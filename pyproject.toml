@@ -6,6 +6,7 @@ authors = ["lynxlevin <72173230+lynxlevin@users.noreply.github.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+Django = "3.2.11"
 
 [tool.poetry.dev-dependencies]
 
