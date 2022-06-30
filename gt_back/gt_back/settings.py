@@ -12,9 +12,13 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 import os
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+env.read_env('.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -78,11 +82,11 @@ WSGI_APPLICATION = 'gt_back.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv("DB_NAME", None),
-        'USER': os.getenv("DB_USER", None),
-        'PASSWORD': os.getenv("DB_PASS", None),
-        'HOST': os.getenv("DB_HOST", None),
-        'PORT': os.getenv("DB_PORT", 5432),
+        'NAME': env.get_value("DB_NAME", default=None),
+        'USER': env.get_value("DB_USER", default=None),
+        'PASSWORD': env.get_value("DB_PASS", default=None),
+        'HOST': env.get_value("DB_HOST", default=None),
+        'PORT': env.get_value("DB_PORT", default="5432"),
     }
 }
 
