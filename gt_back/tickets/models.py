@@ -1,6 +1,25 @@
+from typing import Optional
 from django.db import models
 
 from user_relations.models import UserRelation
+
+
+class TicketQuerySet(models.QuerySet):
+    # sample method
+    def get_by_id(self, ticket_id) -> Optional["Ticket"]:
+        try:
+            return self.get(id=ticket_id)
+        except Ticket.DoesNotExist:
+            return None
+
+    def get_unused_tickets(self, user_relation_id) -> "TicketQuerySet":
+        return self.filter(user_relation__id=user_relation_id).filter(use_date=None).order_by("-gift_date").order_by("-id")
+
+    def get_unused_complete_tickets(self, user_relation_id) -> "TicketQuerySet":
+        return self.filter(user_relation__id=user_relation_id).filter(use_date=None).exclude(status="draft").order_by("-gift_date").order_by("-id")
+
+    def get_used_tickets(self, user_relation_id) -> "TicketQuerySet":
+        return self.filter(user_relation__id=user_relation_id).exclude(use_date=None).order_by("-use_date").order_by("-id")
 
 
 class Ticket(models.Model):
@@ -25,4 +44,8 @@ class Ticket(models.Model):
     is_special = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # MYMEMO: タイムスタンプはisvizと比較
+
+    objects: TicketQuerySet = TicketQuerySet.as_manager()
+
+    def __repr__(self):
+        return f"<Ticket({str(self.id)})>"
