@@ -1,6 +1,6 @@
 from django.utils import timezone
 
-from django.contrib.auth.models import User
+from users.models import User
 from user_relations.models import UserRelation
 from tickets.models import Ticket
 

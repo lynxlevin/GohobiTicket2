@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'tickets.apps.TicketsConfig',
     'user_relations.apps.UserRelationsConfig',
     'user_settings.apps.UserSettingsConfig',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -112,6 +113,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'users.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/

@@ -3,7 +3,7 @@ from django.utils import timezone
 from tickets.test_utils import factory
 from tickets.models import Ticket
 
-from django.contrib.auth.models import User
+from users.models import User
 from user_relations.models import UserRelation
 
 
