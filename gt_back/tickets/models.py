@@ -37,9 +37,9 @@ class Ticket(models.Model):
 
     user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE)
     description = models.TextField(default="", blank=True)
-    gift_date = models.DateTimeField()
+    gift_date = models.DateField()
     use_description = models.TextField(default="", blank=True)
-    use_date = models.DateTimeField(null=True)
+    use_date = models.DateField(null=True)
     status = models.CharField(max_length=8, choices=STATUS_CHOICES)
     is_special = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

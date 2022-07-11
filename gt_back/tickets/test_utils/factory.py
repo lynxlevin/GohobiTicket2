@@ -1,4 +1,4 @@
-from django.utils import timezone
+from datetime import date
 
 from users.models import User
 from user_relations.models import UserRelation
@@ -29,7 +29,7 @@ def create_user_relation(giving_user: User, receiving_user: User) -> UserRelatio
 def create_ticket(user_relation: UserRelation, param: dict = {}) -> Ticket:
     ticket = Ticket(
         description=param.get("description", "test_ticket"),
-        gift_date=param.get("gift_date", timezone.now()),
+        gift_date=param.get("gift_date", date.today()),
         use_description=param.get("use_description", ""),
         use_date=param.get("use_date", None),
         status=param.get("status", "unread"),

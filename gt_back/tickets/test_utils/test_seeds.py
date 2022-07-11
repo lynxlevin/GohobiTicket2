@@ -1,4 +1,4 @@
-from django.utils import timezone
+from datetime import date
 
 from tickets.test_utils import factory
 from tickets.models import Ticket
@@ -35,18 +35,18 @@ class TestSeed:
             {"status": "draft"},  # 1
             {"status": "read"},  # 2
             {"status": "edited"},  # 3
-            {"status": "unread", "use_date": timezone.now()},  # 4
-            {"status": "draft", "use_date": timezone.now()},  # 5
-            {"status": "read", "use_date": timezone.now()},  # 6
-            {"status": "edited", "use_date": timezone.now()},  # 7
+            {"status": "unread", "use_date": date.today()},  # 4
+            {"status": "draft", "use_date": date.today()},  # 5
+            {"status": "read", "use_date": date.today()},  # 6
+            {"status": "edited", "use_date": date.today()},  # 7
             {"status": "unread", "is_special": True},  # 8
             {"status": "draft", "is_special": True},  # 9
             {"status": "read", "is_special": True},  # 10
             {"status": "edited", "is_special": True},  # 11
-            {"status": "unread", "use_date": timezone.now(), "is_special": True},  # 12
-            {"status": "draft", "use_date": timezone.now(), "is_special": True},  # 13
-            {"status": "read", "use_date": timezone.now(), "is_special": True},  # 14
-            {"status": "edited", "use_date": timezone.now(), "is_special": True},  # 15
+            {"status": "unread", "use_date": date.today(), "is_special": True},  # 12
+            {"status": "draft", "use_date": date.today(), "is_special": True},  # 13
+            {"status": "read", "use_date": date.today(), "is_special": True},  # 14
+            {"status": "edited", "use_date": date.today(), "is_special": True},  # 15
         ]
         tickets = factory.create_tickets(self.user_relations[0], params)
         self.tickets.extend(tickets)
