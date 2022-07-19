@@ -19,15 +19,35 @@ class TestSeed:
         self.setUpForDateRelatedTests()
 
     def setUpUsers(self):
-        self.users = factory.create_users()  # 0, 1
+        self.users = factory.create_users()  # 0, 1, 2, 3
 
+    # MYMEMO: refactor
     def setUpUserRelations(self):
         self.user_relations = []
+
         user_relation1 = factory.create_user_relation(
             self.users[0], self.users[1])
+        self.user_relations.append(user_relation1)
+
         user_relation2 = factory.create_user_relation(
             self.users[1], self.users[0])
-        self.user_relations.extend([user_relation1, user_relation2])  # 2, 3
+        self.user_relations.append(user_relation2)
+
+        user_relation3 = factory.create_user_relation(
+            self.users[0], self.users[2])
+        self.user_relations.append(user_relation3)
+
+        user_relation4 = factory.create_user_relation(
+            self.users[2], self.users[0])
+        self.user_relations.append(user_relation4)
+
+        user_relation5 = factory.create_user_relation(
+            self.users[0], self.users[3])
+        self.user_relations.append(user_relation5)
+
+        user_relation6 = factory.create_user_relation(
+            self.users[3], self.users[0])
+        self.user_relations.append(user_relation6)
 
     def setUpTickets(self):
         self.tickets = []

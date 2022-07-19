@@ -1,5 +1,20 @@
+from typing import Optional
 from django.db import models
 from users.models import User
+
+
+class UserRelationQuerySet(models.QuerySet):
+    def get_by_id(self, user_relation_id) -> Optional["UserRelation"]:
+        try:
+            return self.get(id=user_relation_id)
+        except UserRelation.DoesNotExist:
+            return None
+
+    def filter_by_receiving_user_id(self, user_id) -> "UserRelationQuerySet":
+        return self.filter(receiving_user__id=user_id)
+
+    def filter_by_giving_user_id(self, user_id) -> "UserRelationQuerySet":
+        return self.filter(giving_user__id=user_id)
 
 
 class UserRelation(models.Model):
@@ -16,4 +31,4 @@ class UserRelation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # MYMEMO: correspondent_relationを取得するクエリを作る
+    objects: UserRelationQuerySet = UserRelationQuerySet.as_manager()

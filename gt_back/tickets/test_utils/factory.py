@@ -15,6 +15,14 @@ def create_users() -> list[User]:
     user2.set_password("password2")
     users.append(user2)
 
+    user3 = User(username="test_user3", email="test3@test.com")
+    user3.set_password("password3")
+    users.append(user3)
+
+    user4 = User(username="test_user4", email="test4@test.com")
+    user4.set_password("password4")
+    users.append(user4)
+
     User.objects.bulk_create(users)
     return users
 
