@@ -1,3 +1,5 @@
+from calendar import monthrange
+from datetime import date
 from typing import Optional
 from django.db import models
 
@@ -5,21 +7,29 @@ from user_relations.models import UserRelation
 
 
 class TicketQuerySet(models.QuerySet):
-    # sample method
     def get_by_id(self, ticket_id) -> Optional["Ticket"]:
         try:
             return self.get(id=ticket_id)
         except Ticket.DoesNotExist:
             return None
 
-    def get_unused_tickets(self, user_relation_id) -> "TicketQuerySet":
-        return self.filter(user_relation__id=user_relation_id).filter(use_date=None).order_by("-gift_date").order_by("-id")
+    def filter_eq_user_relation_id(self, user_relation_id: str) -> "TicketQuerySet":
+        return Ticket.objects.filter(user_relation__id=user_relation_id)
 
-    def get_unused_complete_tickets(self, user_relation_id) -> "TicketQuerySet":
-        return self.filter(user_relation__id=user_relation_id).filter(use_date=None).exclude(status="draft").order_by("-gift_date").order_by("-id")
+    def filter_unused_tickets(self) -> "TicketQuerySet":
+        return self.filter(use_date=None).order_by("-gift_date").order_by("-id")
 
-    def get_used_tickets(self, user_relation_id) -> "TicketQuerySet":
-        return self.filter(user_relation__id=user_relation_id).exclude(use_date=None).order_by("-use_date").order_by("-id")
+    def filter_unused_complete_tickets(self) -> "TicketQuerySet":
+        return self.filter(use_date=None).exclude(status="draft").order_by("-gift_date").order_by("-id")
+
+    def filter_used_tickets(self) -> "TicketQuerySet":
+        return self.exclude(use_date=None).order_by("-use_date").order_by("-id")
+
+    def filter_special_tickets(self, target_date: date) -> "TicketQuerySet":
+        start_of_month = date(target_date.year, target_date.month, 1)
+        end_of_month = date(target_date.year, target_date.month, monthrange(
+            target_date.year, target_date.month)[1])
+        return self.filter(is_special=True, gift_date__gte=start_of_month, gift_date__lte=end_of_month)
 
 
 class Ticket(models.Model):

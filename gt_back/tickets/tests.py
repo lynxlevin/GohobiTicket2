@@ -1,3 +1,4 @@
+from datetime import date
 from django.test import TestCase
 
 from tickets.models import Ticket
@@ -10,33 +11,55 @@ class TicketModelTests(TestCase):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
 
-    def test_get_unused_tickets(self):
-        tickets = self.seeds.tickets
+    def test_filter_eq_user_relation_id(self):
         user_relation_id = self.seeds.user_relations[0].id
-
-        result = Ticket.objects.get_unused_tickets(user_relation_id).all()
-        expected = [tickets[11], tickets[10], tickets[9], tickets[8],
-                    tickets[3], tickets[2], tickets[1], tickets[0]]
-
-        self.assertEqual(list(result), expected)
-
-    def test_get_unused_complete_tickets(self):
         tickets = self.seeds.tickets
-        user_relation_id = self.seeds.user_relations[0].id
 
-        result = Ticket.objects.get_unused_complete_tickets(
-            user_relation_id).all()
-        expected = [tickets[11], tickets[10], tickets[8],
-                    tickets[3], tickets[2], tickets[0]]
+        result = Ticket.objects.filter_eq_user_relation_id(user_relation_id)
+        expected = tickets[0:16]
 
-        self.assertEqual(list(result), expected)
+        self.assertEqual(list(result.all()), expected)
 
-    def test_get_used_tickets(self):
+    def test_filter_unused_tickets(self):
         tickets = self.seeds.tickets
-        user_relation_id = self.seeds.user_relations[0].id
 
-        result = Ticket.objects.get_used_tickets(user_relation_id).all()
-        expected = [tickets[15], tickets[14], tickets[13],
-                    tickets[12], tickets[7], tickets[6], tickets[5], tickets[4]]
+        result = Ticket.objects.filter_unused_tickets()
 
-        self.assertEqual(list(result), expected)
+        list1 = tickets[0:4]
+        list2 = tickets[8:12]
+        list3 = tickets[16:22]
+        expected = list(reversed(list1 + list2 + list3))
+
+        self.assertEqual(list(result.all()), expected)
+
+    def test_filter_unused_complete_tickets(self):
+        tickets = self.seeds.tickets
+
+        result = Ticket.objects.filter_unused_complete_tickets()
+
+        list1 = [tickets[0], tickets[2], tickets[3]]
+        list2 = [tickets[8], tickets[10], tickets[11]]
+        list3 = tickets[16:22]
+        expected = list(reversed(list1 + list2 + list3))
+
+        self.assertEqual(list(result.all()), expected)
+
+    def test_filter_used_tickets(self):
+        tickets = self.seeds.tickets
+
+        result = Ticket.objects.filter_used_tickets()
+
+        list1 = tickets[4:8]
+        list2 = tickets[12:16]
+        expected = list(reversed(list1 + list2))
+
+        self.assertEqual(list(result.all()), expected)
+
+    def test_filter_special_tickets(self):
+        target_date = date(2022, 6, 11)
+
+        tickets = self.seeds.tickets
+        result = Ticket.objects.filter_special_tickets(target_date)
+        expected = [tickets[19]]
+
+        self.assertEqual(list(result.all()), expected)
