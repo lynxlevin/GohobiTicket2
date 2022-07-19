@@ -1,8 +1,15 @@
+from typing import Optional
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 
-class UserManager(BaseUserManager):
+class UserQuerySet(models.QuerySet):
+    def get_by_id(self, user_id) -> Optional["User"]:
+        try:
+            return self.get(id=user_id)
+        except User.DoesNotExist:
+            return None
+
     def create_user(self, email, username, password=None):
         if not email:
             raise ValueError('Users must have an email address')
@@ -23,7 +30,7 @@ class User(AbstractBaseUser):
     username = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
 
-    objects = UserManager
+    objects: UserQuerySet = UserQuerySet.as_manager()
 
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
