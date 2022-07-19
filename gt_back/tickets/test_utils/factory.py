@@ -2,6 +2,7 @@ from datetime import date
 
 from users.models import User
 from user_relations.models import UserRelation
+from user_settings.models import UserSetting
 from tickets.models import Ticket
 
 
@@ -25,6 +26,16 @@ def create_users() -> list[User]:
 
     User.objects.bulk_create(users)
     return users
+
+
+def create_user_settings(params: list[dict]) -> UserSetting:
+    user_settings = []
+    for param in params:
+        user_setting = UserSetting(
+            user=param["user"], default_page=param["default_page"])
+        user_setting.save()
+        user_settings.append(user_setting)
+    return user_settings
 
 
 def create_user_relation(giving_user: User, receiving_user: User) -> UserRelation:

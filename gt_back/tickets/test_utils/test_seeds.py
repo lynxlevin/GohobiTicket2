@@ -1,25 +1,37 @@
 from datetime import date
 
 from tickets.test_utils import factory
-from tickets.models import Ticket
 
 from users.models import User
 from user_relations.models import UserRelation
+from user_settings.models import UserSetting
+from tickets.models import Ticket
 
 
 class TestSeed:
     users: list[User]
     user_relations: list[UserRelation]
+    user_settings: list[UserSetting]
     tickets: list[Ticket]
 
     def setUp(self):
         self.setUpUsers()
         self.setUpUserRelations()
+        self.setUpUserSettings()
         self.setUpTickets()
         self.setUpForDateRelatedTests()
 
     def setUpUsers(self):
         self.users = factory.create_users()  # 0, 1, 2, 3
+
+    def setUpUserSettings(self):
+        params = [
+            {"user": self.users[0], "default_page": "default_page1"},
+            {"user": self.users[1], "default_page": "default_page2"},
+            {"user": self.users[2], "default_page": "default_page3"},
+            {"user": self.users[3], "default_page": "default_page4"},
+        ]
+        self.user_settings = factory.create_user_settings(params)  # 0, 1, 2, 3
 
     # MYMEMO: refactor
     def setUpUserRelations(self):
