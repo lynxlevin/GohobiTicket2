@@ -5,7 +5,7 @@ from tickets.models import Ticket
 from tickets.test_utils.test_seeds import TestSeed
 
 
-class TicketModelTests(TestCase):
+class TestTicketModel(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.seeds = TestSeed()

@@ -4,7 +4,7 @@ from user_relations.models import UserRelation
 
 
 # MYMEMO: 権限のないuser_relationは使えないようにする
-class UserRelationModelTests(TestCase):
+class TestUserRelationModel(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.seeds = TestSeed()
