@@ -22,44 +22,48 @@ class TestSeed:
         self.setUpForDateRelatedTests()
 
     def setUpUsers(self):
-        self.users = factory.create_users()  # 0, 1, 2, 3
+        self.users = []
+
+        args = [
+            ("test_user1", "test1@test.com", "password1"),  # 0
+            ("test_user2", "test2@test.com", "password2"),  # 1
+            ("test_user3", "test3@test.com", "password3"),  # 2
+            ("test_user4", "test4@test.com", "password4"),  # 3
+        ]
+
+        for arg in args:
+            user = factory.create_user(*arg)
+            self.users.append(user)
 
     def setUpUserSettings(self):
-        params = [
-            {"user": self.users[0], "default_page": "default_page1"},
-            {"user": self.users[1], "default_page": "default_page2"},
-            {"user": self.users[2], "default_page": "default_page3"},
-            {"user": self.users[3], "default_page": "default_page4"},
-        ]
-        self.user_settings = factory.create_user_settings(params)  # 0, 1, 2, 3
+        self.user_settings = []
 
-    # MYMEMO: refactor
+        args = [
+            (self.users[0], "default_page1"),  # 0
+            (self.users[1], "default_page2"),  # 1
+            (self.users[2], "default_page3"),  # 2
+            (self.users[3], "default_page4"),  # 3
+        ]
+
+        for arg in args:
+            user_setting = factory.create_user_setting(*arg)
+            self.user_settings.append(user_setting)
+
     def setUpUserRelations(self):
         self.user_relations = []
 
-        user_relation1 = factory.create_user_relation(
-            self.users[0], self.users[1])
-        self.user_relations.append(user_relation1)
+        args = [
+            (self.users[0], self.users[1]),  # 0
+            (self.users[1], self.users[0]),  # 1
+            (self.users[0], self.users[2]),  # 2
+            (self.users[2], self.users[0]),  # 3
+            (self.users[0], self.users[3]),  # 4
+            (self.users[3], self.users[0]),  # 5
+        ]
 
-        user_relation2 = factory.create_user_relation(
-            self.users[1], self.users[0])
-        self.user_relations.append(user_relation2)
-
-        user_relation3 = factory.create_user_relation(
-            self.users[0], self.users[2])
-        self.user_relations.append(user_relation3)
-
-        user_relation4 = factory.create_user_relation(
-            self.users[2], self.users[0])
-        self.user_relations.append(user_relation4)
-
-        user_relation5 = factory.create_user_relation(
-            self.users[0], self.users[3])
-        self.user_relations.append(user_relation5)
-
-        user_relation6 = factory.create_user_relation(
-            self.users[3], self.users[0])
-        self.user_relations.append(user_relation6)
+        for arg in args:
+            user_relation = factory.create_user_relation(*arg)
+            self.user_relations.append(user_relation)
 
     def setUpTickets(self):
         self.tickets = []

@@ -6,36 +6,17 @@ from user_settings.models import UserSetting
 from tickets.models import Ticket
 
 
-def create_users() -> list[User]:
-    users = []
-    user1 = User(username="test_user1", email="test1@test.com")
-    user1.set_password("password1")
-    users.append(user1)
-
-    user2 = User(username="test_user2", email="test2@test.com")
-    user2.set_password("password2")
-    users.append(user2)
-
-    user3 = User(username="test_user3", email="test3@test.com")
-    user3.set_password("password3")
-    users.append(user3)
-
-    user4 = User(username="test_user4", email="test4@test.com")
-    user4.set_password("password4")
-    users.append(user4)
-
-    User.objects.bulk_create(users)
-    return users
+def create_user(username: str, email: str, password: str) -> User:
+    user = User(username=username, email=email)
+    user.set_password(password)
+    user.save()
+    return user
 
 
-def create_user_settings(params: list[dict]) -> UserSetting:
-    user_settings = []
-    for param in params:
-        user_setting = UserSetting(
-            user=param["user"], default_page=param["default_page"])
-        user_setting.save()
-        user_settings.append(user_setting)
-    return user_settings
+def create_user_setting(user: User, default_page) -> UserSetting:
+    user_setting = UserSetting(user=user, default_page=default_page)
+    user_setting.save()
+    return user_setting
 
 
 def create_user_relation(giving_user: User, receiving_user: User) -> UserRelation:
