@@ -22,9 +22,9 @@ class UserRelation(models.Model):
     DEFAULT_BACKGROUND = "rgb(250, 255, 255)"
 
     giving_user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="giving_user")
+        User, on_delete=models.CASCADE, related_name="giving_relations")
     receiving_user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="receiving_user")
+        User, on_delete=models.CASCADE, related_name="receiving_relations")
     ticket_img = models.CharField(max_length=13)
     background_color = models.CharField(
         max_length=18, default=DEFAULT_BACKGROUND)
@@ -32,3 +32,7 @@ class UserRelation(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     objects: UserRelationQuerySet = UserRelationQuerySet.as_manager()
+
+    @property
+    def corresponding_relation(self):
+        return UserRelation.objects.filter_by_receiving_user_id(self.giving_user.id).filter_by_giving_user_id(self.receiving_user.id).first()
