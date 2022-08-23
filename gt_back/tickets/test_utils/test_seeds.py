@@ -35,20 +35,6 @@ class TestSeed:
             user = factory.create_user(*arg)
             self.users.append(user)
 
-    def setUpUserSettings(self):
-        self.user_settings = []
-
-        args = [
-            (self.users[0], "default_page1"),  # 0
-            (self.users[1], "default_page2"),  # 1
-            (self.users[2], "default_page3"),  # 2
-            (self.users[3], "default_page4"),  # 3
-        ]
-
-        for arg in args:
-            user_setting = factory.create_user_setting(*arg)
-            self.user_settings.append(user_setting)
-
     def setUpUserRelations(self):
         self.user_relations = []
 
@@ -64,6 +50,20 @@ class TestSeed:
         for arg in args:
             user_relation = factory.create_user_relation(*arg)
             self.user_relations.append(user_relation)
+
+    def setUpUserSettings(self):
+        self.user_settings = []
+
+        args = [
+            (self.users[0], "default_page1"),  # 0
+            (self.users[1], "default_page2"),  # 1
+            (self.users[2], "default_page3"),  # 2
+            (self.users[3], "default_page4"),  # 3
+        ]
+
+        for arg in args:
+            user_setting = factory.create_user_setting(*arg)
+            self.user_settings.append(user_setting)
 
     def setUpTickets(self):
         self.tickets = []
