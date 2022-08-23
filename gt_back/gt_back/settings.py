@@ -145,7 +145,7 @@ LOGGING = {
     "desable_existing_loggers": False,
     "formatters": {
         "default": {
-            "()": "logging.Formatter",
+            "()": "gt_back.logging.Formatter",
             "format": "[%(asctime)s] [%(levelname)s] [%(name)s:%(lineno)s] %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
