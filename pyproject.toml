@@ -13,8 +13,21 @@ django-filter = "^21.1"
 psycopg2 = "^2.9.3"
 urllib3 = "^1.26.9"
 django-environ = "^0.9.0"
+mypy = "^0.971"
 
 [tool.poetry.dev-dependencies]
+
+[tool.black]
+linep-length = 160
+target-version = ['py36']
+exclude = '''
+/(
+    \.git
+    | \.mypy_cache
+    | \.venv
+    | \.vscode
+)/
+'''
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
