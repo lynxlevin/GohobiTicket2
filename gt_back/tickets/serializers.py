@@ -7,3 +7,13 @@ class TicketSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = ['user_relation', 'description', 'gift_date',
                   'use_description', 'use_date', 'status', 'is_special']
+
+
+class TicketCreateSerializer(serializers.Serializer):
+    class TicketCreateRequestSerializer(serializers.Serializer):
+        gift_date = serializers.DateField()
+        description = serializers.CharField()
+        user_relation_id = serializers.CharField()
+
+    id = serializers.CharField(read_only=True)
+    ticket = TicketCreateRequestSerializer(write_only=True)

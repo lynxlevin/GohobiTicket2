@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 class IsGivingUserOrReceivingUser(BasePermission):
     message = 'Wrong user_relation accessed'
 
+    # MYMEMO: use_case 内でやるべきかも
     def has_permission(self, request, view):
         user = request.user
         user_relation_id = request.parser_context["kwargs"]["pk"]

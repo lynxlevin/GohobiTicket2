@@ -48,7 +48,8 @@ class TestSeed:
         ]
 
         for arg in args:
-            user_relation = factory.create_user_relation(*arg)
+            user_relation = factory.create_user_relation(
+                giving_user=arg[0], receiving_user=arg[1])
             self.user_relations.append(user_relation)
 
     def setUpUserSettings(self):

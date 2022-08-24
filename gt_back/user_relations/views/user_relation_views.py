@@ -5,7 +5,7 @@ from tickets.models.ticket import Ticket
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.permissions import IsAuthenticated
 import logging
 
 logger = logging.getLogger(__name__)
