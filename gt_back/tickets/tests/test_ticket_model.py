@@ -28,7 +28,8 @@ class TestTicketModel(TestCase):
         list1 = tickets[0:4]
         list2 = tickets[8:12]
         list3 = tickets[16:22]
-        expected = list(reversed(list1 + list2 + list3))
+        list4 = tickets[22:23]
+        expected = list(reversed(list1 + list2 + list3 + list4))
 
         self.assertEqual(list(result.all()), expected)
 
@@ -40,7 +41,8 @@ class TestTicketModel(TestCase):
         list1 = [tickets[0], tickets[2], tickets[3]]
         list2 = [tickets[8], tickets[10], tickets[11]]
         list3 = tickets[16:22]
-        expected = list(reversed(list1 + list2 + list3))
+        list4 = tickets[22:23]
+        expected = list(reversed(list1 + list2 + list3 + list4))
 
         self.assertEqual(list(result.all()), expected)
 

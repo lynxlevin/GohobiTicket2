@@ -19,7 +19,8 @@ class TestSeed:
         self.setUpUserRelations()
         self.setUpUserSettings()
         self.setUpTickets()
-        self.setUpForDateRelatedTests()
+        self.setUpTicketsForDateRelatedTests()
+        self.setUpTicketsForUserRelation2()
 
     def setUpUsers(self):
         self.users = []
@@ -89,7 +90,7 @@ class TestSeed:
         tickets = factory.create_tickets(self.user_relations[0], params)
         self.tickets.extend(tickets)
 
-    def setUpForDateRelatedTests(self):
+    def setUpTicketsForDateRelatedTests(self):
         params = [
             {"gift_date": date(2022, 6, 1)},  # 16
             {"gift_date": date(2022, 7, 1)},  # 17
@@ -99,4 +100,11 @@ class TestSeed:
             {"gift_date": date(2022, 8, 1), "is_special": True},  # 21
         ]
         tickets = factory.create_tickets(self.user_relations[1], params)
+        self.tickets.extend(tickets)
+
+    def setUpTicketsForUserRelation2(self):
+        params = [
+            {"gift_date": date(2022, 6, 1)},  # 22
+        ]
+        tickets = factory.create_tickets(self.user_relations[2], params)
         self.tickets.extend(tickets)

@@ -17,3 +17,11 @@ class TicketCreateSerializer(serializers.Serializer):
 
     id = serializers.CharField(read_only=True)
     ticket = TicketCreateRequestSerializer(write_only=True)
+
+
+class TicketPartialUpdateSerializer(serializers.Serializer):
+    class TicketPartialUpdateRequestSerializer(serializers.Serializer):
+        description = serializers.CharField()
+
+    id = serializers.CharField(read_only=True)
+    ticket = TicketPartialUpdateRequestSerializer(write_only=True)
