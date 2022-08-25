@@ -12,23 +12,6 @@ class TestTicketViews(TestCase):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
 
-    def test_list(self):
-        """
-        Get /tickets/
-        """
-
-        user = self.seeds.users[0]
-
-        client = Client()
-        client.force_login(user)
-        response = client.get("/tickets/")
-
-        self.assertEqual(status.HTTP_200_OK, response.status_code)
-
-        data = response.data
-
-        self.assertEqual(len(self.seeds.tickets), len(data))
-
     def test_create(self):
         """
         Post /tickets/

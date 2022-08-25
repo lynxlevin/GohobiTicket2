@@ -14,12 +14,6 @@ class TicketViewSet(viewsets.GenericViewSet):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    # MYMEMO: いらないはずなので、後で消す
-    def list(self, request, format=None):
-        tickets = Ticket.objects.order_by("-gift_date")
-        serializer = self.get_serializer(tickets, many=True)
-        return Response(serializer.data)
-
     def create(self, request, format=None):
         serializer = TicketCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
