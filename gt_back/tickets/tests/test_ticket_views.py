@@ -80,37 +80,35 @@ class TestTicketViews(TestCase):
         unrelated_relation_id = self.seeds.user_relations[2].id
         receiving_relation_id = user.receiving_relations.first().id
 
-        cases = [
-            {"name": "unrelated_user", "id": unrelated_relation_id,
-                "status_code": status.HTTP_403_FORBIDDEN},
-            {"name": "receiving_relation", "id": receiving_relation_id,
-                "status_code": status.HTTP_403_FORBIDDEN},
-            {"name": "non_existent_user_relation", "id": "-1",
-                "status_code": status.HTTP_404_NOT_FOUND},
-        ]
+        cases = {
+            "unrelated_user": {"id": unrelated_relation_id, "status_code": status.HTTP_403_FORBIDDEN},
+            "receiving_relation": {"id": receiving_relation_id, "status_code": status.HTTP_403_FORBIDDEN},
+            "non_existent_user_relation": {"id": "-1", "status_code": status.HTTP_404_NOT_FOUND},
+        }
 
         client = Client()
         client.force_login(user)
 
-        for case in cases:
-            with self.subTest(case=case["name"]):
+        for case, condition in cases.items():
+            with self.subTest(case=case):
                 params = {
                     "ticket": {
                         "gift_date": "2022-08-24",
                         "description": "test_ticket",
-                        "user_relation_id": case["id"],
+                        "user_relation_id": condition["id"],
                     }
                 }
 
                 original_ticket_count = Ticket.objects.filter_eq_user_relation_id(
-                    case["id"]).count()
+                    condition["id"]).count()
 
                 response = client.post(f"/tickets/", params,
                                        content_type="application/json")
-                self.assertEqual(case["status_code"], response.status_code)
+                self.assertEqual(
+                    condition["status_code"], response.status_code)
 
                 pro_execution_ticket_count = Ticket.objects.filter_eq_user_relation_id(
-                    case["id"]).count()
+                    condition["id"]).count()
                 self.assertEqual(original_ticket_count,
                                  pro_execution_ticket_count)
 
@@ -163,14 +161,11 @@ class TestTicketViews(TestCase):
 
         non_existent_ticket = Ticket(id="-1", description="not_saved")
 
-        cases = [
-            {"name": "receiving_relation", "ticket": receiving_ticket,
-                "status_code": status.HTTP_403_FORBIDDEN},
-            {"name": "unrelated_ticket", "ticket": unrelated_ticket,
-                "status_code": status.HTTP_403_FORBIDDEN},
-            {"name": "non_existent_ticket", "ticket": non_existent_ticket,
-                "status_code": status.HTTP_404_NOT_FOUND},
-        ]
+        cases = {
+            "receiving_relation": {"ticket": receiving_ticket, "status_code": status.HTTP_403_FORBIDDEN},
+            "unrelated_ticket": {"ticket": unrelated_ticket, "status_code": status.HTTP_403_FORBIDDEN},
+            "non_existent_ticket": {"ticket": non_existent_ticket, "status_code": status.HTTP_404_NOT_FOUND},
+        }
 
         client = Client()
         client.force_login(user)
@@ -181,17 +176,18 @@ class TestTicketViews(TestCase):
             }
         }
 
-        for case in cases:
-            with self.subTest(case=case["name"]):
+        for case, condition in cases.items():
+            with self.subTest(case=case):
                 response = client.patch(
-                    f"/tickets/{case['ticket'].id}/", params, content_type="application/json")
+                    f"/tickets/{condition['ticket'].id}/", params, content_type="application/json")
 
-                self.assertEqual(case["status_code"], response.status_code)
+                self.assertEqual(
+                    condition["status_code"], response.status_code)
 
-                if not case["name"] in ["non_existent_ticket"]:
-                    case["ticket"].refresh_from_db()
+                if not case in ["non_existent_ticket"]:
+                    condition["ticket"].refresh_from_db()
                     self.assertNotEqual(
-                        params["ticket"]["description"], case["ticket"].description)
+                        params["ticket"]["description"], condition["ticket"].description)
 
     def test_destroy(self):
         """
@@ -238,26 +234,23 @@ class TestTicketViews(TestCase):
         used_ticket.use_date = date.today()
         used_ticket.save()
 
-        cases = [
-            {"name": "receiving_relation", "ticket_id": receiving_ticket_id,
-                "status_code": status.HTTP_403_FORBIDDEN},
-            {"name": "unrelated_relation", "ticket_id": unrelated_ticket_id,
-                "status_code": status.HTTP_403_FORBIDDEN},
-            {"name": "non_existent_ticket", "ticket_id": "-1",
-                "status_code": status.HTTP_404_NOT_FOUND},
-            {"name": "used_ticket", "ticket_id": used_ticket.id,
-                "status_code": status.HTTP_403_FORBIDDEN},
-        ]
+        cases = {
+            "receiving_relation": {"ticket_id": receiving_ticket_id, "status_code": status.HTTP_403_FORBIDDEN},
+            "unrelated_relation": {"ticket_id": unrelated_ticket_id, "status_code": status.HTTP_403_FORBIDDEN},
+            "non_existent_ticket": {"ticket_id": "-1", "status_code": status.HTTP_404_NOT_FOUND},
+            "used_ticket": {"ticket_id": used_ticket.id, "status_code": status.HTTP_403_FORBIDDEN},
+        }
 
         client = Client()
         client.force_login(user)
 
-        for case in cases:
-            with self.subTest(case=case["name"]):
-                response = client.delete(f"/tickets/{case['ticket_id']}/")
+        for case, condition in cases.items():
+            with self.subTest(case=case):
+                response = client.delete(f"/tickets/{condition['ticket_id']}/")
 
-                self.assertEqual(case["status_code"], response.status_code)
+                self.assertEqual(
+                    condition["status_code"], response.status_code)
 
-                if not case["name"] in ["non_existent_ticket"]:
+                if not case in ["non_existent_ticket"]:
                     self.assertIsNotNone(
-                        Ticket.objects.get_by_id(case["ticket_id"]))
+                        Ticket.objects.get_by_id(condition["ticket_id"]))
