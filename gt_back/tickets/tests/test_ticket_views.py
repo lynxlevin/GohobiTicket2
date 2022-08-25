@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from django.test import Client, TestCase
 from rest_framework import status
 
@@ -192,3 +192,72 @@ class TestTicketViews(TestCase):
                     case["ticket"].refresh_from_db()
                     self.assertNotEqual(
                         params["ticket"]["description"], case["ticket"].description)
+
+    def test_destroy(self):
+        """
+        Delete /tickets/{ticket_id}/
+        """
+
+        user = self.seeds.users[1]
+        giving_relation = user.giving_relations.first()
+
+        client = Client()
+        client.force_login(user)
+
+        query = Ticket.objects.filter_eq_user_relation_id(giving_relation.id)
+        ticket = query.first()
+        original_ticket_count = query.count()
+
+        response = client.delete(f"/tickets/{ticket.id}/")
+
+        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
+
+        self.assertIsNone(Ticket.objects.get_by_id(ticket.id))
+        pro_execution_ticket_count = query.count()
+        self.assertEqual(original_ticket_count - 1, pro_execution_ticket_count)
+
+    def test_destroy_case_error(self):
+        """
+        Delete /tickets/{ticket_id}/
+        error case
+        """
+
+        user = self.seeds.users[1]
+
+        receiving_relation_id = user.receiving_relations.first().id
+        receiving_ticket_id = Ticket.objects.filter_eq_user_relation_id(
+            receiving_relation_id).first().id
+
+        unrelated_relation_id = self.seeds.user_relations[2].id
+        unrelated_ticket_id = Ticket.objects.filter_eq_user_relation_id(
+            unrelated_relation_id).first().id
+
+        giving_relation_id = user.giving_relations.first().id
+        used_ticket = Ticket.objects.filter_eq_user_relation_id(
+            giving_relation_id).first()
+        used_ticket.use_date = date.today()
+        used_ticket.save()
+
+        cases = [
+            {"name": "receiving_relation", "ticket_id": receiving_ticket_id,
+                "status_code": status.HTTP_403_FORBIDDEN},
+            {"name": "unrelated_relation", "ticket_id": unrelated_ticket_id,
+                "status_code": status.HTTP_403_FORBIDDEN},
+            {"name": "non_existent_ticket", "ticket_id": "-1",
+                "status_code": status.HTTP_404_NOT_FOUND},
+            {"name": "used_ticket", "ticket_id": used_ticket.id,
+                "status_code": status.HTTP_403_FORBIDDEN},
+        ]
+
+        client = Client()
+        client.force_login(user)
+
+        for case in cases:
+            with self.subTest(case=case["name"]):
+                response = client.delete(f"/tickets/{case['ticket_id']}/")
+
+                self.assertEqual(case["status_code"], response.status_code)
+
+                if not case["name"] in ["non_existent_ticket"]:
+                    self.assertIsNotNone(
+                        Ticket.objects.get_by_id(case["ticket_id"]))

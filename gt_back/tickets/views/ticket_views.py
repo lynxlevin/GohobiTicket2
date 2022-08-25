@@ -68,3 +68,21 @@ class TicketViewSet(viewsets.GenericViewSet):
         serializer = TicketPartialUpdateSerializer({"id": ticket.id})
 
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
+    def destroy(self, request, format=None, pk=None):
+        ticket = Ticket.objects.get_by_id(pk)
+
+        if ticket is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if ticket.use_date is not None:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        user = request.user
+        user_relation = ticket.user_relation
+
+        if user != user_relation.giving_user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        ticket.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
