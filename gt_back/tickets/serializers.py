@@ -25,3 +25,7 @@ class TicketPartialUpdateSerializer(serializers.Serializer):
 
     id = serializers.CharField(read_only=True)
     ticket = TicketPartialUpdateRequestSerializer(write_only=True)
+
+
+class TicketIdResponseSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True)
