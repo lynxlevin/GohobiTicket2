@@ -45,4 +45,4 @@ class SlackMessageTemplates():
             ],
         }
 
-        return special_message
+        return json.dumps(special_message)

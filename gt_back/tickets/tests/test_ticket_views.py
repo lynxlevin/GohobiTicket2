@@ -331,8 +331,11 @@ class TestTicketViews(TestCase):
 
         user = self.seeds.users[1]
         receiving_relation = user.receiving_relations.first()
-        ticket = Ticket.objects.filter_eq_user_relation_id(
-            receiving_relation.id).filter(use_date__isnull=True).first()
+        normal_ticket = Ticket.objects.filter_eq_user_relation_id(
+            receiving_relation.id).filter(use_date__isnull=True, is_special=False).first()
+
+        special_ticket = Ticket.objects.filter_eq_user_relation_id(
+            receiving_relation.id).filter(use_date__isnull=True, is_special=True).first()
 
         params = {
             "ticket": {
@@ -340,37 +343,47 @@ class TestTicketViews(TestCase):
             }
         }
 
+        cases = {
+            "normal_ticket": {"ticket": normal_ticket, "supposed_message_method": "get_message"},
+            "special_ticket": {"ticket": special_ticket, "supposed_message_method": "get_special_message"},
+        }
+
         client = Client()
         client.force_login(user)
 
-        original_updated_at = ticket.updated_at
+        for case, condition in cases.items():
+            with self.subTest(case=case):
+                ticket = condition["ticket"]
+                requests_mock.reset_mock()
 
-        response = client.put(
-            f"/tickets/{ticket.id}/use/", params, content_type="application/json")
+                original_updated_at = ticket.updated_at
 
-        self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
+                response = client.put(
+                    f"/tickets/{ticket.id}/use/", params, content_type="application/json")
 
-        self.assertEqual(str(ticket.id), response.data["id"])
+                self.assertEqual(status.HTTP_202_ACCEPTED,
+                                 response.status_code)
 
-        ticket.refresh_from_db()
-        self.assertEqual(date.today(), ticket.use_date)
-        self.assertEqual(params["ticket"]["use_description"],
-                         ticket.use_description)
-        self.assertNotEqual(original_updated_at, ticket.updated_at)
+                self.assertEqual(str(ticket.id), response.data["id"])
 
-        url = os.getenv("SLACK_API_URL")
-        slack_message = SlackMessageTemplates()
-        message = slack_message.get_message(
-            ticket_user_name=user.username,
-            ticket_gifter_name=ticket.user_relation.giving_user.username,
-            use_description=params["ticket"]["use_description"],
-            description=ticket.description,
-        )
-        header = {"Content-type": "application/json"}
+                ticket.refresh_from_db()
+                self.assertEqual(date.today(), ticket.use_date)
+                self.assertEqual(params["ticket"]["use_description"],
+                                 ticket.use_description)
+                self.assertNotEqual(original_updated_at, ticket.updated_at)
 
-        requests_mock.assert_called_once_with(
-            url, data=message, headers=header, timeout=(5.0, 30.0))
-        # MYMEMO: check both normal and special tickets
+                url = os.getenv("SLACK_API_URL")
+                slack_message = SlackMessageTemplates()
+                message = getattr(slack_message, condition["supposed_message_method"])(
+                    ticket_user_name=user.username,
+                    ticket_gifter_name=ticket.user_relation.giving_user.username,
+                    use_description=params["ticket"]["use_description"],
+                    description=ticket.description,
+                )
+                header = {"Content-type": "application/json"}
+
+                requests_mock.assert_called_once_with(
+                    url, data=message, headers=header, timeout=(5.0, 30.0))
 
     def test_use_case_error(self):
         user = self.seeds.users[1]

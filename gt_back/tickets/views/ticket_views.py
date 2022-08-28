@@ -161,7 +161,9 @@ class TicketViewSet(viewsets.GenericViewSet):
             # MYMEMO: メッセージ送るところまで別クラスにする
             url = os.getenv("SLACK_API_URL")
             slack_message = SlackMessageTemplates()
-            message = slack_message.get_message(
+            message_method = "get_special_message" if ticket.is_special else "get_message"
+            logger.info(message_method)
+            message = getattr(slack_message, message_method)(
                 ticket_user_name=user.username,
                 ticket_gifter_name=ticket.user_relation.giving_user.username,
                 use_description=data["use_description"],
@@ -173,7 +175,7 @@ class TicketViewSet(viewsets.GenericViewSet):
             response = requests.post(url, data=message, headers=header,
                                      timeout=(connect_timeout, read_timeout))
             response.raise_for_status()
-            logger.info("Successfull sent message to Slack",
+            logger.info("Successfully sent message to Slack",
                         extra={"slack_message": message})
 
         except Exception as exc:
