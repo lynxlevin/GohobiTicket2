@@ -1,6 +1,9 @@
+import os
+from test.support import EnvironmentVarGuard
+from unittest import mock
 from datetime import date, datetime
 from django.test import Client, TestCase
-from gt_back.messages import ErrorMessages
+from gt_back.messages import ErrorMessages, SlackMessageTemplates
 from rest_framework import status
 
 from tickets.models import Ticket
@@ -8,6 +11,10 @@ from tickets.test_utils.test_seeds import TestSeed
 
 
 class TestTicketViews(TestCase):
+    def setUp(self):
+        self.env = EnvironmentVarGuard()
+        self.env.set("SLACK_API_URL", "https://test_api/")
+
     @classmethod
     def setUpTestData(cls):
         cls.seeds = TestSeed()
@@ -315,6 +322,98 @@ class TestTicketViews(TestCase):
                 if not case in ["non_existent_ticket"]:
                     condition["ticket"].refresh_from_db()
                     self.assertFalse(condition["ticket"].is_special)
+
+    @mock.patch("requests.post")
+    def test_use(self, requests_mock):
+        """
+        Put /tickets/{ticket_id}/use/
+        """
+
+        user = self.seeds.users[1]
+        receiving_relation = user.receiving_relations.first()
+        ticket = Ticket.objects.filter_eq_user_relation_id(
+            receiving_relation.id).filter(use_date__isnull=True).first()
+
+        params = {
+            "ticket": {
+                "use_description": "test_use_ticket",
+            }
+        }
+
+        client = Client()
+        client.force_login(user)
+
+        original_updated_at = ticket.updated_at
+
+        response = client.put(
+            f"/tickets/{ticket.id}/use/", params, content_type="application/json")
+
+        self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
+
+        self.assertEqual(str(ticket.id), response.data["id"])
+
+        ticket.refresh_from_db()
+        self.assertEqual(date.today(), ticket.use_date)
+        self.assertEqual(params["ticket"]["use_description"],
+                         ticket.use_description)
+        self.assertNotEqual(original_updated_at, ticket.updated_at)
+
+        url = os.getenv("SLACK_API_URL")
+        slack_message = SlackMessageTemplates()
+        message = slack_message.get_message(
+            ticket_user_name=user.username,
+            ticket_gifter_name=ticket.user_relation.giving_user.username,
+            use_description=params["ticket"]["use_description"],
+            description=ticket.description,
+        )
+        header = {"Content-type": "application/json"}
+
+        requests_mock.assert_called_once_with(
+            url, data=message, headers=header, timeout=(5.0, 30.0))
+        # MYMEMO: check both normal and special tickets
+
+    def test_use_case_error(self):
+        user = self.seeds.users[1]
+
+        params = {"ticket": {"use_description": "test_use_case_error"}}
+
+        giving_relation_id = user.giving_relations.first().id
+        giving_ticket = Ticket.objects.filter_eq_user_relation_id(
+            giving_relation_id).first()
+
+        unrelated_relation_id = self.seeds.user_relations[2].id
+        unrelated_ticket = Ticket.objects.filter_eq_user_relation_id(
+            unrelated_relation_id).first()
+
+        non_existent_ticket = Ticket(id="-1", description="not_saved")
+
+        receiving_relation = user.receiving_relations.first()
+        used_ticket = Ticket(description="used_ticket", user_relation=receiving_relation,
+                             gift_date=date.today(), use_date=date.today())
+        used_ticket.save()
+
+        cases = {
+            "giving_relation": {"ticket": giving_ticket, "status_code": status.HTTP_403_FORBIDDEN},
+            "unrelated_relation": {"ticket": unrelated_ticket, "status_code": status.HTTP_403_FORBIDDEN},
+            "non_existent_ticket": {"ticket": non_existent_ticket, "status_code": status.HTTP_404_NOT_FOUND},
+            "used_ticket": {"ticket": used_ticket, "status_code": status.HTTP_403_FORBIDDEN},
+        }
+
+        client = Client()
+        client.force_login(user)
+
+        for case, condition in cases.items():
+            with self.subTest(case):
+                response = client.put(
+                    f"/tickets/{condition['ticket'].id}/use/", params, content_type="application/json")
+
+                self.assertEqual(
+                    condition["status_code"], response.status_code)
+
+                if not case in ["non_existent_ticket", "used_ticket"]:
+                    condition["ticket"].refresh_from_db()
+                    self.assertIsNone(condition["ticket"].use_date)
+                    self.assertEqual("", condition["ticket"].use_description)
 
     # MYMEMO: use (use_date, use_description, send_slack)
     # MYMEMO: DRAFTS
