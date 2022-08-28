@@ -1,10 +1,10 @@
 from datetime import date
 import requests
-from gt_back.messages import ErrorMessages, SlackMessageTemplates
+from gt_back.messages import ErrorMessages
 from user_relations.models import UserRelation
-from ..serializers import *
-from tickets.serializers import TicketSerializer
+from tickets.serializers import *
 from tickets.models.ticket import Ticket
+from tickets.use_cases.helper.slack_message_helper import SlackMessageHelper
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
@@ -157,30 +157,8 @@ class TicketViewSet(viewsets.GenericViewSet):
         ticket.save(update_fields=["use_date",
                     "use_description", "updated_at"])
 
-        try:
-            # MYMEMO: メッセージ送るところまで別クラスにする
-            url = os.getenv("SLACK_API_URL")
-            slack_message = SlackMessageTemplates()
-            message_method = "get_special_message" if ticket.is_special else "get_message"
-            logger.info(message_method)
-            message = getattr(slack_message, message_method)(
-                ticket_user_name=user.username,
-                ticket_gifter_name=ticket.user_relation.giving_user.username,
-                use_description=data["use_description"],
-                description=ticket.description,
-            )
-            header = {"Content-type": "application/json"}
-            connect_timeout = 5.0
-            read_timeout = 30.0
-            response = requests.post(url, data=message, headers=header,
-                                     timeout=(connect_timeout, read_timeout))
-            response.raise_for_status()
-            logger.info("Successfully sent message to Slack",
-                        extra={"slack_message": message})
-
-        except Exception as exc:
-            logger.error("Slack message error", extra={
-                         "response_text": exc.response.text, "response_status_code": exc.response.status_code})
+        slack_message = SlackMessageHelper()
+        slack_message.send_message(ticket)
 
         serializer = TicketUseSerializer({"id": ticket.id})
 

@@ -3,11 +3,12 @@ from test.support import EnvironmentVarGuard
 from unittest import mock
 from datetime import date, datetime
 from django.test import Client, TestCase
-from gt_back.messages import ErrorMessages, SlackMessageTemplates
+from gt_back.messages import ErrorMessages
 from rest_framework import status
 
 from tickets.models import Ticket
 from tickets.test_utils.test_seeds import TestSeed
+from tickets.use_cases.helper.slack_message_helper import SlackMessageHelper
 
 
 class TestTicketViews(TestCase):
@@ -343,6 +344,11 @@ class TestTicketViews(TestCase):
             }
         }
 
+        """
+        MYMEMO: slack_message_helper は個別にテストしているから、こうする必要はない。
+        だけど、slack_message_helper は ticket から分離して、normalかspecialかはこちらでテストできるようにしたほうがいいかも？
+        MYMEMO: あと、このテストで、ちゃんと正しい内容を渡して、それがrequests.postまで渡されていることを確認したい
+        """
         cases = {
             "normal_ticket": {"ticket": normal_ticket, "supposed_message_method": "get_message"},
             "special_ticket": {"ticket": special_ticket, "supposed_message_method": "get_special_message"},
@@ -373,10 +379,10 @@ class TestTicketViews(TestCase):
                 self.assertNotEqual(original_updated_at, ticket.updated_at)
 
                 url = os.getenv("SLACK_API_URL")
-                slack_message = SlackMessageTemplates()
+                slack_message = SlackMessageHelper()
                 message = getattr(slack_message, condition["supposed_message_method"])(
-                    ticket_user_name=user.username,
-                    ticket_gifter_name=ticket.user_relation.giving_user.username,
+                    user_name=user.username,
+                    gifter_name=ticket.user_relation.giving_user.username,
                     use_description=params["ticket"]["use_description"],
                     description=ticket.description,
                 )
