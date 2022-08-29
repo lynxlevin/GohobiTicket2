@@ -338,7 +338,6 @@ class TestTicketViews(TestCase):
             }
         }
 
-        # MYMEMO: logger の確認もしたい 成功->成功を返されて、viewでlogger.info 失敗->失敗を返されて(exception?、viewでlogger.info
         cases = {
             "normal_ticket": {"ticket": normal_ticket},
             "special_ticket": {"ticket": special_ticket},

@@ -1,6 +1,9 @@
 import os
 from tickets.models.ticket import Ticket
 from tickets.utils import SlackMessenger
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SlackMessengerForUseTicket(SlackMessenger):
@@ -18,8 +21,13 @@ class SlackMessengerForUseTicket(SlackMessenger):
         self.message_dict = message
 
     def send_message(self):
-        # MYMEMO: superの失敗を受け取って、log 出力できるようにしたい
-        super().send_message(self.url, self.message_dict)
+        try:
+            super().send_message(self.url, self.message_dict)
+
+            logger.info("Successfully sent message to Slack")
+        except Exception as exc:
+            logger.error("Slack message error", extra={
+                         "reason": exc.response.reason, "status_code": exc.response.status_code})
 
     def _get_normal_message(self, ticket):
         receiving_user_name = ticket.user_relation.receiving_user.username

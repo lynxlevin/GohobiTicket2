@@ -1,4 +1,6 @@
+import logging
 import os
+import requests
 from unittest import mock
 from django.test import TestCase
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
@@ -68,6 +70,9 @@ class TestSlackMessengerForUseTicket(TestCase):
 
     @mock.patch("tickets.utils.slack_messenger.SlackMessenger.send_message", autospec=True)
     def test_send_message(self, slack_messenger_mock):
+        logger = logging.getLogger(
+            "tickets.utils.slack_messenger_for_use_ticket")
+
         # MYMEMO: url はtestようにしたい
         url = os.getenv("SLACK_API_URL")
         message_dict = {
@@ -76,7 +81,39 @@ class TestSlackMessengerForUseTicket(TestCase):
 
         messenger = SlackMessengerForUseTicket()
         messenger.message_dict = message_dict
-        messenger.send_message()
+
+        with self.assertLogs(logger=logger, level=logging.INFO) as cm:
+            messenger.send_message()
 
         slack_messenger_mock.assert_called_once_with(
             messenger, url, message_dict)
+
+        expected_log = [
+            'INFO:tickets.utils.slack_messenger_for_use_ticket:Successfully sent message to Slack']
+        self.assertEqual(cm.output, expected_log)
+
+    @mock.patch("tickets.utils.slack_messenger.SlackMessenger.send_message", autospec=True)
+    def test_send_message_error(self, slack_messenger_mock):
+        stub_exception = requests.exceptions.HTTPError()
+        stub_response = requests.Response()
+        stub_response.reason = "Bad Request"
+        stub_response.status_code = 400
+        stub_exception.response = stub_response
+        slack_messenger_mock.side_effect = stub_exception
+
+        logger = logging.getLogger(
+            "tickets.utils.slack_messenger_for_use_ticket")
+
+        message_dict = {
+            "message": "test_message"
+        }
+
+        messenger = SlackMessengerForUseTicket()
+        messenger.message_dict = message_dict
+
+        with self.assertLogs(logger=logger, level=logging.INFO) as cm:
+            messenger.send_message()
+
+        expected_log = [
+            'ERROR:tickets.utils.slack_messenger_for_use_ticket:Slack message error']
+        self.assertEqual(cm.output, expected_log)
