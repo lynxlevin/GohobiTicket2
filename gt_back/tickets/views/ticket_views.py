@@ -1,17 +1,15 @@
 from datetime import date
-import requests
 from gt_back.messages import ErrorMessages
+from tickets.utils import SlackMessengerForUseTicket
 from user_relations.models import UserRelation
 from tickets.serializers import *
 from tickets.models.ticket import Ticket
-from tickets.use_cases.helper.slack_message_helper import SlackMessageHelper
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 import logging
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -157,8 +155,9 @@ class TicketViewSet(viewsets.GenericViewSet):
         ticket.save(update_fields=["use_date",
                     "use_description", "updated_at"])
 
-        slack_message = SlackMessageHelper()
-        slack_message.send_message(ticket)
+        slack_message = SlackMessengerForUseTicket()
+        slack_message.generate_message(ticket)
+        slack_message.send_message()
 
         serializer = TicketUseSerializer({"id": ticket.id})
 

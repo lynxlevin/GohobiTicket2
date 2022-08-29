@@ -1,5 +1,3 @@
-import os
-from test.support import EnvironmentVarGuard
 from unittest import mock
 from datetime import date, datetime
 from django.test import Client, TestCase
@@ -8,14 +6,10 @@ from rest_framework import status
 
 from tickets.models import Ticket
 from tickets.test_utils.test_seeds import TestSeed
-from tickets.use_cases.helper.slack_message_helper import SlackMessageHelper
+from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
 
 
 class TestTicketViews(TestCase):
-    def setUp(self):
-        self.env = EnvironmentVarGuard()
-        self.env.set("SLACK_API_URL", "https://test_api/")
-
     @classmethod
     def setUpTestData(cls):
         cls.seeds = TestSeed()
@@ -324,8 +318,8 @@ class TestTicketViews(TestCase):
                     condition["ticket"].refresh_from_db()
                     self.assertFalse(condition["ticket"].is_special)
 
-    @mock.patch("requests.post")
-    def test_use(self, requests_mock):
+    @mock.patch.object(SlackMessengerForUseTicket, "__new__")
+    def test_use(self, slack_mock):
         """
         Put /tickets/{ticket_id}/use/
         """
@@ -344,14 +338,10 @@ class TestTicketViews(TestCase):
             }
         }
 
-        """
-        MYMEMO: slack_message_helper は個別にテストしているから、こうする必要はない。
-        だけど、slack_message_helper は ticket から分離して、normalかspecialかはこちらでテストできるようにしたほうがいいかも？
-        MYMEMO: あと、このテストで、ちゃんと正しい内容を渡して、それがrequests.postまで渡されていることを確認したい
-        """
+        # MYMEMO: logger の確認もしたい 成功->成功を返されて、viewでlogger.info 失敗->失敗を返されて(exception?、viewでlogger.info
         cases = {
-            "normal_ticket": {"ticket": normal_ticket, "supposed_message_method": "get_message"},
-            "special_ticket": {"ticket": special_ticket, "supposed_message_method": "get_special_message"},
+            "normal_ticket": {"ticket": normal_ticket},
+            "special_ticket": {"ticket": special_ticket},
         }
 
         client = Client()
@@ -359,8 +349,10 @@ class TestTicketViews(TestCase):
 
         for case, condition in cases.items():
             with self.subTest(case=case):
+                slack_instance_mock = mock.Mock()
+                slack_mock.return_value = slack_instance_mock
+
                 ticket = condition["ticket"]
-                requests_mock.reset_mock()
 
                 original_updated_at = ticket.updated_at
 
@@ -378,18 +370,9 @@ class TestTicketViews(TestCase):
                                  ticket.use_description)
                 self.assertNotEqual(original_updated_at, ticket.updated_at)
 
-                url = os.getenv("SLACK_API_URL")
-                slack_message = SlackMessageHelper()
-                message = getattr(slack_message, condition["supposed_message_method"])(
-                    user_name=user.username,
-                    gifter_name=ticket.user_relation.giving_user.username,
-                    use_description=params["ticket"]["use_description"],
-                    description=ticket.description,
-                )
-                header = {"Content-type": "application/json"}
-
-                requests_mock.assert_called_once_with(
-                    url, data=message, headers=header, timeout=(5.0, 30.0))
+                slack_instance_mock.generate_message.assert_called_once_with(
+                    condition["ticket"])
+                slack_instance_mock.send_message.assert_called_once()
 
     def test_use_case_error(self):
         user = self.seeds.users[1]
@@ -434,7 +417,6 @@ class TestTicketViews(TestCase):
                     self.assertIsNone(condition["ticket"].use_date)
                     self.assertEqual("", condition["ticket"].use_description)
 
-    # MYMEMO: use (use_date, use_description, send_slack)
     # MYMEMO: DRAFTS
     # MYMEMO: create (normal_create, status="draft") maybe change default to draft and use make_official
     # MYMEMO: update (error_when_not_draft, normal_partial_update) maybe normal partial_update suffices
