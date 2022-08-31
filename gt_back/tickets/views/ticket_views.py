@@ -1,11 +1,9 @@
-from datetime import date
 from gt_back.exception_handler import exception_handler_with_logging
 from gt_back.messages import ErrorMessages
-from tickets.use_cases import CreateTicket, DestroyTicket, PartialUpdateTicket
-from tickets.utils import SlackMessengerForUseTicket
+from tickets.use_cases import CreateTicket, DestroyTicket, PartialUpdateTicket, UseTicket
 from tickets.serializers import *
 from tickets.models.ticket import Ticket
-from tickets.utils import _is_none, _is_used, _is_not_giving_user, _is_not_receiving_user
+from tickets.utils import _is_none, _is_used, _is_not_giving_user
 from rest_framework import viewsets
 from rest_framework.status import HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 from rest_framework.response import Response
@@ -86,6 +84,7 @@ class TicketViewSet(viewsets.GenericViewSet):
             user_relation.id).filter_special_tickets(ticket.gift_date).count() != 0
 
         if has_other_special_tickets_in_month:
+            # MYMEMO: use_case にしたいけど、このメッセージのハンドリング、テストが大変そう
             data = {
                 "error_message": ErrorMessages.SPECIAL_TICKET_LIMIT_VIOLATION.value}
             return Response(data, status=HTTP_403_FORBIDDEN)
@@ -97,38 +96,19 @@ class TicketViewSet(viewsets.GenericViewSet):
         return Response(serializer.data, status=HTTP_202_ACCEPTED)
 
     @action(detail=True, methods=["put"])
-    def use(self, request, format=None, pk=None):
-        logger.info("UseTicket", extra={
-                    "request.data": request.data, "pk": pk})
+    def use(self, request, use_case=UseTicket(), format=None, pk=None):
+        try:
+            serializer = TicketUseSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
 
-        serializer = TicketUseSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+            data = serializer.validated_data["ticket"]
 
-        data = serializer.validated_data["ticket"]
+            ticket = use_case.execute(
+                user=request.user, data=data, ticket_id=pk)
 
-        ticket = Ticket.objects.get_by_id(pk)
+            serializer = TicketUseSerializer({"id": ticket.id})
 
-        if _is_none(ticket):
-            return Response(status=HTTP_404_NOT_FOUND)
+            return Response(serializer.data, status=HTTP_202_ACCEPTED)
 
-        if _is_used(ticket):
-            return Response(status=HTTP_403_FORBIDDEN)
-
-        user = request.user
-        user_relation = ticket.user_relation
-
-        if _is_not_receiving_user(user, user_relation):
-            return Response(status=HTTP_403_FORBIDDEN)
-
-        ticket.use_description = data["use_description"]
-        ticket.use_date = date.today()
-        ticket.save(update_fields=["use_date",
-                    "use_description", "updated_at"])
-
-        slack_message = SlackMessengerForUseTicket()
-        slack_message.generate_message(ticket)
-        slack_message.send_message()
-
-        serializer = TicketUseSerializer({"id": ticket.id})
-
-        return Response(serializer.data, status=HTTP_202_ACCEPTED)
+        except Exception as exc:
+            return exception_handler_with_logging(exc)

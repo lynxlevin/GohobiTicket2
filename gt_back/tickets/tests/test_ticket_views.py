@@ -275,11 +275,8 @@ class TestTicketViews(TestCase):
 
         user = self.seeds.users[1]
         receiving_relation = user.receiving_relations.first()
-        normal_ticket = Ticket.objects.filter_eq_user_relation_id(
+        ticket = Ticket.objects.filter_eq_user_relation_id(
             receiving_relation.id).filter(use_date__isnull=True, is_special=False).first()
-
-        special_ticket = Ticket.objects.filter_eq_user_relation_id(
-            receiving_relation.id).filter(use_date__isnull=True, is_special=True).first()
 
         params = {
             "ticket": {
@@ -287,83 +284,49 @@ class TestTicketViews(TestCase):
             }
         }
 
-        cases = {
-            "normal_ticket": {"ticket": normal_ticket},
-            "special_ticket": {"ticket": special_ticket},
-        }
-
         client = Client()
         client.force_login(user)
 
-        for case, condition in cases.items():
-            with self.subTest(case=case):
-                slack_instance_mock = mock.Mock()
-                slack_mock.return_value = slack_instance_mock
+        slack_instance_mock = mock.Mock()
+        slack_mock.return_value = slack_instance_mock
 
-                ticket = condition["ticket"]
+        response = client.put(
+            f"/tickets/{ticket.id}/use/", params, content_type="application/json")
 
-                original_updated_at = ticket.updated_at
+        self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
 
-                response = client.put(
-                    f"/tickets/{ticket.id}/use/", params, content_type="application/json")
+        self.assertEqual(str(ticket.id), response.data["id"])
 
-                self.assertEqual(status.HTTP_202_ACCEPTED,
-                                 response.status_code)
+    @mock.patch("tickets.use_cases.use_ticket.UseTicket.execute")
+    def test_use_case_error(self, use_case_mock):
+        """
+        Put /tickets/{ticket_id}/use/
+        error case
+        """
 
-                self.assertEqual(str(ticket.id), response.data["id"])
+        test_log = "test_exception_log"
+        use_case_mock.side_effect = exceptions.APIException(detail=test_log)
 
-                ticket.refresh_from_db()
-                self.assertEqual(date.today(), ticket.use_date)
-                self.assertEqual(params["ticket"]["use_description"],
-                                 ticket.use_description)
-                self.assertNotEqual(original_updated_at, ticket.updated_at)
-
-                slack_instance_mock.generate_message.assert_called_once_with(
-                    condition["ticket"])
-                slack_instance_mock.send_message.assert_called_once()
-
-    def test_use_case_error(self):
         user = self.seeds.users[1]
 
         params = {"ticket": {"use_description": "test_use_case_error"}}
 
-        giving_relation_id = user.giving_relations.first().id
-        giving_ticket = Ticket.objects.filter_eq_user_relation_id(
-            giving_relation_id).first()
-
-        unrelated_relation_id = self.seeds.user_relations[2].id
-        unrelated_ticket = Ticket.objects.filter_eq_user_relation_id(
-            unrelated_relation_id).first()
-
-        non_existent_ticket = Ticket(id="-1", description="not_saved")
-
-        receiving_relation = user.receiving_relations.first()
-        used_ticket = Ticket(description="used_ticket", user_relation=receiving_relation,
-                             gift_date=date.today(), use_date=date.today())
-        used_ticket.save()
-
-        cases = {
-            "giving_relation": {"ticket": giving_ticket, "status_code": status.HTTP_403_FORBIDDEN},
-            "unrelated_relation": {"ticket": unrelated_ticket, "status_code": status.HTTP_403_FORBIDDEN},
-            "non_existent_ticket": {"ticket": non_existent_ticket, "status_code": status.HTTP_404_NOT_FOUND},
-            "used_ticket": {"ticket": used_ticket, "status_code": status.HTTP_403_FORBIDDEN},
-        }
+        ticket_id = "1"
 
         client = Client()
         client.force_login(user)
 
-        for case, condition in cases.items():
-            with self.subTest(case):
-                response = client.put(
-                    f"/tickets/{condition['ticket'].id}/use/", params, content_type="application/json")
+        logger = logging.getLogger("gt_back.exception_handler")
 
-                self.assertEqual(
-                    condition["status_code"], response.status_code)
+        with self.assertLogs(logger=logger, level=logging.WARN) as cm:
+            response = client.put(
+                f"/tickets/{ticket_id}/use/", params, content_type="application/json")
 
-                if not case in ["non_existent_ticket", "used_ticket"]:
-                    condition["ticket"].refresh_from_db()
-                    self.assertIsNone(condition["ticket"].use_date)
-                    self.assertEqual("", condition["ticket"].use_description)
+        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR,
+                         response.status_code)
+
+        expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
+        self.assertEqual(expected_log, cm.output)
 
     # MYMEMO: DRAFTS
     # MYMEMO: create (normal_create, status="draft") maybe change default to draft and use make_official
