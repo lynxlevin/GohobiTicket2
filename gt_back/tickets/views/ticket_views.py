@@ -4,7 +4,9 @@ from tickets.utils import SlackMessengerForUseTicket
 from user_relations.models import UserRelation
 from tickets.serializers import *
 from tickets.models.ticket import Ticket
-from rest_framework import viewsets, status
+from tickets.utils import _is_none, _is_used, _is_not_giving_user, _is_not_receiving_user
+from rest_framework import viewsets
+from rest_framework.status import HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -32,12 +34,11 @@ class TicketViewSet(viewsets.GenericViewSet):
         user_relation = UserRelation.objects.get_by_id(
             data["user_relation_id"])
 
-        # MYMEMO: raise して except したほうが読みやすいかも
-        if user_relation is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        if _is_none(user_relation):
+            return Response(status=HTTP_404_NOT_FOUND)
 
-        if user != user_relation.giving_user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        if _is_not_giving_user(user, user_relation):
+            return Response(status=HTTP_403_FORBIDDEN)
 
         ticket = Ticket(gift_date=data["gift_date"], description=data["description"],
                         user_relation_id=data["user_relation_id"])
@@ -45,7 +46,7 @@ class TicketViewSet(viewsets.GenericViewSet):
 
         serializer = TicketCreateSerializer({"id": ticket.id})
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=HTTP_201_CREATED)
 
     def partial_update(self, request, format=None, pk=None):
         logger.info("PatialUpdateTicket", extra={
@@ -58,21 +59,21 @@ class TicketViewSet(viewsets.GenericViewSet):
 
         ticket = Ticket.objects.get_by_id(pk)
 
-        if ticket is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        if _is_none(ticket):
+            return Response(status=HTTP_404_NOT_FOUND)
 
         user = request.user
         user_relation = ticket.user_relation
 
-        if user != user_relation.giving_user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        if _is_not_giving_user(user, user_relation):
+            return Response(status=HTTP_403_FORBIDDEN)
 
         ticket.description = data["description"]
         ticket.save(update_fields=["description", "updated_at"])
 
         serializer = TicketPartialUpdateSerializer({"id": ticket.id})
 
-        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.data, status=HTTP_202_ACCEPTED)
 
     def destroy(self, request, format=None, pk=None):
         logger.info("DestroyTicket", extra={
@@ -80,20 +81,20 @@ class TicketViewSet(viewsets.GenericViewSet):
 
         ticket = Ticket.objects.get_by_id(pk)
 
-        if ticket is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        if _is_none(ticket):
+            return Response(status=HTTP_404_NOT_FOUND)
 
-        if ticket.use_date is not None:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        if _is_used(ticket):
+            return Response(status=HTTP_403_FORBIDDEN)
 
         user = request.user
         user_relation = ticket.user_relation
 
-        if user != user_relation.giving_user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        if _is_not_giving_user(user, user_relation):
+            return Response(status=HTTP_403_FORBIDDEN)
 
         ticket.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["put"])
     def mark_special(self, request, format=None, pk=None):
@@ -102,29 +103,31 @@ class TicketViewSet(viewsets.GenericViewSet):
 
         ticket = Ticket.objects.get_by_id(pk)
 
-        if ticket is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        if ticket.use_date is not None:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        if _is_none(ticket):
+            return Response(status=HTTP_404_NOT_FOUND)
 
-        # MYMEMO: 共通化したい
+        if _is_used(ticket):
+            return Response(status=HTTP_403_FORBIDDEN)
+
         user = request.user
         user_relation = ticket.user_relation
 
-        if user != user_relation.giving_user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        if _is_not_giving_user(user, user_relation):
+            return Response(status=HTTP_403_FORBIDDEN)
 
-        has_other_special_tickets_in_month = Ticket.objects.filter_eq_user_relation_id(user_relation.id).filter_special_tickets(
-            ticket.gift_date).count() != 0
+        has_other_special_tickets_in_month = Ticket.objects.filter_eq_user_relation_id(
+            user_relation.id).filter_special_tickets(ticket.gift_date).count() != 0
 
         if has_other_special_tickets_in_month:
-            return Response({"error_message": ErrorMessages.SPECIAL_TICKET_LIMIT_VIOLATION.value}, status=status.HTTP_403_FORBIDDEN)
+            data = {
+                "error_message": ErrorMessages.SPECIAL_TICKET_LIMIT_VIOLATION.value}
+            return Response(data, status=HTTP_403_FORBIDDEN)
 
         ticket.is_special = True
         ticket.save()
 
         serializer = TicketIdResponseSerializer({"id": ticket.id})
-        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.data, status=HTTP_202_ACCEPTED)
 
     @action(detail=True, methods=["put"])
     def use(self, request, format=None, pk=None):
@@ -138,17 +141,17 @@ class TicketViewSet(viewsets.GenericViewSet):
 
         ticket = Ticket.objects.get_by_id(pk)
 
-        if ticket is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        if _is_none(ticket):
+            return Response(status=HTTP_404_NOT_FOUND)
 
-        if ticket.use_date is not None:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        if _is_used(ticket):
+            return Response(status=HTTP_403_FORBIDDEN)
 
         user = request.user
         user_relation = ticket.user_relation
 
-        if user != user_relation.receiving_user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        if _is_not_receiving_user(user, user_relation):
+            return Response(status=HTTP_403_FORBIDDEN)
 
         ticket.use_description = data["use_description"]
         ticket.use_date = date.today()
@@ -161,4 +164,4 @@ class TicketViewSet(viewsets.GenericViewSet):
 
         serializer = TicketUseSerializer({"id": ticket.id})
 
-        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.data, status=HTTP_202_ACCEPTED)
