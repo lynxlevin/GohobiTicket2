@@ -5,7 +5,7 @@ from django.test import Client, TestCase
 from gt_back.messages import ErrorMessages
 from rest_framework import status, exceptions
 
-from tickets.models import Ticket
+from tickets.models import Ticket, ticket
 from tickets.test_utils.test_seeds import TestSeed
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
 
@@ -69,13 +69,18 @@ class TestTicketViews(TestCase):
         with self.assertLogs(logger=logger, level=logging.WARN) as cm:
             response = client.post(f"/tickets/", params,
                                    content_type="application/json")
+
+        expected_params = {**params["ticket"], "gift_date": datetime.strptime(
+            params["ticket"]["gift_date"], "%Y-%m-%d").date()}
+        use_case_mock.assert_called_once_with(user=user, data=expected_params)
+
         self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR,
                          response.status_code)
 
         expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
         self.assertEqual(expected_log, cm.output)
 
-    def test_partial_update(self):
+    def test_partial_update_integration(self):
         """
         Patch /tickets/{ticket_id}/
         """
@@ -93,7 +98,6 @@ class TestTicketViews(TestCase):
                 "description": "updated description",
             }
         }
-        original_updated_at = ticket.updated_at
 
         response = client.patch(
             f"/tickets/{ticket.id}/", params, content_type="application/json")
@@ -102,33 +106,18 @@ class TestTicketViews(TestCase):
 
         self.assertEqual(str(ticket.id), response.data["id"])
 
-        ticket.refresh_from_db()
-        self.assertEqual(params["ticket"]["description"], ticket.description)
-        self.assertNotEqual(original_updated_at, ticket.updated_at)
-
-    def test_partial_update_case_error(self):
+    @mock.patch("tickets.use_cases.partial_update_ticket.PartialUpdateTicket.execute")
+    def test_partial_update_case_error(self, use_case_mock):
         """
         Patch /tickets/{ticket_id}/
         error cases
         """
+        test_log = "test_exception_log"
+        use_case_mock.side_effect = exceptions.APIException(detail=test_log)
 
         user = self.seeds.users[1]
 
-        receiving_relation_id = user.receiving_relations.first().id
-        receiving_ticket = Ticket.objects.filter_eq_user_relation_id(
-            receiving_relation_id).first()
-
-        unrelated_relation_id = self.seeds.user_relations[2].id
-        unrelated_ticket = Ticket.objects.filter_eq_user_relation_id(
-            unrelated_relation_id).first()
-
-        non_existent_ticket = Ticket(id="-1", description="not_saved")
-
-        cases = {
-            "receiving_relation": {"ticket": receiving_ticket, "status_code": status.HTTP_403_FORBIDDEN},
-            "unrelated_ticket": {"ticket": unrelated_ticket, "status_code": status.HTTP_403_FORBIDDEN},
-            "non_existent_ticket": {"ticket": non_existent_ticket, "status_code": status.HTTP_404_NOT_FOUND},
-        }
+        ticket_id = "1"
 
         client = Client()
         client.force_login(user)
@@ -139,18 +128,20 @@ class TestTicketViews(TestCase):
             }
         }
 
-        for case, condition in cases.items():
-            with self.subTest(case=case):
-                response = client.patch(
-                    f"/tickets/{condition['ticket'].id}/", params, content_type="application/json")
+        logger = logging.getLogger("gt_back.exception_handler")
 
-                self.assertEqual(
-                    condition["status_code"], response.status_code)
+        with self.assertLogs(logger=logger, level=logging.WARN) as cm:
+            response = client.patch(
+                f"/tickets/{ticket_id}/", params, content_type="application/json")
 
-                if not case in ["non_existent_ticket"]:
-                    condition["ticket"].refresh_from_db()
-                    self.assertNotEqual(
-                        params["ticket"]["description"], condition["ticket"].description)
+        use_case_mock.assert_called_once_with(
+            user=user, data=params["ticket"], ticket_id=ticket_id)
+
+        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR,
+                         response.status_code)
+
+        expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
+        self.assertEqual(expected_log, cm.output)
 
     def test_destroy_integration(self):
         """
@@ -190,6 +181,9 @@ class TestTicketViews(TestCase):
 
         with self.assertLogs(logger=logger, level=logging.WARN) as cm:
             response = client.delete(f"/tickets/{ticket_id}/")
+
+        use_case_mock.assert_called_once_with(user=user, ticket_id=ticket_id)
+
         self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR,
                          response.status_code)
 

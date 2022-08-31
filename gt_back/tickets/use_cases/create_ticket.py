@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 class CreateTicket():
     def __init__(self):
-        self.exception_log_title = "CreateTicket_exception"
+        self.exception_log_title = f"{__class__.__name__}_exception"
 
-    def execute(self, user: User, data: str,):
-        logger.info("CreateTicket", extra={"data": data, "user": user})
+    def execute(self, user: User, data: dict,):
+        logger.info(__class__.__name__, extra={"data": data, "user": user})
 
         user_relation = UserRelation.objects.get_by_id(
             data["user_relation_id"])

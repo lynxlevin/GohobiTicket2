@@ -1,19 +1,19 @@
 from tickets.models import Ticket
 from users.models import User
-from tickets.utils import _is_none, _is_used, _is_not_giving_user
+from tickets.utils import _is_none, _is_not_giving_user
 from rest_framework import exceptions
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class DestroyTicket():
+class PartialUpdateTicket():
     def __init__(self):
         self.exception_log_title = f"{__class__.__name__}_exception"
 
-    def execute(self, ticket_id: str, user: User):
+    def execute(self, user: User, data: dict, ticket_id: str):
         logger.info(__class__.__name__, extra={
-                    "ticket_id": ticket_id, "user": user})
+                    "data": data, "user": user, "ticket_id": ticket_id})
 
         ticket = Ticket.objects.get_by_id(ticket_id)
 
@@ -21,14 +21,13 @@ class DestroyTicket():
             raise exceptions.NotFound(
                 detail=f"{self.exception_log_title}: Ticket not found.")
 
-        if _is_used(ticket):
-            raise exceptions.PermissionDenied(
-                detail=f"{self.exception_log_title}: Used ticket cannot be deleted.")
-
         user_relation = ticket.user_relation
 
         if _is_not_giving_user(user, user_relation):
             raise exceptions.PermissionDenied(
-                detail=f"{self.exception_log_title}: Only the giving user may delete ticket.")
+                detail=f"{self.exception_log_title}: Only the giving user may update ticket.")
 
-        ticket.delete()
+        ticket.description = data["description"]
+        ticket.save(update_fields=["description", "updated_at"])
+
+        return ticket

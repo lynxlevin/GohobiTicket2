@@ -1,8 +1,7 @@
 from datetime import date
 from gt_back.exception_handler import exception_handler_with_logging
 from gt_back.messages import ErrorMessages
-from tickets.use_cases import DestroyTicket
-from tickets.use_cases.create_ticket import CreateTicket
+from tickets.use_cases import CreateTicket, DestroyTicket, PartialUpdateTicket
 from tickets.utils import SlackMessengerForUseTicket
 from tickets.serializers import *
 from tickets.models.ticket import Ticket
@@ -13,7 +12,6 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
-from rest_framework.views import exception_handler
 import logging
 
 logger = logging.getLogger(__name__)
@@ -39,32 +37,22 @@ class TicketViewSet(viewsets.GenericViewSet):
         except Exception as exc:
             return exception_handler_with_logging(exc)
 
-    def partial_update(self, request, format=None, pk=None):
-        logger.info("PatialUpdateTicket", extra={
-                    "request.data": request.data, "pk": pk})
+    def partial_update(self, request, use_case=PartialUpdateTicket(), format=None, pk=None):
+        try:
+            serializer = TicketPartialUpdateSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
 
-        serializer = TicketPartialUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+            data = serializer.validated_data["ticket"]
 
-        data = serializer.validated_data["ticket"]
+            ticket = use_case.execute(
+                user=request.user, ticket_id=pk, data=data)
 
-        ticket = Ticket.objects.get_by_id(pk)
+            serializer = TicketPartialUpdateSerializer({"id": ticket.id})
 
-        if _is_none(ticket):
-            return Response(status=HTTP_404_NOT_FOUND)
+            return Response(serializer.data, status=HTTP_202_ACCEPTED)
 
-        user = request.user
-        user_relation = ticket.user_relation
-
-        if _is_not_giving_user(user, user_relation):
-            return Response(status=HTTP_403_FORBIDDEN)
-
-        ticket.description = data["description"]
-        ticket.save(update_fields=["description", "updated_at"])
-
-        serializer = TicketPartialUpdateSerializer({"id": ticket.id})
-
-        return Response(serializer.data, status=HTTP_202_ACCEPTED)
+        except Exception as exc:
+            return exception_handler_with_logging(exc)
 
     def destroy(self, request, use_case=DestroyTicket(), format=None, pk=None):
         try:
