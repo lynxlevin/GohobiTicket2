@@ -1,9 +1,7 @@
 from tickets.models import Ticket
 from users.models import User
-from tickets.utils import _is_none, _is_used, _is_not_giving_user, _is_not_receiving_user
+from tickets.utils import _is_none, _is_used, _is_not_giving_user
 from rest_framework import exceptions
-from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
-from rest_framework.response import Response
 import logging
 
 logger = logging.getLogger(__name__)

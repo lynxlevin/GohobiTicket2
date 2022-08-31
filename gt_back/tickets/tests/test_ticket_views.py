@@ -16,7 +16,7 @@ class TestTicketViews(TestCase):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
 
-    def test_create(self):
+    def test_create_integration(self):
         """
         Post /tickets/
         """
@@ -35,69 +35,45 @@ class TestTicketViews(TestCase):
             }
         }
 
-        query = Ticket.objects.filter_eq_user_relation_id(giving_relation.id)
-        count_before_create = query.count()
-
         response = client.post("/tickets/", params,
                                content_type="application/json")
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
-        count_after_create = query.count()
-        self.assertEqual(count_before_create + 1, count_after_create)
+        self.assertIsNotNone(response.data.get("id"))
 
-        created_ticket = Ticket.objects.get_by_id(response.data["id"])
-
-        expected_date = datetime.strptime(
-            params["ticket"]["gift_date"], "%Y-%m-%d").date()
-        self.assertEqual(expected_date, created_ticket.gift_date)
-        self.assertEqual(params["ticket"]["description"],
-                         created_ticket.description)
-        self.assertEqual(params["ticket"]["user_relation_id"],
-                         created_ticket.user_relation_id)
-
-    def test_create_case_error(self):
+    @mock.patch("tickets.use_cases.create_ticket.CreateTicket.execute")
+    def test_create_case_error(self, use_case_mock):
         """
         Post /tickets
         error cases
         """
+        test_log = "test_exception_log"
+        use_case_mock.side_effect = exceptions.APIException(detail=test_log)
 
         user = self.seeds.users[1]
-
-        unrelated_relation_id = self.seeds.user_relations[2].id
-        receiving_relation_id = user.receiving_relations.first().id
-
-        cases = {
-            "unrelated_user": {"id": unrelated_relation_id, "status_code": status.HTTP_403_FORBIDDEN},
-            "receiving_relation": {"id": receiving_relation_id, "status_code": status.HTTP_403_FORBIDDEN},
-            "non_existent_user_relation": {"id": "-1", "status_code": status.HTTP_404_NOT_FOUND},
-        }
 
         client = Client()
         client.force_login(user)
 
-        for case, condition in cases.items():
-            with self.subTest(case=case):
-                params = {
-                    "ticket": {
-                        "gift_date": "2022-08-24",
-                        "description": "test_ticket",
-                        "user_relation_id": condition["id"],
-                    }
-                }
+        params = {
+            "ticket": {
+                "gift_date": "2022-08-24",
+                "description": "test_ticket",
+                "user_relation_id": "1",
+            }
+        }
 
-                original_ticket_count = Ticket.objects.filter_eq_user_relation_id(
-                    condition["id"]).count()
+        logger = logging.getLogger("gt_back.exception_handler")
 
-                response = client.post(f"/tickets/", params,
-                                       content_type="application/json")
-                self.assertEqual(
-                    condition["status_code"], response.status_code)
+        with self.assertLogs(logger=logger, level=logging.WARN) as cm:
+            response = client.post(f"/tickets/", params,
+                                   content_type="application/json")
+        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR,
+                         response.status_code)
 
-                pro_execution_ticket_count = Ticket.objects.filter_eq_user_relation_id(
-                    condition["id"]).count()
-                self.assertEqual(original_ticket_count,
-                                 pro_execution_ticket_count)
+        expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
+        self.assertEqual(expected_log, cm.output)
 
     def test_partial_update(self):
         """
@@ -213,7 +189,9 @@ class TestTicketViews(TestCase):
         logger = logging.getLogger("gt_back.exception_handler")
 
         with self.assertLogs(logger=logger, level=logging.WARN) as cm:
-            client.delete(f"/tickets/{ticket_id}/")
+            response = client.delete(f"/tickets/{ticket_id}/")
+        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR,
+                         response.status_code)
 
         expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
         self.assertEqual(expected_log, cm.output)

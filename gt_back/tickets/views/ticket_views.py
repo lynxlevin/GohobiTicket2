@@ -2,8 +2,8 @@ from datetime import date
 from gt_back.exception_handler import exception_handler_with_logging
 from gt_back.messages import ErrorMessages
 from tickets.use_cases import DestroyTicket
+from tickets.use_cases.create_ticket import CreateTicket
 from tickets.utils import SlackMessengerForUseTicket
-from user_relations.models import UserRelation
 from tickets.serializers import *
 from tickets.models.ticket import Ticket
 from tickets.utils import _is_none, _is_used, _is_not_giving_user, _is_not_receiving_user
@@ -25,31 +25,19 @@ class TicketViewSet(viewsets.GenericViewSet):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def create(self, request, format=None):
-        logger.info("CreateTicket", extra={"request.data": request.data})
+    def create(self, request, use_case=CreateTicket(), format=None):
+        try:
+            serializer = TicketCreateSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
 
-        serializer = TicketCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+            data = serializer.validated_data["ticket"]
+            ticket = use_case.execute(user=request.user, data=data)
 
-        data = serializer.validated_data["ticket"]
+            serializer = TicketCreateSerializer({"id": ticket.id})
+            return Response(serializer.data, status=HTTP_201_CREATED)
 
-        user = request.user
-        user_relation = UserRelation.objects.get_by_id(
-            data["user_relation_id"])
-
-        if _is_none(user_relation):
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        if _is_not_giving_user(user, user_relation):
-            return Response(status=HTTP_403_FORBIDDEN)
-
-        ticket = Ticket(gift_date=data["gift_date"], description=data["description"],
-                        user_relation_id=data["user_relation_id"])
-        ticket.save()
-
-        serializer = TicketCreateSerializer({"id": ticket.id})
-
-        return Response(serializer.data, status=HTTP_201_CREATED)
+        except Exception as exc:
+            return exception_handler_with_logging(exc)
 
     def partial_update(self, request, format=None, pk=None):
         logger.info("PatialUpdateTicket", extra={
@@ -83,6 +71,7 @@ class TicketViewSet(viewsets.GenericViewSet):
             use_case.execute(ticket_id=pk, user=request.user)
 
             return Response(status=HTTP_204_NO_CONTENT)
+
         except Exception as exc:
             return exception_handler_with_logging(exc)
 
