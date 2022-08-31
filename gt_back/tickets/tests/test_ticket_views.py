@@ -1,3 +1,4 @@
+import logging
 from unittest import mock
 from datetime import date, datetime
 from django.test import Client, TestCase
@@ -221,25 +222,34 @@ class TestTicketViews(TestCase):
         used_ticket.save()
 
         cases = {
-            "receiving_relation": {"ticket_id": receiving_ticket_id, "status_code": status.HTTP_403_FORBIDDEN},
-            "unrelated_relation": {"ticket_id": unrelated_ticket_id, "status_code": status.HTTP_403_FORBIDDEN},
-            "non_existent_ticket": {"ticket_id": "-1", "status_code": status.HTTP_404_NOT_FOUND},
-            "used_ticket": {"ticket_id": used_ticket.id, "status_code": status.HTTP_403_FORBIDDEN},
+            "receiving_relation": {"ticket_id": receiving_ticket_id, "status_code": status.HTTP_403_FORBIDDEN, "log": "Only the giving user may delete ticket."},
+            "unrelated_relation": {"ticket_id": unrelated_ticket_id, "status_code": status.HTTP_403_FORBIDDEN, "log": "Only the giving user may delete ticket."},
+            "non_existent_ticket": {"ticket_id": "-1", "status_code": status.HTTP_404_NOT_FOUND, "log": "Ticket not found."},
+            "used_ticket": {"ticket_id": used_ticket.id, "status_code": status.HTTP_403_FORBIDDEN, "log": "Used ticket cannot be deleted."},
         }
 
         client = Client()
         client.force_login(user)
 
+        logger = logging.getLogger("gt_back.exception_handler")
+
         for case, condition in cases.items():
             with self.subTest(case=case):
-                response = client.delete(f"/tickets/{condition['ticket_id']}/")
+                with self.assertLogs(logger=logger, level=logging.WARN) as cm:
+                    response = client.delete(
+                        f"/tickets/{condition['ticket_id']}/")
 
                 self.assertEqual(
                     condition["status_code"], response.status_code)
 
+                expected_log = [
+                    f"WARNING:gt_back.exception_handler:DestroyTicket_exception: {condition['log']}"]
+                self.assertEqual(expected_log, cm.output)
+
                 if not case in ["non_existent_ticket"]:
                     self.assertIsNotNone(
                         Ticket.objects.get_by_id(condition["ticket_id"]))
+                # MYMEMO: add use_case test
 
     def test_mark_special(self):
         """

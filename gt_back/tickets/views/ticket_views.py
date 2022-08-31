@@ -1,5 +1,7 @@
 from datetime import date
+from gt_back.exception_handler import exception_handler_with_logging
 from gt_back.messages import ErrorMessages
+from tickets.use_cases import DestroyTicket
 from tickets.utils import SlackMessengerForUseTicket
 from user_relations.models import UserRelation
 from tickets.serializers import *
@@ -11,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from rest_framework.views import exception_handler
 import logging
 
 logger = logging.getLogger(__name__)
@@ -75,26 +78,13 @@ class TicketViewSet(viewsets.GenericViewSet):
 
         return Response(serializer.data, status=HTTP_202_ACCEPTED)
 
-    def destroy(self, request, format=None, pk=None):
-        logger.info("DestroyTicket", extra={
-                    "request.data": request.data, "pk": pk})
+    def destroy(self, request, use_case=DestroyTicket(), format=None, pk=None):
+        try:
+            use_case.execute(ticket_id=pk, user=request.user)
 
-        ticket = Ticket.objects.get_by_id(pk)
-
-        if _is_none(ticket):
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        if _is_used(ticket):
-            return Response(status=HTTP_403_FORBIDDEN)
-
-        user = request.user
-        user_relation = ticket.user_relation
-
-        if _is_not_giving_user(user, user_relation):
-            return Response(status=HTTP_403_FORBIDDEN)
-
-        ticket.delete()
-        return Response(status=HTTP_204_NO_CONTENT)
+            return Response(status=HTTP_204_NO_CONTENT)
+        except Exception as exc:
+            return exception_handler_with_logging(exc)
 
     @action(detail=True, methods=["put"])
     def mark_special(self, request, format=None, pk=None):
