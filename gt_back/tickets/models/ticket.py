@@ -50,7 +50,8 @@ class Ticket(models.Model):
     gift_date = models.DateField()
     use_description = models.TextField(default="", blank=True)
     use_date = models.DateField(null=True)
-    status = models.CharField(max_length=8, choices=STATUS_CHOICES)
+    status = models.CharField(
+        max_length=8, choices=STATUS_CHOICES, default=STATUS_UNREAD)
     is_special = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
