@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 
 from django.test import TestCase
@@ -31,12 +32,15 @@ class TestPartialUpdateTicket(TestCase):
         with self.assertLogs(logger=logger, level=logging.INFO) as cm:
             PartialUpdateTicket().execute(user=user, data=data, ticket_id=ticket.id)
 
-        ticket.refresh_from_db()
-        self.assertEqual(data["description"], ticket.description)
-        self.assertNotEqual(original_updated_at, ticket.updated_at)
+        self._make_assertions(data, ticket.id, original_updated_at)
 
         expected_log = [f"INFO:{class_name}:PartialUpdateTicket"]
         self.assertEqual(expected_log, cm.output)
+
+    def _make_assertions(self, data: dict, ticket_id: int, original_updated_at: datetime):
+        ticket = Ticket.objects.get_by_id(ticket_id)
+        self.assertEqual(data["description"], ticket.description)
+        self.assertNotEqual(original_updated_at, ticket.updated_at)
 
     def test_execute_case_error(self):
         user = self.seeds.users[1]

@@ -18,10 +18,8 @@ class TestDestroyTicket(TestCase):
     def test_execute(self):
         user = self.seeds.users[1]
         giving_relation = user.giving_relations.first()
-
-        query = Ticket.objects.filter_eq_user_relation_id(giving_relation.id)
-        ticket = query.first()
-        original_ticket_count = query.count()
+        ticket = Ticket.objects.filter_eq_user_relation_id(
+            giving_relation.id).first()
 
         class_name = "tickets.use_cases.destroy_ticket"
         logger = logging.getLogger(class_name)
@@ -29,12 +27,13 @@ class TestDestroyTicket(TestCase):
         with self.assertLogs(logger=logger, level=logging.INFO) as cm:
             DestroyTicket().execute(ticket_id=ticket.id, user=user)
 
-        self.assertIsNone(Ticket.objects.get_by_id(ticket.id))
-        pro_execution_ticket_count = query.count()
-        self.assertEqual(original_ticket_count - 1, pro_execution_ticket_count)
+        self._make_assertions(ticket.id)
 
         expected_log = [f"INFO:{class_name}:DestroyTicket"]
         self.assertEqual(expected_log, cm.output)
+
+    def _make_assertions(self, ticket_id: int):
+        self.assertIsNone(Ticket.objects.get_by_id(ticket_id))
 
     def test_execute_case_error(self):
         user = self.seeds.users[1]

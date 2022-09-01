@@ -5,7 +5,7 @@ from django.test import Client, TestCase
 from gt_back.messages import ErrorMessages
 from rest_framework import status, exceptions
 
-from tickets.models import Ticket, ticket
+from tickets.models import Ticket
 from tickets.test_utils.test_seeds import TestSeed
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
 

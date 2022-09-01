@@ -5,6 +5,7 @@ from django.test import TestCase
 from rest_framework import exceptions
 
 from tickets.models import Ticket
+from users.models import User
 from tickets.use_cases import CreateTicket
 from tickets.test_utils.test_seeds import TestSeed
 
@@ -25,30 +26,32 @@ class TestCreateTicket(TestCase):
             "user_relation_id": giving_relation.id,
         }
 
-        query = Ticket.objects.filter_eq_user_relation_id(giving_relation.id)
-        count_before_create = query.count()
-
         class_name = "tickets.use_cases.create_ticket"
         logger = logging.getLogger(class_name)
 
         with self.assertLogs(logger=logger, level=logging.INFO) as cm:
             created_ticket = CreateTicket().execute(user=user, data=data)
 
-        count_after_create = query.count()
-        self.assertEqual(count_before_create + 1, count_after_create)
-
-        created_ticket.refresh_from_db()
-
-        expected_date = datetime.strptime(
-            data["gift_date"], "%Y-%m-%d").date()
-        self.assertEqual(expected_date, created_ticket.gift_date)
-        self.assertEqual(
-            data["description"], created_ticket.description)
-        self.assertEqual(data["user_relation_id"],
-                         created_ticket.user_relation_id)
+        self._make_assertions(data, created_ticket.id)
 
         expected_log = [f"INFO:{class_name}:CreateTicket"]
         self.assertEqual(expected_log, cm.output)
+
+    def _make_assertions(self, data: dict, created_ticket_id: int):
+        created_ticket = Ticket.objects.get_by_id(created_ticket_id)
+        self.assertIsNotNone(created_ticket)
+
+        expected_date = datetime.strptime(
+            data["gift_date"], "%Y-%m-%d").date()
+        self.assertEqual(data["user_relation_id"],
+                         created_ticket.user_relation_id)
+        self.assertEqual(
+            data["description"], created_ticket.description)
+        self.assertEqual(expected_date, created_ticket.gift_date)
+        self.assertEqual("", created_ticket.use_description)
+        self.assertEqual(None, created_ticket.use_date)
+        self.assertEqual(Ticket.STATUS_UNREAD, created_ticket.status)
+        self.assertFalse(created_ticket.is_special)
 
     def test_execute_case_error(self):
         user = self.seeds.users[1]

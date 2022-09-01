@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 import logging
 from unittest import mock
 
@@ -51,18 +51,21 @@ class TestUseTicket(TestCase):
                 with self.assertLogs(logger=logger, level=logging.INFO) as cm:
                     UseTicket().execute(user=user, data=data, ticket_id=str(ticket.id))
 
-                ticket.refresh_from_db()
-                self.assertEqual(date.today(), ticket.use_date)
-                self.assertEqual(data["use_description"],
-                                 ticket.use_description)
-                self.assertNotEqual(original_updated_at, ticket.updated_at)
-
-                slack_instance_mock.generate_message.assert_called_once_with(
-                    condition["ticket"])
-                slack_instance_mock.send_message.assert_called_once()
+                self._make_assertions(
+                    data, ticket.id, original_updated_at, slack_instance_mock)
 
                 expected_log = [f"INFO:{class_name}:UseTicket"]
                 self.assertEqual(expected_log, cm.output)
+
+    def _make_assertions(self, data: dict, ticket_id: int, original_updated_at: datetime, slack_instance_mock):
+        ticket = Ticket.objects.get_by_id(ticket_id)
+
+        self.assertEqual(date.today(), ticket.use_date)
+        self.assertEqual(data["use_description"], ticket.use_description)
+        self.assertNotEqual(original_updated_at, ticket.updated_at)
+
+        slack_instance_mock.generate_message.assert_called_once_with(ticket)
+        slack_instance_mock.send_message.assert_called_once()
 
     def test_execute_case_error(self):
         user = self.seeds.users[1]
