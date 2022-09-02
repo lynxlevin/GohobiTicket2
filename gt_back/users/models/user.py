@@ -1,6 +1,7 @@
 from typing import Optional
-from django.db import models
+
 from django.contrib.auth.models import AbstractBaseUser
+from django.db import models
 
 
 class UserQuerySet(models.QuerySet):

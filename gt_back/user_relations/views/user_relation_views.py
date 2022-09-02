@@ -1,12 +1,14 @@
-from ..permissions import IsGivingUserOrReceivingUser
-from tickets.serializers import TicketSerializer
-from user_relations.models.user_relation import UserRelation
-from tickets.models.ticket import Ticket
+import logging
+
 from rest_framework import viewsets
-from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
-import logging
+from rest_framework.response import Response
+from tickets.models.ticket import Ticket
+from tickets.serializers import TicketSerializer
+from user_relations.models.user_relation import UserRelation
+
+from ..permissions import IsGivingUserOrReceivingUser
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 from datetime import date
-from django.test import TestCase
 
+from django.test import TestCase
 from tickets.models import Ticket
 from tickets.test_utils.test_seeds import TestSeed
 

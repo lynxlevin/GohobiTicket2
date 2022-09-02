@@ -1,13 +1,12 @@
-from datetime import date, datetime
 import logging
+from datetime import date, datetime
 from unittest import mock
 
 from django.test import TestCase
 from rest_framework import exceptions
-
 from tickets.models import Ticket
-from tickets.use_cases import UseTicket
 from tickets.test_utils.test_seeds import TestSeed
+from tickets.use_cases import UseTicket
 from tickets.utils import SlackMessengerForUseTicket
 
 

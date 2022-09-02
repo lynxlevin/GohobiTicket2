@@ -1,9 +1,10 @@
 import json
-import requests
 from unittest import mock
+
+import requests
 from django.test import TestCase
-from tickets.utils.slack_messenger import SlackMessenger
 from tickets.test_utils.test_seeds import TestSeed
+from tickets.utils.slack_messenger import SlackMessenger
 
 
 class TestSlackMessenger(TestCase):

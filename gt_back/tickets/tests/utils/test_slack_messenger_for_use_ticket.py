@@ -1,11 +1,12 @@
 import logging
 import os
-import requests
 from unittest import mock
+
+import requests
 from django.test import TestCase
-from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
 from tickets.models.ticket import Ticket
 from tickets.test_utils.test_seeds import TestSeed
+from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
 
 
 class TestSlackMessengerForUseTicket(TestCase):

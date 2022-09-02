@@ -1,11 +1,10 @@
 from datetime import date
 
+from tickets.models import Ticket
 from tickets.test_utils import factory
-
-from users.models import User
 from user_relations.models import UserRelation
 from user_settings.models import UserSetting
-from tickets.models import Ticket
+from users.models import User
 
 
 class TestSeed:

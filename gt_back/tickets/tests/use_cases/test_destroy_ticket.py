@@ -1,12 +1,11 @@
-from datetime import date
 import logging
+from datetime import date
 
 from django.test import TestCase
 from rest_framework import exceptions
-
 from tickets.models import Ticket
-from tickets.use_cases import DestroyTicket
 from tickets.test_utils.test_seeds import TestSeed
+from tickets.use_cases import DestroyTicket
 
 
 class TestDestroyTicket(TestCase):

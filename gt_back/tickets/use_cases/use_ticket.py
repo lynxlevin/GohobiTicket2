@@ -1,10 +1,10 @@
-from datetime import date
-from tickets.models import Ticket
-from tickets.utils import SlackMessengerForUseTicket
-from users.models import User
-from tickets.utils import _is_none, _is_used, _is_not_receiving_user
-from rest_framework import exceptions
 import logging
+from datetime import date
+
+from rest_framework import exceptions
+from tickets.models import Ticket
+from tickets.utils import SlackMessengerForUseTicket, _is_none, _is_not_receiving_user, _is_used
+from users.models import User
 
 logger = logging.getLogger(__name__)
 

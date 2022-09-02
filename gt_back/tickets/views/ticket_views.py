@@ -1,16 +1,18 @@
+import logging
+
+from rest_framework import viewsets
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.status import HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
+from tickets.models.ticket import Ticket
+from tickets.serializers import *
+from tickets.use_cases import CreateTicket, DestroyTicket, PartialUpdateTicket, UseTicket
+from tickets.utils import _is_none, _is_not_giving_user, _is_used
+
 from gt_back.exception_handler import exception_handler_with_logging
 from gt_back.messages import ErrorMessages
-from tickets.use_cases import CreateTicket, DestroyTicket, PartialUpdateTicket, UseTicket
-from tickets.serializers import *
-from tickets.models.ticket import Ticket
-from tickets.utils import _is_none, _is_used, _is_not_giving_user
-from rest_framework import viewsets
-from rest_framework.status import HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
-from rest_framework.response import Response
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import action
-import logging
 
 logger = logging.getLogger(__name__)
 

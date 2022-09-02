@@ -1,8 +1,7 @@
 from django.db import models
-
 from tickets.models import Ticket
-from users.models import User
 from user_relations.models import UserRelation
+from users.models import User
 
 
 def _is_none(model: models.Model) -> bool:

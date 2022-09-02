@@ -1,13 +1,14 @@
 import datetime
 import enum
-from logging import Formatter as BaseFormatter
 import json
-from socket import socket
 import uuid
-from psycopg2.extras import Json
+from logging import Formatter as BaseFormatter
+from socket import socket
+
 from django.core.files.uploadedfile import UploadedFile
 from django.db import models
 from django.http import HttpRequest
+from psycopg2.extras import Json
 
 
 class Formatter(BaseFormatter):

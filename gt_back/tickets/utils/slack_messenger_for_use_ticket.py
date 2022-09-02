@@ -1,7 +1,8 @@
+import logging
 import os
+
 from tickets.models.ticket import Ticket
 from tickets.utils import SlackMessenger
-import logging
 
 logger = logging.getLogger(__name__)
 

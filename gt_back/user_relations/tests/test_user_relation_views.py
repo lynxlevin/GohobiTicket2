@@ -1,7 +1,7 @@
 from datetime import date
+
 from django.test import Client, TestCase
 from rest_framework import status
-
 from tickets.models import Ticket
 from tickets.test_utils.test_seeds import TestSeed
 

@@ -1,13 +1,14 @@
 import logging
-from unittest import mock
 from datetime import date, datetime
-from django.test import Client, TestCase
-from gt_back.messages import ErrorMessages
-from rest_framework import status, exceptions
+from unittest import mock
 
+from django.test import Client, TestCase
+from rest_framework import exceptions, status
 from tickets.models import Ticket
 from tickets.test_utils.test_seeds import TestSeed
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
+
+from gt_back.messages import ErrorMessages
 
 
 class TestTicketViews(TestCase):

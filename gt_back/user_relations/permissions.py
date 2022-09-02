@@ -1,6 +1,7 @@
-from user_relations.models.user_relation import UserRelation
-from rest_framework.permissions import BasePermission
 import logging
+
+from rest_framework.permissions import BasePermission
+from user_relations.models.user_relation import UserRelation
 
 logger = logging.getLogger(__name__)
 

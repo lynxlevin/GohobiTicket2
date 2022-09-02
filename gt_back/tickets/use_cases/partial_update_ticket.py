@@ -1,8 +1,9 @@
-from tickets.models import Ticket
-from users.models import User
-from tickets.utils import _is_none, _is_not_giving_user
-from rest_framework import exceptions
 import logging
+
+from rest_framework import exceptions
+from tickets.models import Ticket
+from tickets.utils import _is_none, _is_not_giving_user
+from users.models import User
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,5 @@
 from django.test import TestCase
 from tickets.test_utils.test_seeds import TestSeed
-
 from user_settings.models import UserSetting
 
 

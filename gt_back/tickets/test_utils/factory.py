@@ -1,9 +1,9 @@
 from datetime import date
 
-from users.models import User
+from tickets.models import Ticket
 from user_relations.models import UserRelation
 from user_settings.models import UserSetting
-from tickets.models import Ticket
+from users.models import User
 
 
 def create_user(username: str, email: str, password: str) -> User:

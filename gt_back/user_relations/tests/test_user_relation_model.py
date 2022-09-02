@@ -1,4 +1,5 @@
 from datetime import date
+
 from django.test import TestCase
 from tickets.test_utils.test_seeds import TestSeed
 from user_relations.models import UserRelation

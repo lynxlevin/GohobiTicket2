@@ -1,8 +1,8 @@
 from calendar import monthrange
 from datetime import date
 from typing import Optional
-from django.db import models
 
+from django.db import models
 from user_relations.models import UserRelation
 
 
