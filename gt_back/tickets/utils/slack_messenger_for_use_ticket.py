@@ -23,11 +23,11 @@ class SlackMessengerForUseTicket(SlackMessenger):
     def send_message(self):
         try:
             super().send_message(self.url, self.message_dict)
-
-            logger.info("Successfully sent message to Slack")
         except Exception as exc:
             logger.error("Slack message error", extra={
                          "reason": exc.response.reason, "status_code": exc.response.status_code})
+        else:
+            logger.info("Successfully sent message to Slack")
 
     def _get_normal_message(self, ticket):
         receiving_user_name = ticket.user_relation.receiving_user.username
