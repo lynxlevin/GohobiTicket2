@@ -92,6 +92,9 @@ DATABASES = {
         'PASSWORD': env.get_value("DB_PASS", default=None),
         'HOST': env.get_value("DB_HOST", default=None),
         'PORT': env.get_value("DB_PORT", default="5432"),
+        'TEST': {
+            'NAME': env.get_value("TEST_DB_NAME"),
+        }
     }
 }
 
