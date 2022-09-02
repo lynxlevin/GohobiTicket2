@@ -40,12 +40,9 @@ class TestCreateTicket(TestCase):
         created_ticket = Ticket.objects.get_by_id(created_ticket_id)
         self.assertIsNotNone(created_ticket)
 
-        expected_date = datetime.strptime(
-            data["gift_date"], "%Y-%m-%d").date()
-        self.assertEqual(data["user_relation_id"],
-                         created_ticket.user_relation_id)
-        self.assertEqual(
-            data["description"], created_ticket.description)
+        expected_date = datetime.strptime(data["gift_date"], "%Y-%m-%d").date()
+        self.assertEqual(data["user_relation_id"], created_ticket.user_relation_id)
+        self.assertEqual(data["description"], created_ticket.description)
         self.assertEqual(expected_date, created_ticket.gift_date)
         self.assertEqual("", created_ticket.use_description)
         self.assertEqual(None, created_ticket.use_date)
@@ -59,9 +56,21 @@ class TestCreateTicket(TestCase):
         receiving_relation_id = user.receiving_relations.first().id
 
         cases = {
-            "receiving_relation": {"id": receiving_relation_id, "exception": exceptions.PermissionDenied, "detail": "Only the giving user may create ticket."},
-            "unrelated_relation": {"id": unrelated_relation_id, "exception": exceptions.PermissionDenied, "detail": "Only the giving user may create ticket."},
-            "non_existent_user_relation": {"id": "-1", "exception": exceptions.NotFound, "detail": "UserRelation not found."},
+            "receiving_relation": {
+                "id": receiving_relation_id,
+                "exception": exceptions.PermissionDenied,
+                "detail": "Only the giving user may create ticket.",
+            },
+            "unrelated_relation": {
+                "id": unrelated_relation_id,
+                "exception": exceptions.PermissionDenied,
+                "detail": "Only the giving user may create ticket.",
+            },
+            "non_existent_user_relation": {
+                "id": "-1",
+                "exception": exceptions.NotFound,
+                "detail": "UserRelation not found.",
+            },
         }
 
         for case, condition in cases.items():
@@ -73,13 +82,16 @@ class TestCreateTicket(TestCase):
                 }
 
                 original_ticket_count = Ticket.objects.filter_eq_user_relation_id(
-                    condition["id"]).count()
+                    condition["id"]
+                ).count()
 
                 expected_exc_detail = f"CreateTicket_exception: {condition['detail']}"
-                with self.assertRaisesRegex(condition["exception"], expected_exc_detail):
+                with self.assertRaisesRegex(
+                    condition["exception"], expected_exc_detail
+                ):
                     CreateTicket().execute(user=user, data=data)
 
                 pro_execution_ticket_count = Ticket.objects.filter_eq_user_relation_id(
-                    condition["id"]).count()
-                self.assertEqual(original_ticket_count,
-                                 pro_execution_ticket_count)
+                    condition["id"]
+                ).count()
+                self.assertEqual(original_ticket_count, pro_execution_ticket_count)

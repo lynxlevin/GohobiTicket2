@@ -24,8 +24,11 @@ class TestUserRelationModel(TestCase):
 
     def test_filter_by_receiving_user_id(self):
         user1 = self.seeds.users[0]
-        expected = [self.seeds.user_relations[1],
-                    self.seeds.user_relations[3], self.seeds.user_relations[5]]
+        expected = [
+            self.seeds.user_relations[1],
+            self.seeds.user_relations[3],
+            self.seeds.user_relations[5],
+        ]
 
         result = UserRelation.objects.filter_by_receiving_user_id(user1.id)
 
@@ -34,8 +37,11 @@ class TestUserRelationModel(TestCase):
 
     def test_filter_by_giving_user_id(self):
         user1 = self.seeds.users[0]
-        expected = [self.seeds.user_relations[0],
-                    self.seeds.user_relations[2], self.seeds.user_relations[4]]
+        expected = [
+            self.seeds.user_relations[0],
+            self.seeds.user_relations[2],
+            self.seeds.user_relations[4],
+        ]
 
         result = UserRelation.objects.filter_by_giving_user_id(user1.id)
 
@@ -64,11 +70,9 @@ class TestUserRelationModel(TestCase):
         target_date = date(2022, 6, 11)
 
         user_relation1 = self.seeds.user_relations[0]
-        result1 = user_relation1.ticket_set.filter_special_tickets(
-            target_date).exists()
+        result1 = user_relation1.ticket_set.filter_special_tickets(target_date).exists()
         self.assertFalse(result1)
 
         user_relation2 = self.seeds.user_relations[1]
-        result2 = user_relation2.ticket_set.filter_special_tickets(
-            target_date).exists()
+        result2 = user_relation2.ticket_set.filter_special_tickets(target_date).exists()
         self.assertTrue(result2)

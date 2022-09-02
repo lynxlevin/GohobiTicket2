@@ -13,10 +13,10 @@ class UserQuerySet(models.QuerySet):
 
     def create_user(self, email, username, password=None):
         if not email:
-            raise ValueError('Users must have an email address')
+            raise ValueError("Users must have an email address")
 
         if not username:
-            raise ValueError('Users must have a username')
+            raise ValueError("Users must have a username")
 
         user = self.model(
             email=self.normalize_email(email),
@@ -33,5 +33,5 @@ class User(AbstractBaseUser):
 
     objects: UserQuerySet = UserQuerySet.as_manager()
 
-    EMAIL_FIELD = 'email'
-    USERNAME_FIELD = 'email'
+    EMAIL_FIELD = "email"
+    USERNAME_FIELD = "email"

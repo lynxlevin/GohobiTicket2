@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class IsGivingUserOrReceivingUser(BasePermission):
-    message = 'Wrong user_relation accessed'
+    message = "Wrong user_relation accessed"
 
     # MYMEMO: use_case 内でやるべきかも
     def has_permission(self, request, view):
@@ -19,6 +19,5 @@ class IsGivingUserOrReceivingUser(BasePermission):
         elif user_relation.receiving_user == user:
             return True
         else:
-            logger.info("IsGivingUserOrReceivingUser_False",
-                        extra={"user_id": user.id})
+            logger.info("IsGivingUserOrReceivingUser_False", extra={"user_id": user.id})
             return False

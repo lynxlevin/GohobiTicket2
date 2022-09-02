@@ -31,9 +31,21 @@ class TestPartialUpdateTicket(TestCase):
         unread_ticket2.save()
 
         cases = {
-            "update_description_unread_ticket": {"ticket": unread_ticket, "data": {"description": "updated description"}, "status_to_be": Ticket.STATUS_UNREAD},
-            "update_description_read_ticket": {"ticket": read_ticket, "data": {"description": "updated description"}, "status_to_be": Ticket.STATUS_EDITED},
-            "update_status": {"ticket": unread_ticket2, "data": {"status": Ticket.STATUS_READ}, "status_to_be": Ticket.STATUS_READ},
+            "update_description_unread_ticket": {
+                "ticket": unread_ticket,
+                "data": {"description": "updated description"},
+                "status_to_be": Ticket.STATUS_UNREAD,
+            },
+            "update_description_read_ticket": {
+                "ticket": read_ticket,
+                "data": {"description": "updated description"},
+                "status_to_be": Ticket.STATUS_EDITED,
+            },
+            "update_status": {
+                "ticket": unread_ticket2,
+                "data": {"status": Ticket.STATUS_READ},
+                "status_to_be": Ticket.STATUS_READ,
+            },
         }
 
         class_name = "tickets.use_cases.partial_update_ticket"
@@ -47,15 +59,24 @@ class TestPartialUpdateTicket(TestCase):
                 original_updated_at = ticket.updated_at
 
                 with self.assertLogs(logger=logger, level=logging.INFO) as cm:
-                    PartialUpdateTicket().execute(user=user, data=data, ticket_id=ticket.id)
+                    PartialUpdateTicket().execute(
+                        user=user, data=data, ticket_id=ticket.id
+                    )
 
                 self._make_assertions(
-                    data, ticket.id, original_updated_at, condition["status_to_be"])
+                    data, ticket.id, original_updated_at, condition["status_to_be"]
+                )
 
                 expected_log = [f"INFO:{class_name}:PartialUpdateTicket"]
                 self.assertEqual(expected_log, cm.output)
 
-    def _make_assertions(self, data: dict, ticket_id: int, original_updated_at: datetime, status_to_be: str):
+    def _make_assertions(
+        self,
+        data: dict,
+        ticket_id: int,
+        original_updated_at: datetime,
+        status_to_be: str,
+    ):
         ticket = Ticket.objects.get_by_id(ticket_id)
 
         data_list = list(data.items())
@@ -69,18 +90,32 @@ class TestPartialUpdateTicket(TestCase):
 
         receiving_relation_id = user.receiving_relations.first().id
         receiving_ticket = Ticket.objects.filter_eq_user_relation_id(
-            receiving_relation_id).first()
+            receiving_relation_id
+        ).first()
 
         unrelated_relation_id = self.seeds.user_relations[2].id
         unrelated_ticket = Ticket.objects.filter_eq_user_relation_id(
-            unrelated_relation_id).first()
+            unrelated_relation_id
+        ).first()
 
         non_existent_ticket = Ticket(id="-1", description="not_saved")
 
         cases = {
-            "receiving_relation": {"ticket": receiving_ticket, "exception": exceptions.PermissionDenied, "detail": "Only the giving user may update ticket."},
-            "unrelated_ticket": {"ticket": unrelated_ticket, "exception": exceptions.PermissionDenied, "detail": "Only the giving user may update ticket."},
-            "non_existent_ticket": {"ticket": non_existent_ticket, "exception": exceptions.NotFound, "detail": "Ticket not found."},
+            "receiving_relation": {
+                "ticket": receiving_ticket,
+                "exception": exceptions.PermissionDenied,
+                "detail": "Only the giving user may update ticket.",
+            },
+            "unrelated_ticket": {
+                "ticket": unrelated_ticket,
+                "exception": exceptions.PermissionDenied,
+                "detail": "Only the giving user may update ticket.",
+            },
+            "non_existent_ticket": {
+                "ticket": non_existent_ticket,
+                "exception": exceptions.NotFound,
+                "detail": "Ticket not found.",
+            },
         }
 
         data = {
@@ -89,12 +124,18 @@ class TestPartialUpdateTicket(TestCase):
 
         for case, condition in cases.items():
             with self.subTest(case=case):
-                expected_exc_detail = f"PartialUpdateTicket_exception: {condition['detail']}"
-                with self.assertRaisesRegex(condition["exception"], expected_exc_detail):
-                    PartialUpdateTicket().execute(user=user, data=data,
-                                                  ticket_id=condition["ticket"].id)
+                expected_exc_detail = (
+                    f"PartialUpdateTicket_exception: {condition['detail']}"
+                )
+                with self.assertRaisesRegex(
+                    condition["exception"], expected_exc_detail
+                ):
+                    PartialUpdateTicket().execute(
+                        user=user, data=data, ticket_id=condition["ticket"].id
+                    )
 
                 if not case in ["non_existent_ticket"]:
                     condition["ticket"].refresh_from_db()
                     self.assertNotEqual(
-                        data["description"], condition["ticket"].description)
+                        data["description"], condition["ticket"].description
+                    )

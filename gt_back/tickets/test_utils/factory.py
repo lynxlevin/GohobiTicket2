@@ -20,8 +20,7 @@ def create_user_setting(user: User, default_page) -> UserSetting:
 
 
 def create_user_relation(giving_user: User, receiving_user: User) -> UserRelation:
-    user_relation = UserRelation(
-        giving_user=giving_user, receiving_user=receiving_user)
+    user_relation = UserRelation(giving_user=giving_user, receiving_user=receiving_user)
     user_relation.save()
     return user_relation
 

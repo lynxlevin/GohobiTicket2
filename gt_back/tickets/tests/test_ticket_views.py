@@ -36,8 +36,7 @@ class TestTicketViews(TestCase):
             }
         }
 
-        response = client.post("/tickets/", params,
-                               content_type="application/json")
+        response = client.post("/tickets/", params, content_type="application/json")
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
@@ -68,15 +67,19 @@ class TestTicketViews(TestCase):
         logger = logging.getLogger("gt_back.exception_handler")
 
         with self.assertLogs(logger=logger, level=logging.WARN) as cm:
-            response = client.post(f"/tickets/", params,
-                                   content_type="application/json")
+            response = client.post(
+                f"/tickets/", params, content_type="application/json"
+            )
 
-        expected_params = {**params["ticket"], "gift_date": datetime.strptime(
-            params["ticket"]["gift_date"], "%Y-%m-%d").date()}
+        expected_params = {
+            **params["ticket"],
+            "gift_date": datetime.strptime(
+                params["ticket"]["gift_date"], "%Y-%m-%d"
+            ).date(),
+        }
         use_case_mock.assert_called_once_with(user=user, data=expected_params)
 
-        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR,
-                         response.status_code)
+        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR, response.status_code)
 
         expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
         self.assertEqual(expected_log, cm.output)
@@ -94,20 +97,27 @@ class TestTicketViews(TestCase):
         client.force_login(user)
 
         cases = {
-            "update_description": {"ticket": tickets[0], "params": {"ticket": {"description": "updated description"}}},
-            "update_status": {"ticket": tickets[1], "params": {"ticket": {"status": Ticket.STATUS_READ}}},
+            "update_description": {
+                "ticket": tickets[0],
+                "params": {"ticket": {"description": "updated description"}},
+            },
+            "update_status": {
+                "ticket": tickets[1],
+                "params": {"ticket": {"status": Ticket.STATUS_READ}},
+            },
         }
 
         for case, condition in cases.items():
             with self.subTest(case=case):
                 response = client.patch(
-                    f"/tickets/{condition['ticket'].id}/", condition["params"], content_type="application/json")
+                    f"/tickets/{condition['ticket'].id}/",
+                    condition["params"],
+                    content_type="application/json",
+                )
 
-                self.assertEqual(status.HTTP_202_ACCEPTED,
-                                 response.status_code)
+                self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
 
-                self.assertEqual(
-                    str(condition["ticket"].id), response.data["id"])
+                self.assertEqual(str(condition["ticket"].id), response.data["id"])
 
     @mock.patch("tickets.use_cases.partial_update_ticket.PartialUpdateTicket.execute")
     def test_partial_update_case_error(self, use_case_mock):
@@ -135,13 +145,14 @@ class TestTicketViews(TestCase):
 
         with self.assertLogs(logger=logger, level=logging.WARN) as cm:
             response = client.patch(
-                f"/tickets/{ticket_id}/", params, content_type="application/json")
+                f"/tickets/{ticket_id}/", params, content_type="application/json"
+            )
 
         use_case_mock.assert_called_once_with(
-            user=user, data=params["ticket"], ticket_id=ticket_id)
+            user=user, data=params["ticket"], ticket_id=ticket_id
+        )
 
-        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR,
-                         response.status_code)
+        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR, response.status_code)
 
         expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
         self.assertEqual(expected_log, cm.output)
@@ -157,8 +168,7 @@ class TestTicketViews(TestCase):
         client = Client()
         client.force_login(user)
 
-        ticket = Ticket.objects.filter_eq_user_relation_id(
-            giving_relation.id).first()
+        ticket = Ticket.objects.filter_eq_user_relation_id(giving_relation.id).first()
 
         response = client.delete(f"/tickets/{ticket.id}/")
 
@@ -187,8 +197,7 @@ class TestTicketViews(TestCase):
 
         use_case_mock.assert_called_once_with(user=user, ticket_id=ticket_id)
 
-        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR,
-                         response.status_code)
+        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR, response.status_code)
 
         expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
         self.assertEqual(expected_log, cm.output)
@@ -201,8 +210,12 @@ class TestTicketViews(TestCase):
         user = self.seeds.users[1]
         giving_relation = user.giving_relations.first()
         gift_date = datetime.strptime("2022-05-01", "%Y-%m-%d").date()
-        ticket = Ticket(description="to be special", gift_date=gift_date,
-                        user_relation=giving_relation, is_special=False)
+        ticket = Ticket(
+            description="to be special",
+            gift_date=gift_date,
+            user_relation=giving_relation,
+            is_special=False,
+        )
         ticket.save()
 
         client = Client()
@@ -211,7 +224,8 @@ class TestTicketViews(TestCase):
         original_updated_at = ticket.updated_at
 
         response = client.put(
-            f"/tickets/{ticket.id}/mark_special/", {}, content_type="application/json")
+            f"/tickets/{ticket.id}/mark_special/", {}, content_type="application/json"
+        )
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
 
@@ -228,29 +242,53 @@ class TestTicketViews(TestCase):
 
         receiving_relation_id = user.receiving_relations.first().id
         receiving_ticket = Ticket.objects.filter_eq_user_relation_id(
-            receiving_relation_id).first()
+            receiving_relation_id
+        ).first()
 
         unrelated_relation_id = self.seeds.user_relations[2].id
         unrelated_ticket = Ticket.objects.filter_eq_user_relation_id(
-            unrelated_relation_id).first()
+            unrelated_relation_id
+        ).first()
 
         non_existent_ticket = Ticket(id="-1", description="not_saved")
 
         giving_relation = user.giving_relations.first()
-        used_ticket = Ticket(description="used_ticket", user_relation=giving_relation,
-                             gift_date=date.today(), use_date=date.today())
+        used_ticket = Ticket(
+            description="used_ticket",
+            user_relation=giving_relation,
+            gift_date=date.today(),
+            use_date=date.today(),
+        )
         used_ticket.save()
 
         cases = {
             "multiple_special_tickets_in_month": {
                 "ticket": second_special_ticket_in_month,
                 "status_code": status.HTTP_403_FORBIDDEN,
-                "response_data": {"error_message": ErrorMessages.SPECIAL_TICKET_LIMIT_VIOLATION.value},
+                "response_data": {
+                    "error_message": ErrorMessages.SPECIAL_TICKET_LIMIT_VIOLATION.value
+                },
             },
-            "receiving_relation": {"ticket": receiving_ticket, "status_code": status.HTTP_403_FORBIDDEN, "response_data": None},
-            "unrelated_relation": {"ticket": unrelated_ticket, "status_code": status.HTTP_403_FORBIDDEN, "response_data": None},
-            "non_existent_ticket": {"ticket": non_existent_ticket, "status_code": status.HTTP_404_NOT_FOUND, "response_data": None},
-            "used_ticket": {"ticket": used_ticket, "status_code": status.HTTP_403_FORBIDDEN, "response_data": None},
+            "receiving_relation": {
+                "ticket": receiving_ticket,
+                "status_code": status.HTTP_403_FORBIDDEN,
+                "response_data": None,
+            },
+            "unrelated_relation": {
+                "ticket": unrelated_ticket,
+                "status_code": status.HTTP_403_FORBIDDEN,
+                "response_data": None,
+            },
+            "non_existent_ticket": {
+                "ticket": non_existent_ticket,
+                "status_code": status.HTTP_404_NOT_FOUND,
+                "response_data": None,
+            },
+            "used_ticket": {
+                "ticket": used_ticket,
+                "status_code": status.HTTP_403_FORBIDDEN,
+                "response_data": None,
+            },
         }
 
         client = Client()
@@ -259,10 +297,12 @@ class TestTicketViews(TestCase):
         for case, condition in cases.items():
             with self.subTest(case):
                 response = client.put(
-                    f"/tickets/{condition['ticket'].id}/mark_special/", {}, content_type="application/json")
+                    f"/tickets/{condition['ticket'].id}/mark_special/",
+                    {},
+                    content_type="application/json",
+                )
 
-                self.assertEqual(
-                    condition["status_code"], response.status_code)
+                self.assertEqual(condition["status_code"], response.status_code)
 
                 self.assertEqual(condition["response_data"], response.data)
 
@@ -278,8 +318,11 @@ class TestTicketViews(TestCase):
 
         user = self.seeds.users[1]
         receiving_relation = user.receiving_relations.first()
-        ticket = Ticket.objects.filter_eq_user_relation_id(
-            receiving_relation.id).filter(use_date__isnull=True, is_special=False).first()
+        ticket = (
+            Ticket.objects.filter_eq_user_relation_id(receiving_relation.id)
+            .filter(use_date__isnull=True, is_special=False)
+            .first()
+        )
 
         params = {
             "ticket": {
@@ -294,7 +337,8 @@ class TestTicketViews(TestCase):
         slack_mock.return_value = slack_instance_mock
 
         response = client.put(
-            f"/tickets/{ticket.id}/use/", params, content_type="application/json")
+            f"/tickets/{ticket.id}/use/", params, content_type="application/json"
+        )
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
 
@@ -323,10 +367,10 @@ class TestTicketViews(TestCase):
 
         with self.assertLogs(logger=logger, level=logging.WARN) as cm:
             response = client.put(
-                f"/tickets/{ticket_id}/use/", params, content_type="application/json")
+                f"/tickets/{ticket_id}/use/", params, content_type="application/json"
+            )
 
-        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR,
-                         response.status_code)
+        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR, response.status_code)
 
         expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
         self.assertEqual(expected_log, cm.output)

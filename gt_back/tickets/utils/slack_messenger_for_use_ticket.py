@@ -25,8 +25,13 @@ class SlackMessengerForUseTicket(SlackMessenger):
         try:
             super().send_message(self.url, self.message_dict)
         except Exception as exc:
-            logger.error("Slack message error", extra={
-                         "reason": exc.response.reason, "status_code": exc.response.status_code})
+            logger.error(
+                "Slack message error",
+                extra={
+                    "reason": exc.response.reason,
+                    "status_code": exc.response.status_code,
+                },
+            )
         else:
             logger.info("Successfully sent message to Slack")
 
@@ -41,14 +46,19 @@ class SlackMessengerForUseTicket(SlackMessenger):
         normal_message = {
             "text": title,
             "blocks": [
-                {"type": "section", "text": {
-                    "type": "mrkdwn", "text": "〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜"}},
-                {"type": "section", "text": {
-                    "type": "mrkdwn", "text": main_text}},
-                {"type": "section", "text": {
-                    "type": "mrkdwn", "text": ticket_description}},
-                {"type": "section", "text": {
-                    "type": "mrkdwn", "text": "〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜"}},
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": "〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜"},
+                },
+                {"type": "section", "text": {"type": "mrkdwn", "text": main_text}},
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": ticket_description},
+                },
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": "〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜"},
+                },
             ],
         }
 
@@ -64,16 +74,23 @@ class SlackMessengerForUseTicket(SlackMessenger):
         special_message = {
             "text": title,
             "blocks": [
-                {"type": "section", "text": {
-                    "type": "mrkdwn", "text": "〜★〜★〜★〜★〜★〜★〜★〜★"}},
-                {"type": "section", "text": {
-                    "type": "mrkdwn", "text": "★ ★ ★ 特別チケット ★ ★ ★"}},
-                {"type": "section", "text": {
-                    "type": "mrkdwn", "text": main_text}},
-                {"type": "section", "text": {
-                    "type": "mrkdwn", "text": ticket_description}},
-                {"type": "section", "text": {
-                    "type": "mrkdwn", "text": "★〜★〜★〜★〜★〜★〜★〜★〜"}},
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": "〜★〜★〜★〜★〜★〜★〜★〜★"},
+                },
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": "★ ★ ★ 特別チケット ★ ★ ★"},
+                },
+                {"type": "section", "text": {"type": "mrkdwn", "text": main_text}},
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": ticket_description},
+                },
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": "★〜★〜★〜★〜★〜★〜★〜★〜"},
+                },
             ],
         }
 

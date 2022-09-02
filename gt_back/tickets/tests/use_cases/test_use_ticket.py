@@ -20,11 +20,17 @@ class TestUseTicket(TestCase):
     def test_execute(self, slack_mock):
         user = self.seeds.users[1]
         receiving_relation = user.receiving_relations.first()
-        normal_ticket = Ticket.objects.filter_eq_user_relation_id(
-            receiving_relation.id).filter(use_date__isnull=True, is_special=False).first()
+        normal_ticket = (
+            Ticket.objects.filter_eq_user_relation_id(receiving_relation.id)
+            .filter(use_date__isnull=True, is_special=False)
+            .first()
+        )
 
-        special_ticket = Ticket.objects.filter_eq_user_relation_id(
-            receiving_relation.id).filter(use_date__isnull=True, is_special=True).first()
+        special_ticket = (
+            Ticket.objects.filter_eq_user_relation_id(receiving_relation.id)
+            .filter(use_date__isnull=True, is_special=True)
+            .first()
+        )
 
         data = {
             "use_description": "test_use_ticket",
@@ -51,12 +57,19 @@ class TestUseTicket(TestCase):
                     UseTicket().execute(user=user, data=data, ticket_id=str(ticket.id))
 
                 self._make_assertions(
-                    data, ticket.id, original_updated_at, slack_instance_mock)
+                    data, ticket.id, original_updated_at, slack_instance_mock
+                )
 
                 expected_log = [f"INFO:{class_name}:UseTicket"]
                 self.assertEqual(expected_log, cm.output)
 
-    def _make_assertions(self, data: dict, ticket_id: int, original_updated_at: datetime, slack_instance_mock):
+    def _make_assertions(
+        self,
+        data: dict,
+        ticket_id: int,
+        original_updated_at: datetime,
+        slack_instance_mock,
+    ):
         ticket = Ticket.objects.get_by_id(ticket_id)
 
         self.assertEqual(date.today(), ticket.use_date)
@@ -73,32 +86,57 @@ class TestUseTicket(TestCase):
 
         giving_relation_id = user.giving_relations.first().id
         giving_ticket = Ticket.objects.filter_eq_user_relation_id(
-            giving_relation_id).first()
+            giving_relation_id
+        ).first()
 
         unrelated_relation_id = self.seeds.user_relations[2].id
         unrelated_ticket = Ticket.objects.filter_eq_user_relation_id(
-            unrelated_relation_id).first()
+            unrelated_relation_id
+        ).first()
 
         non_existent_ticket = Ticket(id="-1", description="not_saved")
 
         receiving_relation = user.receiving_relations.first()
-        used_ticket = Ticket(description="used_ticket", user_relation=receiving_relation,
-                             gift_date=date.today(), use_date=date.today())
+        used_ticket = Ticket(
+            description="used_ticket",
+            user_relation=receiving_relation,
+            gift_date=date.today(),
+            use_date=date.today(),
+        )
         used_ticket.save()
 
         cases = {
-            "giving_relation": {"ticket": giving_ticket, "exception": exceptions.PermissionDenied, "detail": "Only the receiving user may use ticket."},
-            "unrelated_relation": {"ticket": unrelated_ticket, "exception": exceptions.PermissionDenied, "detail": "Only the receiving user may use ticket."},
-            "non_existent_ticket": {"ticket": non_existent_ticket, "exception": exceptions.NotFound, "detail": "Ticket not found."},
-            "used_ticket": {"ticket": used_ticket, "exception": exceptions.PermissionDenied, "detail": "This ticket is already used"},
+            "giving_relation": {
+                "ticket": giving_ticket,
+                "exception": exceptions.PermissionDenied,
+                "detail": "Only the receiving user may use ticket.",
+            },
+            "unrelated_relation": {
+                "ticket": unrelated_ticket,
+                "exception": exceptions.PermissionDenied,
+                "detail": "Only the receiving user may use ticket.",
+            },
+            "non_existent_ticket": {
+                "ticket": non_existent_ticket,
+                "exception": exceptions.NotFound,
+                "detail": "Ticket not found.",
+            },
+            "used_ticket": {
+                "ticket": used_ticket,
+                "exception": exceptions.PermissionDenied,
+                "detail": "This ticket is already used",
+            },
         }
 
         for case, condition in cases.items():
             with self.subTest(case):
                 expected_exc_detail = f"UseTicket_exception: {condition['detail']}"
-                with self.assertRaisesRegex(condition["exception"], expected_exc_detail):
-                    UseTicket().execute(user=user, data=data,
-                                        ticket_id=str(condition["ticket"].id))
+                with self.assertRaisesRegex(
+                    condition["exception"], expected_exc_detail
+                ):
+                    UseTicket().execute(
+                        user=user, data=data, ticket_id=str(condition["ticket"].id)
+                    )
 
                 if not case in ["non_existent_ticket", "used_ticket"]:
                     condition["ticket"].refresh_from_db()

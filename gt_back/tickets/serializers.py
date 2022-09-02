@@ -5,8 +5,15 @@ from tickets.models.ticket import Ticket
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
-        fields = ['user_relation', 'description', 'gift_date',
-                  'use_description', 'use_date', 'status', 'is_special']
+        fields = [
+            "user_relation",
+            "description",
+            "gift_date",
+            "use_description",
+            "use_date",
+            "status",
+            "is_special",
+        ]
 
 
 class TicketCreateSerializer(serializers.Serializer):
@@ -22,8 +29,7 @@ class TicketCreateSerializer(serializers.Serializer):
 class TicketPartialUpdateSerializer(serializers.Serializer):
     class TicketPartialUpdateRequestSerializer(serializers.Serializer):
         description = serializers.CharField(required=False)
-        status = serializers.ChoiceField(
-            choices=Ticket.STATUS_CHOICES, required=False)
+        status = serializers.ChoiceField(choices=Ticket.STATUS_CHOICES, required=False)
 
     id = serializers.CharField(read_only=True)
     ticket = TicketPartialUpdateRequestSerializer(write_only=True)

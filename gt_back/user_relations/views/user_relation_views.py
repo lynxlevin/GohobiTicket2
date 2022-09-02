@@ -20,9 +20,12 @@ class UserRelationViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated, IsGivingUserOrReceivingUser]
 
     def retrieve(self, request, format=None, pk=None):
-        logger.info(f"RetrieveUserRelation", extra={
-                    "user_relation_id": pk, "user_id": request.user.id})
-        tickets = Ticket.objects.filter_eq_user_relation_id(
-            pk).order_by("-gift_date", "id")
+        logger.info(
+            f"RetrieveUserRelation",
+            extra={"user_relation_id": pk, "user_id": request.user.id},
+        )
+        tickets = Ticket.objects.filter_eq_user_relation_id(pk).order_by(
+            "-gift_date", "id"
+        )
         serializer = self.get_serializer(tickets, many=True)
         return Response(serializer.data)

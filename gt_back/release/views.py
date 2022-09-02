@@ -5,4 +5,4 @@ from urllib3 import HTTPResponse
 
 
 def index(request):
-    return render(request, 'release/index.html')
+    return render(request, "release/index.html")

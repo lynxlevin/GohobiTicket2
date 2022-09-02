@@ -20,16 +20,26 @@ class TicketQuerySet(models.QuerySet):
         return self.filter(use_date=None).order_by("-gift_date").order_by("-id")
 
     def filter_unused_complete_tickets(self) -> "TicketQuerySet":
-        return self.filter(use_date=None).exclude(status="draft").order_by("-gift_date").order_by("-id")
+        return (
+            self.filter(use_date=None)
+            .exclude(status="draft")
+            .order_by("-gift_date")
+            .order_by("-id")
+        )
 
     def filter_used_tickets(self) -> "TicketQuerySet":
         return self.exclude(use_date=None).order_by("-use_date").order_by("-id")
 
     def filter_special_tickets(self, target_date: date) -> "TicketQuerySet":
         start_of_month = date(target_date.year, target_date.month, 1)
-        end_of_month = date(target_date.year, target_date.month, monthrange(
-            target_date.year, target_date.month)[1])
-        return self.filter(is_special=True, gift_date__gte=start_of_month, gift_date__lte=end_of_month)
+        end_of_month = date(
+            target_date.year,
+            target_date.month,
+            monthrange(target_date.year, target_date.month)[1],
+        )
+        return self.filter(
+            is_special=True, gift_date__gte=start_of_month, gift_date__lte=end_of_month
+        )
 
 
 class Ticket(models.Model):
@@ -51,7 +61,8 @@ class Ticket(models.Model):
     use_description = models.TextField(default="", blank=True)
     use_date = models.DateField(null=True)
     status = models.CharField(
-        max_length=8, choices=STATUS_CHOICES, default=STATUS_UNREAD)
+        max_length=8, choices=STATUS_CHOICES, default=STATUS_UNREAD
+    )
     is_special = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

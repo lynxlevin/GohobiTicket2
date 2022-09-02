@@ -42,13 +42,18 @@ class Formatter(BaseFormatter):
 
         extra = self.get_extra(record)
         if extra:
-            log_text += "\n" + \
-                json.dumps(extra, default=self.default, ensure_ascii=False)
+            log_text += "\n" + json.dumps(
+                extra, default=self.default, ensure_ascii=False
+            )
 
         return log_text
 
     def get_extra(self, record):
-        return {attr: record.__dict__[attr] for attr in record.__dict__ if attr not in self.ATTRS}
+        return {
+            attr: record.__dict__[attr]
+            for attr in record.__dict__
+            if attr not in self.ATTRS
+        }
 
     def default(self, o):
         if isinstance(o, uuid.UUID):
