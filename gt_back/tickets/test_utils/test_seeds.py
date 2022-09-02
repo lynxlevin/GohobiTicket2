@@ -91,6 +91,7 @@ class TestSeed:
         self.tickets.extend(tickets)
 
     def setUpTicketsForDateRelatedTests(self):
+        # MYMEMO: このケースはテスト内でパラメータ変更して、このリレーションは上記と同じように網羅したほうがいいかも
         params = [
             {"gift_date": date(2022, 6, 1)},  # 16
             {"gift_date": date(2022, 7, 1)},  # 17

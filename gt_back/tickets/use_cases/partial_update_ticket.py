@@ -27,7 +27,19 @@ class PartialUpdateTicket():
             raise exceptions.PermissionDenied(
                 detail=f"{self.exception_log_title}: Only the giving user may update ticket.")
 
-        ticket.description = data["description"]
-        ticket.save(update_fields=["description", "updated_at"])
+        update_fields = set(["updated_at"])
+
+        if data.get("description"):
+            ticket.description = data["description"]
+            update_fields.add("description")
+            if ticket.status == Ticket.STATUS_READ:
+                ticket.status = Ticket.STATUS_EDITED
+                update_fields.add("status")
+
+        if data.get("status"):
+            ticket.status = data["status"]
+            update_fields.add("status")
+
+        ticket.save(update_fields=update_fields)
 
         return ticket

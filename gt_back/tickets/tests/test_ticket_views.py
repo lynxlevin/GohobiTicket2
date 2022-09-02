@@ -87,24 +87,26 @@ class TestTicketViews(TestCase):
 
         user = self.seeds.users[1]
         giving_relation = user.giving_relations.first()
-        ticket = Ticket.objects.filter_eq_user_relation_id(
-            giving_relation.id).first()
+        tickets = Ticket.objects.filter_eq_user_relation_id(giving_relation.id)
 
         client = Client()
         client.force_login(user)
 
-        params = {
-            "ticket": {
-                "description": "updated description",
-            }
+        cases = {
+            "update_description": {"ticket": tickets[0], "params": {"ticket": {"description": "updated description"}}},
+            "update_status": {"ticket": tickets[1], "params": {"ticket": {"status": Ticket.STATUS_READ}}},
         }
 
-        response = client.patch(
-            f"/tickets/{ticket.id}/", params, content_type="application/json")
+        for case, condition in cases.items():
+            with self.subTest(case=case):
+                response = client.patch(
+                    f"/tickets/{condition['ticket'].id}/", condition["params"], content_type="application/json")
 
-        self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
+                self.assertEqual(status.HTTP_202_ACCEPTED,
+                                 response.status_code)
 
-        self.assertEqual(str(ticket.id), response.data["id"])
+                self.assertEqual(
+                    str(condition["ticket"].id), response.data["id"])
 
     @mock.patch("tickets.use_cases.partial_update_ticket.PartialUpdateTicket.execute")
     def test_partial_update_case_error(self, use_case_mock):

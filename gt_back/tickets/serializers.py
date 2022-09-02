@@ -21,7 +21,9 @@ class TicketCreateSerializer(serializers.Serializer):
 
 class TicketPartialUpdateSerializer(serializers.Serializer):
     class TicketPartialUpdateRequestSerializer(serializers.Serializer):
-        description = serializers.CharField()
+        description = serializers.CharField(required=False)
+        status = serializers.ChoiceField(
+            choices=Ticket.STATUS_CHOICES, required=False)
 
     id = serializers.CharField(read_only=True)
     ticket = TicketPartialUpdateRequestSerializer(write_only=True)
