@@ -6,6 +6,7 @@ from rest_framework import exceptions
 from tickets.models import Ticket
 from tickets.test_utils.test_seeds import TestSeed
 from tickets.use_cases import PartialUpdateTicket
+from tickets.test_utils import factory
 
 
 class TestPartialUpdateTicket(TestCase):
@@ -17,22 +18,32 @@ class TestPartialUpdateTicket(TestCase):
     def test_execute(self):
         user = self.seeds.users[1]
         giving_relation = user.giving_relations.first()
-        tickets = Ticket.objects.filter_eq_user_relation_id(giving_relation.id)
 
-        unread_ticket, read_ticket, unread_ticket2 = tickets[0:3]
-
-        unread_ticket.status = Ticket.STATUS_UNREAD
-        unread_ticket.save()
-
-        read_ticket.status = Ticket.STATUS_READ
-        read_ticket.save()
-
-        unread_ticket2.status = Ticket.STATUS_UNREAD
-        unread_ticket2.save()
+        params = {
+            "unread_ticket": {
+                "description": "test_description",
+                "status": Ticket.STATUS_UNREAD,
+            },
+            "unread_ticket2": {
+                "description": "test_description",
+                "status": Ticket.STATUS_UNREAD,
+            },
+            "read_ticket": {
+                "description": "test_description",
+                "status": Ticket.STATUS_READ,
+            },
+        }
+        tickets = factory.create_tickets(giving_relation, params.values())
+        unread_ticket, unread_ticket2, read_ticket = tickets
 
         cases = {
-            "update_description_unread_ticket": {
+            "update_status": {
                 "ticket": unread_ticket,
+                "data": {"status": Ticket.STATUS_READ},
+                "status_to_be": Ticket.STATUS_READ,
+            },
+            "update_description_unread_ticket": {
+                "ticket": unread_ticket2,
                 "data": {"description": "updated description"},
                 "status_to_be": Ticket.STATUS_UNREAD,
             },
@@ -40,11 +51,6 @@ class TestPartialUpdateTicket(TestCase):
                 "ticket": read_ticket,
                 "data": {"description": "updated description"},
                 "status_to_be": Ticket.STATUS_EDITED,
-            },
-            "update_status": {
-                "ticket": unread_ticket2,
-                "data": {"status": Ticket.STATUS_READ},
-                "status_to_be": Ticket.STATUS_READ,
             },
         }
 
