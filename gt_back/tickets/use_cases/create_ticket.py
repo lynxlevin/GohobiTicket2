@@ -18,7 +18,7 @@ class CreateTicket:
         user: User,
         data: dict,
     ):
-        logger.info(__class__.__name__, extra={"data": data, "user": user})
+        logger.info(self.__class__.__name__, extra={"data": data, "user": user})
 
         user_relation = UserRelation.objects.get_by_id(data["user_relation_id"])
 

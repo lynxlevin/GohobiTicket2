@@ -33,6 +33,7 @@ class TestTicketViews(TestCase):
                 "gift_date": "2022-08-24",
                 "description": "test_ticket",
                 "user_relation_id": giving_relation.id,
+                "status": Ticket.STATUS_DRAFT,
             }
         }
 

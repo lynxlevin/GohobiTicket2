@@ -69,7 +69,7 @@ class TestTicketViews(TestCase):
 
         ticket_id = response.data["id"]
 
-        TestCreateTicket()._make_assertions(params["ticket"], ticket_id)
+        TestCreateTicket()._then_ticket_should_be_created(ticket_id, giving_relation.id)
 
         return ticket_id
 
