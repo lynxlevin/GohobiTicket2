@@ -36,6 +36,7 @@ class CreateTicket:
             gift_date=data["gift_date"],
             description=data["description"],
             user_relation_id=data["user_relation_id"],
+            status=data.get("status", Ticket.STATUS_UNREAD),
         )
         ticket.save()
 

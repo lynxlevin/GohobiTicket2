@@ -33,6 +33,32 @@ class TestTicketViews(TestCase):
                 "gift_date": "2022-08-24",
                 "description": "test_ticket",
                 "user_relation_id": giving_relation.id,
+            }
+        }
+
+        response = client.post("/tickets/", params, content_type="application/json")
+
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+
+        ticket_id = response.json()["id"]
+        self.assertIsNotNone(ticket_id)
+
+    def test_create_draft(self):
+        """
+        Post /tickets/
+        """
+
+        user = self.seeds.users[1]
+        giving_relation = user.giving_relations.first()
+
+        client = Client()
+        client.force_login(user)
+
+        params = {
+            "ticket": {
+                "gift_date": "2022-08-24",
+                "description": "test_ticket",
+                "user_relation_id": giving_relation.id,
                 "status": Ticket.STATUS_DRAFT,
             }
         }
@@ -41,7 +67,11 @@ class TestTicketViews(TestCase):
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
-        self.assertIsNotNone(response.data.get("id"))
+        ticket_id = response.json()["id"]
+        self.assertIsNotNone(ticket_id)
+
+        ticket = Ticket.objects.get_by_id(ticket_id)
+        self.assertEqual(Ticket.STATUS_DRAFT, ticket.status)
 
     @mock.patch("tickets.use_cases.create_ticket.CreateTicket.execute")
     def test_create_case_error(self, use_case_mock):
@@ -377,6 +407,5 @@ class TestTicketViews(TestCase):
         self.assertEqual(expected_log, cm.output)
 
     # MYMEMO: DRAFTS
-    # MYMEMO: create (normal_create, status="draft") maybe change default to draft and use make_official
     # MYMEMO: update (error_when_not_draft, normal_partial_update) maybe normal partial_update suffices
     # MYMEMO: post -> make_official (error_when_not_draft, status="unread", normal_partial_update)

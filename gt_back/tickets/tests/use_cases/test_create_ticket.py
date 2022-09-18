@@ -24,6 +24,16 @@ class TestCreateTicket(TestCase):
         self._then_ticket_should_be_created(created_ticket.id, giving_relation_id)
         self._then_info_log_should_be_output(cm.output)
 
+    def test_execute_create_draft_ticket(self):
+        user, giving_relation_id = self._given_user_and_relation_id("giving_relation")
+
+        cm, created_ticket = self._when_user_creates_draft_ticket(
+            user, giving_relation_id
+        )
+
+        self._then_draft_ticket_should_be_created(created_ticket.id, giving_relation_id)
+        self._then_info_log_should_be_output(cm.output)
+
     def test_execute_error_case_receiving_relation(self):
         user, receiving_relation_id = self._given_user_and_relation_id(
             "receiving_relation"
@@ -86,6 +96,23 @@ class TestCreateTicket(TestCase):
             "user_relation_id": giving_relation_id,
         }
 
+        cm, created_ticket = self._execute_create_ticket(user, data)
+
+        return (cm, created_ticket)
+
+    def _when_user_creates_draft_ticket(self, user: User, giving_relation_id: int):
+        data = {
+            "gift_date": "2022-08-24",
+            "description": "test_ticket",
+            "user_relation_id": giving_relation_id,
+            "status": Ticket.STATUS_DRAFT,
+        }
+
+        cm, created_ticket = self._execute_create_ticket(user, data)
+
+        return (cm, created_ticket)
+
+    def _execute_create_ticket(self, user: User, data: dict):
         class_name = "tickets.use_cases.create_ticket"
         logger = logging.getLogger(class_name)
 
@@ -124,6 +151,25 @@ class TestCreateTicket(TestCase):
             "use_description": "",
             "use_date": None,
             "status": Ticket.STATUS_UNREAD,
+            "is_special": False,
+        }
+
+        for key, value in expected_ticket.items():
+            self.assertEqual(getattr(created_ticket, key), value)
+
+    def _then_draft_ticket_should_be_created(
+        self, created_ticket_id: int, giving_relation_id: int
+    ):
+        created_ticket = Ticket.objects.get_by_id(created_ticket_id)
+        self.assertIsNotNone(created_ticket)
+
+        expected_ticket = {
+            "description": "test_ticket",
+            "user_relation_id": giving_relation_id,
+            "gift_date": datetime.strptime("2022-08-24", "%Y-%m-%d").date(),
+            "use_description": "",
+            "use_date": None,
+            "status": Ticket.STATUS_DRAFT,
             "is_special": False,
         }
 
