@@ -20,7 +20,7 @@ from django.test import Client, TestCase
 from rest_framework import status
 from tickets.models import Ticket
 from tickets.test_utils.test_seeds import TestSeed
-from tickets.tests.use_cases import TestCreateTicket
+from tickets.tests.use_cases import TestCreateTicket, TestUseTicket
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
 from user_relations.models import UserRelation
 
@@ -69,7 +69,7 @@ class TestTicketViews(TestCase):
 
         ticket_id = response.data["id"]
 
-        TestCreateTicket()._then_ticket_should_be_created(ticket_id, giving_relation.id)
+        TestCreateTicket()._then_ticket_is_created(ticket_id, giving_relation.id)
 
         return ticket_id
 
@@ -129,3 +129,6 @@ class TestTicketViews(TestCase):
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
         self.assertEqual(str(ticket.id), response.data["id"])
+
+        TestUseTicket()._then_ticket_should_be(ticket)
+        TestUseTicket()._then_slack_message_is_sent(ticket, slack_instance_mock)

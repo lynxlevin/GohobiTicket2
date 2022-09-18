@@ -15,6 +15,7 @@ class TestCreateTicket(TestCase):
     def setUpTestData(cls):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
+        cls.use_case_name = "tickets.use_cases.create_ticket"
 
     def test_create_ticket(self):
         with self.subTest(case="normal_ticket"):
@@ -26,8 +27,8 @@ class TestCreateTicket(TestCase):
                 user, giving_relation_id
             )
 
-            self._then_ticket_should_be_created(created_ticket.id, giving_relation_id)
-            self._then_info_log_should_be_output(cm.output)
+            self._then_ticket_is_created(created_ticket.id, giving_relation_id)
+            self._then_info_log_is_output(cm.output)
 
         with self.subTest(case="draft_ticket"):
             user, giving_relation_id = self._given_user_and_relation_id(
@@ -38,10 +39,8 @@ class TestCreateTicket(TestCase):
                 user, giving_relation_id
             )
 
-            self._then_draft_ticket_should_be_created(
-                created_ticket.id, giving_relation_id
-            )
-            self._then_info_log_should_be_output(cm.output)
+            self._then_draft_ticket_is_created(created_ticket.id, giving_relation_id)
+            self._then_info_log_is_output(cm.output)
 
     def test_execute_error_bad_relation(self):
         with self.subTest(case="receiving_relation"):
@@ -55,7 +54,7 @@ class TestCreateTicket(TestCase):
                 exception=exceptions.PermissionDenied,
                 exception_message="Only the giving user may create ticket.",
             )
-            self._then_ticket_should_not_be_created()
+            self._then_ticket_is_not_created()
 
         with self.subTest(case="unrelated_relation"):
             user, unrelated_relation_id = self._given_user_and_relation_id(
@@ -68,7 +67,7 @@ class TestCreateTicket(TestCase):
                 exception=exceptions.PermissionDenied,
                 exception_message="Only the giving user may create ticket.",
             )
-            self._then_ticket_should_not_be_created()
+            self._then_ticket_is_not_created()
 
         with self.subTest(case="non_existent_relation"):
             user, non_existent_relation_id = self._given_user_and_relation_id(
@@ -81,7 +80,7 @@ class TestCreateTicket(TestCase):
                 exception=exceptions.NotFound,
                 exception_message="UserRelation not found.",
             )
-            self._then_ticket_should_not_be_created()
+            self._then_ticket_is_not_created()
 
     """
     Utility Functions
@@ -123,8 +122,7 @@ class TestCreateTicket(TestCase):
         return (cm, created_ticket)
 
     def _execute_create_ticket(self, user: User, data: dict):
-        class_name = "tickets.use_cases.create_ticket"
-        logger = logging.getLogger(class_name)
+        logger = logging.getLogger(self.use_case_name)
 
         with self.assertLogs(logger=logger, level=logging.INFO) as cm:
             created_ticket = CreateTicket().execute(user=user, data=data)
@@ -148,9 +146,7 @@ class TestCreateTicket(TestCase):
         with self.assertRaisesRegex(exception, expected_exc_detail):
             CreateTicket().execute(user=user, data=data)
 
-    def _then_ticket_should_be_created(
-        self, created_ticket_id: int, giving_relation_id: int
-    ):
+    def _then_ticket_is_created(self, created_ticket_id: int, giving_relation_id: int):
         created_ticket = Ticket.objects.get_by_id(created_ticket_id)
         self.assertIsNotNone(created_ticket)
 
@@ -167,7 +163,7 @@ class TestCreateTicket(TestCase):
         for key, value in expected_ticket.items():
             self.assertEqual(getattr(created_ticket, key), value)
 
-    def _then_draft_ticket_should_be_created(
+    def _then_draft_ticket_is_created(
         self, created_ticket_id: int, giving_relation_id: int
     ):
         created_ticket = Ticket.objects.get_by_id(created_ticket_id)
@@ -186,13 +182,12 @@ class TestCreateTicket(TestCase):
         for key, value in expected_ticket.items():
             self.assertEqual(getattr(created_ticket, key), value)
 
-    def _then_ticket_should_not_be_created(self):
+    def _then_ticket_is_not_created(self):
         error_ticket_count = Ticket.objects.filter(
             description="test_ticket_to_raise_exception"
         ).count()
         self.assertEqual(0, error_ticket_count)
 
-    def _then_info_log_should_be_output(self, cm_output):
-        class_name = "tickets.use_cases.create_ticket"
-        expected_log = [f"INFO:{class_name}:CreateTicket"]
+    def _then_info_log_is_output(self, cm_output):
+        expected_log = [f"INFO:{self.use_case_name}:CreateTicket"]
         self.assertEqual(expected_log, cm_output)

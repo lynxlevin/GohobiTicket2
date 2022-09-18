@@ -15,6 +15,7 @@ class TestPartialUpdateTicketClean(TestCase):
     def setUpTestData(cls):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
+        cls.use_case_name = "tickets.use_cases.partial_update_ticket"
 
     def test_update_status(self):
         with self.subTest(case="unread_to_read"):
@@ -22,7 +23,7 @@ class TestPartialUpdateTicketClean(TestCase):
             cm = self._when_user_updates_ticket_status(user, ticket, Ticket.STATUS_READ)
 
             self._then_ticket_should_be(ticket, Ticket.STATUS_READ)
-            self._then_info_log_should_be_output(cm.output)
+            self._then_info_log_is_output(cm.output)
 
         with self.subTest(case="draft_to_unread"):
             user, ticket = self._given_ticket(Ticket.STATUS_DRAFT)
@@ -31,7 +32,7 @@ class TestPartialUpdateTicketClean(TestCase):
             )
 
             self._then_ticket_should_be(ticket, Ticket.STATUS_UNREAD)
-            self._then_info_log_should_be_output(cm.output)
+            self._then_info_log_is_output(cm.output)
 
     def test_update_description(self):
         with self.subTest(case="unread_ticket"):
@@ -42,7 +43,7 @@ class TestPartialUpdateTicketClean(TestCase):
                 status=Ticket.STATUS_UNREAD,
                 description="edited_description",
             )
-            self._then_info_log_should_be_output(cm.output)
+            self._then_info_log_is_output(cm.output)
 
         with self.subTest(case="read_ticket"):
             user, ticket = self._given_ticket(Ticket.STATUS_READ)
@@ -52,7 +53,7 @@ class TestPartialUpdateTicketClean(TestCase):
                 status=Ticket.STATUS_EDITED,
                 description="edited_description",
             )
-            self._then_info_log_should_be_output(cm.output)
+            self._then_info_log_is_output(cm.output)
 
     def test_update_error__bad_ticket(self):
         with self.subTest(case="receiving_ticket"):
@@ -65,7 +66,7 @@ class TestPartialUpdateTicketClean(TestCase):
                 exception_message="Only the giving user may update ticket.",
             )
 
-            self._then_ticket_should_not_be_updated(ticket)
+            self._then_ticket_is_not_updated(ticket)
 
         with self.subTest(case="unrelated_ticket"):
             user, ticket = self._given_bad_ticket("unrelated_ticket")
@@ -77,7 +78,7 @@ class TestPartialUpdateTicketClean(TestCase):
                 exception_message="Only the giving user may update ticket.",
             )
 
-            self._then_ticket_should_not_be_updated(ticket)
+            self._then_ticket_is_not_updated(ticket)
 
         with self.subTest(case="non_existent_ticket"):
             user, ticket = self._given_bad_ticket("non_existent_ticket")
@@ -99,7 +100,7 @@ class TestPartialUpdateTicketClean(TestCase):
                 exception=PermissionDenied,
                 exception_message="Tickets cannot be updated to draft.",
             )
-            self._then_ticket_should_not_be_updated(ticket)
+            self._then_ticket_is_not_updated(ticket)
 
         with self.subTest(case="to_unread"):
             user, ticket = self._given_ticket(Ticket.STATUS_READ)
@@ -110,7 +111,7 @@ class TestPartialUpdateTicketClean(TestCase):
                 exception=PermissionDenied,
                 exception_message="Only draft tickets can be updated to unread.",
             )
-            self._then_ticket_should_not_be_updated(ticket)
+            self._then_ticket_is_not_updated(ticket)
 
     """
     Utility Functions
@@ -178,8 +179,7 @@ class TestPartialUpdateTicketClean(TestCase):
         )
 
     def _execute_use_case(self, user: User, ticket: Ticket, data: dict):
-        class_name = "tickets.use_cases.partial_update_ticket"
-        logger = logging.getLogger(class_name)
+        logger = logging.getLogger(self.use_case_name)
 
         with self.assertLogs(logger=logger, level=logging.INFO) as cm:
             PartialUpdateTicket().execute(
@@ -236,7 +236,7 @@ class TestPartialUpdateTicketClean(TestCase):
         if description:
             self.assertEqual(description, ticket.description)
 
-    def _then_ticket_should_not_be_updated(self, ticket: Ticket):
+    def _then_ticket_is_not_updated(self, ticket: Ticket):
         original_description = ticket.description
         original_status = ticket.status
         original_updated_at = ticket.updated_at
@@ -246,7 +246,6 @@ class TestPartialUpdateTicketClean(TestCase):
         self.assertEqual(original_status, ticket.status)
         self.assertEqual(original_updated_at, ticket.updated_at)
 
-    def _then_info_log_should_be_output(self, cm_output):
-        class_name = "tickets.use_cases.partial_update_ticket"
-        expected_log = [f"INFO:{class_name}:PartialUpdateTicket"]
+    def _then_info_log_is_output(self, cm_output):
+        expected_log = [f"INFO:{self.use_case_name}:PartialUpdateTicket"]
         self.assertEqual(expected_log, cm_output)
