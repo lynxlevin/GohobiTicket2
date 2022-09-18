@@ -405,7 +405,3 @@ class TestTicketViews(TestCase):
 
         expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
         self.assertEqual(expected_log, cm.output)
-
-    # MYMEMO: DRAFTS
-    # MYMEMO: update (error_when_not_draft, normal_partial_update) maybe normal partial_update suffices
-    # MYMEMO: post -> make_official (error_when_not_draft, status="unread", normal_partial_update)

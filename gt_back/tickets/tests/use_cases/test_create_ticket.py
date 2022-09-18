@@ -16,62 +16,72 @@ class TestCreateTicket(TestCase):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
 
-    def test_execute_create_ticket(self):
-        user, giving_relation_id = self._given_user_and_relation_id("giving_relation")
+    def test_create_ticket(self):
+        with self.subTest(case="normal_ticket"):
+            user, giving_relation_id = self._given_user_and_relation_id(
+                "giving_relation"
+            )
 
-        cm, created_ticket = self._when_user_creates_ticket(user, giving_relation_id)
+            cm, created_ticket = self._when_user_creates_ticket(
+                user, giving_relation_id
+            )
 
-        self._then_ticket_should_be_created(created_ticket.id, giving_relation_id)
-        self._then_info_log_should_be_output(cm.output)
+            self._then_ticket_should_be_created(created_ticket.id, giving_relation_id)
+            self._then_info_log_should_be_output(cm.output)
 
-    def test_execute_create_draft_ticket(self):
-        user, giving_relation_id = self._given_user_and_relation_id("giving_relation")
+        with self.subTest(case="draft_ticket"):
+            user, giving_relation_id = self._given_user_and_relation_id(
+                "giving_relation"
+            )
 
-        cm, created_ticket = self._when_user_creates_draft_ticket(
-            user, giving_relation_id
-        )
+            cm, created_ticket = self._when_user_creates_draft_ticket(
+                user, giving_relation_id
+            )
 
-        self._then_draft_ticket_should_be_created(created_ticket.id, giving_relation_id)
-        self._then_info_log_should_be_output(cm.output)
+            self._then_draft_ticket_should_be_created(
+                created_ticket.id, giving_relation_id
+            )
+            self._then_info_log_should_be_output(cm.output)
 
-    def test_execute_error_case_receiving_relation(self):
-        user, receiving_relation_id = self._given_user_and_relation_id(
-            "receiving_relation"
-        )
+    def test_execute_error_bad_relation(self):
+        with self.subTest(case="receiving_relation"):
+            user, receiving_relation_id = self._given_user_and_relation_id(
+                "receiving_relation"
+            )
 
-        self._when_created_should_raise_exception(
-            user,
-            receiving_relation_id,
-            exception=exceptions.PermissionDenied,
-            exception_message="Only the giving user may create ticket.",
-        )
-        self._then_ticket_should_not_be_created()
+            self._when_created_should_raise_exception(
+                user,
+                receiving_relation_id,
+                exception=exceptions.PermissionDenied,
+                exception_message="Only the giving user may create ticket.",
+            )
+            self._then_ticket_should_not_be_created()
 
-    def test_execute_error_case_unrelated_relation(self):
-        user, unrelated_relation_id = self._given_user_and_relation_id(
-            "unrelated_relation"
-        )
+        with self.subTest(case="unrelated_relation"):
+            user, unrelated_relation_id = self._given_user_and_relation_id(
+                "unrelated_relation"
+            )
 
-        self._when_created_should_raise_exception(
-            user,
-            unrelated_relation_id,
-            exception=exceptions.PermissionDenied,
-            exception_message="Only the giving user may create ticket.",
-        )
-        self._then_ticket_should_not_be_created()
+            self._when_created_should_raise_exception(
+                user,
+                unrelated_relation_id,
+                exception=exceptions.PermissionDenied,
+                exception_message="Only the giving user may create ticket.",
+            )
+            self._then_ticket_should_not_be_created()
 
-    def test_execute_error_case_non_existent_relation(self):
-        user, non_existent_relation_id = self._given_user_and_relation_id(
-            "non_existent_relation"
-        )
+        with self.subTest(case="non_existent_relation"):
+            user, non_existent_relation_id = self._given_user_and_relation_id(
+                "non_existent_relation"
+            )
 
-        self._when_created_should_raise_exception(
-            user,
-            non_existent_relation_id,
-            exception=exceptions.NotFound,
-            exception_message="UserRelation not found.",
-        )
-        self._then_ticket_should_not_be_created()
+            self._when_created_should_raise_exception(
+                user,
+                non_existent_relation_id,
+                exception=exceptions.NotFound,
+                exception_message="UserRelation not found.",
+            )
+            self._then_ticket_should_not_be_created()
 
     """
     Utility Functions

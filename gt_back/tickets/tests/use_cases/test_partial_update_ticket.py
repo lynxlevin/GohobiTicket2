@@ -1,178 +1,252 @@
-import inspect
 import logging
-from datetime import datetime
 from typing import Tuple
 
 from django.test import TestCase
 from users.models import User
-from rest_framework import exceptions
+from rest_framework.exceptions import PermissionDenied, NotFound
 from tickets.models import Ticket
 from tickets.test_utils.test_seeds import TestSeed
 from tickets.use_cases import PartialUpdateTicket
 from tickets.test_utils import factory
 
 
-class TestPartialUpdateTicket(TestCase):
+class TestPartialUpdateTicketClean(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
 
-    def test_execute(self):
-        user = self.seeds.users[1]
-        unread_ticket, unread_ticket2, read_ticket = self._setup_tickets(user)
+    def test_update_status(self):
+        with self.subTest(case="unread_to_read"):
+            user, ticket = self._given_ticket(Ticket.STATUS_UNREAD)
+            cm = self._when_user_updates_ticket_status(user, ticket, Ticket.STATUS_READ)
 
-        cases = {
-            "update_status": {
-                "ticket": unread_ticket,
-                "data": {"status": Ticket.STATUS_READ},
-                "to_be": {
-                    "description": unread_ticket.description,
-                    "status": Ticket.STATUS_READ,
-                },
-            },
-            "update_description_unread_ticket": {
-                "ticket": unread_ticket2,
-                "data": {"description": "updated description"},
-                "to_be": {
-                    "description": "updated description",
-                    "status": Ticket.STATUS_UNREAD,
-                },
-            },
-            "update_description_read_ticket": {
-                "ticket": read_ticket,
-                "data": {"description": "updated description"},
-                "to_be": {
-                    "description": "updated description",
-                    "status": Ticket.STATUS_EDITED,
-                },
-            },
-        }
+            self._then_ticket_should_be(ticket, Ticket.STATUS_READ)
+            self._then_info_log_should_be_output(cm.output)
 
-        for case, condition in cases.items():
-            with self.subTest(case=case):
-                cm = self._execute_partial_update(
-                    user, condition["ticket"], condition["data"]
-                )
+        with self.subTest(case="draft_to_unread"):
+            user, ticket = self._given_ticket(Ticket.STATUS_DRAFT)
+            cm = self._when_user_updates_ticket_status(
+                user, ticket, Ticket.STATUS_UNREAD
+            )
 
-                self._assert_ticket(
-                    condition["ticket"],
-                    condition["to_be"]["description"],
-                    condition["to_be"]["status"],
-                )
+            self._then_ticket_should_be(ticket, Ticket.STATUS_UNREAD)
+            self._then_info_log_should_be_output(cm.output)
 
-                expected_log = [
-                    "INFO:tickets.use_cases.partial_update_ticket:PartialUpdateTicket"
-                ]
-                self.assertEqual(expected_log, cm.output)
+    def test_update_description(self):
+        with self.subTest(case="unread_ticket"):
+            user, ticket = self._given_ticket(Ticket.STATUS_UNREAD)
+            cm = self._when_user_updates_ticket_description(user, ticket)
+            self._then_ticket_should_be(
+                ticket,
+                status=Ticket.STATUS_UNREAD,
+                description="edited_description",
+            )
+            self._then_info_log_should_be_output(cm.output)
 
-    def test_execute_case_error(self):
-        user = self.seeds.users[1]
+        with self.subTest(case="read_ticket"):
+            user, ticket = self._given_ticket(Ticket.STATUS_READ)
+            cm = self._when_user_updates_ticket_description(user, ticket)
+            self._then_ticket_should_be(
+                ticket,
+                status=Ticket.STATUS_EDITED,
+                description="edited_description",
+            )
+            self._then_info_log_should_be_output(cm.output)
 
-        tickets = self._setup_tickets_for_error_case(user)
-        receiving_ticket, unrelated_ticket, non_existent_ticket = tickets
+    def test_update_error__bad_ticket(self):
+        with self.subTest(case="receiving_ticket"):
+            user, ticket = self._given_bad_ticket("receiving_ticket")
 
-        cases = {
-            "receiving_relation": {
-                "ticket": receiving_ticket,
-                "exception": exceptions.PermissionDenied,
-                "exc_detail": "Only the giving user may update ticket.",
-            },
-            "unrelated_ticket": {
-                "ticket": unrelated_ticket,
-                "exception": exceptions.PermissionDenied,
-                "exc_detail": "Only the giving user may update ticket.",
-            },
-            "non_existent_ticket": {
-                "ticket": non_existent_ticket,
-                "exception": exceptions.NotFound,
-                "exc_detail": "Ticket not found.",
-            },
-        }
+            self._when_updated_should_raise_exception(
+                user,
+                ticket,
+                exception=PermissionDenied,
+                exception_message="Only the giving user may update ticket.",
+            )
 
-        for case, condition in cases.items():
-            with self.subTest(case=case):
-                self._execute_with_exception(user, **condition)
+            self._then_ticket_should_not_be_updated(ticket)
 
-                if not case in ["non_existent_ticket"]:
-                    self._assert_ticket_unchanged(condition["ticket"])
+        with self.subTest(case="unrelated_ticket"):
+            user, ticket = self._given_bad_ticket("unrelated_ticket")
+
+            self._when_updated_should_raise_exception(
+                user,
+                ticket,
+                exception=PermissionDenied,
+                exception_message="Only the giving user may update ticket.",
+            )
+
+            self._then_ticket_should_not_be_updated(ticket)
+
+        with self.subTest(case="non_existent_ticket"):
+            user, ticket = self._given_bad_ticket("non_existent_ticket")
+
+            self._when_updated_should_raise_exception(
+                user,
+                ticket,
+                exception=NotFound,
+                exception_message="Ticket not found.",
+            )
+
+    def test_update_status_error(self):
+        with self.subTest(case="to_draft"):
+            user, ticket = self._given_ticket(Ticket.STATUS_UNREAD)
+
+            self._when_updated_to_draft_should_raise_exception(
+                user,
+                ticket,
+                exception=PermissionDenied,
+                exception_message="Tickets cannot be updated to draft.",
+            )
+            self._then_ticket_should_not_be_updated(ticket)
+
+        with self.subTest(case="to_unread"):
+            user, ticket = self._given_ticket(Ticket.STATUS_READ)
+
+            self._when_updated_to_unread_should_raise_exception(
+                user,
+                ticket,
+                exception=PermissionDenied,
+                exception_message="Only draft tickets can be updated to unread.",
+            )
+            self._then_ticket_should_not_be_updated(ticket)
 
     """
     Utility Functions
     """
 
-    def _setup_tickets(self, user: User) -> Tuple[Ticket, Ticket, Ticket]:
+    def _given_ticket(self, status: str) -> Tuple[User, Ticket]:
+        user: User = self.seeds.users[1]
         giving_relation = user.giving_relations.first()
 
-        params = {
-            "unread_ticket": {
-                "description": "test_description",
-                "status": Ticket.STATUS_UNREAD,
-            },
-            "unread_ticket2": {
-                "description": "test_description",
-                "status": Ticket.STATUS_UNREAD,
-            },
-            "read_ticket": {
-                "description": "test_description",
-                "status": Ticket.STATUS_READ,
-            },
+        ticket_param = {
+            "description": "test_description",
+            "status": status,
         }
-        tickets = factory.create_tickets(giving_relation, params.values())
-        unread_ticket, unread_ticket2, read_ticket = tickets
-        return (unread_ticket, unread_ticket2, read_ticket)
+        ticket: Ticket = factory.create_ticket(giving_relation, ticket_param)
 
-    def _setup_tickets_for_error_case(
-        self, user: User
-    ) -> Tuple[Ticket, Ticket, Ticket]:
-        receiving_relation_id = user.receiving_relations.first().id
+        return (user, ticket)
+
+    def _given_bad_ticket(self, case: str) -> Tuple[User, Ticket]:
+        user = self.seeds.users[1]
+
+        if case == "receiving_ticket":
+            receiving_relation = user.receiving_relations.first()
+            ticket = Ticket.objects.filter_eq_user_relation_id(
+                receiving_relation.id
+            ).first()
+        elif case == "unrelated_ticket":
+            unrelated_relation = self.seeds.user_relations[2]
+            ticket = Ticket.objects.filter_eq_user_relation_id(
+                unrelated_relation.id
+            ).first()
+        elif case == "non_existent_ticket":
+            ticket = Ticket(id="-1", description="not_saved")
+
+        return (user, ticket)
+
+    def _given_receiving_ticket(self) -> Tuple[User, Ticket]:
+        user: User = self.seeds.users[1]
+        receiving_relation = user.receiving_relations.first()
         receiving_ticket = Ticket.objects.filter_eq_user_relation_id(
-            receiving_relation_id
+            receiving_relation.id
         ).first()
 
-        unrelated_relation_id = self.seeds.user_relations[2].id
+        return (user, receiving_ticket)
+
+    def _given_unrelated_ticket(self) -> Tuple[User, Ticket]:
+        user: User = self.seeds.users[1]
+        unrelated_relation = self.seeds.user_relations[2]
         unrelated_ticket = Ticket.objects.filter_eq_user_relation_id(
-            unrelated_relation_id
+            unrelated_relation.id
         ).first()
 
+        return (user, unrelated_ticket)
+
+    def _given_non_existent_ticket(self) -> Tuple[User, Ticket]:
+        user: User = self.seeds.users[1]
         non_existent_ticket = Ticket(id="-1", description="not_saved")
+        return (user, non_existent_ticket)
 
-        return (receiving_ticket, unrelated_ticket, non_existent_ticket)
+    def _when_user_updates_ticket_status(self, user: User, ticket: Ticket, status: str):
+        return self._execute_use_case(user, ticket, {"status": status})
 
-    def _execute_partial_update(self, user: User, ticket: Ticket, data: dict):
+    def _when_user_updates_ticket_description(self, user: User, ticket: Ticket):
+        return self._execute_use_case(
+            user, ticket, {"description": "edited_description"}
+        )
+
+    def _execute_use_case(self, user: User, ticket: Ticket, data: dict):
         class_name = "tickets.use_cases.partial_update_ticket"
         logger = logging.getLogger(class_name)
 
         with self.assertLogs(logger=logger, level=logging.INFO) as cm:
-            PartialUpdateTicket().execute(user=user, data=data, ticket_id=ticket.id)
+            PartialUpdateTicket().execute(
+                user=user,
+                data=data,
+                ticket_id=ticket.id,
+            )
 
         return cm
 
-    def _execute_with_exception(
-        self, user: User, ticket: Ticket, exception: Exception, exc_detail: str
+    def _when_updated_should_raise_exception(
+        self, user: User, ticket: Ticket, exception: Exception, exception_message: str
     ):
-        data = {
-            "description": "updated description",
-        }
-        expected_exc_detail = f"PartialUpdateTicket_exception: {exc_detail}"
-        with self.assertRaisesRegex(exception, expected_exc_detail):
+        data = {"description": "updated description"}
+        self._execute_use_case_raise_exception(
+            user, ticket, data, exception, exception_message
+        )
+
+    def _when_updated_to_draft_should_raise_exception(
+        self, user: User, ticket: Ticket, exception: Exception, exception_message: str
+    ):
+        data = {"status": Ticket.STATUS_DRAFT}
+        self._execute_use_case_raise_exception(
+            user, ticket, data, exception, exception_message
+        )
+
+    def _when_updated_to_unread_should_raise_exception(
+        self, user: User, ticket: Ticket, exception: Exception, exception_message: str
+    ):
+        data = {"status": Ticket.STATUS_UNREAD}
+        self._execute_use_case_raise_exception(
+            user, ticket, data, exception, exception_message
+        )
+
+    def _execute_use_case_raise_exception(
+        self,
+        user: User,
+        ticket: Ticket,
+        data: dict,
+        exception: Exception,
+        exception_message: str,
+    ):
+        exc_detail = f"PartialUpdateTicket_exception: {exception_message}"
+        with self.assertRaisesRegex(exception, exc_detail):
             PartialUpdateTicket().execute(user=user, data=data, ticket_id=ticket.id)
 
-    def _assert_ticket(
-        self,
-        ticket: Ticket,
-        description_to_be: str,
-        status_to_be: str,
+    def _then_ticket_should_be(
+        self, ticket: Ticket, status: str, description: str = ""
     ):
+        original_updated_at = ticket.updated_at
+        ticket.refresh_from_db()
+        self.assertNotEqual(original_updated_at, ticket.updated_at)
+        self.assertEqual(status, ticket.status)
+        if description:
+            self.assertEqual(description, ticket.description)
+
+    def _then_ticket_should_not_be_updated(self, ticket: Ticket):
+        original_description = ticket.description
+        original_status = ticket.status
         original_updated_at = ticket.updated_at
 
         ticket.refresh_from_db()
-
-        self.assertEqual(description_to_be, ticket.description)
-        self.assertEqual(status_to_be, ticket.status)
-        self.assertNotEqual(original_updated_at, ticket.updated_at)
-
-    def _assert_ticket_unchanged(self, ticket: Ticket):
-        original_description = ticket.description
-        ticket.refresh_from_db()
         self.assertEqual(original_description, ticket.description)
+        self.assertEqual(original_status, ticket.status)
+        self.assertEqual(original_updated_at, ticket.updated_at)
+
+    def _then_info_log_should_be_output(self, cm_output):
+        class_name = "tickets.use_cases.partial_update_ticket"
+        expected_log = [f"INFO:{class_name}:PartialUpdateTicket"]
+        self.assertEqual(expected_log, cm_output)
