@@ -20,7 +20,7 @@ class UseTicket:
 
     def execute(self, user: User, data: dict, ticket_id: str):
         logger.info(
-            __class__.__name__,
+            self.__class__.__name__,
             extra={"data": data, "user": user, "ticket_id": ticket_id},
         )
 

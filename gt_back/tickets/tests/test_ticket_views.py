@@ -17,7 +17,7 @@ class TestTicketViews(TestCase):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
 
-    def test_create_integration(self):
+    def test_create(self):
         """
         Post /tickets/
         """
@@ -84,7 +84,7 @@ class TestTicketViews(TestCase):
         expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
         self.assertEqual(expected_log, cm.output)
 
-    def test_partial_update_integration(self):
+    def test_partial_update(self):
         """
         Patch /tickets/{ticket_id}/
         """
@@ -157,7 +157,7 @@ class TestTicketViews(TestCase):
         expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
         self.assertEqual(expected_log, cm.output)
 
-    def test_destroy_integration(self):
+    def test_destroy(self):
         """
         Delete /tickets/{ticket_id}/
         """
