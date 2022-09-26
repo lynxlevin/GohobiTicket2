@@ -1,1 +1,0 @@
-from .user_relation_views import UserRelationViewSet
