@@ -4,3 +4,4 @@ db.sqlite3
 todos.md
 fixtures/
 django.log
+gt_back/static

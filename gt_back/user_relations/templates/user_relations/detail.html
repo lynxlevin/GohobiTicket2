@@ -1,4 +1,4 @@
-{% load static %}
+{% load sass_tags %}
 <!DOCTYPE html>
 <html>
   <head style="scroll-padding-top: 70px;">
@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8" />
     <title>GohobiTicket</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'user_relations/style.css' %}">
+    <link rel="stylesheet" href="{% sass_src 'user_relations/style.scss' %}">
   </head>
   <body>
     <div class="pt-6" id="tickettop">
