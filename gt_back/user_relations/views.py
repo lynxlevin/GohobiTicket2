@@ -1,3 +1,6 @@
 from django.shortcuts import render
 
-# Create your views here.
+
+def detail(request, pk: int):
+    context = {"user_relation_id": pk}
+    return render(request, "user_relations/detail.html", context)
