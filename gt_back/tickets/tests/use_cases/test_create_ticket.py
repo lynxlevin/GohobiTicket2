@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from typing import Tuple
 
 from django.test import TestCase
 from rest_framework import exceptions
@@ -16,67 +15,46 @@ class TestCreateTicket(TestCase):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
         cls.use_case_name = "tickets.use_cases.create_ticket"
+        cls.user = cls.seeds.users[1]
+
+        cls.giving_relation_id = cls.user.giving_relations.first().id
+        cls.receiving_relation_id = cls.user.receiving_relations.first().id
+        cls.unrelated_relation_id = cls.seeds.user_relations[2].id
+        cls.non_existent_relation_id = -1
 
     def test_create_ticket(self):
         with self.subTest(case="normal_ticket"):
-            user, giving_relation_id = self._given_user_and_relation_id(
-                "giving_relation"
-            )
+            cm, created_ticket = self._when_user_creates_ticket()
 
-            cm, created_ticket = self._when_user_creates_ticket(
-                user, giving_relation_id
-            )
-
-            self._then_ticket_is_created(created_ticket.id, giving_relation_id)
+            self._then_ticket_is_created(created_ticket.id)
             self._then_info_log_is_output(cm.output)
 
         with self.subTest(case="draft_ticket"):
-            user, giving_relation_id = self._given_user_and_relation_id(
-                "giving_relation"
-            )
+            cm, created_ticket = self._when_user_creates_draft_ticket()
 
-            cm, created_ticket = self._when_user_creates_draft_ticket(
-                user, giving_relation_id
-            )
-
-            self._then_draft_ticket_is_created(created_ticket.id, giving_relation_id)
+            self._then_draft_ticket_is_created(created_ticket.id)
             self._then_info_log_is_output(cm.output)
 
     def test_execute_error_bad_relation(self):
         with self.subTest(case="receiving_relation"):
-            user, receiving_relation_id = self._given_user_and_relation_id(
-                "receiving_relation"
-            )
-
             self._when_created_should_raise_exception(
-                user,
-                receiving_relation_id,
+                self.receiving_relation_id,
                 exception=exceptions.PermissionDenied,
                 exception_message="Only the giving user may create ticket.",
             )
             self._then_ticket_is_not_created()
 
         with self.subTest(case="unrelated_relation"):
-            user, unrelated_relation_id = self._given_user_and_relation_id(
-                "unrelated_relation"
-            )
-
             self._when_created_should_raise_exception(
-                user,
-                unrelated_relation_id,
+                self.unrelated_relation_id,
                 exception=exceptions.PermissionDenied,
                 exception_message="Only the giving user may create ticket.",
             )
             self._then_ticket_is_not_created()
 
         with self.subTest(case="non_existent_relation"):
-            user, non_existent_relation_id = self._given_user_and_relation_id(
-                "non_existent_relation"
-            )
-
             self._when_created_should_raise_exception(
-                user,
-                non_existent_relation_id,
+                self.non_existent_relation_id,
                 exception=exceptions.NotFound,
                 exception_message="UserRelation not found.",
             )
@@ -86,38 +64,26 @@ class TestCreateTicket(TestCase):
     Utility Functions
     """
 
-    def _given_user_and_relation_id(self, relation_type: str) -> Tuple[User, int]:
-        user = self.seeds.users[1]
-
-        user_relation_ids = {
-            "giving_relation": user.giving_relations.first().id,
-            "receiving_relation": user.receiving_relations.first().id,
-            "unrelated_relation": self.seeds.user_relations[2].id,
-            "non_existent_relation": -1,
-        }
-
-        return (user, user_relation_ids[relation_type])
-
-    def _when_user_creates_ticket(self, user: User, giving_relation_id: int):
+    def _when_user_creates_ticket(self):
         data = {
             "gift_date": "2022-08-24",
             "description": "test_ticket",
-            "user_relation_id": giving_relation_id,
+            "user_relation_id": self.giving_relation_id,
         }
 
-        cm, created_ticket = self._execute_create_ticket(user, data)
+        cm, created_ticket = self._execute_create_ticket(self.user, data)
 
         return (cm, created_ticket)
 
-    def _when_user_creates_draft_ticket(self, user: User, giving_relation_id: int):
+    def _when_user_creates_draft_ticket(self):
         data = {
             "gift_date": "2022-08-24",
             "description": "test_ticket",
-            "user_relation_id": giving_relation_id,
+            "user_relation_id": self.giving_relation_id,
             "status": Ticket.STATUS_DRAFT,
         }
 
-        cm, created_ticket = self._execute_create_ticket(user, data)
+        cm, created_ticket = self._execute_create_ticket(self.user, data)
 
         return (cm, created_ticket)
 
@@ -131,7 +97,6 @@ class TestCreateTicket(TestCase):
 
     def _when_created_should_raise_exception(
         self,
-        user: User,
         user_relation_id: int,
         exception: Exception,
         exception_message: str,
@@ -144,15 +109,18 @@ class TestCreateTicket(TestCase):
 
         expected_exc_detail = f"CreateTicket_exception: {exception_message}"
         with self.assertRaisesRegex(exception, expected_exc_detail):
-            CreateTicket().execute(user=user, data=data)
+            CreateTicket().execute(user=self.user, data=data)
 
-    def _then_ticket_is_created(self, created_ticket_id: int, giving_relation_id: int):
+    def _then_ticket_is_created(self, created_ticket_id: int, giving_relation_id=None):
+        expected_relation_id = (
+            giving_relation_id if giving_relation_id else self.giving_relation_id
+        )
         created_ticket = Ticket.objects.get_by_id(created_ticket_id)
         self.assertIsNotNone(created_ticket)
 
         expected_ticket = {
             "description": "test_ticket",
-            "user_relation_id": giving_relation_id,
+            "user_relation_id": expected_relation_id,
             "gift_date": datetime.strptime("2022-08-24", "%Y-%m-%d").date(),
             "use_description": "",
             "use_date": None,
@@ -160,18 +128,15 @@ class TestCreateTicket(TestCase):
             "is_special": False,
         }
 
-        for key, value in expected_ticket.items():
-            self.assertEqual(getattr(created_ticket, key), value)
+        self.assertDictContainsSubset(expected_ticket, created_ticket.__dict__)
 
-    def _then_draft_ticket_is_created(
-        self, created_ticket_id: int, giving_relation_id: int
-    ):
+    def _then_draft_ticket_is_created(self, created_ticket_id: int):
         created_ticket = Ticket.objects.get_by_id(created_ticket_id)
         self.assertIsNotNone(created_ticket)
 
         expected_ticket = {
             "description": "test_ticket",
-            "user_relation_id": giving_relation_id,
+            "user_relation_id": self.giving_relation_id,
             "gift_date": datetime.strptime("2022-08-24", "%Y-%m-%d").date(),
             "use_description": "",
             "use_date": None,
@@ -179,8 +144,7 @@ class TestCreateTicket(TestCase):
             "is_special": False,
         }
 
-        for key, value in expected_ticket.items():
-            self.assertEqual(getattr(created_ticket, key), value)
+        self.assertDictContainsSubset(expected_ticket, created_ticket.__dict__)
 
     def _then_ticket_is_not_created(self):
         error_ticket_count = Ticket.objects.filter(

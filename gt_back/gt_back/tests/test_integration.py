@@ -49,7 +49,8 @@ class TestTicketViews(TestCase):
         ticket_id = self._create_ticket_and_return_id(giving_client, giving_relation)
 
         ticket = Ticket.objects.get_by_id(ticket_id)
-        self._list_tickets(giving_client, giving_relation, ticket)
+        # MYMEMO: API じゃ無くした
+        # self._list_tickets(giving_client, giving_relation, ticket)
         self._make_ticket_read(giving_client, ticket)
         self._use_ticket(receiving_client, ticket)
 

@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple
 
 from django.test import TestCase
 from users.models import User
@@ -10,34 +9,33 @@ from tickets.use_cases import PartialUpdateTicket
 from tickets.test_utils import factory
 
 
-class TestPartialUpdateTicketClean(TestCase):
+class TestPartialUpdateTicket(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
         cls.use_case_name = "tickets.use_cases.partial_update_ticket"
+        cls.user = cls.seeds.users[1]
 
     def test_update_status(self):
         with self.subTest(case="unread_to_read"):
-            user, ticket = self._given_ticket(Ticket.STATUS_UNREAD)
-            cm = self._when_user_updates_ticket_status(user, ticket, Ticket.STATUS_READ)
+            ticket = self._given_ticket(Ticket.STATUS_UNREAD)
+            cm = self._when_user_updates_ticket_status(ticket, Ticket.STATUS_READ)
 
             self._then_ticket_should_be(ticket, Ticket.STATUS_READ)
             self._then_info_log_is_output(cm.output)
 
         with self.subTest(case="draft_to_unread"):
-            user, ticket = self._given_ticket(Ticket.STATUS_DRAFT)
-            cm = self._when_user_updates_ticket_status(
-                user, ticket, Ticket.STATUS_UNREAD
-            )
+            ticket = self._given_ticket(Ticket.STATUS_DRAFT)
+            cm = self._when_user_updates_ticket_status(ticket, Ticket.STATUS_UNREAD)
 
             self._then_ticket_should_be(ticket, Ticket.STATUS_UNREAD)
             self._then_info_log_is_output(cm.output)
 
     def test_update_description(self):
         with self.subTest(case="unread_ticket"):
-            user, ticket = self._given_ticket(Ticket.STATUS_UNREAD)
-            cm = self._when_user_updates_ticket_description(user, ticket)
+            ticket = self._given_ticket(Ticket.STATUS_UNREAD)
+            cm = self._when_user_updates_ticket_description(ticket)
             self._then_ticket_should_be(
                 ticket,
                 status=Ticket.STATUS_UNREAD,
@@ -46,8 +44,8 @@ class TestPartialUpdateTicketClean(TestCase):
             self._then_info_log_is_output(cm.output)
 
         with self.subTest(case="read_ticket"):
-            user, ticket = self._given_ticket(Ticket.STATUS_READ)
-            cm = self._when_user_updates_ticket_description(user, ticket)
+            ticket = self._given_ticket(Ticket.STATUS_READ)
+            cm = self._when_user_updates_ticket_description(ticket)
             self._then_ticket_should_be(
                 ticket,
                 status=Ticket.STATUS_EDITED,
@@ -57,10 +55,9 @@ class TestPartialUpdateTicketClean(TestCase):
 
     def test_update_error__bad_ticket(self):
         with self.subTest(case="receiving_ticket"):
-            user, ticket = self._given_bad_ticket("receiving_ticket")
+            ticket = self._given_bad_ticket("receiving_ticket")
 
             self._when_updated_should_raise_exception(
-                user,
                 ticket,
                 exception=PermissionDenied,
                 exception_message="Only the giving user may update ticket.",
@@ -69,10 +66,9 @@ class TestPartialUpdateTicketClean(TestCase):
             self._then_ticket_is_not_updated(ticket)
 
         with self.subTest(case="unrelated_ticket"):
-            user, ticket = self._given_bad_ticket("unrelated_ticket")
+            ticket = self._given_bad_ticket("unrelated_ticket")
 
             self._when_updated_should_raise_exception(
-                user,
                 ticket,
                 exception=PermissionDenied,
                 exception_message="Only the giving user may update ticket.",
@@ -81,10 +77,9 @@ class TestPartialUpdateTicketClean(TestCase):
             self._then_ticket_is_not_updated(ticket)
 
         with self.subTest(case="non_existent_ticket"):
-            user, ticket = self._given_bad_ticket("non_existent_ticket")
+            ticket = self._given_bad_ticket("non_existent_ticket")
 
             self._when_updated_should_raise_exception(
-                user,
                 ticket,
                 exception=NotFound,
                 exception_message="Ticket not found.",
@@ -92,10 +87,9 @@ class TestPartialUpdateTicketClean(TestCase):
 
     def test_update_status_error(self):
         with self.subTest(case="to_draft"):
-            user, ticket = self._given_ticket(Ticket.STATUS_UNREAD)
+            ticket = self._given_ticket(Ticket.STATUS_UNREAD)
 
             self._when_updated_to_draft_should_raise_exception(
-                user,
                 ticket,
                 exception=PermissionDenied,
                 exception_message="Tickets cannot be updated to draft.",
@@ -103,10 +97,9 @@ class TestPartialUpdateTicketClean(TestCase):
             self._then_ticket_is_not_updated(ticket)
 
         with self.subTest(case="to_unread"):
-            user, ticket = self._given_ticket(Ticket.STATUS_READ)
+            ticket = self._given_ticket(Ticket.STATUS_READ)
 
             self._when_updated_to_unread_should_raise_exception(
-                user,
                 ticket,
                 exception=PermissionDenied,
                 exception_message="Only draft tickets can be updated to unread.",
@@ -117,9 +110,8 @@ class TestPartialUpdateTicketClean(TestCase):
     Utility Functions
     """
 
-    def _given_ticket(self, status: str) -> Tuple[User, Ticket]:
-        user: User = self.seeds.users[1]
-        giving_relation = user.giving_relations.first()
+    def _given_ticket(self, status: str) -> Ticket:
+        giving_relation = self.user.giving_relations.first()
 
         ticket_param = {
             "description": "test_description",
@@ -127,13 +119,11 @@ class TestPartialUpdateTicketClean(TestCase):
         }
         ticket: Ticket = factory.create_ticket(giving_relation, ticket_param)
 
-        return (user, ticket)
+        return ticket
 
-    def _given_bad_ticket(self, case: str) -> Tuple[User, Ticket]:
-        user = self.seeds.users[1]
-
+    def _given_bad_ticket(self, case: str) -> Ticket:
         if case == "receiving_ticket":
-            receiving_relation = user.receiving_relations.first()
+            receiving_relation = self.user.receiving_relations.first()
             ticket = Ticket.objects.filter_eq_user_relation_id(
                 receiving_relation.id
             ).first()
@@ -145,37 +135,14 @@ class TestPartialUpdateTicketClean(TestCase):
         elif case == "non_existent_ticket":
             ticket = Ticket(id="-1", description="not_saved")
 
-        return (user, ticket)
+        return ticket
 
-    def _given_receiving_ticket(self) -> Tuple[User, Ticket]:
-        user: User = self.seeds.users[1]
-        receiving_relation = user.receiving_relations.first()
-        receiving_ticket = Ticket.objects.filter_eq_user_relation_id(
-            receiving_relation.id
-        ).first()
+    def _when_user_updates_ticket_status(self, ticket: Ticket, status: str):
+        return self._execute_use_case(self.user, ticket, {"status": status})
 
-        return (user, receiving_ticket)
-
-    def _given_unrelated_ticket(self) -> Tuple[User, Ticket]:
-        user: User = self.seeds.users[1]
-        unrelated_relation = self.seeds.user_relations[2]
-        unrelated_ticket = Ticket.objects.filter_eq_user_relation_id(
-            unrelated_relation.id
-        ).first()
-
-        return (user, unrelated_ticket)
-
-    def _given_non_existent_ticket(self) -> Tuple[User, Ticket]:
-        user: User = self.seeds.users[1]
-        non_existent_ticket = Ticket(id="-1", description="not_saved")
-        return (user, non_existent_ticket)
-
-    def _when_user_updates_ticket_status(self, user: User, ticket: Ticket, status: str):
-        return self._execute_use_case(user, ticket, {"status": status})
-
-    def _when_user_updates_ticket_description(self, user: User, ticket: Ticket):
+    def _when_user_updates_ticket_description(self, ticket: Ticket):
         return self._execute_use_case(
-            user, ticket, {"description": "edited_description"}
+            self.user, ticket, {"description": "edited_description"}
         )
 
     def _execute_use_case(self, user: User, ticket: Ticket, data: dict):
@@ -191,27 +158,27 @@ class TestPartialUpdateTicketClean(TestCase):
         return cm
 
     def _when_updated_should_raise_exception(
-        self, user: User, ticket: Ticket, exception: Exception, exception_message: str
+        self, ticket: Ticket, exception: Exception, exception_message: str
     ):
         data = {"description": "updated description"}
         self._execute_use_case_raise_exception(
-            user, ticket, data, exception, exception_message
+            self.user, ticket, data, exception, exception_message
         )
 
     def _when_updated_to_draft_should_raise_exception(
-        self, user: User, ticket: Ticket, exception: Exception, exception_message: str
+        self, ticket: Ticket, exception: Exception, exception_message: str
     ):
         data = {"status": Ticket.STATUS_DRAFT}
         self._execute_use_case_raise_exception(
-            user, ticket, data, exception, exception_message
+            self.user, ticket, data, exception, exception_message
         )
 
     def _when_updated_to_unread_should_raise_exception(
-        self, user: User, ticket: Ticket, exception: Exception, exception_message: str
+        self, ticket: Ticket, exception: Exception, exception_message: str
     ):
         data = {"status": Ticket.STATUS_UNREAD}
         self._execute_use_case_raise_exception(
-            user, ticket, data, exception, exception_message
+            self.user, ticket, data, exception, exception_message
         )
 
     def _execute_use_case_raise_exception(

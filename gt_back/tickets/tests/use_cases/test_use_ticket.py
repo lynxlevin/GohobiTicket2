@@ -18,14 +18,15 @@ class TestUseTicket(TestCase):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
         cls.use_case_name = "tickets.use_cases.use_ticket"
+        cls.user = cls.seeds.users[1]
 
     @mock.patch.object(SlackMessengerForUseTicket, "__new__")
     def test_use(self, slack_mock):
         with self.subTest(case="normal_ticket"):
             slack_instance_mock = self._prepare_mock(slack_mock)
-            user, ticket = self._given_ticket(is_special=False)
+            ticket = self._given_ticket(is_special=False)
 
-            cm = self._when_ticket_is_used(user, ticket)
+            cm = self._when_ticket_is_used(ticket)
 
             self._then_ticket_should_be(ticket)
             self._then_slack_message_is_sent(ticket, slack_instance_mock)
@@ -33,9 +34,9 @@ class TestUseTicket(TestCase):
 
         with self.subTest(case="special_ticket"):
             slack_instance_mock = self._prepare_mock(slack_mock)
-            user, ticket = self._given_ticket(is_special=True)
+            ticket = self._given_ticket(is_special=True)
 
-            cm = self._when_ticket_is_used(user, ticket)
+            cm = self._when_ticket_is_used(ticket)
 
             self._then_ticket_should_be(ticket)
             self._then_slack_message_is_sent(ticket, slack_instance_mock)
@@ -43,10 +44,9 @@ class TestUseTicket(TestCase):
 
     def test_use_error__bad_ticket(self):
         with self.subTest(case="giving_ticket"):
-            user, giving_ticket = self._given_bad_ticket("giving_ticket")
+            giving_ticket = self._given_bad_ticket("giving_ticket")
 
             self._when_used_should_raise_exception(
-                user,
                 giving_ticket,
                 exception=PermissionDenied,
                 exception_message="Only the receiving user may use ticket.",
@@ -55,10 +55,9 @@ class TestUseTicket(TestCase):
             self._then_ticket_is_not_used(giving_ticket)
 
         with self.subTest(case="unrelated_ticket"):
-            user, unrelated_ticket = self._given_bad_ticket("unrelated_ticket")
+            unrelated_ticket = self._given_bad_ticket("unrelated_ticket")
 
             self._when_used_should_raise_exception(
-                user,
                 unrelated_ticket,
                 exception=PermissionDenied,
                 exception_message="Only the receiving user may use ticket.",
@@ -67,20 +66,18 @@ class TestUseTicket(TestCase):
             self._then_ticket_is_not_used(unrelated_ticket)
 
         with self.subTest(case="non_existent_ticket"):
-            user, non_existent_ticket = self._given_bad_ticket("non_existent_ticket")
+            non_existent_ticket = self._given_bad_ticket("non_existent_ticket")
 
             self._when_used_should_raise_exception(
-                user,
                 non_existent_ticket,
                 exception=NotFound,
                 exception_message="Ticket not found.",
             )
 
         with self.subTest(case="used_ticket"):
-            user, used_ticket = self._given_bad_ticket("used_ticket")
+            used_ticket = self._given_bad_ticket("used_ticket")
 
             self._when_used_should_raise_exception(
-                user,
                 used_ticket,
                 exception=PermissionDenied,
                 exception_message="This ticket is already used.",
@@ -98,9 +95,8 @@ class TestUseTicket(TestCase):
 
         return slack_instance_mock
 
-    def _given_ticket(self, is_special: bool) -> Tuple[User, Ticket]:
-        user = self.seeds.users[1]
-        receiving_relation = user.receiving_relations.first()
+    def _given_ticket(self, is_special: bool) -> Ticket:
+        receiving_relation = self.user.receiving_relations.first()
         # MYMEMO: ここはチケットを新たに作るようにした方がよさそう
         ticket = (
             Ticket.objects.filter_eq_user_relation_id(receiving_relation.id)
@@ -108,13 +104,11 @@ class TestUseTicket(TestCase):
             .first()
         )
 
-        return (user, ticket)
+        return ticket
 
-    def _given_bad_ticket(self, case: str) -> Tuple[User, Ticket]:
-        user = self.seeds.users[1]
-
+    def _given_bad_ticket(self, case: str) -> Ticket:
         if case == "giving_ticket":
-            giving_relation = user.giving_relations.first()
+            giving_relation = self.user.giving_relations.first()
             ticket = Ticket.objects.filter_eq_user_relation_id(
                 giving_relation.id
             ).first()
@@ -129,7 +123,7 @@ class TestUseTicket(TestCase):
             ticket = Ticket(id="-1", description="not_saved")
 
         elif case == "used_ticket":
-            receiving_relation = user.receiving_relations.first()
+            receiving_relation = self.user.receiving_relations.first()
             ticket = Ticket(
                 description="used_ticket",
                 user_relation=receiving_relation,
@@ -138,25 +132,25 @@ class TestUseTicket(TestCase):
             )
             ticket.save()
 
-        return (user, ticket)
+        return ticket
 
-    def _when_ticket_is_used(self, user: User, ticket: Ticket):
+    def _when_ticket_is_used(self, ticket: Ticket):
         data = {"use_description": "test_use_ticket"}
 
         logger = logging.getLogger(self.use_case_name)
         with self.assertLogs(logger=logger, level=logging.INFO) as cm:
-            UseTicket().execute(user=user, data=data, ticket_id=str(ticket.id))
+            UseTicket().execute(user=self.user, data=data, ticket_id=str(ticket.id))
 
         return cm
 
     def _when_used_should_raise_exception(
-        self, user: User, ticket: Ticket, exception: Exception, exception_message: str
+        self, ticket: Ticket, exception: Exception, exception_message: str
     ):
         data = {"use_description": "test_use_case_error"}
 
         expected_exc_detail = f"UseTicket_exception: {exception_message}"
         with self.assertRaisesRegex(exception, expected_exc_detail):
-            UseTicket().execute(user=user, data=data, ticket_id=str(ticket.id))
+            UseTicket().execute(user=self.user, data=data, ticket_id=str(ticket.id))
 
     def _then_ticket_should_be(self, ticket: Ticket):
         original_updated_at = ticket.updated_at
