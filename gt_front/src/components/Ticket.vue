@@ -165,7 +165,7 @@ import UseDescriptionModal from './modals/UseDescriptionModal'
 import SpecialTicketNoticeModal from './modals/SpecialTicketNoticeModal'
 import Modal from './modals/Modal'
 import axios from 'axios'
-import utils from '../packs/utils'
+import utils from '../utils'
 
 export default {
   components: {

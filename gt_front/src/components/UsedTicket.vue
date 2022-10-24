@@ -34,7 +34,7 @@
 
 <script>
 import UseDescriptionModal from './modals/UseDescriptionModal'
-import utils from '../packs/utils'
+import utils from '../utils'
 
 export default {
   name: 'UsedTicket',

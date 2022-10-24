@@ -76,7 +76,7 @@ import axios from 'axios'
 import Datepicker from 'vuejs-datepicker'
 import Ticket from './Ticket'
 import SpecialTicketNoticeModal from './modals/SpecialTicketNoticeModal'
-import utils from '../packs/utils'
+import utils from '../utils'
 
 export default {
   props: ['csrfToken', 'userRelationId'],

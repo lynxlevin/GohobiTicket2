@@ -58,7 +58,7 @@
 <script>
 import Modal from './Modal'
 import axios from 'axios'
-import utils from '../../packs/utils'
+import utils from '../../utils'
 
 export default {
   name: 'UseDescriptionModal',
