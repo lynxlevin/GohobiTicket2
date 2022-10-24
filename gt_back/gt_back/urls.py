@@ -21,10 +21,11 @@ from user_relations import views as user_relation_views
 
 router = routers.DefaultRouter()
 router.register(r"tickets", ticket_views.TicketViewSet)
+router.register(r"user_relations", user_relation_views.UserRelationViewSet)
+
 
 urlpatterns = [
     path("", include(router.urls)),
     path("admin/", admin.site.urls),
     path("release/", include("release.urls")),
-    path("user_relations/", include("user_relations.urls")),
 ]
