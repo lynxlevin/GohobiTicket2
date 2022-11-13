@@ -4,28 +4,24 @@ from rest_framework import viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from tickets.models.ticket import Ticket
-from tickets.serializers import TicketSerializer
 from user_relations.models.user_relation import UserRelation
-
-from ..permissions import IsGivingUserOrReceivingUser
+from user_relations.use_cases import RetrieveUserRelation
+from user_relations.serializers import UserRelationRetrieveSerializer
+from gt_back.exception_handler import exception_handler_with_logging
 
 logger = logging.getLogger(__name__)
 
 
 class UserRelationViewSet(viewsets.GenericViewSet):
     queryset = UserRelation.objects.all()
-    serializer_class = TicketSerializer
+    serializer_class = UserRelationRetrieveSerializer
     authentication_classes = [SessionAuthentication]
-    permission_classes = [IsAuthenticated, IsGivingUserOrReceivingUser]
+    permission_classes = [IsAuthenticated]
 
-    def retrieve(self, request, format=None, pk=None):
-        logger.info(
-            f"RetrieveUserRelation",
-            extra={"user_relation_id": pk, "user_id": request.user.id},
-        )
-        tickets = Ticket.objects.filter_eq_user_relation_id(pk).order_by(
-            "-gift_date", "id"
-        )
-        serializer = self.get_serializer(tickets, many=True)
-        return Response(serializer.data)
+    def retrieve(self, request, use_case=RetrieveUserRelation(), format=None, pk=None):
+        try:
+            tickets = use_case.execute(pk, request.user.id)
+            serializer = self.get_serializer(tickets)
+            return Response(serializer.data)
+        except Exception as exc:
+            return exception_handler_with_logging(exc)
