@@ -1,6 +1,6 @@
 <template>
   <div class="pt-6" id="tickettop">
-    <div>
+    <div v-if="apiAccessed">
     <!-- MYMEMO: <div style="backgrount-color: {background_color}> -->
       <header-nav
         :relatedUserNickname = "relatedUserNickname"
@@ -90,8 +90,9 @@ import TicketForm from './TicketForm'
 import Tickets from './Tickets'
 import Modal from './modals/Modal'
 import Datepicker from 'vuejs-datepicker'
-import _ from 'lodash'
+// import _ from 'lodash'
 import utils from '../utils'
+import axios from 'axios'
 
 export default {
   components: {
@@ -102,52 +103,55 @@ export default {
     Datepicker
   },
   name: 'MainPage',
-  props: [
-    'available_tickets',
-    'used_tickets',
-    'other_receiving_relations',
-    'is_giving_relation',
-    // この中で使うもの
-    'ticketImage',
-    'availableTicketCount',
-    'allTicketCount',
-    'relatedUserNickname',
-    // 渡すだけのもの
-    'correspondingRelationId',
-    'csrfToken',
-    'userRelationId'
-  ],
   data: function () {
     return {
       scrollPosition: 0,
-      isGivingRelation: false,
       searchGiftDate: '',
       searchErrorMessage: '',
       toUsedTicketsVisible: true,
-      otherReceivingRelations: [],
       isLogoFixed: false,
-      isSearchModalActive: false
+      isSearchModalActive: false,
+      userRelationId: 1, // MYMEMO: get from url
+      apiAccessed: false,
+      userRelationInfo: {},
+      otherReceivingRelations: [],
+      availableTickets: [],
+      usedTickets: [],
+      allTicketCount: 0,
+      availableTicketCount: 0,
+      isGivingRelation: false,
+      titleMessage: '',
+      ticketImage: '',
+      relatedUserNickname: '',
+      correspondingRelationId: '',
+      csrfToken: 'dummy' // MYMEMO: dummy csrfToken
     }
   },
   created: function () {
-    this.isGivingRelation = this.is_giving_relation === 'true'
-    this.titleMessage = this.isGivingRelation ? 'あげる' : 'もらった'
-    this.otherReceivingRelations = JSON.parse(this.other_receiving_relations)
+    // MYMEMO: ポート番号の問題を解決
+    // MYMEMO: アドレスは仮
+    axios.get(`http://127.0.0.1:8000/user_relations/${this.userRelationId}/`).then((res) => {
+      this.userRelationInfo = res.data.user_relation_info
+      this.otherReceivingRelations = res.data.other_receiving_relations
+      this.availableTickets = res.data.available_tickets
+      this.usedTickets = res.data.used_tickets
+      this.allTicketCount = res.data.all_ticket_count
+      this.availableTicketCount = res.data.available_ticket_count
+      this.apiAccessed = true
+
+      this.isGivingRelation = res.data.user_relation_info.is_giving_relation
+      this.titleMessage = this.isGivingRelation ? 'あげる' : 'もらった'
+      this.ticketImage = res.data.user_relation_info.ticket_image
+      this.relatedUserNickname = res.data.user_relation_info.related_user_nickname
+      this.correspondingRelationId = res.data.user_relation_info.corresponding_relation_id
+    })
   },
   mounted: function () {
-    this.$store.state.availableTicketCount = this.availableTickets.length
-    this.$store.state.allTicketCount =
-      this.$store.state.availableTicketCount +
-      this.usedTickets.length
-    window.addEventListener('scroll', _.debounce(this.updateScrollPosition, 100))
-  },
-  computed: {
-    availableTickets () {
-      return JSON.parse(this.available_tickets)
-    },
-    usedTickets () {
-      return JSON.parse(this.used_tickets)
-    }
+    // this.$store.state.availableTicketCount = this.availableTickets.length
+    // this.$store.state.allTicketCount =
+    //   this.$store.state.availableTicketCount +
+    //   this.usedTickets.length
+    // window.addEventListener('scroll', _.debounce(this.updateScrollPosition, 100))
   },
   methods: {
     updateScrollPosition () {
