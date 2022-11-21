@@ -1,7 +1,6 @@
 <template>
-  <div class="pt-6" id="tickettop">
+  <div class="pt-6" id="tickettop" v-bind:style="{backgroundColor: backgroundColor}">
     <div v-if="apiAccessed">
-    <!-- MYMEMO: <div style="backgrount-color: {background_color}> -->
       <header-nav
         :relatedUserNickname = "relatedUserNickname"
         :isGivingRelation = "isGivingRelation"
@@ -90,7 +89,7 @@ import TicketForm from './TicketForm'
 import Tickets from './Tickets'
 import Modal from './modals/Modal'
 import Datepicker from 'vuejs-datepicker'
-// import _ from 'lodash'
+import _ from 'lodash'
 import utils from '../utils'
 import axios from 'axios'
 
@@ -122,6 +121,7 @@ export default {
       isGivingRelation: false,
       titleMessage: '',
       ticketImage: '',
+      backgroundColor: '#FFFFFF',
       relatedUserNickname: '',
       correspondingRelationId: '',
       csrfToken: 'dummy' // MYMEMO: dummy csrfToken
@@ -142,16 +142,15 @@ export default {
       this.isGivingRelation = res.data.user_relation_info.is_giving_relation
       this.titleMessage = this.isGivingRelation ? 'あげる' : 'もらった'
       this.ticketImage = res.data.user_relation_info.ticket_image
+      this.backgroundColor = res.data.user_relation_info.background_color
       this.relatedUserNickname = res.data.user_relation_info.related_user_nickname
       this.correspondingRelationId = res.data.user_relation_info.corresponding_relation_id
     })
   },
   mounted: function () {
-    // this.$store.state.availableTicketCount = this.availableTickets.length
-    // this.$store.state.allTicketCount =
-    //   this.$store.state.availableTicketCount +
-    //   this.usedTickets.length
-    // window.addEventListener('scroll', _.debounce(this.updateScrollPosition, 100))
+    this.$store.state.availableTicketCount = this.availableTicketCount
+    this.$store.state.allTicketCount = this.allTicketCount
+    window.addEventListener('scroll', _.debounce(this.updateScrollPosition, 100))
   },
   methods: {
     updateScrollPosition () {

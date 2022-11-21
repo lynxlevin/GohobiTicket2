@@ -32,13 +32,15 @@
               class="navbar-item"
               :href="'/relations/' + otherReceivingRelation.id"
             >
-              {{ otherReceivingRelation.giving_user_nickname }}
+              {{ otherReceivingRelation.related_user_nickname }}
             </a>
           </div>
         </div>
+        <!-- MYMEMO: implement link -->
         <a href="/release" class="navbar-item">
           更新履歴
         </a>
+        <!-- MYMEMO: implement authorization -->
         <div class="navbar-item">
           <div class="buttons">
             <a href="/users/sign_out" rel="nofollow" data-method="DELETE" class="button is-light">ログアウト</a>
