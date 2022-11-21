@@ -73,3 +73,44 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.ticket-wrapper {
+    box-sizing: border-box;
+    transition: 0.6s;
+}
+.ticket-wrapper.ticket-wrapper--unread {
+    border: solid 3px rgba(72, 199, 116, 0.43);
+}
+
+.ticket-wrapper--transparent-border {
+    border: solid 3px rgba(72, 199, 116, 0.18);
+}
+
+.ticket-wrapper.special-ticket {
+    background: linear-gradient(46deg, #b67b03 0%, #daaf08 45%, #fee9a0 80%, #daaf08 90%, #b67b03 100%);
+    color: #2a2a2a;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.4);
+    border: none;
+    /* MYMEMO: implement this */
+    /* &.ticket-wrapper--unread {
+        border: none;
+    } */
+}
+.ticket-wrapper.special-ticket .button.is-light {
+    background: rgba(255, 255, 255, 0.5);
+}
+.ticket-wrapper.special-ticket .button.is-white {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.tag-used {
+    position: absolute;
+    top: -5px;
+    right: 9px;
+    z-index: 1;
+}
+.u-w-100 {
+    width: 100%;
+}
+</style>

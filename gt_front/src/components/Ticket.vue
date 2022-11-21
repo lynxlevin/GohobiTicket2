@@ -385,3 +385,102 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.ticket-wrapper {
+    box-sizing: border-box;
+    transition: 0.6s;
+}
+.ticket-wrapper.ticket-wrapper--unread {
+    border: solid 3px rgba(72, 199, 116, 0.43);
+}
+
+.ticket-wrapper--transparent-border {
+    border: solid 3px rgba(72, 199, 116, 0.18);
+}
+
+.ticket-wrapper.special-ticket {
+    background: linear-gradient(46deg, #b67b03 0%, #daaf08 45%, #fee9a0 80%, #daaf08 90%, #b67b03 100%);
+    color: #2a2a2a;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.4);
+    border: none;
+    /* MYMEMO: implement this */
+    /* &.ticket-wrapper--unread {
+        border: none;
+    } */
+}
+.ticket-wrapper.special-ticket .button.is-light {
+    background: rgba(255, 255, 255, 0.5);
+}
+.ticket-wrapper.special-ticket .button.is-white {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.tag-used {
+    position: absolute;
+    top: -5px;
+    right: 9px;
+    z-index: 1;
+}
+
+.tag--transparent {
+    opacity: 0.45;
+    transition: 0.5s;
+}
+
+.tag-new {
+    position: absolute;
+    top: -5px;
+    right: 9px;
+}
+
+.tag-edited {
+    position: absolute;
+    top: -5px;
+    right: 9px;
+}
+
+.tag-draft {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 0.75rem;
+    z-index: 1;
+}
+
+.gifter-dropdown {
+    position: absolute;
+    top: 24px;
+    right: 20px;
+}
+
+@media screen and (min-width: 769px) {
+    .gifter-dropdown {
+        top: 8px;
+        right: 9px;
+    }
+}
+
+.dropdown-membrane {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.delete-btn {
+    font-size: 24px;
+    padding: 10px 30px;
+    border-radius: 100px;
+    background: white;
+    border: 1px solid gray;
+}
+
+.w-170 {
+    width: 170px;
+}
+.u-w-100 {
+    width: 100%;
+}
+</style>

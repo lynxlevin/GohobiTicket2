@@ -107,7 +107,6 @@ export default {
       scrollPosition: 0,
       searchGiftDate: '',
       searchErrorMessage: '',
-      toUsedTicketsVisible: true,
       isLogoFixed: false,
       isSearchModalActive: false,
       userRelationId: 1, // MYMEMO: get from url
@@ -214,3 +213,84 @@ export default {
   }
 }
 </script>
+
+<style>
+.logo-block {
+    height: 170px;
+}
+@media screen and (min-width: 769px) {
+    .logo-block {
+        height: 350px;
+    }
+}
+.logo {
+    height: inherit;
+}
+.logo-fixed {
+    position: fixed;
+    bottom: 8px;
+    right: 8px;
+    margin: 0 5px 5px 0;
+    height: 50px;
+    display: flex;
+    z-index: 1000;
+    transition: margin 0.5s;
+    box-shadow: 2px 2px 7px rgba(18, 47, 61, 0.5),
+      -5px -5px 15px rgba(248, 253, 255, 0.9), inset 5px 5px 15px transparent,
+      inset -5px -5px 15px transparent;
+}
+.logo-fixed:hover {
+    opacity: 0.95;
+    filter: brightness(105%);
+}
+@media screen and (min-width: 769px) {
+    .logo-fixed {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        margin: 0 10px 10px 0;
+        height: 100px;
+        display: flex;
+        z-index: 1000;
+        transition: margin 0.5s;
+        box-shadow: 5px 5px 14px rgba(18, 47, 61, 0.5),
+            -10px -10px 30px rgba(248, 253, 255, 0.9),
+            inset 10px 10px 30px transparent, inset -10px -10px 30px transparent;
+    }
+}
+
+.tickets {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.to-used-tickets {
+    font-size: 30px;
+    background: white;
+    border-radius: 999px;
+    position: fixed;
+    left: 16px;
+    bottom: 20px;
+    border: 2px solid #ddd;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #555;
+    z-index: 2;
+}
+
+.searchDatePicker {
+    margin: 0 auto;
+    transform: translate(0, 0);
+    height: 320px;
+}
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
+}
+</style>

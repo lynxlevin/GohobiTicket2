@@ -78,3 +78,12 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+@media screen and (max-width: 1023px) {
+    .u-tab-flex-column-end {
+        flex-direction: column;
+        align-items: flex-end;
+    }
+}
+</style>

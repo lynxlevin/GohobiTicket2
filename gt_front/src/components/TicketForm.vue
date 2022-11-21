@@ -189,3 +189,30 @@ export default {
   }
 }
 </script>
+
+<style>
+.absolute-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.formDatePicker {
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, 0%);
+}
+.formDatePickerInput {
+    border-radius: 4px;
+    color: #363636;
+    border: 1px solid #dbdbdb;
+    font-size: 1rem;
+    height: 2.5em;
+    line-height: 1.5;
+    padding-bottom: calc(0.5em - 1px);
+    padding-left: calc(0.75em - 1px);
+    padding-right: calc(0.75em - 1px);
+    padding-top: calc(0.5em - 1px);
+    vertical-align: top;
+    box-shadow: inset 0 0.0625em 0.125em rgba(10, 10, 10, 0.05);
+}
+</style>
