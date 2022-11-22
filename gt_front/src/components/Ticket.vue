@@ -200,6 +200,9 @@ export default {
   mounted () {
     this.description = this.ticket.description
   },
+  updated () {
+    this.description = this.ticket.description
+  },
   computed: {
     dayOfWeekGiftDate () {
       return utils.getDayOfWeek(this.ticket.gift_date)
