@@ -55,7 +55,7 @@
                     ></div>
                     <div class="dropdown-menu" role="menu">
                         <div class="dropdown-content" style="width: 80px">
-                            <div @click="activateModal('isEditModalActive'); closeMenu()" class="dropdown-item">編集</div>
+                            <div @click="openEdit" class="dropdown-item">編集</div>
                             <hr class="dropdown-divider" />
                             <div @click="activateModal('isDeleteModalActive'); closeMenu()" class="dropdown-item">削除</div>
                         </div>
@@ -93,7 +93,7 @@
             <div class="section block">
                 <div class="field">
                     <div class="control">
-                        <textarea v-model="description" name="ticket[description]" class="textarea" />
+                        <textarea v-model="editedDescription" name="ticket[description]" class="textarea" />
                     </div>
                 </div>
 
@@ -193,22 +193,16 @@ export default {
       timer: '',
       errorCode: '',
       errorMessage: '',
-      description: '',
-      toBeSpecial: false
+      toBeSpecial: false,
+      editedDescription: ''
     }
-  },
-  mounted () {
-    this.description = this.ticket.description
-  },
-  updated () {
-    this.description = this.ticket.description
   },
   computed: {
     dayOfWeekGiftDate () {
       return utils.getDayOfWeek(this.ticket.gift_date)
     },
     descriptionLines () {
-      return this.description.split('\n')
+      return this.ticket.description.split('\n')
     },
     tagName () {
       if (this.ticket.status === 'unread') {
@@ -252,11 +246,11 @@ export default {
       const formData = new FormData()
       formData.append('_method', 'put')
       formData.append('authenticity_token', this.csrfToken)
-      formData.append('ticket[description]', this.description)
+      formData.append('ticket[description]', this.editedDescription)
       await axios
         .post(`/tickets/draft/${this.ticket.id}`, formData)
         .then(() => {
-          this.$set(this.ticket, 'description', this.description)
+          this.$set(this.ticket, 'description', this.editedDescription)
         })
         .catch((error) => {
           this.errorCode = error.response.data.status
@@ -271,11 +265,11 @@ export default {
       const formData = new FormData()
       formData.append('_method', 'put')
       formData.append('authenticity_token', this.csrfToken)
-      formData.append('ticket[description]', this.description)
+      formData.append('ticket[description]', this.editedDescription)
       await axios
         .post(`/tickets/draft/${this.ticket.id}/post`, formData)
         .then(() => {
-          this.$set(this.ticket, 'description', this.description)
+          this.$set(this.ticket, 'description', this.editedDescription)
           this.$set(this.ticket, 'status', 'unread')
         })
         .catch((error) => {
@@ -293,10 +287,10 @@ export default {
           const formData = new FormData()
           formData.append('_method', 'put')
           formData.append('authenticity_token', this.csrfToken)
-          formData.append('ticket[description]', this.description)
+          formData.append('ticket[description]', this.editedDescription)
           await axios.post(`/tickets/draft/${this.ticket.id}/post`, formData)
             .then(() => {
-              this.$set(this.ticket, 'description', this.description)
+              this.$set(this.ticket, 'description', this.editedDescription)
               this.$set(this.ticket, 'status', 'unread')
               this.$set(this.ticket, 'is_special', true)
             }).catch(error => {
@@ -318,7 +312,7 @@ export default {
       const formData = new FormData()
       formData.append('_method', 'put')
       formData.append('authenticity_token', this.csrfToken)
-      formData.append('ticket[description]', this.description)
+      formData.append('ticket[description]', this.editedDescription)
       formData.append(
         'ticket[status]',
         this.ticket.status === 'unread' ? 'unread' : 'edited'
@@ -326,7 +320,7 @@ export default {
       await axios
         .post(`/tickets/${this.ticket.id}`, formData)
         .then(() => {
-          this.$set(this.ticket, 'description', this.description)
+          this.$set(this.ticket, 'description', this.editedDescription)
         })
         .catch((error) => {
           this.errorCode = error.response.data.status
@@ -334,8 +328,12 @@ export default {
         })
       this.deactivateModal('isEditModalActive')
     },
+    openEdit () {
+      this.editedDescription = this.ticket.description
+      this.activateModal('isEditModalActive')
+      this.closeMenu()
+    },
     cancelEdit () {
-      this.description = this.ticket.description
       this.deactivateModal('isEditModalActive')
     },
     readTicket () {
