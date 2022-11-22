@@ -24,6 +24,7 @@
       </div>
     </div>
     <UseDescriptionModal
+      v-if="isModalActive"
       :ticket="ticket"
       :key="ticket.id"
       :modalMounted="isModalActive"

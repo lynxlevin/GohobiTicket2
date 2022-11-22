@@ -1,5 +1,5 @@
 <template>
-    <div class="modal is-active" v-if="modalMounted">
+    <div class="modal is-active">
         <div class="modal-background" @click="onClose" />
         <div class="modal-content">
             <div :class="{'box': !hideBoxDiv}">

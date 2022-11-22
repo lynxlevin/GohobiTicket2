@@ -63,6 +63,7 @@
     </form>
     <!-- 特別チケット使用時モーダル -->
         <SpecialTicketNoticeModal
+            v-if="isModalActive"
             :modalMounted="isModalActive"
             :onClose="deactivateModal.bind(this)"
             :submitSpecialTicket="submitSpecialTicket"

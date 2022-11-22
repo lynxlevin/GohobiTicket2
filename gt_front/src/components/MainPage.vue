@@ -58,6 +58,7 @@
         </transition>
         <!-- TODO: 独自コンポーネントにする -->
         <modal
+          v-if="isSearchModalActive"
           :modalMounted="isSearchModalActive"
           :onClose="deactivateSearchModal"
         >

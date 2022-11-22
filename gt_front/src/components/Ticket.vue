@@ -96,6 +96,7 @@
                         <textarea v-model="editedDescription" name="ticket[description]" class="textarea" />
                     </div>
                 </div>
+              v-if="isEditModalActive"
 
                 <div class="field" v-if="ticket.status === 'draft'">
                     <label class="label has-text-white">
@@ -131,6 +132,7 @@
         </Modal>
         <!-- 削除モーダル -->
         <Modal
+            v-if="isDeleteModalActive"
             :modalMounted="isDeleteModalActive"
             :onClose="deactivateModal.bind(this, 'isDeleteModalActive')"
             :hideBoxDiv="true"
@@ -146,6 +148,7 @@
             </button>
         </Modal>
         <UseDescriptionModal
+            v-if="isModalActive"
             :ticket="ticket"
             :csrfToken="csrfToken"
             :key="ticket.id"
@@ -153,6 +156,7 @@
             :onClose="deactivateModal.bind(this, 'isModalActive')"
         />
         <SpecialTicketNoticeModal
+            v-if="isSpecialModalActive"
             :modalMounted="isSpecialModalActive"
             :onClose="deactivateModal.bind(this, 'isSpecialModalActive')"
             :submitSpecialTicket="submitSpecialTicket"
