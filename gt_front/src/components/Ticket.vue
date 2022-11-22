@@ -10,143 +10,166 @@
         }"
         style="margin-bottom: 25px"
     >
-        <div class="has-text-danger" v-if="errorMessage !== ''">{{ errorCode }} {{ errorMessage }}</div>
-        <div class="tag is-info tag-used" v-if="ticket.use_date !== null">
-            使用済み
-        </div>
-        <div
-            class="tag is-success"
-            v-if="['unread', 'edited'].includes(ticket.status) && !isGivingRelation"
-            :class="{
-                'tag--transparent': markedRead,
-                'tag-new': ticket.status === 'unread',
-                'tag-edited is-light': ticket.status === 'edited',
-            }"
-        >
-            {{ tagName }}
-        </div>
-        <div
-            class="tag-draft"
-            v-if="ticket.status === 'draft' && isGivingRelation"
-        >
-            Draft
-        </div>
-        <div class="is-flex w-170">
-            <div class="column is-narrow has-text-weight-bold">
-                {{ ticket.gift_date }} {{ dayOfWeekGiftDate }}
-            </div>
-            <div class="gifter-dropdown">
-                <div
-                    class="dropdown"
-                    :class="{ 'is-active': dropdownOpen }"
-                    v-if="isGivingRelation && ticket.use_date === null"
-                >
-                    <button
-                        class="button"
-                        :class="{ 'is-light': ticket.status === 'draft', 'is-white': ticket.status !== 'draft', }"
-                        @click="openMenu"
-                    >
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div
-                        class="dropdown-membrane"
-                        @click="closeMenu"
-                        v-if="dropdownOpen"
-                    ></div>
-                    <div class="dropdown-menu" role="menu">
-                        <div class="dropdown-content" style="width: 80px">
-                            <div @click="openEdit" class="dropdown-item">編集</div>
-                            <hr class="dropdown-divider" />
-                            <div @click="activateModal('isDeleteModalActive'); closeMenu()" class="dropdown-item">削除</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="column has-text-justified" ref="textBlock">
-            <p v-for="(line, index) in descriptionLines" :key='index'>
-                {{ line }}
-            </p>
-        </div>
-        <div class="column is-narrow">
-            <div
-                class="has-text-weight-bold button is-light u-w-100"
-                @click="activateModal('isModalActive')"
-                v-if="!this.isGivingRelation && this.ticket.use_date === null"
-            >
-                このチケットを使う
-            </div>
-            <div
-                class="has-text-weight-bold button is-light u-w-100"
-                @click="activateModal('isModalActive')"
-                v-if="ticket.use_date !== null"
-            >
-                内容を見る
-            </div>
-        </div>
-        <!-- 編集モーダル -->
-        <Modal
-            :modalMounted="isEditModalActive"
-            :onClose="cancelEdit"
-            :hideBoxDiv="true"
-        >
-            <div class="section block">
-                <div class="field">
-                    <div class="control">
-                        <textarea v-model="editedDescription" name="ticket[description]" class="textarea" />
-                    </div>
-                </div>
+        <div v-if="isGivingRelation">
+          <div class="has-text-danger" v-if="errorMessage !== ''">{{ errorCode }} {{ errorMessage }}</div>
+          <div class="tag is-info tag-used" v-if="ticket.use_date !== null">使用済み</div>
+          <div class="tag-draft" v-if="ticket.status === 'draft'">Draft</div>
+          <div class="is-flex w-170">
+              <div class="column is-narrow has-text-weight-bold">
+                  {{ ticket.gift_date }} {{ dayOfWeekGiftDate }}
+              </div>
+              <div class="gifter-dropdown">
+                  <div
+                      class="dropdown"
+                      :class="{ 'is-active': dropdownOpen }"
+                      v-if="ticket.use_date === null"
+                  >
+                      <button
+                          class="button"
+                          :class="{ 'is-light': ticket.status === 'draft', 'is-white': ticket.status !== 'draft', }"
+                          @click="openMenu"
+                      >
+                          <i class="fas fa-bars"></i>
+                      </button>
+                      <div
+                          class="dropdown-membrane"
+                          @click="closeMenu"
+                          v-if="dropdownOpen"
+                      ></div>
+                      <div class="dropdown-menu" role="menu">
+                          <div class="dropdown-content" style="width: 80px">
+                              <div @click="openEdit" class="dropdown-item">編集</div>
+                              <hr class="dropdown-divider" />
+                              <div @click="activateModal('isDeleteModalActive'); closeMenu()" class="dropdown-item">削除</div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="column has-text-justified" ref="textBlock">
+              <p v-for="(line, index) in descriptionLines" :key='index'>
+                  {{ line }}
+              </p>
+          </div>
+          <div class="column is-narrow">
+              <div
+                  class="has-text-weight-bold button is-light u-w-100"
+                  @click="activateModal('isModalActive')"
+                  v-if="ticket.use_date !== null"
+              >
+                  内容を見る
+              </div>
+          </div>
+          <!-- 編集モーダル -->
+          <Modal
               v-if="isEditModalActive"
+              :modalMounted="isEditModalActive"
+              :onClose="cancelEdit"
+              :hideBoxDiv="true"
+          >
+              <div class="section block">
+                  <div class="field">
+                      <div class="control">
+                          <textarea v-model="editedDescription" name="ticket[description]" class="textarea" />
+                      </div>
+                  </div>
 
-                <div class="field" v-if="ticket.status === 'draft'">
-                    <label class="label has-text-white">
-                        <input type="checkbox" v-model="toBeSpecial" />
-                        特別チケットにする
-                    </label>
-                </div>
+                  <div class="field" v-if="ticket.status === 'draft'">
+                      <label class="label has-text-white">
+                          <input type="checkbox" v-model="toBeSpecial" />
+                          特別チケットにする
+                      </label>
+                  </div>
 
-                <div class="field" v-if="ticket.status === 'draft'">
-                    <div class="control">
-                        <button @click="submitDraft();" class="button is-small is-link">
-                            {{toBeSpecial ? '特別' : ''}}チケット付与
-                        </button>
-                        <button @click="updateDraftTicket();" class="button is-small" :disabled="toBeSpecial">
-                            下書き保存
-                        </button>
-                        <button @click="cancelEdit();" class="button is-small">
-                            キャンセル
-                        </button>
-                    </div>
-                </div>
-                <div class="field" v-if="ticket.status !== 'draft'">
-                    <div class="control">
-                        <button @click="editTicket();" class="button is-link">
-                            修正する
-                        </button>
-                        <button @click="cancelEdit();" class="button">
-                            キャンセル
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </Modal>
-        <!-- 削除モーダル -->
-        <Modal
-            v-if="isDeleteModalActive"
-            :modalMounted="isDeleteModalActive"
-            :onClose="deactivateModal.bind(this, 'isDeleteModalActive')"
-            :hideBoxDiv="true"
-        >
-            <button
-                @click="
-                    deleteTicket();
-                    deactivateModal('isDeleteModalActive');
-                "
-                class="delete-btn"
-            >
-                本当に削除する
-            </button>
-        </Modal>
+                  <div class="field" v-if="ticket.status === 'draft'">
+                      <div class="control">
+                          <button @click="submitDraft();" class="button is-small is-link">
+                              {{toBeSpecial ? '特別' : ''}}チケット付与
+                          </button>
+                          <button @click="updateDraftTicket();" class="button is-small" :disabled="toBeSpecial">
+                              下書き保存
+                          </button>
+                          <button @click="cancelEdit();" class="button is-small">
+                              キャンセル
+                          </button>
+                      </div>
+                  </div>
+                  <div class="field" v-if="ticket.status !== 'draft'">
+                      <div class="control">
+                          <button @click="editTicket();" class="button is-link">
+                              修正する
+                          </button>
+                          <button @click="cancelEdit();" class="button">
+                              キャンセル
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </Modal>
+          <!-- 削除モーダル -->
+          <Modal
+              v-if="isDeleteModalActive"
+              :modalMounted="isDeleteModalActive"
+              :onClose="deactivateModal.bind(this, 'isDeleteModalActive')"
+              :hideBoxDiv="true"
+          >
+              <button
+                  @click="
+                      deleteTicket();
+                      deactivateModal('isDeleteModalActive');
+                  "
+                  class="delete-btn"
+              >
+                  本当に削除する
+              </button>
+          </Modal>
+          <SpecialTicketNoticeModal
+              v-if="isSpecialModalActive"
+              :modalMounted="isSpecialModalActive"
+              :onClose="deactivateModal.bind(this, 'isSpecialModalActive')"
+              :submitSpecialTicket="submitSpecialTicket"
+          />
+        </div>
+        <div v-if="!isGivingRelation">
+          <div class="tag is-info tag-used" v-if="ticket.use_date !== null">使用済み</div>
+          <div
+              class="tag is-success"
+              v-if="['unread', 'edited'].includes(ticket.status)"
+              :class="{
+                  'tag--transparent': markedRead,
+                  'tag-new': ticket.status === 'unread',
+                  'tag-edited is-light': ticket.status === 'edited',
+              }"
+          >
+              {{ tagName }}
+          </div>
+          <div class="is-flex w-170">
+              <div class="column is-narrow has-text-weight-bold">
+                  {{ ticket.gift_date }} {{ dayOfWeekGiftDate }}
+              </div>
+          </div>
+          <div class="column has-text-justified" ref="textBlock">
+              <p v-for="(line, index) in descriptionLines" :key='index'>
+                  {{ line }}
+              </p>
+          </div>
+          <div class="column is-narrow">
+              <div
+                  class="has-text-weight-bold button is-light u-w-100"
+                  @click="activateModal('isModalActive')"
+                  v-if="ticket.use_date === null"
+              >
+                  このチケットを使う
+              </div>
+              <div
+                  class="has-text-weight-bold button is-light u-w-100"
+                  @click="activateModal('isModalActive')"
+                  v-if="ticket.use_date !== null"
+              >
+                  内容を見る
+              </div>
+          </div>
+        </div>
         <UseDescriptionModal
             v-if="isModalActive"
             :ticket="ticket"
@@ -154,12 +177,6 @@
             :key="ticket.id"
             :modalMounted="isModalActive"
             :onClose="deactivateModal.bind(this, 'isModalActive')"
-        />
-        <SpecialTicketNoticeModal
-            v-if="isSpecialModalActive"
-            :modalMounted="isSpecialModalActive"
-            :onClose="deactivateModal.bind(this, 'isSpecialModalActive')"
-            :submitSpecialTicket="submitSpecialTicket"
         />
     </div>
 </template>

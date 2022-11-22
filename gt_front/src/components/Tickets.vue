@@ -4,6 +4,7 @@
             <template
                 v-for="(available_ticket, index) in availableTickets"
             >
+                <!-- MYMEMO: isGivingRelation に応じて GivingTicket ReceivedTicket に分割したら動作速くなりそう -->
                 <Ticket
                     :ticket="available_ticket"
                     :csrfToken="csrfToken"
