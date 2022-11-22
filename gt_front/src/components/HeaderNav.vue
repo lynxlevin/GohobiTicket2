@@ -1,9 +1,9 @@
 <template>
   <nav class="navbar is-fixed-top is-light" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <a class="navbar-item" :href="'/relations/' + correspondingRelationId">
+      <router-link class="navbar-item" :to="'/user_relations/' + correspondingRelationId">
         {{navbarMessage}}
-      </a>
+      </router-link>
       <a
         role="button"
         class="navbar-burger"
@@ -26,20 +26,19 @@
         <div class="navbar-item has-dropdown is-hoverable">
           <a class="navbar-link">ほかの相手</a>
           <div class="navbar-dropdown">
-            <a
+            <router-link
               v-for="(otherReceivingRelation, index) in otherReceivingRelations"
               :key=index
               class="navbar-item"
-              :href="'/relations/' + otherReceivingRelation.id"
+              :to="'/user_relations/' + otherReceivingRelation.id"
             >
               {{ otherReceivingRelation.related_user_nickname }}
-            </a>
+            </router-link>
           </div>
         </div>
-        <!-- MYMEMO: implement link -->
-        <a href="/release" class="navbar-item">
+        <router-link to="/release" class="navbar-item">
           更新履歴
-        </a>
+        </router-link>
         <!-- MYMEMO: implement authorization -->
         <div class="navbar-item">
           <div class="buttons">
@@ -65,15 +64,21 @@ export default {
       navbarVisible: false
     }
   },
-  created: function () {
-    this.navbarMessage =
-        this.relatedUserNickname +
-        'に' +
-        (this.isGivingRelation ? 'もらったチケットを見る' : 'チケットをあげる')
+  mounted: function () {
+    this.updateMessage()
+  },
+  beforeUpdate: function () {
+    this.updateMessage()
   },
   methods: {
     toggleNavbarMenu () {
       this.navbarVisible = !this.navbarVisible
+    },
+    updateMessage () {
+      this.navbarMessage =
+          this.relatedUserNickname +
+          'に' +
+          (this.isGivingRelation ? 'もらったチケットを見る' : 'チケットをあげる')
     }
   }
 }

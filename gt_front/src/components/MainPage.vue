@@ -109,7 +109,7 @@ export default {
       searchErrorMessage: '',
       isLogoFixed: false,
       isSearchModalActive: false,
-      userRelationId: 1, // MYMEMO: get from url
+      userRelationId: 0, // MYMEMO: get from url
       apiAccessed: false,
       userRelationInfo: {},
       otherReceivingRelations: [],
@@ -127,24 +127,19 @@ export default {
     }
   },
   created: function () {
-    // MYMEMO: ポート番号の問題を解決
-    // MYMEMO: アドレスは仮
-    axios.get(`http://127.0.0.1:8000/user_relations/${this.userRelationId}/`).then((res) => {
-      this.userRelationInfo = res.data.user_relation_info
-      this.otherReceivingRelations = res.data.other_receiving_relations
-      this.availableTickets = res.data.available_tickets
-      this.usedTickets = res.data.used_tickets
-      this.allTicketCount = res.data.all_ticket_count
-      this.availableTicketCount = res.data.available_ticket_count
-      this.apiAccessed = true
-
-      this.isGivingRelation = res.data.user_relation_info.is_giving_relation
-      this.titleMessage = this.isGivingRelation ? 'あげる' : 'もらった'
-      this.ticketImage = res.data.user_relation_info.ticket_image
-      this.backgroundColor = res.data.user_relation_info.background_color
-      this.relatedUserNickname = res.data.user_relation_info.related_user_nickname
-      this.correspondingRelationId = res.data.user_relation_info.corresponding_relation_id
-    })
+    this.$watch(
+      () => this.$route.params,
+      (toParams, _prev) => {
+        if (this.$route.path === '/') {
+          // MYMEMO: 間に合わせのさく。初期ページURL をとってくる API が必要
+          this.$router.push('user_relations/1')
+        } else {
+          this.userRelationId = toParams.relationId
+          this.getInitialData()
+        }
+      },
+      { immediate: true }
+    )
   },
   mounted: function () {
     this.$store.state.availableTicketCount = this.availableTicketCount
@@ -152,6 +147,25 @@ export default {
     window.addEventListener('scroll', _.debounce(this.updateScrollPosition, 100))
   },
   methods: {
+    getInitialData () {
+      // MYMEMO: ポート番号の問題を解決
+      axios.get(`http://127.0.0.1:8000/user_relations/${this.userRelationId}/`).then((res) => {
+        this.userRelationInfo = res.data.user_relation_info
+        this.otherReceivingRelations = res.data.other_receiving_relations
+        this.availableTickets = res.data.available_tickets
+        this.usedTickets = res.data.used_tickets
+        this.allTicketCount = res.data.all_ticket_count
+        this.availableTicketCount = res.data.available_ticket_count
+        this.apiAccessed = true
+
+        this.isGivingRelation = res.data.user_relation_info.is_giving_relation
+        this.titleMessage = this.isGivingRelation ? 'あげる' : 'もらった'
+        this.ticketImage = res.data.user_relation_info.ticket_image
+        this.backgroundColor = res.data.user_relation_info.background_color
+        this.relatedUserNickname = res.data.user_relation_info.related_user_nickname
+        this.correspondingRelationId = res.data.user_relation_info.corresponding_relation_id
+      })
+    },
     updateScrollPosition () {
       this.scrollPosition = window.scrollY
       this.isLogoFixed = this.scrollPosition > 320
