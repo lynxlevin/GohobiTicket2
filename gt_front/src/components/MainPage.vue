@@ -149,8 +149,7 @@ export default {
   },
   methods: {
     getInitialData () {
-      // MYMEMO: ポート番号の問題を解決
-      axios.get(`http://127.0.0.1:8000/user_relations/${this.userRelationId}/`).then((res) => {
+      axios.get(`/api/user_relations/${this.userRelationId}/`).then((res) => {
         this.userRelationInfo = res.data.user_relation_info
         this.otherReceivingRelations = res.data.other_receiving_relations
         this.availableTickets = res.data.available_tickets

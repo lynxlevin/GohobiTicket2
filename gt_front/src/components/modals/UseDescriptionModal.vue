@@ -85,7 +85,7 @@ export default {
       formData.append('ticket[use_description]', this.use_description)
       formData.append('authenticity_token', this.csrfToken)
       axios
-        .post(`/tickets/${this.ticket.id}/use`, formData)
+        .post(`/api/tickets/${this.ticket.id}/use/`, formData)
         .then(() => {
           this.$store.dispatch('useTicket')
           this.$set(this.ticket, 'use_date', Date())

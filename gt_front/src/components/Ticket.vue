@@ -251,7 +251,7 @@ export default {
       formData.append('_method', 'delete')
       formData.append('authenticity_token', this.csrfToken)
       axios
-        .post(`/tickets/${this.ticket.id}`, formData)
+        .post(`/api/tickets/${this.ticket.id}/`, formData)
         .then(() => {
           this.$el.style = 'display: none;' // 応急処置
           // 付与⇨削除すると、正規のコンポーネントではないので、以下の３行が動かない。
@@ -269,7 +269,7 @@ export default {
       formData.append('authenticity_token', this.csrfToken)
       formData.append('ticket[description]', this.editedDescription)
       await axios
-        .post(`/tickets/draft/${this.ticket.id}`, formData)
+        .post(`/api/tickets/draft/${this.ticket.id}/`, formData)
         .then(() => {
           this.$set(this.ticket, 'description', this.editedDescription)
         })
@@ -288,7 +288,7 @@ export default {
       formData.append('authenticity_token', this.csrfToken)
       formData.append('ticket[description]', this.editedDescription)
       await axios
-        .post(`/tickets/draft/${this.ticket.id}/post`, formData)
+        .post(`/api/tickets/draft/${this.ticket.id}/post/`, formData)
         .then(() => {
           this.$set(this.ticket, 'description', this.editedDescription)
           this.$set(this.ticket, 'status', 'unread')
@@ -303,13 +303,13 @@ export default {
       const formData2 = new FormData()
       formData2.append('_method', 'put')
       formData2.append('authenticity_token', this.csrfToken)
-      await axios.post(`/tickets/${this.ticket.id}/mark_special`, formData2)
+      await axios.post(`/api/tickets/${this.ticket.id}/mark_special/`, formData2)
         .then(async _response => {
           const formData = new FormData()
           formData.append('_method', 'put')
           formData.append('authenticity_token', this.csrfToken)
           formData.append('ticket[description]', this.editedDescription)
-          await axios.post(`/tickets/draft/${this.ticket.id}/post`, formData)
+          await axios.post(`/api/tickets/draft/${this.ticket.id}/post/`, formData)
             .then(() => {
               this.$set(this.ticket, 'description', this.editedDescription)
               this.$set(this.ticket, 'status', 'unread')
@@ -339,7 +339,7 @@ export default {
         this.ticket.status === 'unread' ? 'unread' : 'edited'
       )
       await axios
-        .post(`/tickets/${this.ticket.id}`, formData)
+        .post(`/api/tickets/${this.ticket.id}/`, formData)
         .then(() => {
           this.$set(this.ticket, 'description', this.editedDescription)
         })
@@ -363,7 +363,7 @@ export default {
       formData.append('authenticity_token', this.csrfToken)
       formData.append('ticket[status]', 'read')
       axios
-        .post(`/tickets/${this.ticket.id}`, formData)
+        .post(`/api/tickets/${this.ticket.id}/`, formData)
         .then((response) => {
           if (response.data.ticket.status === 'read') {
             this.markedRead = true

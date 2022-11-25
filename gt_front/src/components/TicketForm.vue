@@ -105,17 +105,17 @@ export default {
     },
     submitForm () {
       const formData = this.prepareFormData()
-      this.postData('/tickets', formData)
+      this.postData('/api/tickets/', formData)
     },
     submitSpecialTicket () {
       // FIXME: 特別チケット枠がない場合に普通のチケットができてしまう
       const formData = this.prepareFormData()
-      axios.post('/tickets', formData).then(response => {
+      axios.post('/api/tickets/', formData).then(response => {
         const data = response.data
         const formData2 = new FormData()
         formData2.append('_method', 'put')
         formData2.append('authenticity_token', this.csrfToken)
-        axios.post(`/tickets/${data.ticket.id}/mark_special`, formData2).then(response => {
+        axios.post(`/api/tickets/${data.ticket.id}/mark_special/`, formData2).then(response => {
           data.ticket.is_special = true
           this.addTicketComponent(data)
           this.gift_date = Date()
@@ -137,7 +137,7 @@ export default {
     },
     saveDraft () {
       const formData = this.prepareFormData()
-      this.postData('/tickets/draft', formData)
+      this.postData('/api/tickets/draft/', formData)
     },
     prepareFormData () {
       const formData = new FormData()
