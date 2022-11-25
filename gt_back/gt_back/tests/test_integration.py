@@ -65,7 +65,7 @@ class TestTicketViews(TestCase):
             }
         }
 
-        response = client.post("/tickets/", params, content_type="application/json")
+        response = client.post("/api/tickets/", params, content_type="application/json")
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
         ticket_id = response.data["id"]
@@ -77,7 +77,7 @@ class TestTicketViews(TestCase):
     def _list_tickets(
         self, client: Client, user_relation: UserRelation, expected_ticket: Ticket
     ):
-        response = client.get(f"/user_relations/{user_relation.id}/")
+        response = client.get(f"/api/user_relations/{user_relation.id}/")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
 
@@ -105,7 +105,7 @@ class TestTicketViews(TestCase):
         }
 
         response = client.patch(
-            f"/tickets/{ticket.id}/", params, content_type="application/json"
+            f"/api/tickets/{ticket.id}/", params, content_type="application/json"
         )
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
@@ -125,7 +125,7 @@ class TestTicketViews(TestCase):
         }
 
         response = client.put(
-            f"/tickets/{ticket.id}/use/", params, content_type="application/json"
+            f"/api/tickets/{ticket.id}/use/", params, content_type="application/json"
         )
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)

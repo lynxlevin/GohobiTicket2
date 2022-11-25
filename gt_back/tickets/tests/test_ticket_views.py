@@ -19,7 +19,7 @@ class TestTicketViews(TestCase):
 
     def test_create(self):
         """
-        Post /tickets/
+        Post /api/tickets/
         """
 
         user = self.seeds.users[1]
@@ -36,7 +36,7 @@ class TestTicketViews(TestCase):
             }
         }
 
-        response = client.post("/tickets/", params, content_type="application/json")
+        response = client.post("/api/tickets/", params, content_type="application/json")
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
@@ -45,7 +45,7 @@ class TestTicketViews(TestCase):
 
     def test_create_draft(self):
         """
-        Post /tickets/
+        Post /api/tickets/
         """
 
         user = self.seeds.users[1]
@@ -63,7 +63,7 @@ class TestTicketViews(TestCase):
             }
         }
 
-        response = client.post("/tickets/", params, content_type="application/json")
+        response = client.post("/api/tickets/", params, content_type="application/json")
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
@@ -76,7 +76,7 @@ class TestTicketViews(TestCase):
     @mock.patch("tickets.use_cases.create_ticket.CreateTicket.execute")
     def test_create_case_error(self, use_case_mock):
         """
-        Post /tickets
+        Post /api/tickets
         error cases
         """
         test_log = "test_exception_log"
@@ -99,7 +99,7 @@ class TestTicketViews(TestCase):
 
         with self.assertLogs(logger=logger, level=logging.WARN) as cm:
             response = client.post(
-                f"/tickets/", params, content_type="application/json"
+                f"/api/tickets/", params, content_type="application/json"
             )
 
         expected_params = {
@@ -117,7 +117,7 @@ class TestTicketViews(TestCase):
 
     def test_partial_update(self):
         """
-        Patch /tickets/{ticket_id}/
+        Patch /api/tickets/{ticket_id}/
         """
 
         user = self.seeds.users[1]
@@ -141,7 +141,7 @@ class TestTicketViews(TestCase):
         for case, condition in cases.items():
             with self.subTest(case=case):
                 response = client.patch(
-                    f"/tickets/{condition['ticket'].id}/",
+                    f"/api/tickets/{condition['ticket'].id}/",
                     condition["params"],
                     content_type="application/json",
                 )
@@ -153,7 +153,7 @@ class TestTicketViews(TestCase):
     @mock.patch("tickets.use_cases.partial_update_ticket.PartialUpdateTicket.execute")
     def test_partial_update_case_error(self, use_case_mock):
         """
-        Patch /tickets/{ticket_id}/
+        Patch /api/tickets/{ticket_id}/
         error cases
         """
         test_log = "test_exception_log"
@@ -176,7 +176,7 @@ class TestTicketViews(TestCase):
 
         with self.assertLogs(logger=logger, level=logging.WARN) as cm:
             response = client.patch(
-                f"/tickets/{ticket_id}/", params, content_type="application/json"
+                f"/api/tickets/{ticket_id}/", params, content_type="application/json"
             )
 
         use_case_mock.assert_called_once_with(
@@ -190,7 +190,7 @@ class TestTicketViews(TestCase):
 
     def test_destroy(self):
         """
-        Delete /tickets/{ticket_id}/
+        Delete /api/tickets/{ticket_id}/
         """
 
         user = self.seeds.users[1]
@@ -201,14 +201,14 @@ class TestTicketViews(TestCase):
 
         ticket = Ticket.objects.filter_eq_user_relation_id(giving_relation.id).first()
 
-        response = client.delete(f"/tickets/{ticket.id}/")
+        response = client.delete(f"/api/tickets/{ticket.id}/")
 
         self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
 
     @mock.patch("tickets.use_cases.destroy_ticket.DestroyTicket.execute")
     def test_destroy_case_error(self, use_case_mock):
         """
-        Delete /tickets/{ticket_id}/
+        Delete /api/tickets/{ticket_id}/
         error case
         """
         test_log = "test_exception_log"
@@ -224,7 +224,7 @@ class TestTicketViews(TestCase):
         logger = logging.getLogger("gt_back.exception_handler")
 
         with self.assertLogs(logger=logger, level=logging.WARN) as cm:
-            response = client.delete(f"/tickets/{ticket_id}/")
+            response = client.delete(f"/api/tickets/{ticket_id}/")
 
         use_case_mock.assert_called_once_with(user=user, ticket_id=ticket_id)
 
@@ -235,7 +235,7 @@ class TestTicketViews(TestCase):
 
     def test_mark_special(self):
         """
-        Put /tickets/{ticket_id}/mark_special/
+        Put /api/tickets/{ticket_id}/mark_special/
         """
 
         user = self.seeds.users[1]
@@ -255,7 +255,9 @@ class TestTicketViews(TestCase):
         original_updated_at = ticket.updated_at
 
         response = client.put(
-            f"/tickets/{ticket.id}/mark_special/", {}, content_type="application/json"
+            f"/api/tickets/{ticket.id}/mark_special/",
+            {},
+            content_type="application/json",
         )
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
@@ -328,7 +330,7 @@ class TestTicketViews(TestCase):
         for case, condition in cases.items():
             with self.subTest(case):
                 response = client.put(
-                    f"/tickets/{condition['ticket'].id}/mark_special/",
+                    f"/api/tickets/{condition['ticket'].id}/mark_special/",
                     {},
                     content_type="application/json",
                 )
@@ -344,7 +346,7 @@ class TestTicketViews(TestCase):
     @mock.patch.object(SlackMessengerForUseTicket, "__new__")
     def test_use(self, slack_mock):
         """
-        Put /tickets/{ticket_id}/use/
+        Put /api/tickets/{ticket_id}/use/
         """
 
         user = self.seeds.users[1]
@@ -368,7 +370,7 @@ class TestTicketViews(TestCase):
         slack_mock.return_value = slack_instance_mock
 
         response = client.put(
-            f"/tickets/{ticket.id}/use/", params, content_type="application/json"
+            f"/api/tickets/{ticket.id}/use/", params, content_type="application/json"
         )
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
@@ -378,7 +380,7 @@ class TestTicketViews(TestCase):
     @mock.patch("tickets.use_cases.use_ticket.UseTicket.execute")
     def test_use_case_error(self, use_case_mock):
         """
-        Put /tickets/{ticket_id}/use/
+        Put /api/tickets/{ticket_id}/use/
         error case
         """
 
@@ -398,7 +400,9 @@ class TestTicketViews(TestCase):
 
         with self.assertLogs(logger=logger, level=logging.WARN) as cm:
             response = client.put(
-                f"/tickets/{ticket_id}/use/", params, content_type="application/json"
+                f"/api/tickets/{ticket_id}/use/",
+                params,
+                content_type="application/json",
             )
 
         self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR, response.status_code)

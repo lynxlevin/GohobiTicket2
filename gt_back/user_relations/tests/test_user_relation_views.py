@@ -15,7 +15,7 @@ class TestUserRelationViews(TestCase):
     # MYMEMO: 内容ごとに user_relations/id/tickets とかに分けるのが REST かも
     def test_retrieve(self):
         """
-        Get /user_relations/{id}
+        Get /api/user_relations/{id}
         """
 
         user = self.seeds.users[0]
@@ -23,7 +23,7 @@ class TestUserRelationViews(TestCase):
 
         client = Client()
         client.force_login(user)
-        response = client.get(f"/user_relations/{user_relation.id}/")
+        response = client.get(f"/api/user_relations/{user_relation.id}/")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
 
@@ -32,20 +32,20 @@ class TestUserRelationViews(TestCase):
 
     def test_retrieve_not_authenticated(self):
         """
-        Get /user_relations/{id}
+        Get /api/user_relations/{id}
         403 Forbidden: when not logged in
         """
 
         user_relation = self.seeds.user_relations[2]
 
         client = Client()
-        response = client.get(f"/user_relations/{user_relation.id}/")
+        response = client.get(f"/api/user_relations/{user_relation.id}/")
 
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
     def test_retrieve_non_related_user(self):
         """
-        Get /user_relations/{id}
+        Get /api/user_relations/{id}
         403 Forbidden: when wrong login
         """
 
@@ -56,6 +56,6 @@ class TestUserRelationViews(TestCase):
 
         client = Client()
         client.force_login(user)
-        response = client.get(f"/user_relations/{other_relation.id}/")
+        response = client.get(f"/api/user_relations/{other_relation.id}/")
 
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
