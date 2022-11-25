@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "release.apps.ReleaseConfig",
     "tickets.apps.TicketsConfig",
     "user_relations.apps.UserRelationsConfig",
     "user_settings.apps.UserSettingsConfig",
@@ -189,10 +188,6 @@ LOGGING = {
             "propagate": False,
         },
         "gt_back": {
-            "handlers": ["file"],
-            "level": "DEBUG",
-        },
-        "release": {
             "handlers": ["file"],
             "level": "DEBUG",
         },
