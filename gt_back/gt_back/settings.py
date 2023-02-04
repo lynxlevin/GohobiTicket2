@@ -49,11 +49,9 @@ INSTALLED_APPS = [
     "user_settings.apps.UserSettingsConfig",
     "users.apps.UsersConfig",
     "sass_processor",  # MYMEMO: 不要かも
-    "corsheaders",
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -219,9 +217,3 @@ SASS_PROCESSOR_INCLUDE_FILE_PATTERN = r"^.+\.(sass|scss)$"
 SASS_PRECISION = 8
 SASS_OUTPUT_STYLE = "compressed"
 SASS_TEMPLATE_EXTS = [".html", ".haml"]
-
-# MYMEMO: 本番用の設定必要
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8080",
-    "http://localhost:8080",
-]

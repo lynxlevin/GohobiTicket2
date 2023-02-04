@@ -19,7 +19,6 @@ isort = "^5.10.1"
 libsass = "^0.21.0"
 django-compressor = "^4.1"
 django-sass-processor = "^1.2.1"
-django-cors-headers = "^3.13.0"
 
 [tool.poetry.dev-dependencies]
 
