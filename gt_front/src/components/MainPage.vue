@@ -160,7 +160,7 @@ export default {
 
         this.isGivingRelation = res.data.user_relation_info.is_giving_relation
         this.titleMessage = this.isGivingRelation ? 'あげる' : 'もらった'
-        this.ticketImage = res.data.user_relation_info.ticket_image
+        this.ticketImage = '../static/' + res.data.user_relation_info.ticket_image
         this.backgroundColor = res.data.user_relation_info.background_color
         this.relatedUserNickname = res.data.user_relation_info.related_user_nickname
         this.correspondingRelationId = res.data.user_relation_info.corresponding_relation_id
