@@ -32,8 +32,10 @@ router.register(r"user_relations", user_relation_views.UserRelationViewSet)
 
 urlpatterns = [
     path("api/", include(router.urls)),
+    path("user/", include("users.urls")),
     path("admin/", admin.site.urls),
     path("", index_view, name="index"),
     path("release/", index_view, name="index"),
+    path("login", index_view, name="index"),
     path("user_relations/<int:pk>", index_view, name="index"),
 ]

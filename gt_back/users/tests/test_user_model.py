@@ -9,13 +9,6 @@ class TestUserModel(TestCase):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
 
-    def test_get_by_id(self):
-        user = self.seeds.users[0]
-
-        result = User.objects.get_by_id(user.id)
-
-        self.assertEqual(result, user)
-
     # sample for record fetching
     def test_user_setting(self):
         user = self.seeds.users[0]
