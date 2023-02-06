@@ -6,9 +6,9 @@
                 <input autofocus="autofocus" autocomplete="email" type="email" value=""id="user_email">
             </div> -->
             <div class="field">
-                <label class="label" for="username">Username</label>
+                <label class="label" for="email">Username</label>
                 <div class="control">
-                  <input class="input" v-model="username" autofocus="autofocus" autocomplete="username" type="text" value="" id="username">
+                  <input class="input" v-model="email" autofocus="autofocus" autocomplete="email" type="text" value="" id="email">
                 </div>
             </div>
 
@@ -39,7 +39,7 @@ export default {
   name: 'Login',
   data: function () {
     return {
-      username: '',
+      email: '',
       password: '',
       errorMessage: ''
     }
@@ -50,7 +50,7 @@ export default {
   methods: {
     login () {
       const data = {
-        username: this.username,
+        email: this.email,
         password: this.password
       }
       axios

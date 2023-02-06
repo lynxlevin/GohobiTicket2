@@ -15,15 +15,15 @@ def get_csrf(request):
 @require_POST
 def login_view(request):
     data = json.loads(request.body)
-    username = data.get("username")
+    email = data.get("email")
     password = data.get("password")
 
-    if username is None or password is None:
+    if email is None or password is None:
         return JsonResponse(
-            {"detail": "Please provide username and password."}, status=400
+            {"detail": "Please provide email and password."}, status=400
         )
 
-    user = authenticate(username=username, password=password)
+    user = authenticate(email=email, password=password)
 
     if user is None:
         return JsonResponse({"detail": "Wrong email or password"}, status=400)
