@@ -1,18 +1,22 @@
 <template>
-    <div>
-        <form action="/user/login/" accept-charset="UTF-8" method="post">
+    <div style="background-color: rgb(250, 255, 255); height: 100vh;" class="container is-max-desktop has-text-centered">
+        <form class="section block" action="/user/login/" accept-charset="UTF-8" method="post">
             <!-- <div class="field">
                 <label for="user_email">Email</label><br>
                 <input autofocus="autofocus" autocomplete="email" type="email" value=""id="user_email">
             </div> -->
             <div class="field">
-                <label for="username">Username</label><br>
-                <input v-model="username" autofocus="autofocus" autocomplete="username" type="text" value="" id="username">
+                <label class="label" for="username">Username</label>
+                <div class="control">
+                  <input class="input" v-model="username" autofocus="autofocus" autocomplete="username" type="text" value="" id="username">
+                </div>
             </div>
 
             <div class="field">
-                <label for="password">Password</label><br>
-                <input v-model="password" autocomplete="current-password" type="password" id="password">
+                <label class="label" for="password">Password</label>
+                <div class="control">
+                  <input class="input" v-model="password" autocomplete="current-password" type="password" id="password">
+                </div>
             </div>
 
             <!-- <div class="field">
@@ -21,7 +25,7 @@
             </div> -->
 
             <div class="actions">
-                <button type="button" @click="login" class="button is-small">
+                <button type="button" @click="login" class="button">
                     Log in
                 </button>
             </div>
