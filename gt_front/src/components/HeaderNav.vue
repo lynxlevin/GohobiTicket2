@@ -39,10 +39,9 @@
         <router-link to="/release" class="navbar-item">
           更新履歴
         </router-link>
-        <!-- MYMEMO: implement authorization -->
         <div class="navbar-item">
           <div class="buttons">
-            <a href="/users/sign_out" rel="nofollow" data-method="DELETE" class="button is-light">ログアウト</a>
+            <button @click="logout" class="button is-light">ログアウト</button>
           </div>
         </div>
       </div>
@@ -51,6 +50,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   props: [
     'relatedUserNickname',
@@ -79,6 +80,11 @@ export default {
           this.relatedUserNickname +
           'に' +
           (this.isGivingRelation ? 'もらったチケットを見る' : 'チケットをあげる')
+    },
+    logout () {
+      axios.get('/user/logout').then(() => {
+        this.$router.push('/login')
+      })
     }
   }
 }
