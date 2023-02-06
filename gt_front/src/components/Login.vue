@@ -53,12 +53,10 @@ export default {
         username: this.username,
         password: this.password
       }
-      console.log(data)
-      console.log(utils.getCsrfHeader())
       axios
         .post('/user/login/', data, utils.getCsrfHeader())
         .then((response) => {
-
+          this.$router.push(response.data.default_page)
         })
     }
   }

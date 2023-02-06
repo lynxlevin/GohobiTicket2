@@ -29,4 +29,6 @@ def login_view(request):
         return JsonResponse({"detail": "Invalid credentials."}, status=400)
 
     login(request, user)
-    return JsonResponse({"detail": "Successfully logged in."})
+
+    default_page = user.usersetting.default_page
+    return JsonResponse({"default_page": default_page})
