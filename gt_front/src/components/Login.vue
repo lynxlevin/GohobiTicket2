@@ -46,6 +46,11 @@ export default {
   },
   mounted: function () {
     axios.get('/user/csrf/')
+    axios.get('/user/session').then(response => {
+      if (response.data.is_authenticated) {
+        this.$router.push(response.data.default_page)
+      }
+    })
   },
   methods: {
     login () {
@@ -55,7 +60,7 @@ export default {
       }
       axios
         .post('/user/login/', data, utils.getCsrfHeader())
-        .then((response) => {
+        .then(response => {
           this.$router.push(response.data.default_page)
         })
         .catch(error => {
