@@ -131,13 +131,8 @@ export default {
     this.$watch(
       () => this.$route.params,
       (toParams, _prev) => {
-        if (this.$route.path === '/') {
-          // MYMEMO: 間に合わせのさく。初期ページURL をとってくる API が必要
-          this.$router.push('user_relations/1')
-        } else {
-          this.userRelationId = toParams.relationId
-          this.getInitialData()
-        }
+        this.userRelationId = toParams.relationId
+        this.getInitialData()
       },
       { immediate: true }
     )
@@ -149,7 +144,7 @@ export default {
   },
   methods: {
     getInitialData () {
-      axios.get(`/api/user_relations/${this.userRelationId}/`).then((res) => {
+      axios.get(`/api/user_relations/${this.userRelationId}/`).then(res => {
         this.userRelationInfo = res.data.user_relation_info
         this.otherReceivingRelations = res.data.other_receiving_relations
         this.availableTickets = res.data.available_tickets
@@ -164,6 +159,10 @@ export default {
         this.backgroundColor = res.data.user_relation_info.background_color
         this.relatedUserNickname = res.data.user_relation_info.related_user_nickname
         this.correspondingRelationId = res.data.user_relation_info.corresponding_relation_id
+      }).catch(err => {
+        if (err.response.status === 403) {
+          this.$router.push('/login')
+        }
       })
     },
     updateScrollPosition () {

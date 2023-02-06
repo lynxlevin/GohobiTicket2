@@ -7,7 +7,7 @@ import Login from '@/components/Login'
 Vue.use(Router)
 
 const routes = [
-  {path: '/', component: MainPage},
+  {path: '/', component: Login},
   {path: '/user_relations/:relationId', component: MainPage},
   {path: '/release', component: Release},
   {path: '/login', component: Login}

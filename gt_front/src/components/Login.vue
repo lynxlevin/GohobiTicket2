@@ -1,6 +1,6 @@
 <template>
     <div style="background-color: rgb(250, 255, 255); height: 100vh;" class="container is-max-desktop has-text-centered">
-        <form class="section block" action="/user/login/" accept-charset="UTF-8" method="post">
+        <form class="section block" accept-charset="UTF-8">
             <!-- <div class="field">
                 <label for="user_email">Email</label><br>
                 <input autofocus="autofocus" autocomplete="email" type="email" value=""id="user_email">
@@ -46,7 +46,7 @@ export default {
   },
   mounted: function () {
     axios.get('/user/csrf/')
-    axios.get('/user/session').then(response => {
+    axios.get('/user/session/').then(response => {
       if (response.data.is_authenticated) {
         this.$router.push(response.data.default_page)
       }
