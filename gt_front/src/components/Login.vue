@@ -19,10 +19,9 @@
                 </div>
             </div>
 
-            <!-- <div class="field">
-                <input type="hidden" value="0" autocomplete="off"><input type="checkbox" value="1" id="user_remember_me">
-                <label for="user_remember_me">Remember me</label>
-            </div> -->
+            <div class="box has-text-danger" v-if="errorMessage !== ''">
+              {{ errorMessage }}
+            </div>
 
             <div class="actions">
                 <button type="button" @click="login" class="button">
@@ -41,7 +40,8 @@ export default {
   data: function () {
     return {
       username: '',
-      password: ''
+      password: '',
+      errorMessage: ''
     }
   },
   mounted: function () {
@@ -57,6 +57,9 @@ export default {
         .post('/user/login/', data, utils.getCsrfHeader())
         .then((response) => {
           this.$router.push(response.data.default_page)
+        })
+        .catch(error => {
+          this.errorMessage = error.response.data.detail
         })
     }
   }
