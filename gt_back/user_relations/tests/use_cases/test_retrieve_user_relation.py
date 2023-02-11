@@ -51,12 +51,12 @@ class TestUserRelationViews(TestCase):
                 },
             ],
             "available_tickets": [
-                *self.seeds.tickets[0:4],
-                *self.seeds.tickets[8:12],
+                *self.seeds.tickets[8:12][::-1],
+                *self.seeds.tickets[0:4][::-1],
             ],
             "used_tickets": [
-                *self.seeds.tickets[4:8],
-                *self.seeds.tickets[12:16],
+                *self.seeds.tickets[12:16][::-1],
+                *self.seeds.tickets[4:8][::-1],
             ],
             "all_ticket_count": 16,
             "available_ticket_count": 8,

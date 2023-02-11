@@ -90,7 +90,7 @@ class RetrieveUserRelation:
         available_tickets = list(
             Ticket.objects.filter_eq_user_relation_id(user_relation_id)
             .filter_unused_tickets()
-            .order_by("-gift_date", "id")
+            .order_by("-gift_date", "-id")
             .all()
         )
         return available_tickets
@@ -99,7 +99,7 @@ class RetrieveUserRelation:
         used_tickets = list(
             Ticket.objects.filter_eq_user_relation_id(user_reltaion_id)
             .filter_used_tickets()
-            .order_by("-gift_date", "id")
+            .order_by("-gift_date", "-id")
             .all()
         )
         return used_tickets
