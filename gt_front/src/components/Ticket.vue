@@ -247,11 +247,8 @@ export default {
   },
   methods: {
     deleteTicket () {
-      const formData = new FormData()
-      formData.append('_method', 'delete')
-      formData.append('authenticity_token', this.csrfToken)
       axios
-        .post(`/api/tickets/${this.ticket.id}/`, formData)
+        .delete(`/api/tickets/${this.ticket.id}/`, utils.getCsrfHeader())
         .then(() => {
           this.$el.style = 'display: none;' // 応急処置
           // 付与⇨削除すると、正規のコンポーネントではないので、以下の３行が動かない。
@@ -260,7 +257,8 @@ export default {
           this.$destroy()
         })
         .catch((error) => {
-          console.log(error)
+          this.errorCode = error.response.status
+          this.errorMessage = error.response.data
         })
     },
     async updateDraftTicket () {
