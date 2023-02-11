@@ -281,19 +281,7 @@ export default {
     },
     postTicket () {
       const data = {ticket: {description: this.editedDescription, status: 'unread'}}
-      axios
-        .patch(`/api/tickets/${this.ticket.id}/`, data, utils.getCsrfHeader())
-        .then(() => {
-          this.$set(this.ticket, 'description', this.editedDescription)
-          this.$set(this.ticket, 'status', 'unread')
-        })
-        .catch((error) => {
-          this.errorCode = error.response.status
-          this.errorMessage = error.response.data
-        })
-        .finally(() => {
-          this.deactivateModal('isEditModalActive')
-        })
+      this.partialUpdateTicket(data)
     },
     async submitSpecialTicket () {
       await axios.put(`/api/tickets/${this.ticket.id}/mark_special/`, {}, utils.getCsrfHeader())
@@ -310,24 +298,23 @@ export default {
       this.postTicket()
     },
     async editTicket () {
-      const formData = new FormData()
-      formData.append('_method', 'put')
-      formData.append('authenticity_token', this.csrfToken)
-      formData.append('ticket[description]', this.editedDescription)
-      formData.append(
-        'ticket[status]',
-        this.ticket.status === 'unread' ? 'unread' : 'edited'
-      )
-      await axios
-        .post(`/api/tickets/${this.ticket.id}/`, formData)
+      const status = this.ticket.status === 'unread' ? 'unread' : 'edited'
+      const data = {ticket: {description: this.editedDescription, status}}
+      this.partialUpdateTicket(data)
+    },
+    partialUpdateTicket (data) {
+      axios
+        .patch(`/api/tickets/${this.ticket.id}/`, data, utils.getCsrfHeader())
         .then(() => {
           this.$set(this.ticket, 'description', this.editedDescription)
         })
         .catch((error) => {
-          this.errorCode = error.response.data.status
-          this.errorMessage = error.response.data.error
+          this.errorCode = error.response.status
+          this.errorMessage = error.response.data
         })
-      this.deactivateModal('isEditModalActive')
+        .finally(() => {
+          this.deactivateModal('isEditModalActive')
+        })
     },
     openEdit () {
       this.editedDescription = this.ticket.description

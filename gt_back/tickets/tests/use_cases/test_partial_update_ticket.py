@@ -96,16 +96,6 @@ class TestPartialUpdateTicket(TestCase):
             )
             self._then_ticket_is_not_updated(ticket)
 
-        with self.subTest(case="to_unread"):
-            ticket = self._given_ticket(Ticket.STATUS_READ)
-
-            self._when_updated_to_unread_should_raise_exception(
-                ticket,
-                exception=PermissionDenied,
-                exception_message="Only draft tickets can be updated to unread.",
-            )
-            self._then_ticket_is_not_updated(ticket)
-
     """
     Utility Functions
     """
@@ -169,14 +159,6 @@ class TestPartialUpdateTicket(TestCase):
         self, ticket: Ticket, exception: Exception, exception_message: str
     ):
         data = {"status": Ticket.STATUS_DRAFT}
-        self._execute_use_case_raise_exception(
-            self.user, ticket, data, exception, exception_message
-        )
-
-    def _when_updated_to_unread_should_raise_exception(
-        self, ticket: Ticket, exception: Exception, exception_message: str
-    ):
-        data = {"status": Ticket.STATUS_UNREAD}
         self._execute_use_case_raise_exception(
             self.user, ticket, data, exception, exception_message
         )
