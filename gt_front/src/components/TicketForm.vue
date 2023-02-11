@@ -107,6 +107,10 @@ export default {
     createTicket () {
       this.postData('/api/tickets/', this.prepareFormData())
     },
+    saveDraft () {
+      const isDraft = true
+      this.postData('/api/tickets/', this.prepareFormData(isDraft))
+    },
     submitSpecialTicket () {
       // FIXME: 特別チケット枠がない場合に普通のチケットができてしまう
       const formData = this.prepareFormData()
@@ -135,25 +139,25 @@ export default {
         this.deactivateModal()
       })
     },
-    saveDraft () {
-      const formData = this.prepareFormData()
-      this.postData('/api/tickets/draft/', formData)
-    },
-    prepareFormData () {
-      return {
+    prepareFormData (isDraft = false) {
+      const data = {
         ticket: {
           gift_date: this.gift_date.toISOString().slice(0, 10),
           description: this.description,
           user_relation_id: this.userRelationId
         }
       }
+      if (isDraft) {
+        data.ticket.status = 'draft'
+      }
+      return data
     },
     postData (url, data) {
       axios
         .post(url, data, utils.getCsrfHeader())
         .then((response) => {
           this.addTicketComponent(response.data)
-          this.$store.dispatch('addTicket')
+          this.$store.dispatch('addTicket') // MYMEMO: draft の時は発火したくない
           this.resetForm()
         })
         .catch((error) => {
