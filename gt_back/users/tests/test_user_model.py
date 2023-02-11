@@ -14,7 +14,7 @@ class TestUserModel(TestCase):
         user = self.seeds.users[0]
         expected = self.seeds.user_settings[0]
 
-        result = user.usersetting_set.first()
+        result = user.usersetting
 
         self.assertEqual(result, expected)
 
