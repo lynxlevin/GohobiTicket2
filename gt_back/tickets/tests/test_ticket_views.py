@@ -129,8 +129,6 @@ class TestTicketViews(TestCase):
 
         uri = f"/api/tickets/{ticket.id}/mark_special/"
 
-        original_updated_at = ticket.updated_at
-
         response = self._send_put_request(self.user, uri, {})
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
@@ -139,7 +137,6 @@ class TestTicketViews(TestCase):
 
         ticket.refresh_from_db()
         self.assertTrue(ticket.is_special)
-        self.assertNotEqual(original_updated_at, ticket.updated_at)
 
     def test_mark_special_case_error__multiple_special_tickets_in_month(self):
         second_special_ticket_in_month = self.seeds.tickets[16]

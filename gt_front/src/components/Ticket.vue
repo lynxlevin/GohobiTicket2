@@ -261,71 +261,53 @@ export default {
           this.errorMessage = error.response.data
         })
     },
-    async updateDraftTicket () {
-      const formData = new FormData()
-      formData.append('_method', 'put')
-      formData.append('authenticity_token', this.csrfToken)
-      formData.append('ticket[description]', this.editedDescription)
-      await axios
-        .post(`/api/tickets/draft/${this.ticket.id}/`, formData)
+    updateDraftTicket () {
+      const data = {ticket: {description: this.editedDescription}}
+      axios
+        .patch(`/api/tickets/${this.ticket.id}/`, data, utils.getCsrfHeader())
         .then(() => {
           this.$set(this.ticket, 'description', this.editedDescription)
         })
         .catch((error) => {
-          this.errorCode = error.response.data.status
-          this.errorMessage = error.response.data.error
+          this.errorCode = error.response.status
+          this.errorMessage = error.response.data
         })
-      this.deactivateModal('isEditModalActive')
+        .finally(() => {
+          this.deactivateModal('isEditModalActive')
+        })
     },
     submitDraft () {
       this.toBeSpecial ? this.activateModal('isSpecialModalActive') : this.postTicket()
     },
-    async postTicket () {
-      const formData = new FormData()
-      formData.append('_method', 'put')
-      formData.append('authenticity_token', this.csrfToken)
-      formData.append('ticket[description]', this.editedDescription)
-      await axios
-        .post(`/api/tickets/draft/${this.ticket.id}/post/`, formData)
+    postTicket () {
+      const data = {ticket: {description: this.editedDescription, status: 'unread'}}
+      axios
+        .patch(`/api/tickets/${this.ticket.id}/`, data, utils.getCsrfHeader())
         .then(() => {
           this.$set(this.ticket, 'description', this.editedDescription)
           this.$set(this.ticket, 'status', 'unread')
         })
         .catch((error) => {
-          this.errorCode = error.response.data.status
-          this.errorMessage = error.response.data.error
+          this.errorCode = error.response.status
+          this.errorMessage = error.response.data
         })
-      this.deactivateModal('isEditModalActive')
+        .finally(() => {
+          this.deactivateModal('isEditModalActive')
+        })
     },
     async submitSpecialTicket () {
-      const formData2 = new FormData()
-      formData2.append('_method', 'put')
-      formData2.append('authenticity_token', this.csrfToken)
-      await axios.post(`/api/tickets/${this.ticket.id}/mark_special/`, formData2)
-        .then(async _response => {
-          const formData = new FormData()
-          formData.append('_method', 'put')
-          formData.append('authenticity_token', this.csrfToken)
-          formData.append('ticket[description]', this.editedDescription)
-          await axios.post(`/api/tickets/draft/${this.ticket.id}/post/`, formData)
-            .then(() => {
-              this.$set(this.ticket, 'description', this.editedDescription)
-              this.$set(this.ticket, 'status', 'unread')
-              this.$set(this.ticket, 'is_special', true)
-            }).catch(error => {
-              this.errorCode = error.response.data.status
-              this.errorMessage = error.response.data.error
-            })
+      await axios.put(`/api/tickets/${this.ticket.id}/mark_special/`, {}, utils.getCsrfHeader())
+        .then(_ => {
+          this.ticket.is_special = true
         })
-        .catch((error) => {
-          this.updateDraftTicket()
-          this.errorCode = error.response.data.status
-          this.errorMessage = error.response.data.error
+        .catch(error => {
+          this.errorCode = error.response.status
+          this.errorMessage = error.response.data
         })
         .finally(() => {
           this.deactivateModal('isSpecialModalActive')
-          this.deactivateModal('isEditModalActive')
         })
+      this.postTicket()
     },
     async editTicket () {
       const formData = new FormData()

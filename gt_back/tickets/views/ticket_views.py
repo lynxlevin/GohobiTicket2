@@ -106,7 +106,7 @@ class TicketViewSet(viewsets.GenericViewSet):
             return Response(data, status=HTTP_403_FORBIDDEN)
 
         ticket.is_special = True
-        ticket.save()
+        ticket.save(update_fields=["is_special"])
 
         serializer = TicketIdResponseSerializer({"id": ticket.id})
         return Response(serializer.data, status=HTTP_202_ACCEPTED)
