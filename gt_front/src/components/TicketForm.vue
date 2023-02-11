@@ -11,6 +11,7 @@
             calendar-class='formDatePicker'
             input-class="formDatePickerInput"
             name="ticket[gift_date]"
+            @input="checkSpecialTicketAvailability"
           ></Datepicker>
         </div>
       </div>
@@ -27,8 +28,8 @@
       </div>
 
       <div class="field">
-        <label class="label">
-          <input type="checkbox" v-model="toBeSpecial" />
+        <label class="label" :class="{'disabled': !isSpecialTicketAvailable}">
+          <input type="checkbox" v-model="toBeSpecial" :disabled="!isSpecialTicketAvailable" />
           特別チケットにする
         </label>
       </div>
@@ -94,7 +95,8 @@ export default {
       errorCode: '',
       errorMessage: '',
       toBeSpecial: false,
-      isModalActive: false
+      isModalActive: false,
+      isSpecialTicketAvailable: true
     }
   },
   mounted: function () {
@@ -105,15 +107,29 @@ export default {
       this.toBeSpecial ? this.activateModal() : this.createTicket()
     },
     createTicket () {
-      this.postData('/api/tickets/', this.prepareFormData())
+      this.postData('/api/tickets/', this.prepareData())
     },
     saveDraft () {
       const isDraft = true
-      this.postData('/api/tickets/', this.prepareFormData(isDraft))
+      this.postData('/api/tickets/', this.prepareData(isDraft))
+    },
+    checkSpecialTicketAvailability () {
+      const year = this.gift_date.getFullYear()
+      const month = this.gift_date.getMonth() + 1
+      const url = `/api/user_relations/${this.userRelationId}/special_ticket_availability/?year=${year}&month=${month}`
+      axios
+        .get(url)
+        .then((response) => {
+          this.isSpecialTicketAvailable = response.data
+        })
+        .catch((error) => {
+          this.errorCode = error.response.status
+          this.errorMessage = error.response.data
+        })
     },
     submitSpecialTicket () {
       // FIXME: 特別チケット枠がない場合に普通のチケットができてしまう
-      const formData = this.prepareFormData()
+      const formData = this.prepareData()
       axios.post('/api/tickets/', formData).then(response => {
         const data = response.data
         const formData2 = new FormData()
@@ -139,7 +155,7 @@ export default {
         this.deactivateModal()
       })
     },
-    prepareFormData (isDraft = false) {
+    prepareData (isDraft = false) {
       const data = {
         ticket: {
           gift_date: this.gift_date.toISOString().slice(0, 10),
@@ -201,27 +217,30 @@ export default {
 
 <style>
 .absolute-right {
-    position: absolute;
-    top: 0;
-    right: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 .formDatePicker {
-    top: 100%;
-    left: 50%;
-    transform: translate(-50%, 0%);
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 0%);
 }
 .formDatePickerInput {
-    border-radius: 4px;
-    color: #363636;
-    border: 1px solid #dbdbdb;
-    font-size: 1rem;
-    height: 2.5em;
-    line-height: 1.5;
-    padding-bottom: calc(0.5em - 1px);
-    padding-left: calc(0.75em - 1px);
-    padding-right: calc(0.75em - 1px);
-    padding-top: calc(0.5em - 1px);
-    vertical-align: top;
-    box-shadow: inset 0 0.0625em 0.125em rgba(10, 10, 10, 0.05);
+  border-radius: 4px;
+  color: #363636;
+  border: 1px solid #dbdbdb;
+  font-size: 1rem;
+  height: 2.5em;
+  line-height: 1.5;
+  padding-bottom: calc(0.5em - 1px);
+  padding-left: calc(0.75em - 1px);
+  padding-right: calc(0.75em - 1px);
+  padding-top: calc(0.5em - 1px);
+  vertical-align: top;
+  box-shadow: inset 0 0.0625em 0.125em rgba(10, 10, 10, 0.05);
+}
+.disabled {
+  color: #dbdbdb;
 }
 </style>
