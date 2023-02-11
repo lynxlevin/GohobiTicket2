@@ -138,8 +138,6 @@ export default {
     )
   },
   mounted: function () {
-    this.$store.state.availableTicketCount = this.availableTicketCount
-    this.$store.state.allTicketCount = this.allTicketCount
     window.addEventListener('scroll', _.debounce(this.updateScrollPosition, 100))
   },
   methods: {
@@ -151,6 +149,8 @@ export default {
         this.usedTickets = res.data.used_tickets
         this.allTicketCount = res.data.all_ticket_count
         this.availableTicketCount = res.data.available_ticket_count
+        this.$store.state.allTicketCount = this.allTicketCount
+        this.$store.state.availableTicketCount = this.availableTicketCount
         this.apiAccessed = true
 
         this.isGivingRelation = res.data.user_relation_info.is_giving_relation
