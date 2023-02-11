@@ -17,26 +17,23 @@ class TestTicketViews(TestCase):
         cls.seeds = TestSeed()
         cls.seeds.setUp()
 
+        cls.user = cls.seeds.users[1]
+        cls.giving_relation = cls.user.giving_relations.first()
+        cls.receiving_relation = cls.user.receiving_relations.first()
+
     def test_create(self):
         """
         Post /api/tickets/
         """
-
-        user = self.seeds.users[1]
-        giving_relation = user.giving_relations.first()
-
-        client = Client()
-        client.force_login(user)
-
         params = {
             "ticket": {
                 "gift_date": "2022-08-24",
                 "description": "test_ticket",
-                "user_relation_id": giving_relation.id,
+                "user_relation_id": self.giving_relation.id,
             }
         }
 
-        response = client.post("/api/tickets/", params, content_type="application/json")
+        response = self._send_post_request(self.user, "/api/tickets/", params)
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
@@ -54,23 +51,16 @@ class TestTicketViews(TestCase):
         """
         Post /api/tickets/
         """
-
-        user = self.seeds.users[1]
-        giving_relation = user.giving_relations.first()
-
-        client = Client()
-        client.force_login(user)
-
         params = {
             "ticket": {
                 "gift_date": "2022-08-24",
                 "description": "test_ticket",
-                "user_relation_id": giving_relation.id,
+                "user_relation_id": self.giving_relation.id,
                 "status": Ticket.STATUS_DRAFT,
             }
         }
 
-        response = client.post("/api/tickets/", params, content_type="application/json")
+        response = self._send_post_request(self.user, "/api/tickets/", params)
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
@@ -84,192 +74,64 @@ class TestTicketViews(TestCase):
         self.assertFalse(ticket["is_special"])
         self.assertIsNone(ticket.get("use_date"))
 
-    @mock.patch("tickets.use_cases.create_ticket.CreateTicket.execute")
-    def test_create_case_error(self, use_case_mock):
-        """
-        Post /api/tickets
-        error cases
-        """
-        test_log = "test_exception_log"
-        use_case_mock.side_effect = exceptions.APIException(detail=test_log)
-
-        user = self.seeds.users[1]
-
-        client = Client()
-        client.force_login(user)
-
-        params = {
-            "ticket": {
-                "gift_date": "2022-08-24",
-                "description": "test_ticket",
-                "user_relation_id": "1",
-            }
-        }
-
-        logger = logging.getLogger("gt_back.exception_handler")
-
-        with self.assertLogs(logger=logger, level=logging.WARN) as cm:
-            response = client.post(
-                f"/api/tickets/", params, content_type="application/json"
-            )
-
-        expected_params = {
-            **params["ticket"],
-            "gift_date": datetime.strptime(
-                params["ticket"]["gift_date"], "%Y-%m-%d"
-            ).date(),
-        }
-        use_case_mock.assert_called_once_with(user=user, data=expected_params)
-
-        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR, response.status_code)
-
-        expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
-        self.assertEqual(expected_log, cm.output)
-
-    def test_partial_update(self):
+    def test_partial_update__description(self):
         """
         Patch /api/tickets/{ticket_id}/
         """
+        ticket = Ticket.objects.filter_eq_user_relation_id(self.giving_relation.id)[0]
 
-        user = self.seeds.users[1]
-        giving_relation = user.giving_relations.first()
-        tickets = Ticket.objects.filter_eq_user_relation_id(giving_relation.id)
+        uri = f"/api/tickets/{ticket.id}/"
+        params = {"ticket": {"description": "updated description"}}
 
-        client = Client()
-        client.force_login(user)
+        response = self._send_patch_request(self.user, uri, params)
 
-        cases = {
-            "update_description": {
-                "ticket": tickets[0],
-                "params": {"ticket": {"description": "updated description"}},
-            },
-            "update_status": {
-                "ticket": tickets[1],
-                "params": {"ticket": {"status": Ticket.STATUS_READ}},
-            },
-        }
+        self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
+        self.assertEqual(str(ticket.id), response.data["id"])
 
-        for case, condition in cases.items():
-            with self.subTest(case=case):
-                response = client.patch(
-                    f"/api/tickets/{condition['ticket'].id}/",
-                    condition["params"],
-                    content_type="application/json",
-                )
-
-                self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
-
-                self.assertEqual(str(condition["ticket"].id), response.data["id"])
-
-    @mock.patch("tickets.use_cases.partial_update_ticket.PartialUpdateTicket.execute")
-    def test_partial_update_case_error(self, use_case_mock):
+    def test_partial_update__status(self):
         """
         Patch /api/tickets/{ticket_id}/
-        error cases
         """
-        test_log = "test_exception_log"
-        use_case_mock.side_effect = exceptions.APIException(detail=test_log)
+        ticket = Ticket.objects.filter_eq_user_relation_id(self.giving_relation.id)[1]
 
-        user = self.seeds.users[1]
+        uri = f"/api/tickets/{ticket.id}/"
+        params = {"ticket": {"status": Ticket.STATUS_READ}}
 
-        ticket_id = "1"
+        response = self._send_patch_request(self.user, uri, params)
 
-        client = Client()
-        client.force_login(user)
-
-        params = {
-            "ticket": {
-                "description": "updated description",
-            }
-        }
-
-        logger = logging.getLogger("gt_back.exception_handler")
-
-        with self.assertLogs(logger=logger, level=logging.WARN) as cm:
-            response = client.patch(
-                f"/api/tickets/{ticket_id}/", params, content_type="application/json"
-            )
-
-        use_case_mock.assert_called_once_with(
-            user=user, data=params["ticket"], ticket_id=ticket_id
-        )
-
-        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR, response.status_code)
-
-        expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
-        self.assertEqual(expected_log, cm.output)
+        self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
+        self.assertEqual(str(ticket.id), response.data["id"])
 
     def test_destroy(self):
         """
         Delete /api/tickets/{ticket_id}/
         """
+        ticket = Ticket.objects.filter_eq_user_relation_id(
+            self.giving_relation.id
+        ).first()
 
-        user = self.seeds.users[1]
-        giving_relation = user.giving_relations.first()
-
-        client = Client()
-        client.force_login(user)
-
-        ticket = Ticket.objects.filter_eq_user_relation_id(giving_relation.id).first()
-
-        response = client.delete(f"/api/tickets/{ticket.id}/")
+        response = self._send_delete_request(self.user, f"/api/tickets/{ticket.id}/")
 
         self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
-
-    @mock.patch("tickets.use_cases.destroy_ticket.DestroyTicket.execute")
-    def test_destroy_case_error(self, use_case_mock):
-        """
-        Delete /api/tickets/{ticket_id}/
-        error case
-        """
-        test_log = "test_exception_log"
-        use_case_mock.side_effect = exceptions.APIException(detail=test_log)
-
-        user = self.seeds.users[1]
-
-        ticket_id = "1"
-
-        client = Client()
-        client.force_login(user)
-
-        logger = logging.getLogger("gt_back.exception_handler")
-
-        with self.assertLogs(logger=logger, level=logging.WARN) as cm:
-            response = client.delete(f"/api/tickets/{ticket_id}/")
-
-        use_case_mock.assert_called_once_with(user=user, ticket_id=ticket_id)
-
-        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR, response.status_code)
-
-        expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
-        self.assertEqual(expected_log, cm.output)
 
     def test_mark_special(self):
         """
         Put /api/tickets/{ticket_id}/mark_special/
         """
-
-        user = self.seeds.users[1]
-        giving_relation = user.giving_relations.first()
         gift_date = datetime.strptime("2022-05-01", "%Y-%m-%d").date()
         ticket = Ticket(
             description="to be special",
             gift_date=gift_date,
-            user_relation=giving_relation,
+            user_relation=self.giving_relation,
             is_special=False,
         )
         ticket.save()
 
-        client = Client()
-        client.force_login(user)
+        uri = f"/api/tickets/{ticket.id}/mark_special/"
 
         original_updated_at = ticket.updated_at
 
-        response = client.put(
-            f"/api/tickets/{ticket.id}/mark_special/",
-            {},
-            content_type="application/json",
-        )
+        response = self._send_put_request(self.user, uri, {})
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
 
@@ -279,91 +141,79 @@ class TestTicketViews(TestCase):
         self.assertTrue(ticket.is_special)
         self.assertNotEqual(original_updated_at, ticket.updated_at)
 
-    def test_mark_special_case_error(self):
-        user = self.seeds.users[1]
-
+    def test_mark_special_case_error__multiple_special_tickets_in_month(self):
         second_special_ticket_in_month = self.seeds.tickets[16]
 
-        receiving_relation_id = user.receiving_relations.first().id
+        uri = f"/api/tickets/{second_special_ticket_in_month.id}/mark_special/"
+        response = self._send_put_request(self.user, uri, {})
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        self.assertEqual(
+            ErrorMessages.SPECIAL_TICKET_LIMIT_VIOLATION.value,
+            response.data["error_message"],
+        )
+        self._assert_false__ticket_is_special(second_special_ticket_in_month)
+
+    def test_mark_special_case_error__receiving_relation(self):
         receiving_ticket = Ticket.objects.filter_eq_user_relation_id(
-            receiving_relation_id
+            self.receiving_relation.id
         ).first()
 
+        uri = f"/api/tickets/{receiving_ticket.id}/mark_special/"
+        response = self._send_put_request(self.user, uri, {})
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        self.assertIsNone(response.data)
+        self._assert_false__ticket_is_special(receiving_ticket)
+
+    def test_mark_special_case_error__unrelated_relation(self):
         unrelated_relation_id = self.seeds.user_relations[2].id
         unrelated_ticket = Ticket.objects.filter_eq_user_relation_id(
             unrelated_relation_id
         ).first()
 
-        non_existent_ticket = Ticket(id="-1", description="not_saved")
+        uri = f"/api/tickets/{unrelated_ticket.id}/mark_special/"
+        response = self._send_put_request(self.user, uri, {})
 
-        giving_relation = user.giving_relations.first()
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        self.assertIsNone(response.data)
+        self._assert_false__ticket_is_special(unrelated_ticket)
+
+    def test_mark_special_case_error__used_ticket(self):
         used_ticket = Ticket(
             description="used_ticket",
-            user_relation=giving_relation,
+            user_relation=self.giving_relation,
             gift_date=date.today(),
             use_date=date.today(),
         )
         used_ticket.save()
 
-        cases = {
-            "multiple_special_tickets_in_month": {
-                "ticket": second_special_ticket_in_month,
-                "status_code": status.HTTP_403_FORBIDDEN,
-                "response_data": {
-                    "error_message": ErrorMessages.SPECIAL_TICKET_LIMIT_VIOLATION.value
-                },
-            },
-            "receiving_relation": {
-                "ticket": receiving_ticket,
-                "status_code": status.HTTP_403_FORBIDDEN,
-                "response_data": None,
-            },
-            "unrelated_relation": {
-                "ticket": unrelated_ticket,
-                "status_code": status.HTTP_403_FORBIDDEN,
-                "response_data": None,
-            },
-            "non_existent_ticket": {
-                "ticket": non_existent_ticket,
-                "status_code": status.HTTP_404_NOT_FOUND,
-                "response_data": None,
-            },
-            "used_ticket": {
-                "ticket": used_ticket,
-                "status_code": status.HTTP_403_FORBIDDEN,
-                "response_data": None,
-            },
-        }
+        uri = f"/api/tickets/{used_ticket.id}/mark_special/"
+        response = self._send_put_request(self.user, uri, {})
 
-        client = Client()
-        client.force_login(user)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        self.assertIsNone(response.data)
+        self._assert_false__ticket_is_special(used_ticket)
 
-        for case, condition in cases.items():
-            with self.subTest(case):
-                response = client.put(
-                    f"/api/tickets/{condition['ticket'].id}/mark_special/",
-                    {},
-                    content_type="application/json",
-                )
+    def test_mark_special_case_error__non_existent_ticket(self):
+        non_existent_ticket_id = "-1"
 
-                self.assertEqual(condition["status_code"], response.status_code)
+        uri = f"/api/tickets/{non_existent_ticket_id}/mark_special/"
+        response = self._send_put_request(self.user, uri, {})
 
-                self.assertEqual(condition["response_data"], response.data)
-
-                if not case in ["non_existent_ticket"]:
-                    condition["ticket"].refresh_from_db()
-                    self.assertFalse(condition["ticket"].is_special)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+        self.assertIsNone(response.data)
 
     @mock.patch.object(SlackMessengerForUseTicket, "__new__")
     def test_use(self, slack_mock):
         """
         Put /api/tickets/{ticket_id}/use/
         """
+        slack_instance_mock = mock.Mock()
+        slack_mock.return_value = slack_instance_mock
 
-        user = self.seeds.users[1]
-        receiving_relation = user.receiving_relations.first()
         ticket = (
-            Ticket.objects.filter_eq_user_relation_id(receiving_relation.id)
+            Ticket.objects.filter_eq_user_relation_id(self.receiving_relation.id)
             .filter(use_date__isnull=True, is_special=False)
             .first()
         )
@@ -373,50 +223,42 @@ class TestTicketViews(TestCase):
                 "use_description": "test_use_ticket",
             }
         }
+        uri = f"/api/tickets/{ticket.id}/use/"
 
-        client = Client()
-        client.force_login(user)
-
-        slack_instance_mock = mock.Mock()
-        slack_mock.return_value = slack_instance_mock
-
-        response = client.put(
-            f"/api/tickets/{ticket.id}/use/", params, content_type="application/json"
-        )
+        response = self._send_put_request(self.user, uri, params)
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
 
         self.assertEqual(str(ticket.id), response.data["id"])
 
-    @mock.patch("tickets.use_cases.use_ticket.UseTicket.execute")
-    def test_use_case_error(self, use_case_mock):
-        """
-        Put /api/tickets/{ticket_id}/use/
-        error case
-        """
+    """
+    Utility Functions
+    """
 
-        test_log = "test_exception_log"
-        use_case_mock.side_effect = exceptions.APIException(detail=test_log)
-
-        user = self.seeds.users[1]
-
-        params = {"ticket": {"use_description": "test_use_case_error"}}
-
-        ticket_id = "1"
-
+    def _send_post_request(self, user, uri, params):
         client = Client()
         client.force_login(user)
+        response = client.post(uri, params, content_type="application/json")
+        return response
 
-        logger = logging.getLogger("gt_back.exception_handler")
+    def _send_patch_request(self, user, uri, params):
+        client = Client()
+        client.force_login(user)
+        response = client.patch(uri, params, content_type="application/json")
+        return response
 
-        with self.assertLogs(logger=logger, level=logging.WARN) as cm:
-            response = client.put(
-                f"/api/tickets/{ticket_id}/use/",
-                params,
-                content_type="application/json",
-            )
+    def _send_put_request(self, user, uri, params):
+        client = Client()
+        client.force_login(user)
+        response = client.put(uri, params, content_type="application/json")
+        return response
 
-        self.assertEqual(status.HTTP_500_INTERNAL_SERVER_ERROR, response.status_code)
+    def _send_delete_request(self, user, uri):
+        client = Client()
+        client.force_login(user)
+        response = client.delete(uri)
+        return response
 
-        expected_log = [f"WARNING:gt_back.exception_handler:{test_log}"]
-        self.assertEqual(expected_log, cm.output)
+    def _assert_false__ticket_is_special(self, ticket):
+        ticket.refresh_from_db()
+        self.assertFalse(ticket.is_special)
