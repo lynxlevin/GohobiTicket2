@@ -80,6 +80,7 @@ import SpecialTicketNoticeModal from './modals/SpecialTicketNoticeModal'
 import utils from '../utils'
 
 export default {
+  // MYMEMO: delete csrfToken from props
   props: ['csrfToken', 'userRelationId'],
   components: {
     Datepicker,
@@ -97,15 +98,14 @@ export default {
     }
   },
   mounted: function () {
-    this.gift_date = Date()
+    this.gift_date = new Date()
   },
   methods: {
     submit () {
-      this.toBeSpecial ? this.activateModal() : this.submitForm()
+      this.toBeSpecial ? this.activateModal() : this.createTicket()
     },
-    submitForm () {
-      const formData = this.prepareFormData()
-      this.postData('/api/tickets/', formData)
+    createTicket () {
+      this.postData('/api/tickets/', this.prepareFormData())
     },
     submitSpecialTicket () {
       // FIXME: 特別チケット枠がない場合に普通のチケットができてしまう
@@ -140,35 +140,39 @@ export default {
       this.postData('/api/tickets/draft/', formData)
     },
     prepareFormData () {
-      const formData = new FormData()
-      formData.append('ticket[gift_date]', this.gift_date)
-      formData.append('ticket[description]', this.description)
-      formData.append('ticket[user_relation_id]', this.userRelationId)
-      formData.append('authenticity_token', this.csrfToken)
-      return formData
+      return {
+        ticket: {
+          gift_date: this.gift_date.toISOString().slice(0, 10),
+          description: this.description,
+          user_relation_id: this.userRelationId
+        }
+      }
     },
-    postData (url, formData) {
+    postData (url, data) {
       axios
-        .post(url, formData)
+        .post(url, data, utils.getCsrfHeader())
         .then((response) => {
           this.addTicketComponent(response.data)
-          this.gift_date = Date()
-          this.description = ''
           this.$store.dispatch('addTicket')
-          this.errorCode = ''
-          this.errorMessage = ''
+          this.resetForm()
         })
         .catch((error) => {
-          this.errorCode = error.response.data.status
-          this.errorMessage = error.response.data.error
+          this.errorCode = error.response.status
+          this.errorMessage = error.response.data
         })
+    },
+    resetForm () {
+      this.gift_date = new Date()
+      this.description = ''
+      this.errorCode = ''
+      this.errorMessage = ''
     },
     addTicketComponent (data) {
       const ComponentClass = Vue.extend(Ticket)
       const instance = new ComponentClass({
         propsData: {
           ticket: data.ticket,
-          csrfToken: data.csrfToken,
+          csrfToken: 'dummy',
           index: data.ticket.id,
           isGivingRelation: true
         }
