@@ -33,7 +33,6 @@
         </h4>
         <div class="tickets">
           <ticket-form
-            :csrfToken="csrfToken"
             :userRelationId = "userRelationId"
             v-if="isGivingRelation"
           />

@@ -82,7 +82,7 @@ import utils from '../utils'
 
 export default {
   // MYMEMO: delete csrfToken from props
-  props: ['csrfToken', 'userRelationId'],
+  props: ['userRelationId'],
   components: {
     Datepicker,
     SpecialTicketNoticeModal
@@ -101,6 +101,7 @@ export default {
   },
   mounted: function () {
     this.gift_date = new Date()
+    this.checkSpecialTicketAvailability()
   },
   methods: {
     submit () {
@@ -128,32 +129,28 @@ export default {
         })
     },
     submitSpecialTicket () {
-      // FIXME: 特別チケット枠がない場合に普通のチケットができてしまう
-      const formData = this.prepareData()
-      axios.post('/api/tickets/', formData).then(response => {
-        const data = response.data
-        const formData2 = new FormData()
-        formData2.append('_method', 'put')
-        formData2.append('authenticity_token', this.csrfToken)
-        axios.post(`/api/tickets/${data.ticket.id}/mark_special/`, formData2).then(response => {
-          data.ticket.is_special = true
-          this.addTicketComponent(data)
-          this.gift_date = Date()
-          this.description = ''
-          this.toBeSpecial = false
-          this.$store.dispatch('addTicket')
-          this.errorCode = ''
-          this.errorMessage = ''
-        }).catch(error => {
-          this.errorCode = error.response.data.status
-          this.errorMessage = error.response.data.error
+      axios.post('/api/tickets/', this.prepareData(), utils.getCsrfHeader())
+        .then(response => {
+          const data = response.data
+          axios.put(`/api/tickets/${data.ticket.id}/mark_special/`, {}, utils.getCsrfHeader())
+            .then(_ => {
+              data.ticket.is_special = true
+              this.addTicketComponent(data)
+              this.$store.dispatch('addTicket')
+              this.resetForm()
+            })
+            .catch(error => {
+              this.errorCode = error.response.status
+              this.errorMessage = error.response.data
+            })
         })
-      }).catch(error => {
-        this.errorCode = error.response.data.status
-        this.errorMessage = error.response.data.error
-      }).finally(() => {
-        this.deactivateModal()
-      })
+        .catch(error => {
+          this.errorCode = error.response.status
+          this.errorMessage = error.response.data
+        })
+        .finally(() => {
+          this.deactivateModal()
+        })
     },
     prepareData (isDraft = false) {
       const data = {
@@ -186,13 +183,13 @@ export default {
       this.description = ''
       this.errorCode = ''
       this.errorMessage = ''
+      this.toBeSpecial = false
     },
     addTicketComponent (data) {
       const ComponentClass = Vue.extend(Ticket)
       const instance = new ComponentClass({
         propsData: {
           ticket: data.ticket,
-          csrfToken: 'dummy',
           index: data.ticket.id,
           isGivingRelation: true
         }
