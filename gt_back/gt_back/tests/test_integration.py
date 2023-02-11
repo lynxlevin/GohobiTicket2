@@ -68,11 +68,17 @@ class TestTicketViews(TestCase):
         response = client.post("/api/tickets/", params, content_type="application/json")
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
-        ticket_id = response.data["id"]
+        body = response.json()
+        ticket = body["ticket"]
 
-        TestCreateTicket()._then_ticket_is_created(ticket_id, giving_relation.id)
+        self.assertIsNotNone(ticket["id"])
+        self.assertEqual(params["ticket"]["description"], ticket["description"])
+        self.assertEqual(params["ticket"]["gift_date"], ticket["gift_date"])
+        self.assertEqual(Ticket.STATUS_UNREAD, ticket["status"])
+        self.assertFalse(ticket["is_special"])
+        self.assertIsNone(ticket.get("use_date"))
 
-        return ticket_id
+        return ticket["id"]
 
     def _list_tickets(
         self, client: Client, user_relation: UserRelation, expected_ticket: Ticket

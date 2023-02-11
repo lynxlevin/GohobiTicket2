@@ -40,8 +40,15 @@ class TestTicketViews(TestCase):
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
-        ticket_id = response.json()["id"]
-        self.assertIsNotNone(ticket_id)
+        body = response.json()
+        ticket = body["ticket"]
+
+        self.assertIsNotNone(ticket["id"])
+        self.assertEqual(params["ticket"]["gift_date"], ticket["gift_date"])
+        self.assertEqual(params["ticket"]["description"], ticket["description"])
+        self.assertEqual(Ticket.STATUS_UNREAD, ticket["status"])
+        self.assertFalse(ticket["is_special"])
+        self.assertIsNone(ticket.get("use_date"))
 
     def test_create_draft(self):
         """
@@ -67,11 +74,15 @@ class TestTicketViews(TestCase):
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
-        ticket_id = response.json()["id"]
-        self.assertIsNotNone(ticket_id)
+        body = response.json()
+        ticket = body["ticket"]
 
-        ticket = Ticket.objects.get_by_id(ticket_id)
-        self.assertEqual(Ticket.STATUS_DRAFT, ticket.status)
+        self.assertIsNotNone(ticket["id"])
+        self.assertEqual(params["ticket"]["gift_date"], ticket["gift_date"])
+        self.assertEqual(params["ticket"]["description"], ticket["description"])
+        self.assertEqual(Ticket.STATUS_DRAFT, ticket["status"])
+        self.assertFalse(ticket["is_special"])
+        self.assertIsNone(ticket.get("use_date"))
 
     @mock.patch("tickets.use_cases.create_ticket.CreateTicket.execute")
     def test_create_case_error(self, use_case_mock):

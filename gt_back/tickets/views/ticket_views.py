@@ -42,8 +42,8 @@ class TicketViewSet(viewsets.GenericViewSet):
             data = serializer.validated_data["ticket"]
             ticket = use_case.execute(user=request.user, data=data)
 
-            serializer = TicketCreateSerializer({"id": ticket.id})
-            return Response(serializer.data, status=HTTP_201_CREATED)
+            serializer = self.get_serializer(ticket)
+            return Response({"ticket": serializer.data}, status=HTTP_201_CREATED)
 
         except Exception as exc:
             return exception_handler_with_logging(exc)
