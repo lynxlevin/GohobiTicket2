@@ -325,16 +325,10 @@ export default {
       this.deactivateModal('isEditModalActive')
     },
     readTicket () {
-      const formData = new FormData()
-      formData.append('_method', 'put')
-      formData.append('authenticity_token', this.csrfToken)
-      formData.append('ticket[status]', 'read')
       axios
-        .post(`/api/tickets/${this.ticket.id}/`, formData)
-        .then((response) => {
-          if (response.data.ticket.status === 'read') {
-            this.markedRead = true
-          }
+        .put(`/api/tickets/${this.ticket.id}/read/`, {}, utils.getCsrfHeader())
+        .then(() => {
+          this.markedRead = true
         })
         .catch((error) => {
           console.log(error)
