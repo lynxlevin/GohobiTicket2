@@ -1,9 +1,8 @@
-import logging
 from datetime import date, datetime
 from unittest import mock
 
 from django.test import Client, TestCase
-from rest_framework import exceptions, status
+from rest_framework import status
 from tickets.models import Ticket
 from tickets.test_utils.test_seeds import TestSeed
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
@@ -227,6 +226,23 @@ class TestTicketViews(TestCase):
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
 
         self.assertEqual(str(ticket.id), response.data["id"])
+
+    def test_read_ticket(self):
+        """
+        Put /api/tickets/{ticket_id}/read/
+        """
+        unread_ticket = self.seeds.tickets[0]
+
+        uri = f"/api/tickets/{unread_ticket.id}/read/"
+
+        response = self._send_put_request(self.user, uri, {})
+
+        self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
+
+        self.assertEqual(str(unread_ticket.id), response.data["id"])
+
+        unread_ticket.refresh_from_db()
+        self.assertEqual(Ticket.STATUS_READ, unread_ticket.status)
 
     """
     Utility Functions

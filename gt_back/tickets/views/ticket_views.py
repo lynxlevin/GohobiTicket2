@@ -19,6 +19,7 @@ from tickets.use_cases import (
     DestroyTicket,
     PartialUpdateTicket,
     UseTicket,
+    ReadTicket,
 )
 from tickets.utils import _is_none, _is_not_giving_user, _is_used
 
@@ -77,7 +78,7 @@ class TicketViewSet(viewsets.GenericViewSet):
 
     @action(detail=True, methods=["put"])
     def mark_special(self, request, format=None, pk=None):
-        logger.info("MarkSpecialTicket", extra={"request.data": request.data, "pk": pk})
+        logger.info("MarkSpecialTicket", extra={"pk": pk})
 
         ticket = Ticket.objects.get_by_id(pk)
 
@@ -125,5 +126,15 @@ class TicketViewSet(viewsets.GenericViewSet):
 
             return Response(serializer.data, status=HTTP_202_ACCEPTED)
 
+        except Exception as exc:
+            return exception_handler_with_logging(exc)
+
+    @action(detail=True, methods=["put"])
+    def read(self, request, use_case=ReadTicket(), format=None, pk=None):
+        try:
+            ticket = use_case.execute(request.user, pk)
+
+            serializer = TicketIdResponseSerializer({"id": ticket.id})
+            return Response(serializer.data, status=HTTP_202_ACCEPTED)
         except Exception as exc:
             return exception_handler_with_logging(exc)
