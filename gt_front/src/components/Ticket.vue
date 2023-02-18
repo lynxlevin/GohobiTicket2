@@ -10,7 +10,7 @@
         }"
         style="margin-bottom: 25px"
     >
-        <div v-if="isGivingRelation">
+        <div v-if="isGivingRelation" style="width: 100%">
           <div class="has-text-danger" v-if="errorMessage !== ''">{{ errorCode }} {{ errorMessage }}</div>
           <div class="tag is-info tag-used" v-if="ticket.use_date !== null">使用済み</div>
           <div class="tag-draft" v-if="ticket.status === 'draft'">Draft</div>
@@ -130,7 +130,7 @@
               :submitSpecialTicket="submitSpecialTicket"
           />
         </div>
-        <div v-if="!isGivingRelation">
+        <div v-if="!isGivingRelation" style="width: 100%">
           <div class="tag is-info tag-used" v-if="ticket.use_date !== null">使用済み</div>
           <div
               class="tag is-success"
