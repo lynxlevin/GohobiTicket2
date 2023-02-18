@@ -28,6 +28,7 @@
           </div>
         </div>
 
+        <div class="box has-text-danger" v-if="errorMessage !== ''">{{ errorCode }}<br>{{ errorMessage }}</div>
         <div class="field has-text-centered">
           <div class="control">
             <button
@@ -67,7 +68,9 @@ export default {
   data: function () {
     return {
       used: false,
-      use_description: ''
+      use_description: '',
+      errorCode: '',
+      errorMessage: ''
     }
   },
   computed: {
@@ -81,11 +84,8 @@ export default {
   },
   methods: {
     submitForm () {
-      const formData = new FormData()
-      formData.append('ticket[use_description]', this.use_description)
-      formData.append('authenticity_token', this.csrfToken)
-      axios
-        .post(`/api/tickets/${this.ticket.id}/use/`, formData)
+      const data = {ticket: {use_description: this.use_description}}
+      axios.put(`/api/tickets/${this.ticket.id}/use/`, data, utils.getCsrfHeader())
         .then(() => {
           this.$store.dispatch('useTicket')
           this.$set(this.ticket, 'use_date', Date())
@@ -93,8 +93,9 @@ export default {
           this.used = true
           utils.removeIsHidden('#logo')
         })
-        .catch((error) => {
-          console.log(error)
+        .catch(error => {
+          this.errorCode = error.response.status
+          this.errorMessage = error.response.data
         })
     }
   }
