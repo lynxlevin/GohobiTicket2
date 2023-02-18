@@ -93,10 +93,6 @@ export default {
     color: #2a2a2a;
     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.4);
     border: none;
-    /* MYMEMO: implement this */
-    /* &.ticket-wrapper--unread {
-        border: none;
-    } */
 }
 .ticket-wrapper.special-ticket .button.is-light {
     background: rgba(255, 255, 255, 0.5);

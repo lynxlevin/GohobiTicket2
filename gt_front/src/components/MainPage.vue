@@ -108,7 +108,7 @@ export default {
       searchErrorMessage: '',
       isLogoFixed: false,
       isSearchModalActive: false,
-      userRelationId: 0, // MYMEMO: get from url
+      userRelationId: 0,
       apiAccessed: false,
       userRelationInfo: {},
       otherReceivingRelations: [],
@@ -125,6 +125,7 @@ export default {
     }
   },
   created: function () {
+    // MYMEMO: ページ遷移で一番上へスクロール
     this.$watch(
       () => this.$route.params,
       (toParams, _prev) => {
