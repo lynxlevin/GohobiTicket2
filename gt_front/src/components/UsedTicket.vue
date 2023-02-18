@@ -2,6 +2,9 @@
   <div
     :id="'ticket' + ticket.id"
     class="columns box is-relative ticket-wrapper"
+    :class="{
+      'special-ticket': ticket.is_special,
+    }"
     style="margin-bottom: 25px"
   >
     <div class="tag is-info tag-used">
