@@ -54,7 +54,8 @@
             </span>
           </div>
         </transition>
-        <!-- TODO: 独自コンポーネントにする -->
+        <!-- MYMEMO: 独自コンポーネントにする -->
+        <!-- MYMEMO: スペシャルチケット検索もつけたい -->
         <modal
           v-if="isSearchModalActive"
           :modalMounted="isSearchModalActive"
@@ -103,6 +104,7 @@ export default {
   name: 'MainPage',
   data: function () {
     return {
+      headerHight: 56,
       scrollPosition: 0,
       searchGiftDate: '',
       searchErrorMessage: '',
@@ -125,12 +127,12 @@ export default {
     }
   },
   created: function () {
-    // MYMEMO: ページ遷移で一番上へスクロール
     this.$watch(
       () => this.$route.params,
       (toParams, _prev) => {
         this.userRelationId = toParams.relationId
         this.getInitialData()
+        window.scroll({top: 0})
       },
       { immediate: true }
     )
@@ -169,7 +171,7 @@ export default {
     },
     // 以下はsearch_modal用の関数
     activateSearchModal () {
-      // TODO: refactor this
+      // MYMEMO: refactor this
       utils.addIsHidden('#logo')
       utils.preventScroll()
       this.isSearchModalActive = true
@@ -180,12 +182,12 @@ export default {
       this.isSearchModalActive = false
     },
     scrollToTicket (id) {
-      window.location.hash = 'ticket0' // to reset url
-      const target = `ticket${id}`
-      window.location.hash = target
+      const target = document.getElementById(`ticket${id}`)
+      const targetOffsetTop = target.offsetTop
+      window.scroll({top: targetOffsetTop - this.headerHight - 30, behavior: 'smooth'})
     },
     scrollToPageTop () {
-      this.scrollToTicket('top')
+      window.scroll({top: 0, behavior: 'smooth'})
       this.deactivateSearchModal()
     },
     scrollToUsedTickets () {
