@@ -64,7 +64,7 @@ import utils from '../../utils'
 export default {
   name: 'UseDescriptionModal',
   components: { Modal },
-  props: ['modalMounted', 'onClose', 'ticket', 'csrfToken'],
+  props: ['modalMounted', 'onClose', 'ticket'],
   data: function () {
     return {
       used: false,

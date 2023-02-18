@@ -173,7 +173,6 @@
         <UseDescriptionModal
             v-if="isModalActive"
             :ticket="ticket"
-            :csrfToken="csrfToken"
             :key="ticket.id"
             :modalMounted="isModalActive"
             :onClose="deactivateModal.bind(this, 'isModalActive')"
@@ -198,7 +197,6 @@ export default {
   props: [
     // TicketForm.vueのsubmitFormも同じようにする
     'ticket',
-    'csrfToken',
     'index',
     'isGivingRelation',
     'scrollPosition'

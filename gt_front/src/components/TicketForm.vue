@@ -81,7 +81,6 @@ import SpecialTicketNoticeModal from './modals/SpecialTicketNoticeModal'
 import utils from '../utils'
 
 export default {
-  // MYMEMO: delete csrfToken from props
   props: ['userRelationId'],
   components: {
     Datepicker,

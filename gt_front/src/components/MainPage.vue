@@ -39,7 +39,6 @@
           <tickets
             :availableTickets="availableTickets"
             :usedTickets="usedTickets"
-            :csrfToken="csrfToken"
             :isGivingRelation="isGivingRelation"
             :scrollPosition="scrollPosition"
           />
@@ -122,8 +121,7 @@ export default {
       ticketImage: '',
       backgroundColor: '#FFFFFF',
       relatedUserNickname: '',
-      correspondingRelationId: '',
-      csrfToken: 'dummy' // MYMEMO: dummy csrfToken
+      correspondingRelationId: ''
     }
   },
   created: function () {

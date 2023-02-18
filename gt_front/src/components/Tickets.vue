@@ -7,7 +7,6 @@
                 <!-- MYMEMO: isGivingRelation に応じて GivingTicket ReceivedTicket に分割したら動作速くなりそう -->
                 <Ticket
                     :ticket="available_ticket"
-                    :csrfToken="csrfToken"
                     :isGivingRelation="isGivingRelation"
                     :scrollPosition="scrollPosition"
                     :index="index + 1"
@@ -39,7 +38,6 @@ export default {
   props: [
     'availableTickets',
     'usedTickets',
-    'csrfToken',
     'isGivingRelation',
     'scrollPosition'
   ],
