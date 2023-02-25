@@ -13,7 +13,7 @@ class UserSettingQuerySet(models.QuerySet):
 
 
 class UserSetting(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     # MYMEMO: default_pageにはバリデーションとか、自分のリレーションかどうかの確認とかできるか？
     default_page = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -65,19 +65,25 @@ class TestTicketViews(TestCase):
             }
         }
 
-        response = client.post("/tickets/", params, content_type="application/json")
+        response = client.post("/api/tickets/", params, content_type="application/json")
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
-        ticket_id = response.data["id"]
+        body = response.json()
+        ticket = body["ticket"]
 
-        TestCreateTicket()._then_ticket_is_created(ticket_id, giving_relation.id)
+        self.assertIsNotNone(ticket["id"])
+        self.assertEqual(params["ticket"]["description"], ticket["description"])
+        self.assertEqual(params["ticket"]["gift_date"], ticket["gift_date"])
+        self.assertEqual(Ticket.STATUS_UNREAD, ticket["status"])
+        self.assertFalse(ticket["is_special"])
+        self.assertIsNone(ticket.get("use_date"))
 
-        return ticket_id
+        return ticket["id"]
 
     def _list_tickets(
         self, client: Client, user_relation: UserRelation, expected_ticket: Ticket
     ):
-        response = client.get(f"/user_relations/{user_relation.id}/")
+        response = client.get(f"/api/user_relations/{user_relation.id}/")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
 
@@ -105,7 +111,7 @@ class TestTicketViews(TestCase):
         }
 
         response = client.patch(
-            f"/tickets/{ticket.id}/", params, content_type="application/json"
+            f"/api/tickets/{ticket.id}/", params, content_type="application/json"
         )
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
@@ -125,7 +131,7 @@ class TestTicketViews(TestCase):
         }
 
         response = client.put(
-            f"/tickets/{ticket.id}/use/", params, content_type="application/json"
+            f"/api/tickets/{ticket.id}/use/", params, content_type="application/json"
         )
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)

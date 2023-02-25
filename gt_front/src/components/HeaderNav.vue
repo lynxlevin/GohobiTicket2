@@ -1,0 +1,100 @@
+<template>
+  <nav class="navbar is-fixed-top is-light" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <router-link class="navbar-item" :to="'/user_relations/' + correspondingRelationId">
+        {{navbarMessage}}
+      </router-link>
+      <a
+        role="button"
+        class="navbar-burger"
+        :class="{'is-active': navbarVisible}"
+        aria-label="menu"
+        aria-expanded="false"
+        data-target="navbarBasicExample"
+        @click="toggleNavbarMenu"
+      >
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+
+    <div class="navbar-menu u-tab-flex-column-end" :class="{'is-flex': navbarVisible}">
+      <div class="navbar-start">
+      </div>
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link">ほかの相手</a>
+          <div class="navbar-dropdown">
+            <router-link
+              v-for="(otherReceivingRelation, index) in otherReceivingRelations"
+              :key=index
+              class="navbar-item"
+              :to="'/user_relations/' + otherReceivingRelation.id"
+            >
+              {{ otherReceivingRelation.related_user_nickname }}
+            </router-link>
+          </div>
+        </div>
+        <router-link to="/release" class="navbar-item">
+          更新履歴
+        </router-link>
+        <div class="navbar-item">
+          <div class="buttons">
+            <button @click="logout" class="button is-light">ログアウト</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</template>
+
+<script>
+import axios from 'axios'
+
+export default {
+  props: [
+    'relatedUserNickname',
+    'isGivingRelation',
+    'otherReceivingRelations',
+    'correspondingRelationId'
+  ],
+  data: function () {
+    return {
+      navbarMessage: '',
+      navbarVisible: false
+    }
+  },
+  mounted: function () {
+    this.updateMessage()
+  },
+  beforeUpdate: function () {
+    this.updateMessage()
+  },
+  methods: {
+    toggleNavbarMenu () {
+      this.navbarVisible = !this.navbarVisible
+    },
+    updateMessage () {
+      this.navbarMessage =
+          this.relatedUserNickname +
+          'に' +
+          (this.isGivingRelation ? 'もらったチケットを見る' : 'チケットをあげる')
+    },
+    logout () {
+      axios.get('/user/logout').then(() => {
+        this.$router.push('/login')
+      })
+    }
+  }
+}
+</script>
+
+<style scoped>
+@media screen and (max-width: 1023px) {
+    .u-tab-flex-column-end {
+        flex-direction: column;
+        align-items: flex-end;
+    }
+}
+</style>

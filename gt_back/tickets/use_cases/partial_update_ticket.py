@@ -61,14 +61,6 @@ class PartialUpdateTicket:
                 detail=f"{self.exception_log_title}: Tickets cannot be updated to draft."
             )
 
-        if (
-            self.ticket.status != Ticket.STATUS_DRAFT
-            and status_to_be == Ticket.STATUS_UNREAD
-        ):
-            raise exceptions.PermissionDenied(
-                detail=f"{self.exception_log_title}: Only draft tickets can be updated to unread."
-            )
-
     def _update_status(self, status_to_be: str):
         self.ticket.status = status_to_be
         self.update_fields.add("status")
