@@ -3,9 +3,13 @@
 import os
 import sys
 
+import environ
+
 
 def main():
     """Run administrative tasks."""
+    environ.Env().read_env(".env")
+
     env = os.environ.get("DJANGO_ENV", "local")
     if sys.argv[1] == "test":
         env = "testing"
