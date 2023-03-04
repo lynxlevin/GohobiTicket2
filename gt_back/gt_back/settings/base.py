@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     "user_relations.apps.UserRelationsConfig",
     "user_settings.apps.UserSettingsConfig",
     "users.apps.UsersConfig",
-    "sass_processor",  # MYMEMO: 不要かも
 ]
 
 MIDDLEWARE = [
@@ -224,10 +223,3 @@ LOGGING = {
         },
     },
 }
-
-# MYMEMO: 不要かも
-SASS_PROCESSOR_ROOT = os.path.join(BASE_DIR, "static")
-SASS_PROCESSOR_INCLUDE_FILE_PATTERN = r"^.+\.(sass|scss)$"
-SASS_PRECISION = 8
-SASS_OUTPUT_STYLE = "compressed"
-SASS_TEMPLATE_EXTS = [".html", ".haml"]
