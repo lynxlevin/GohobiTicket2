@@ -6,7 +6,11 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gt_back.settings")
+    env = os.environ.get("DJANGO_ENV", "local")
+    if sys.argv[1] == "test":
+        env = "testing"
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", f"gt_back.settings.{env}")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
