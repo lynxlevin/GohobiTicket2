@@ -19,6 +19,7 @@ from django.urls import include, path
 from rest_framework import routers
 from tickets import views as ticket_views
 from user_relations import views as user_relation_views
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 
 def index_view(request, pk=0):
@@ -39,3 +40,4 @@ urlpatterns = [
     path("login", index_view, name="index"),
     path("user_relations/<int:pk>", index_view, name="index"),
 ]
+urlpatterns += staticfiles_urlpatterns()
