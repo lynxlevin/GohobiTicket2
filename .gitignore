@@ -5,3 +5,4 @@ todos.md
 fixtures/
 django.log
 gt_back/static/dist
+gt_back/tmp
