@@ -8,7 +8,7 @@ FILE_DIR = "tickets/fixtures"
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        tickets = Ticket.objects.all()
+        tickets = Ticket.objects.order_by("id").all()
 
         fixture = []
 
