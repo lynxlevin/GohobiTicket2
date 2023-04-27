@@ -305,6 +305,7 @@ export default {
         .patch(`/api/tickets/${this.ticket.id}/`, data, utils.getCsrfHeader())
         .then(() => {
           this.$set(this.ticket, 'description', this.editedDescription)
+          this.$set(this.ticket, 'status', data.ticket.status)
         })
         .catch((error) => {
           this.errorCode = error.response.status
