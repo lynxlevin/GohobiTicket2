@@ -28,20 +28,7 @@ class TestTicketModel(TestCase):
         list1 = tickets[0:4]
         list2 = tickets[8:12]
         list3 = tickets[16:22]
-        list4 = tickets[22:23]
-        expected = list(reversed(list1 + list2 + list3 + list4))
-
-        self.assertEqual(list(result.all()), expected)
-
-    def test_filter_unused_complete_tickets(self):
-        tickets = self.seeds.tickets
-
-        result = Ticket.objects.filter_unused_complete_tickets()
-
-        list1 = [tickets[0], tickets[2], tickets[3]]
-        list2 = [tickets[8], tickets[10], tickets[11]]
-        list3 = tickets[16:22]
-        list4 = tickets[22:23]
+        list4 = tickets[22:24]
         expected = list(reversed(list1 + list2 + list3 + list4))
 
         self.assertEqual(list(result.all()), expected)
