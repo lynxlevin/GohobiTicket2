@@ -33,11 +33,17 @@ class RetrieveUserRelation:
         ]:
             raise exceptions.PermissionDenied()
 
-        user_relation_info = self._get_user_relation_info(user_relation, user_id)
+        is_giving_relation = user_relation.giving_user.id == user_id
+
+        user_relation_info = self._get_user_relation_info(
+            user_relation, user_id, is_giving_relation
+        )
         other_receiving_relations = self._get_other_receiving_relations(
             user_relation, user_id
         )
-        available_tickets = self._get_available_tickets(user_relation_id)
+        available_tickets = self._get_available_tickets(
+            user_relation_id, is_giving_relation
+        )
         used_tickets = self._get_used_tickets(user_relation_id)
 
         return {
@@ -51,9 +57,8 @@ class RetrieveUserRelation:
         }
 
     def _get_user_relation_info(
-        self, user_relation: UserRelation, user_id: str
+        self, user_relation: UserRelation, user_id: str, is_giving_relation: bool
     ) -> dict:
-        is_giving_relation = user_relation.giving_user.id == user_id
         related_user = (
             user_relation.receiving_user
             if is_giving_relation
@@ -84,13 +89,19 @@ class RetrieveUserRelation:
             for relation in other_receiving_relations
         ]
 
-    def _get_available_tickets(self, user_relation_id: str) -> list[Ticket]:
-        available_tickets = list(
+    def _get_available_tickets(
+        self, user_relation_id: str, is_giving_relation: bool
+    ) -> list[Ticket]:
+        qs = (
             Ticket.objects.filter_eq_user_relation_id(user_relation_id)
             .filter_unused_tickets()
             .order_by("-gift_date", "-id")
-            .all()
         )
+
+        if not is_giving_relation:
+            qs = qs.exclude_eq_status(Ticket.STATUS_DRAFT)
+
+        available_tickets = list(qs.all())
         return available_tickets
 
     def _get_used_tickets(self, user_reltaion_id: str) -> list[Ticket]:
