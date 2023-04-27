@@ -41,8 +41,12 @@ class TicketQuerySet(models.QuerySet):
             is_special=True, gift_date__gte=start_of_month, gift_date__lte=end_of_month
         )
 
+    def exclude_eq_status(self, status) -> "TicketQuerySet":
+        return self.exclude(status=status)
+
 
 class Ticket(models.Model):
+    # MYMEMO: move to enums
     STATUS_UNREAD = "unread"
     STATUS_READ = "read"
     STATUS_EDITED = "edited"

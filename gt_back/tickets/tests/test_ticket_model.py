@@ -65,3 +65,13 @@ class TestTicketModel(TestCase):
         expected = [tickets[19]]
 
         self.assertEqual(list(result.all()), expected)
+
+    def test_exclude_eq_status(self):
+        target = Ticket.STATUS_DRAFT
+        result = Ticket.objects.exclude_eq_status(target)
+
+        all_tickets_count = Ticket.objects.count()
+        draft_tickets_count = Ticket.objects.filter(status=target).count()
+        expected_count = all_tickets_count - draft_tickets_count
+
+        self.assertEqual(expected_count, result.count())
