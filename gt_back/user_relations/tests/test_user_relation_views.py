@@ -32,22 +32,28 @@ class TestUserRelationViews(TestCase):
         for ticket in available_tickets:
             self.assertNotEqual(Ticket.STATUS_DRAFT, ticket["status"])
 
-    # def test_retrieve__giving_relation(self):
-    #     """
-    #     Get /api/user_relations/{id}
-    #     When giving relation
-    #     """
-    #     user = self.seeds.users[0]
-    #     user_relation = self.seeds.user_relations[1]
+    def test_retrieve__giving_relation(self):
+        """
+        Get /api/user_relations/{id}
+        When giving relation
+        """
+        user = self.seeds.users[1]
+        user_relation = self.seeds.user_relations[1]
 
-    #     client = Client()
-    #     client.force_login(user)
-    #     response = client.get(f"/api/user_relations/{user_relation.id}/")
+        client = Client()
+        client.force_login(user)
+        response = client.get(f"/api/user_relations/{user_relation.id}/")
 
-    #     self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
 
-    #     data = response.data
-    #     self.assertNotEqual(0, len(data))
+        data = response.data
+        self.assertNotEqual(0, len(data))
+
+        available_tickets = data["available_tickets"]
+        self.assertEqual(
+            Ticket.objects.filter_eq_user_relation_id(user_relation.id).count(),
+            len(available_tickets),
+        )
 
     def test_retrieve__not_authenticated(self):
         """
