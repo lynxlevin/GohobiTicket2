@@ -99,6 +99,7 @@ class TestSeed:
             {"gift_date": date(2022, 6, 1), "is_special": True},  # 19
             {"gift_date": date(2022, 7, 1), "is_special": True},  # 20
             {"gift_date": date(2022, 8, 1), "is_special": True},  # 21
+            {"gift_date": date(2022, 8, 1), "status": "draft"},  # 22
         ]
         tickets = factory.create_tickets(self.user_relations[1], params)
         self.tickets.extend(tickets)
