@@ -121,6 +121,7 @@ export default {
         .get(url)
         .then((response) => {
           this.isSpecialTicketAvailable = response.data
+          this.toBeSpecial = false
         })
         .catch((error) => {
           this.errorCode = error.response.status
