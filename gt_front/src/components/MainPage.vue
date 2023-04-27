@@ -41,6 +41,7 @@
             :usedTickets="usedTickets"
             :isGivingRelation="isGivingRelation"
             :scrollPosition="scrollPosition"
+            :isShowingOnlySpecialTickets="isShowingOnlySpecialTickets"
           />
         </div>
         <transition name="fade">
@@ -67,6 +68,9 @@
           </div>
           <div class="field">
             <button type="button" @click="scrollToUsedTickets">使用済みチケットのトップへ移動</button>
+          </div>
+          <div class="field">
+            <button type="button" @click="showOnlySpecialTickets">特別チケットのみ表示</button>
           </div>
           <div class="field">
             <label class="label">日付で検索</label>
@@ -124,7 +128,8 @@ export default {
       ticketImage: '',
       backgroundColor: '#FFFFFF',
       relatedUserNickname: '',
-      correspondingRelationId: ''
+      correspondingRelationId: '',
+      isShowingOnlySpecialTickets: false
     }
   },
   created: function () {
@@ -223,6 +228,10 @@ export default {
       } else {
         this.searchErrorMessage = '見つかりませんでした。'
       }
+    },
+    showOnlySpecialTickets () {
+      this.isShowingOnlySpecialTickets = true
+      this.deactivateSearchModal()
     }
   }
 }

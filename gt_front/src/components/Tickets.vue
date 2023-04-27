@@ -9,6 +9,8 @@
                     :ticket="available_ticket"
                     :isGivingRelation="isGivingRelation"
                     :scrollPosition="scrollPosition"
+                    :isShowingOnlySpecialTickets="isShowingOnlySpecialTickets"
+                    v-if="!isShowingOnlySpecialTickets || available_ticket.is_special"
                     :index="index + 1"
                     :key="available_ticket.id"
                 ></Ticket>
@@ -17,6 +19,7 @@
             <template v-for="(used_ticket, index) in usedTickets">
                 <UsedTicket
                     :ticket="used_ticket"
+                    v-if="!isShowingOnlySpecialTickets || used_ticket.is_special"
                     :index="index + 1"
                     :key="used_ticket.id"
                 ></UsedTicket>
@@ -39,7 +42,8 @@ export default {
     'availableTickets',
     'usedTickets',
     'isGivingRelation',
-    'scrollPosition'
+    'scrollPosition',
+    'isShowingOnlySpecialTickets'
   ],
   watch: {
     scrollPosition () {
