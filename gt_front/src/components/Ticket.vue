@@ -66,6 +66,7 @@
               :modalMounted="isEditModalActive"
               :onClose="cancelEdit"
               :hideBoxDiv="true"
+              :placeTop="true"
           >
               <div class="section block">
                   <div class="field">
