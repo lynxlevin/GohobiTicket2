@@ -56,6 +56,7 @@
         </transition>
         <!-- MYMEMO: 独自コンポーネントにする -->
         <!-- MYMEMO: スペシャルチケット検索もつけたい -->
+        <!-- MYMEMO: used 混ぜこぜで日付順のソートもつけたい -->
         <modal
           v-if="isSearchModalActive"
           :modalMounted="isSearchModalActive"

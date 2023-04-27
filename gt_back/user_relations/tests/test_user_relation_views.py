@@ -1,5 +1,3 @@
-from datetime import date
-
 from django.test import Client, TestCase
 from rest_framework import status
 from tickets.models import Ticket
@@ -13,9 +11,10 @@ class TestUserRelationViews(TestCase):
         cls.seeds.setUp()
 
     # MYMEMO: 内容ごとに user_relations/id/tickets とかに分けるのが REST かも
-    def test_retrieve(self):
+    def test_retrieve__receiving_relation(self):
         """
         Get /api/user_relations/{id}
+        When receiving relation
         """
         user = self.seeds.users[0]
         user_relation = self.seeds.user_relations[1]
@@ -28,6 +27,33 @@ class TestUserRelationViews(TestCase):
 
         data = response.data
         self.assertNotEqual(0, len(data))
+
+        available_tickets = data["available_tickets"]
+        for ticket in available_tickets:
+            self.assertNotEqual(Ticket.STATUS_DRAFT, ticket["status"])
+
+    def test_retrieve__giving_relation(self):
+        """
+        Get /api/user_relations/{id}
+        When giving relation
+        """
+        user = self.seeds.users[1]
+        user_relation = self.seeds.user_relations[1]
+
+        client = Client()
+        client.force_login(user)
+        response = client.get(f"/api/user_relations/{user_relation.id}/")
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+
+        data = response.data
+        self.assertNotEqual(0, len(data))
+
+        available_tickets = data["available_tickets"]
+        self.assertEqual(
+            Ticket.objects.filter_eq_user_relation_id(user_relation.id).count(),
+            len(available_tickets),
+        )
 
     def test_retrieve__not_authenticated(self):
         """
