@@ -92,16 +92,14 @@ class RetrieveUserRelation:
     def _get_available_tickets(
         self, user_relation_id: str, is_giving_relation: bool
     ) -> list[Ticket]:
-        qs = (
-            Ticket.objects.filter_eq_user_relation_id(user_relation_id)
-            .filter_unused_tickets()
-            .order_by("-gift_date", "-id")
-        )
+        qs = Ticket.objects.filter_eq_user_relation_id(
+            user_relation_id
+        ).filter_unused_tickets()
 
         if not is_giving_relation:
             qs = qs.exclude_eq_status(Ticket.STATUS_DRAFT)
 
-        available_tickets = list(qs.all())
+        available_tickets = list(qs.order_by("-gift_date", "-id").all())
         return available_tickets
 
     def _get_used_tickets(self, user_reltaion_id: str) -> list[Ticket]:
