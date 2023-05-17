@@ -22,28 +22,18 @@ class TestUserRelationModel(TestCase):
 
     def test_filter_by_receiving_user_id(self):
         user = UserFactory()
-        expected = [
-            UserRelationFactory(receiving_user=user),
-            UserRelationFactory(receiving_user=user),
-            UserRelationFactory(receiving_user=user),
-        ]
+        expected = UserRelationFactory.create_batch(5, receiving_user=user)
 
         result = UserRelation.objects.filter_by_receiving_user_id(user.id)
 
-        self.assertEqual(3, len(result.all()))
         self.assertEqual(expected, list(result.all()))
 
     def test_filter_by_giving_user_id(self):
         user = UserFactory()
-        expected = [
-            UserRelationFactory(giving_user=user),
-            UserRelationFactory(giving_user=user),
-            UserRelationFactory(giving_user=user),
-        ]
+        expected = UserRelationFactory.create_batch(5, giving_user=user)
 
         result = UserRelation.objects.filter_by_giving_user_id(user.id)
 
-        self.assertEqual(3, len(result.all()))
         self.assertEqual(expected, list(result.all()))
 
     def test_property_corresponding_relation(self):
@@ -60,12 +50,7 @@ class TestUserRelationModel(TestCase):
     # sample for record fetching
     def test_tickets(self):
         user_relation = UserRelationFactory()
-        expected = [
-            TicketFactory(user_relation=user_relation),
-            TicketFactory(user_relation=user_relation),
-            TicketFactory(user_relation=user_relation),
-            TicketFactory(user_relation=user_relation),
-        ]
+        expected = TicketFactory.create_batch(5, user_relation=user_relation)
 
         result = user_relation.ticket_set.all()
 
@@ -75,12 +60,11 @@ class TestUserRelationModel(TestCase):
     def test_has_special_ticket(self):
         target_date = date(2022, 6, 11)
 
-        user_relation1 = UserRelationFactory()
-        TicketFactory(user_relation=user_relation1, is_special=True, gift_date=target_date - timedelta(days=31))
-        result1 = user_relation1.ticket_set.filter_special_tickets(target_date).exists()
+        user_relation = UserRelationFactory()
+        TicketFactory(user_relation=user_relation, is_special=True, gift_date=target_date - timedelta(days=31))
+        result1 = user_relation.ticket_set.filter_special_tickets(target_date).exists()
         self.assertFalse(result1)
 
-        user_relation2 = UserRelationFactory()
-        TicketFactory(user_relation=user_relation2, is_special=True, gift_date=target_date)
-        result2 = user_relation2.ticket_set.filter_special_tickets(target_date).exists()
+        TicketFactory(user_relation=user_relation, is_special=True, gift_date=target_date)
+        result2 = user_relation.ticket_set.filter_special_tickets(target_date).exists()
         self.assertTrue(result2)

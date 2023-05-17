@@ -9,12 +9,7 @@ from user_relations.tests.user_relation_factory import UserRelationFactory
 class TestTicketModel(TestCase):
     def test_filter_eq_user_relation_id(self):
         user_relation = UserRelationFactory()
-        expected_tickets = [
-            TicketFactory(user_relation=user_relation),
-            TicketFactory(user_relation=user_relation),
-            TicketFactory(user_relation=user_relation),
-            TicketFactory(user_relation=user_relation),
-        ]
+        expected_tickets = TicketFactory.create_batch(5, user_relation=user_relation)
         _another_relation_ticket = TicketFactory()
 
         result = Ticket.objects.filter_eq_user_relation_id(user_relation.id).all()
@@ -53,9 +48,7 @@ class TestTicketModel(TestCase):
         expected_tickets = [TicketFactory(gift_date=date(2022, 6, 1), is_special=True)]
         _other_tickets = [
             TicketFactory(gift_date=date(2022, 6, 11)),
-            TicketFactory(),
-            TicketFactory(),
-            TicketFactory(),
+            *TicketFactory.create_batch(3),
         ]
 
         result = Ticket.objects.filter_special_tickets(target_date)
@@ -64,12 +57,7 @@ class TestTicketModel(TestCase):
 
     def test_exclude_eq_status(self):
         exclude_target = Ticket.STATUS_DRAFT
-        _excluded_tickets = [
-            TicketFactory(status=exclude_target),
-            TicketFactory(status=exclude_target),
-            TicketFactory(status=exclude_target),
-            TicketFactory(status=exclude_target),
-        ]
+        _excluded_tickets = TicketFactory.create_batch(5, status=exclude_target)
         expected_tickets = [
             TicketFactory(status=Ticket.STATUS_READ),
             TicketFactory(status=Ticket.STATUS_UNREAD),
