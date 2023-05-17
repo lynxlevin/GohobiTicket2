@@ -17,10 +17,10 @@ class TicketQuerySet(models.QuerySet):
         return Ticket.objects.filter(user_relation__id=user_relation_id)
 
     def filter_unused_tickets(self) -> "TicketQuerySet":
-        return self.filter(use_date=None).order_by("-gift_date").order_by("-id")
+        return self.filter(use_date=None).order_by("-gift_date", "-id")
 
     def filter_used_tickets(self) -> "TicketQuerySet":
-        return self.exclude(use_date=None).order_by("-use_date").order_by("-id")
+        return self.exclude(use_date=None).order_by("-use_date", "-id")
 
     def filter_special_tickets(self, target_date: date) -> "TicketQuerySet":
         start_of_month = date(target_date.year, target_date.month, 1)
