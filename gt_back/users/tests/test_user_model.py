@@ -1,37 +1,34 @@
 from django.test import TestCase
-from tickets.test_utils.test_seeds import TestSeed
-from users.models import User
+from user_relations.tests.user_relation_factory import UserRelationFactory
+from user_settings.tests.user_setting_factory import UserSettingFactory
+
+from ..tests.user_factory import UserFactory
 
 
 class TestUserModel(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.seeds = TestSeed()
-        cls.seeds.setUp()
-
     # sample for record fetching
     def test_user_setting(self):
-        user = self.seeds.users[0]
-        expected = self.seeds.user_settings[0]
+        expected = UserSettingFactory()
+        user = expected.user
 
         result = user.usersetting
 
-        self.assertEqual(result, expected)
+        self.assertEqual(expected, result)
 
     # sample for record fetching
     def test_giving_relation(self):
-        user = self.seeds.users[0]
-        expected = self.seeds.user_relations[0]
+        user = UserFactory()
+        expected = UserRelationFactory(giving_user=user)
 
         result = user.giving_relations.first()
 
-        self.assertEqual(result, expected)
+        self.assertEqual(expected, result)
 
     # sample for record fetching
     def test_receiving_relation(self):
-        user = self.seeds.users[0]
-        expected = self.seeds.user_relations[1]
+        user = UserFactory()
+        expected = UserRelationFactory(receiving_user=user)
 
         result = user.receiving_relations.first()
 
-        self.assertEqual(result, expected)
+        self.assertEqual(expected, result)
