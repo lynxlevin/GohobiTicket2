@@ -2,7 +2,7 @@ from datetime import date
 
 from django.test import TestCase
 from tickets.models import Ticket
-from tickets.tests.ticket_factory import TicketFactory
+from tickets.tests.ticket_factory import TicketFactory, UsedTicketFactory
 from user_relations.tests.user_relation_factory import UserRelationFactory
 
 
@@ -18,12 +18,12 @@ class TestTicketModel(TestCase):
 
     def test_filter_unused_tickets(self):
         expected_tickets = [
-            TicketFactory(use_date=None, gift_date=date(2022, 1, 4)),
-            TicketFactory(use_date=None, gift_date=date(2022, 1, 3)),
-            TicketFactory(use_date=None, gift_date=date(2022, 1, 2)),
-            TicketFactory(use_date=None, gift_date=date(2022, 1, 1)),
+            TicketFactory(gift_date=date(2022, 1, 4)),
+            TicketFactory(gift_date=date(2022, 1, 3)),
+            TicketFactory(gift_date=date(2022, 1, 2)),
+            TicketFactory(gift_date=date(2022, 1, 1)),
         ]
-        _used_ticket = TicketFactory()
+        _used_ticket = UsedTicketFactory()
 
         result = Ticket.objects.filter_unused_tickets().all()
 
@@ -36,7 +36,7 @@ class TestTicketModel(TestCase):
             TicketFactory(use_date=date(2022, 1, 2)),
             TicketFactory(use_date=date(2022, 1, 1)),
         ]
-        _unused_ticket = TicketFactory(use_date=None)
+        _unused_ticket = TicketFactory()
 
         result = Ticket.objects.filter_used_tickets().all()
 

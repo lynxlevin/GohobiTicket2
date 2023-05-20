@@ -15,7 +15,12 @@ class TicketFactory(factory.django.DjangoModelFactory):
     user_relation = factory.SubFactory(UserRelationFactory)
     description = "チケットをあげるときのメッセージ。絵文字も使えます😁"
     gift_date = factory.fuzzy.FuzzyDate(date(2020, 1, 1))
-    use_description = "チケットを使うときのメッセージ。絵文字も使えます😁"
-    use_date = factory.LazyAttribute(lambda ticket: ticket.gift_date + timedelta(days=randint(0,30)))
+    use_description = ""
+    use_date = None
     status = factory.fuzzy.FuzzyChoice([st[0] for st in Ticket.STATUS_CHOICES])
     is_special = False
+
+class UsedTicketFactory(TicketFactory):
+    use_description = "チケットを使うときのメッセージ。絵文字も使えます😁"
+    use_date = factory.LazyAttribute(lambda ticket: ticket.gift_date + timedelta(days=randint(0,30)))
+
