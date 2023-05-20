@@ -8,4 +8,4 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = User
 
     username = factory.Sequence(lambda n: f"user_{n}")
-    email = factory.LazyAttribute(lambda name: f"{name}@example.com")
+    email = factory.LazyAttribute(lambda name: f"{name.username}@example.com")
