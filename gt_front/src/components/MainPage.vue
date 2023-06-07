@@ -10,7 +10,7 @@
       <div
         class="container is-max-desktop has-text-centered"
       >
-        <h1 class="title is-2 section">
+        <h1 class="title is-2 section pt-4 pb-4">
           <span class="subtitle is-4">
             {{relatedUserNickname}}に{{titleMessage}}
           </span><br />

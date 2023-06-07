@@ -1,5 +1,5 @@
 <template>
-    <div class="section block">
+    <div class="section block pt-4">
         <div id="tickets">
           <div  v-if="!visibleUsedOnly">
             <template
