@@ -28,7 +28,9 @@
           >
         </div>
         <h4 class="subtitle is-3" id="ticket-count">
-          手持ち{{ availableTicketCount }}枚 / 合計{{ allTicketCount }}枚
+          <!-- MYMEMO: consider whether to delete availableTicketCount for good. -->
+          <!-- 手持ち{{ availableTicketCount }}枚 / 合計{{ allTicketCount }}枚 -->
+          計{{ allTicketCount }}枚
         </h4>
         <div class="field">
           <label class="label">
