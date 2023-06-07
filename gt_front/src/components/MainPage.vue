@@ -60,7 +60,7 @@
         <transition name="fade">
           <div
             class="to-used-tickets"
-            v-if="$store.state.toUsedTicketsVisible"
+            v-if="$store.state.isUsedTicketsOnScreen"
             @click="scrollToUsedTickets"
           >
             <span class="icon">

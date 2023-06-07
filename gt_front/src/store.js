@@ -7,7 +7,7 @@ const store = new Vuex.Store({
   state: {
     availableTicketCount: 0,
     allTicketCount: 0,
-    toUsedTicketsVisible: false
+    isUsedTicketsOnScreen: false
   },
   mutations: {
     addToAvailableTicketCount (state, num) {
@@ -19,8 +19,8 @@ const store = new Vuex.Store({
     updateTicketCountDisplay (state) {
       document.getElementById('ticket-count').innerText = `手持ち${state.availableTicketCount}枚 / 合計${state.allTicketCount}枚`
     },
-    setToUsedTicketsVisible (state, bool) {
-      state.toUsedTicketsVisible = bool
+    setisUsedTicketsOnScreen (state, bool) {
+      state.isUsedTicketsOnScreen = bool
     }
   },
   actions: {
@@ -38,8 +38,8 @@ const store = new Vuex.Store({
       context.commit('addToAvailableTicketCount', -1)
       context.commit('updateTicketCountDisplay')
     },
-    setToUsedTicketsVisible (context, bool) {
-      context.commit('setToUsedTicketsVisible', bool)
+    setisUsedTicketsOnScreen (context, bool) {
+      context.commit('setisUsedTicketsOnScreen', bool)
     }
   }
 })

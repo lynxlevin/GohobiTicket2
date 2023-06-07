@@ -50,8 +50,8 @@ export default {
   ],
   watch: {
     scrollPosition () {
-      const toUsedTicketsVisible = this.scrollPosition < this.$refs.usedTickets.offsetTop - window.innerHeight / 2
-      this.$store.dispatch('setToUsedTicketsVisible', toUsedTicketsVisible)
+      const isUsedTicketsOnScreen = this.scrollPosition < this.$refs.usedTickets.offsetTop - window.innerHeight / 2
+      this.$store.dispatch('setisUsedTicketsOnScreen', isUsedTicketsOnScreen)
     }
   }
 }
