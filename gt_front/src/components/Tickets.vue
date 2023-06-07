@@ -1,6 +1,7 @@
 <template>
     <div class="section block">
         <div id="tickets">
+          <div  v-if="!visibleUsedOnly">
             <template
                 v-for="(available_ticket, index) in availableTickets"
             >
@@ -9,21 +10,22 @@
                     :ticket="available_ticket"
                     :isGivingRelation="isGivingRelation"
                     :scrollPosition="scrollPosition"
-                    :isShowingOnlySpecialTickets="isShowingOnlySpecialTickets"
-                    v-if="!isShowingOnlySpecialTickets || available_ticket.is_special"
+                    v-if="!visibleSpecialOnly || available_ticket.is_special"
                     :index="index + 1"
                     :key="available_ticket.id"
                 ></Ticket>
             </template>
-            <div ref="usedTickets"></div>
+          </div>
+          <div ref="usedTickets">
             <template v-for="(used_ticket, index) in usedTickets">
                 <UsedTicket
                     :ticket="used_ticket"
-                    v-if="!isShowingOnlySpecialTickets || used_ticket.is_special"
+                    v-if="!visibleSpecialOnly || used_ticket.is_special"
                     :index="index + 1"
                     :key="used_ticket.id"
                 ></UsedTicket>
             </template>
+          </div>
         </div>
     </div>
 </template>
@@ -43,7 +45,8 @@ export default {
     'usedTickets',
     'isGivingRelation',
     'scrollPosition',
-    'isShowingOnlySpecialTickets'
+    'visibleSpecialOnly',
+    'visibleUsedOnly'
   ],
   watch: {
     scrollPosition () {

@@ -31,6 +31,18 @@
         <h4 class="subtitle is-3" id="ticket-count">
           手持ち{{ availableTicketCount }}枚 / 合計{{ allTicketCount }}枚
         </h4>
+        <div class="field">
+          <label class="label">
+            <input type="checkbox" v-model="visibleSpecialOnly" />
+            特別チケットのみ表示
+          </label>
+        </div>
+        <div class="field">
+          <label class="label">
+            <input type="checkbox" v-model="visibleUsedOnly" />
+            使用済みチケットのみ表示
+          </label>
+        </div>
         <div class="tickets">
           <ticket-form
             :userRelationId = "userRelationId"
@@ -41,7 +53,8 @@
             :usedTickets="usedTickets"
             :isGivingRelation="isGivingRelation"
             :scrollPosition="scrollPosition"
-            :isShowingOnlySpecialTickets="isShowingOnlySpecialTickets"
+            :visibleSpecialOnly="visibleSpecialOnly"
+            :visibleUsedOnly="visibleUsedOnly"
           />
         </div>
         <transition name="fade">
@@ -68,9 +81,6 @@
           </div>
           <div class="field">
             <button type="button" @click="scrollToUsedTickets">使用済みチケットのトップへ移動</button>
-          </div>
-          <div class="field">
-            <button type="button" @click="showOnlySpecialTickets">特別チケットのみ表示</button>
           </div>
           <div class="field">
             <label class="label">日付で検索</label>
@@ -129,7 +139,8 @@ export default {
       backgroundColor: '#FFFFFF',
       relatedUserNickname: '',
       correspondingRelationId: '',
-      isShowingOnlySpecialTickets: false
+      visibleSpecialOnly: false,
+      visibleUsedOnly: false
     }
   },
   created: function () {
@@ -228,10 +239,6 @@ export default {
       } else {
         this.searchErrorMessage = '見つかりませんでした。'
       }
-    },
-    showOnlySpecialTickets () {
-      this.isShowingOnlySpecialTickets = true
-      this.deactivateSearchModal()
     }
   }
 }
