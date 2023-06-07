@@ -2,7 +2,6 @@
   <div class="pt-6" id="tickettop" v-bind:style="{backgroundColor: backgroundColor}">
     <div v-if="apiAccessed">
       <header-nav
-        :relatedUserNickname = "relatedUserNickname"
         :isGivingRelation = "isGivingRelation"
         :otherReceivingRelations = "otherReceivingRelations"
         :correspondingRelationId = "correspondingRelationId"

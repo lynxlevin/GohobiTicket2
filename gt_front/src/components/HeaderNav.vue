@@ -54,7 +54,6 @@ import axios from 'axios'
 
 export default {
   props: [
-    'relatedUserNickname',
     'isGivingRelation',
     'otherReceivingRelations',
     'correspondingRelationId'
@@ -77,9 +76,7 @@ export default {
     },
     updateMessage () {
       this.navbarMessage =
-          this.relatedUserNickname +
-          'に' +
-          (this.isGivingRelation ? 'もらったチケットを見る' : 'チケットをあげる')
+          (this.isGivingRelation ? 'もらったチケットへ' : 'チケットをあげる')
     },
     logout () {
       axios.get('/user/logout').then(() => {
