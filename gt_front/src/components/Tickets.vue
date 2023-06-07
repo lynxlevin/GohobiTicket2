@@ -47,12 +47,6 @@ export default {
     'scrollPosition',
     'visibleSpecialOnly',
     'visibleUsedOnly'
-  ],
-  watch: {
-    scrollPosition () {
-      const isUsedTicketsOnScreen = this.scrollPosition < this.$refs.usedTickets.offsetTop - window.innerHeight / 2
-      this.$store.dispatch('setisUsedTicketsOnScreen', isUsedTicketsOnScreen)
-    }
-  }
+  ]
 }
 </script>

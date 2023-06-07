@@ -59,13 +59,14 @@
           />
         </div>
         <transition name="fade">
+          <!-- MYMEMO: change this to click ticket image -->
           <div
-            class="to-used-tickets"
-            v-if="$store.state.isUsedTicketsOnScreen"
-            @click="scrollToUsedTickets"
+            class="to-page-top"
+            @click="scrollToPageTop"
+            v-if="isLogoFixed"
           >
             <span class="icon">
-              <i class="fas fa-angle-double-down"></i>
+              <i class="fas fa-angle-double-up"></i>
             </span>
           </div>
         </transition>
@@ -77,12 +78,6 @@
           :modalMounted="isSearchModalActive"
           :onClose="deactivateSearchModal"
         >
-          <div class="field">
-            <button type="button" @click="scrollToPageTop">ページトップへ移動</button>
-          </div>
-          <div class="field">
-            <button type="button" @click="scrollToUsedTickets">使用済みチケットのトップへ移動</button>
-          </div>
           <div class="field">
             <label class="label">日付で検索</label>
             <p>{{searchErrorMessage}}</p>
@@ -208,10 +203,6 @@ export default {
       window.scroll({top: 0, behavior: 'smooth'})
       this.deactivateSearchModal()
     },
-    scrollToUsedTickets () {
-      this.scrollToTicket(this.usedTickets[0].id)
-      this.deactivateSearchModal()
-    },
     formatDate (date) {
       const yyyy = date.getFullYear()
       const mm = ('00' + (date.getMonth() + 1)).slice(-2)
@@ -295,7 +286,7 @@ export default {
     margin: 0 auto;
 }
 
-.to-used-tickets {
+.to-page-top {
     font-size: 30px;
     background: white;
     border-radius: 999px;
