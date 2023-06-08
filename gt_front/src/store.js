@@ -6,7 +6,8 @@ Vue.use(Vuex)
 const store = new Vuex.Store({
   state: {
     availableTicketCount: 0,
-    allTicketCount: 0
+    allTicketCount: 0,
+    isSearchModalActive: false
   },
   mutations: {
     addToAvailableTicketCount (state, num) {
@@ -17,6 +18,9 @@ const store = new Vuex.Store({
     },
     updateTicketCountDisplay (state) {
       document.getElementById('ticket-count').innerText = `手持ち${state.availableTicketCount}枚 / 合計${state.allTicketCount}枚`
+    },
+    updateSearchModalActive (state, bool) {
+      state.isSearchModalActive = bool
     }
   },
   actions: {
@@ -33,6 +37,9 @@ const store = new Vuex.Store({
     useTicket (context) {
       context.commit('addToAvailableTicketCount', -1)
       context.commit('updateTicketCountDisplay')
+    },
+    setSearchModalActive (context, bool) {
+      context.commit('updateSearchModalActive', bool)
     }
   }
 })

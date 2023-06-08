@@ -4,6 +4,9 @@
       <router-link class="navbar-item" :to="'/user_relations/' + correspondingRelationId">
         {{navbarMessage}}
       </router-link>
+      <div class="icon search-button" @click="activateSearchModal">
+        <i class="fas fa-search"></i>
+      </div>
       <a
         role="button"
         class="navbar-burger"
@@ -18,7 +21,6 @@
         <span aria-hidden="true"></span>
       </a>
     </div>
-
     <div class="navbar-menu u-tab-flex-column-end" :class="{'is-flex': navbarVisible}">
       <div class="navbar-start">
       </div>
@@ -51,6 +53,7 @@
 
 <script>
 import axios from 'axios'
+import utils from '../utils'
 
 export default {
   props: [
@@ -82,6 +85,12 @@ export default {
       axios.get('/user/logout').then(() => {
         this.$router.push('/login')
       })
+    },
+    activateSearchModal () {
+      // MYMEMO: refactor this
+      utils.addIsHidden('#logo')
+      utils.preventScroll()
+      this.$store.dispatch('setSearchModalActive', true)
     }
   }
 }
@@ -93,5 +102,14 @@ export default {
         flex-direction: column;
         align-items: flex-end;
     }
+}
+.search-button {
+  height: 52px;
+  width: 52px;
+  cursor: pointer;
+  margin-left: auto;
+}
+.search-button:hover {
+  background-color: rgba(0,0,0,.05);
 }
 </style>

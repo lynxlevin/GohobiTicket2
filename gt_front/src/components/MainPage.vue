@@ -24,7 +24,7 @@
               'logo-fixed': isLogoFixed,
             }"
             id="logo"
-            @click="activateSearchModal"
+            @click="scrollToPageTop"
           >
         </div>
         <h4 class="subtitle is-3" id="ticket-count">
@@ -58,24 +58,12 @@
             :visibleUsedOnly="visibleUsedOnly"
           />
         </div>
-        <transition name="fade">
-          <!-- MYMEMO: change this to click ticket image -->
-          <div
-            class="to-page-top"
-            @click="scrollToPageTop"
-            v-if="isLogoFixed"
-          >
-            <span class="icon">
-              <i class="fas fa-angle-double-up"></i>
-            </span>
-          </div>
-        </transition>
         <!-- MYMEMO: 独自コンポーネントにする -->
         <!-- MYMEMO: スペシャルチケット検索もつけたい -->
         <!-- MYMEMO: used 混ぜこぜで日付順のソートもつけたい -->
         <modal
-          v-if="isSearchModalActive"
-          :modalMounted="isSearchModalActive"
+          v-if="$store.state.isSearchModalActive"
+          :modalMounted="$store.state.isSearchModalActive"
           :onClose="deactivateSearchModal"
         >
           <div class="field">
@@ -120,7 +108,6 @@ export default {
       searchGiftDate: '',
       searchErrorMessage: '',
       isLogoFixed: false,
-      isSearchModalActive: false,
       userRelationId: 0,
       apiAccessed: false,
       userRelationInfo: {},
@@ -183,16 +170,10 @@ export default {
       this.isLogoFixed = this.scrollPosition > 320
     },
     // 以下はsearch_modal用の関数
-    activateSearchModal () {
-      // MYMEMO: refactor this
-      utils.addIsHidden('#logo')
-      utils.preventScroll()
-      this.isSearchModalActive = true
-    },
     deactivateSearchModal () {
       utils.removeIsHidden('#logo')
       utils.allowScroll()
-      this.isSearchModalActive = false
+      this.$store.dispatch('setSearchModalActive', false)
     },
     scrollToTicket (id) {
       const target = document.getElementById(`ticket${id}`)
@@ -284,23 +265,6 @@ export default {
 .tickets {
     max-width: 760px;
     margin: 0 auto;
-}
-
-.to-page-top {
-    font-size: 30px;
-    background: white;
-    border-radius: 999px;
-    position: fixed;
-    left: 16px;
-    bottom: 20px;
-    border: 2px solid #ddd;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #555;
-    z-index: 2;
 }
 
 .searchDatePicker {
