@@ -1,6 +1,7 @@
 <template>
-    <div class="section block">
+    <div class="section block pt-4">
         <div id="tickets">
+          <div  v-if="!visibleUsedOnly">
             <template
                 v-for="(available_ticket, index) in availableTickets"
             >
@@ -9,18 +10,22 @@
                     :ticket="available_ticket"
                     :isGivingRelation="isGivingRelation"
                     :scrollPosition="scrollPosition"
+                    v-if="!visibleSpecialOnly || available_ticket.is_special"
                     :index="index + 1"
                     :key="available_ticket.id"
                 ></Ticket>
             </template>
-            <div ref="usedTickets"></div>
+          </div>
+          <div ref="usedTickets">
             <template v-for="(used_ticket, index) in usedTickets">
                 <UsedTicket
                     :ticket="used_ticket"
+                    v-if="!visibleSpecialOnly || used_ticket.is_special"
                     :index="index + 1"
                     :key="used_ticket.id"
                 ></UsedTicket>
             </template>
+          </div>
         </div>
     </div>
 </template>
@@ -39,13 +44,9 @@ export default {
     'availableTickets',
     'usedTickets',
     'isGivingRelation',
-    'scrollPosition'
-  ],
-  watch: {
-    scrollPosition () {
-      const toUsedTicketsVisible = this.scrollPosition < this.$refs.usedTickets.offsetTop - window.innerHeight / 2
-      this.$store.dispatch('setToUsedTicketsVisible', toUsedTicketsVisible)
-    }
-  }
+    'scrollPosition',
+    'visibleSpecialOnly',
+    'visibleUsedOnly'
+  ]
 }
 </script>

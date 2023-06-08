@@ -2,7 +2,6 @@
   <div class="pt-6" id="tickettop" v-bind:style="{backgroundColor: backgroundColor}">
     <div v-if="apiAccessed">
       <header-nav
-        :relatedUserNickname = "relatedUserNickname"
         :isGivingRelation = "isGivingRelation"
         :otherReceivingRelations = "otherReceivingRelations"
         :correspondingRelationId = "correspondingRelationId"
@@ -10,7 +9,7 @@
       <div
         class="container is-max-desktop has-text-centered"
       >
-        <h1 class="title is-2 section">
+        <h1 class="title is-2 section pt-4 pb-4">
           <span class="subtitle is-4">
             {{relatedUserNickname}}に{{titleMessage}}
           </span><br />
@@ -25,12 +24,26 @@
               'logo-fixed': isLogoFixed,
             }"
             id="logo"
-            @click="activateSearchModal"
+            @click="scrollToPageTop"
           >
         </div>
         <h4 class="subtitle is-3" id="ticket-count">
-          手持ち{{ availableTicketCount }}枚 / 合計{{ allTicketCount }}枚
+          <!-- MYMEMO: consider whether to delete availableTicketCount for good. -->
+          <!-- 手持ち{{ availableTicketCount }}枚 / 合計{{ allTicketCount }}枚 -->
+          計{{ allTicketCount }}枚
         </h4>
+        <div class="field">
+          <label class="label">
+            <input type="checkbox" v-model="visibleSpecialOnly" />
+            特別チケットのみ表示
+          </label>
+        </div>
+        <div class="field">
+          <label class="label">
+            <input type="checkbox" v-model="visibleUsedOnly" />
+            使用済みチケットのみ表示
+          </label>
+        </div>
         <div class="tickets">
           <ticket-form
             :userRelationId = "userRelationId"
@@ -41,33 +54,16 @@
             :usedTickets="usedTickets"
             :isGivingRelation="isGivingRelation"
             :scrollPosition="scrollPosition"
+            :visibleSpecialOnly="visibleSpecialOnly"
+            :visibleUsedOnly="visibleUsedOnly"
           />
         </div>
-        <transition name="fade">
-          <div
-            class="to-used-tickets"
-            v-if="$store.state.toUsedTicketsVisible"
-            @click="scrollToUsedTickets"
-          >
-            <span class="icon">
-              <i class="fas fa-angle-double-down"></i>
-            </span>
-          </div>
-        </transition>
         <!-- MYMEMO: 独自コンポーネントにする -->
-        <!-- MYMEMO: スペシャルチケット検索もつけたい -->
-        <!-- MYMEMO: used 混ぜこぜで日付順のソートもつけたい -->
         <modal
-          v-if="isSearchModalActive"
-          :modalMounted="isSearchModalActive"
+          v-if="$store.state.isSearchModalActive"
+          :modalMounted="$store.state.isSearchModalActive"
           :onClose="deactivateSearchModal"
         >
-          <div class="field">
-            <button type="button" @click="scrollToPageTop">ページトップへ移動</button>
-          </div>
-          <div class="field">
-            <button type="button" @click="scrollToUsedTickets">使用済みチケットのトップへ移動</button>
-          </div>
           <div class="field">
             <label class="label">日付で検索</label>
             <p>{{searchErrorMessage}}</p>
@@ -110,7 +106,6 @@ export default {
       searchGiftDate: '',
       searchErrorMessage: '',
       isLogoFixed: false,
-      isSearchModalActive: false,
       userRelationId: 0,
       apiAccessed: false,
       userRelationInfo: {},
@@ -124,7 +119,9 @@ export default {
       ticketImage: '',
       backgroundColor: '#FFFFFF',
       relatedUserNickname: '',
-      correspondingRelationId: ''
+      correspondingRelationId: '',
+      visibleSpecialOnly: false,
+      visibleUsedOnly: false
     }
   },
   created: function () {
@@ -171,16 +168,10 @@ export default {
       this.isLogoFixed = this.scrollPosition > 320
     },
     // 以下はsearch_modal用の関数
-    activateSearchModal () {
-      // MYMEMO: refactor this
-      utils.addIsHidden('#logo')
-      utils.preventScroll()
-      this.isSearchModalActive = true
-    },
     deactivateSearchModal () {
       utils.removeIsHidden('#logo')
       utils.allowScroll()
-      this.isSearchModalActive = false
+      this.$store.dispatch('setSearchModalActive', false)
     },
     scrollToTicket (id) {
       const target = document.getElementById(`ticket${id}`)
@@ -189,10 +180,6 @@ export default {
     },
     scrollToPageTop () {
       window.scroll({top: 0, behavior: 'smooth'})
-      this.deactivateSearchModal()
-    },
-    scrollToUsedTickets () {
-      this.scrollToTicket(this.usedTickets[0].id)
       this.deactivateSearchModal()
     },
     formatDate (date) {
@@ -276,23 +263,6 @@ export default {
 .tickets {
     max-width: 760px;
     margin: 0 auto;
-}
-
-.to-used-tickets {
-    font-size: 30px;
-    background: white;
-    border-radius: 999px;
-    position: fixed;
-    left: 16px;
-    bottom: 20px;
-    border: 2px solid #ddd;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #555;
-    z-index: 2;
 }
 
 .searchDatePicker {

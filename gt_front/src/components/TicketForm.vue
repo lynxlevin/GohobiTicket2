@@ -1,5 +1,5 @@
 <template>
-  <div class="section block">
+  <div class="section block pt-4 pb-4">
     <form action="/tickets" accept-charset="UTF-8" method="post">
       <input type="hidden" name="authenticity_token" />
       <div class="field">
