@@ -1,11 +1,9 @@
-from datetime import date
-
-from django.test import Client, TestCase
-from rest_framework import status
-from rest_framework.exceptions import PermissionDenied, NotFound
-from tickets.models import Ticket
-from tickets.test_utils.test_seeds import TestSeed
+from django.test import TestCase
+from rest_framework.exceptions import NotFound, PermissionDenied
+from tickets.tests.ticket_factory import TicketFactory, UsedTicketFactory
+from user_relations.tests.user_relation_factory import UserRelationFactory
 from user_relations.use_cases import RetrieveUserRelation
+from users.tests.user_factory import UserFactory
 
 
 class TestUserRelationViews(TestCase):
@@ -13,64 +11,60 @@ class TestUserRelationViews(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.seeds = TestSeed()
-        cls.seeds.setUp()
+        cls.user = UserFactory()
+        cls.related_user = UserFactory()
+        cls.giving_relation = UserRelationFactory(giving_user=cls.user, receiving_user=cls.related_user)
+        cls.receiving_relation = UserRelationFactory(receiving_user=cls.user, giving_user=cls.related_user)
+        cls.another_receiving_relation = UserRelationFactory(receiving_user=cls.user)
 
-        cls.user = cls.seeds.users[0]
-        cls.user_relation = cls.seeds.user_relations[0]
-
-        cls.non_related_user = cls.seeds.users[2]
-        cls.non_related_relation = cls.seeds.user_relations[1]
-
-        cls.non_existent_relation_id = "-1"
+        cls.available_tickets = [
+            *TicketFactory.create_batch(5, user_relation=cls.giving_relation),
+        ]
+        cls.used_tickets = [
+            *UsedTicketFactory.create_batch(5, user_relation=cls.giving_relation),
+        ]
 
     def test_retrieve_user_relation(self):
-        data = RetrieveUserRelation().execute(self.user_relation.id, self.user.id)
+        data = RetrieveUserRelation().execute(self.giving_relation.id, self.user.id)
 
         expected = {
             "user_relation_info": {
-                "id": self.user_relation.id,
-                "related_user_nickname": self.seeds.users[1].username,
+                "id": self.giving_relation.id,
+                "related_user_nickname": self.related_user.username,
                 "is_giving_relation": True,
-                "ticket_image": self.user_relation.ticket_img,
-                "background_color": self.user_relation.background_color,
-                "corresponding_relation_id": self.seeds.user_relations[1].id,
+                "ticket_image": self.giving_relation.ticket_img,
+                "background_color": self.giving_relation.background_color,
+                "corresponding_relation_id": self.receiving_relation.id,
             },
             "other_receiving_relations": [
                 {
-                    "id": self.seeds.user_relations[1].id,
-                    "related_user_nickname": self.seeds.users[1].username,
+                    "id": self.receiving_relation.id,
+                    "related_user_nickname": self.related_user.username,
                 },
                 {
-                    "id": self.seeds.user_relations[3].id,
-                    "related_user_nickname": self.seeds.users[2].username,
-                },
-                {
-                    "id": self.seeds.user_relations[5].id,
-                    "related_user_nickname": self.seeds.users[3].username,
+                    "id": self.another_receiving_relation.id,
+                    "related_user_nickname": self.another_receiving_relation.giving_user.username,
                 },
             ],
-            "available_tickets": [
-                *self.seeds.tickets[8:12][::-1],
-                *self.seeds.tickets[0:4][::-1],
-            ],
-            "used_tickets": [
-                *self.seeds.tickets[12:16][::-1],
-                *self.seeds.tickets[4:8][::-1],
-            ],
-            "all_ticket_count": 16,
-            "available_ticket_count": 8,
+            "available_tickets": sorted(self.available_tickets, key=lambda t: t.gift_date, reverse=True),
+            "used_tickets": sorted(self.used_tickets, key=lambda t: t.use_date, reverse=True),
+            "all_ticket_count": len(self.available_tickets + self.used_tickets),
+            "available_ticket_count": len(self.available_tickets),
         }
         self.assertDictContainsSubset(expected, data)
 
     def test_retrieve_non_related_user(self):
+        non_related_relation = UserRelationFactory()
+
         with self.assertRaises(PermissionDenied):
             RetrieveUserRelation().execute(
-                self.non_related_relation.id, self.non_related_user.id
+                non_related_relation.id, self.user.id
             )
 
     def test_retrieve_non_existent_relation(self):
+        non_existent_relation_id = "-1"
+
         with self.assertRaises(NotFound):
             RetrieveUserRelation().execute(
-                self.non_existent_relation_id, self.non_related_user.id
+                non_existent_relation_id, self.user.id
             )
