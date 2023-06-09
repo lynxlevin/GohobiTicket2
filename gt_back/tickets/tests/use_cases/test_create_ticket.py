@@ -4,22 +4,21 @@ from datetime import datetime
 from django.test import TestCase
 from rest_framework import exceptions
 from tickets.models import Ticket
-from tickets.test_utils.test_seeds import TestSeed
 from tickets.use_cases import CreateTicket
+from user_relations.tests.user_relation_factory import UserRelationFactory
 from users.models import User
+from users.tests.user_factory import UserFactory
 
 
 class TestCreateTicket(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.seeds = TestSeed()
-        cls.seeds.setUp()
         cls.use_case_name = "tickets.use_cases.create_ticket"
-        cls.user = cls.seeds.users[1]
 
-        cls.giving_relation_id = cls.user.giving_relations.first().id
-        cls.receiving_relation_id = cls.user.receiving_relations.first().id
-        cls.unrelated_relation_id = cls.seeds.user_relations[2].id
+        cls.user = UserFactory()
+        cls.giving_relation_id = UserRelationFactory(giving_user=cls.user).id
+        cls.receiving_relation_id = UserRelationFactory(receiving_user=cls.user).id
+        cls.unrelated_relation_id = UserRelationFactory().id
         cls.non_existent_relation_id = -1
 
     def test_create_ticket(self):
@@ -154,4 +153,5 @@ class TestCreateTicket(TestCase):
 
     def _then_info_log_is_output(self, cm_output):
         expected_log = [f"INFO:{self.use_case_name}:CreateTicket"]
+        self.assertEqual(expected_log, cm_output)
         self.assertEqual(expected_log, cm_output)
