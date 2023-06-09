@@ -3,16 +3,10 @@ from unittest import mock
 
 import requests
 from django.test import TestCase
-from tickets.test_utils.test_seeds import TestSeed
 from tickets.utils.slack_messenger import SlackMessenger
 
 
 class TestSlackMessenger(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.seeds = TestSeed()
-        cls.seeds.setUp()
-
     @mock.patch("requests.post")
     def test_send_message(self, requests_mock):
         url = "https://test_url"
