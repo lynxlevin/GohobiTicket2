@@ -4,21 +4,13 @@ from unittest import mock
 
 import requests
 from django.test import TestCase
-from tickets.models.ticket import Ticket
-from tickets.test_utils.test_seeds import TestSeed
+from tickets.tests.ticket_factory import TicketFactory
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
 
 
 class TestSlackMessengerForUseTicket(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.seeds = TestSeed()
-        cls.seeds.setUp()
-
     def test_generate_message(self):
-        normal_ticket = Ticket.objects.filter(
-            use_date__isnull=True, is_special=False
-        ).first()
+        normal_ticket = TicketFactory()
 
         receiving_user_name = normal_ticket.user_relation.receiving_user.username
         giving_user_name = normal_ticket.user_relation.giving_user.username
@@ -50,9 +42,7 @@ class TestSlackMessengerForUseTicket(TestCase):
             ],
         }
 
-        special_ticket = Ticket.objects.filter(
-            use_date__isnull=True, is_special=True
-        ).first()
+        special_ticket = TicketFactory(is_special=True)
 
         receiving_user_name = special_ticket.user_relation.receiving_user.username
         giving_user_name = special_ticket.user_relation.giving_user.username
@@ -155,4 +145,5 @@ class TestSlackMessengerForUseTicket(TestCase):
         expected_log = [
             "ERROR:tickets.utils.slack_messenger_for_use_ticket:Slack message error"
         ]
+        self.assertEqual(cm.output, expected_log)
         self.assertEqual(cm.output, expected_log)

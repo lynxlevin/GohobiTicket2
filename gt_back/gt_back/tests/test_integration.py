@@ -16,37 +16,33 @@ user_relations.retrieve
     use_date が入っていること
 """
 from unittest import mock
+
 from django.test import Client, TestCase
 from rest_framework import status
 from tickets.models import Ticket
-from tickets.test_utils.test_seeds import TestSeed
-from tickets.tests.use_cases import TestCreateTicket, TestUseTicket
+from tickets.tests.use_cases import TestUseTicket
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
 from user_relations.models import UserRelation
+from user_relations.tests.user_relation_factory import UserRelationFactory
 
 
 class TestTicketViews(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.seeds = TestSeed()
-        cls.seeds.setUpUsers()
-        cls.seeds.setUpUserRelations()
-        cls.seeds.setUpUserSettings()
+        cls.relation = UserRelationFactory()
+        cls.giving_user = cls.relation.giving_user
+        cls.receiving_user = cls.relation.receiving_user
 
     def test_integration(self):
-        giving_user = self.seeds.users[1]
-        giving_relation = giving_user.giving_relations.first()
-        receiving_user = giving_relation.receiving_user
-
         giving_client = Client()
         # MYMEMO: test login
-        giving_client.force_login(giving_user)
+        giving_client.force_login(self.giving_user)
 
         receiving_client = Client()
         # MYMEMO: test login
-        receiving_client.force_login(receiving_user)
+        receiving_client.force_login(self.receiving_user)
 
-        ticket_id = self._create_ticket_and_return_id(giving_client, giving_relation)
+        ticket_id = self._create_ticket_and_return_id(giving_client, self.relation)
 
         ticket = Ticket.objects.get_by_id(ticket_id)
         # MYMEMO: API じゃ無くした
@@ -138,4 +134,5 @@ class TestTicketViews(TestCase):
         self.assertEqual(str(ticket.id), response.data["id"])
 
         TestUseTicket()._then_ticket_should_be(ticket)
+        TestUseTicket()._then_slack_message_is_sent(ticket, slack_instance_mock)
         TestUseTicket()._then_slack_message_is_sent(ticket, slack_instance_mock)

@@ -1,11 +1,13 @@
-from datetime import date, datetime
+from datetime import date
 from unittest import mock
 
 from django.test import Client, TestCase
 from rest_framework import status
 from tickets.models import Ticket
-from tickets.test_utils.test_seeds import TestSeed
+from tickets.tests.ticket_factory import TicketFactory, UsedTicketFactory
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
+from user_relations.tests.user_relation_factory import UserRelationFactory
+from users.tests.user_factory import UserFactory
 
 from gt_back.messages import ErrorMessages
 
@@ -13,12 +15,9 @@ from gt_back.messages import ErrorMessages
 class TestTicketViews(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.seeds = TestSeed()
-        cls.seeds.setUp()
-
-        cls.user = cls.seeds.users[1]
-        cls.giving_relation = cls.user.giving_relations.first()
-        cls.receiving_relation = cls.user.receiving_relations.first()
+        cls.user = UserFactory()
+        cls.giving_relation = UserRelationFactory(giving_user=cls.user)
+        cls.receiving_relation = UserRelationFactory(receiving_user=cls.user, giving_user=cls.giving_relation.receiving_user)
 
     def test_create(self):
         """
@@ -77,7 +76,7 @@ class TestTicketViews(TestCase):
         """
         Patch /api/tickets/{ticket_id}/
         """
-        ticket = Ticket.objects.filter_eq_user_relation_id(self.giving_relation.id)[0]
+        ticket = TicketFactory(user_relation=self.giving_relation)
 
         uri = f"/api/tickets/{ticket.id}/"
         params = {"ticket": {"description": "updated description"}}
@@ -85,13 +84,16 @@ class TestTicketViews(TestCase):
         response = self._send_patch_request(self.user, uri, params)
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
+
+        ticket.refresh_from_db()
         self.assertEqual(str(ticket.id), response.data["id"])
+        self.assertEqual(params["ticket"]["description"], ticket.description)
 
     def test_partial_update__status(self):
         """
         Patch /api/tickets/{ticket_id}/
         """
-        ticket = Ticket.objects.filter_eq_user_relation_id(self.giving_relation.id)[1]
+        ticket = TicketFactory(user_relation=self.giving_relation, status=Ticket.STATUS_UNREAD)
 
         uri = f"/api/tickets/{ticket.id}/"
         params = {"ticket": {"status": Ticket.STATUS_READ}}
@@ -99,15 +101,16 @@ class TestTicketViews(TestCase):
         response = self._send_patch_request(self.user, uri, params)
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
+
+        ticket.refresh_from_db()
         self.assertEqual(str(ticket.id), response.data["id"])
+        self.assertEqual(params["ticket"]["status"], ticket.status)
 
     def test_destroy(self):
         """
         Delete /api/tickets/{ticket_id}/
         """
-        ticket = Ticket.objects.filter_eq_user_relation_id(
-            self.giving_relation.id
-        ).first()
+        ticket = TicketFactory(user_relation=self.giving_relation)
 
         response = self._send_delete_request(self.user, f"/api/tickets/{ticket.id}/")
 
@@ -117,14 +120,7 @@ class TestTicketViews(TestCase):
         """
         Put /api/tickets/{ticket_id}/mark_special/
         """
-        gift_date = datetime.strptime("2022-05-01", "%Y-%m-%d").date()
-        ticket = Ticket(
-            description="to be special",
-            gift_date=gift_date,
-            user_relation=self.giving_relation,
-            is_special=False,
-        )
-        ticket.save()
+        ticket = TicketFactory(user_relation=self.giving_relation)
 
         uri = f"/api/tickets/{ticket.id}/mark_special/"
 
@@ -132,15 +128,16 @@ class TestTicketViews(TestCase):
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
 
-        self.assertEqual(str(ticket.id), response.data["id"])
-
         ticket.refresh_from_db()
+        self.assertEqual(str(ticket.id), response.data["id"])
         self.assertTrue(ticket.is_special)
 
     def test_mark_special_case_error__multiple_special_tickets_in_month(self):
-        second_special_ticket_in_month = self.seeds.tickets[16]
+        gift_date = date(2022, 5, 1)
+        _first_special_ticket_in_month = TicketFactory(is_special=True, gift_date=gift_date, user_relation=self.giving_relation)
+        target_ticket = TicketFactory(gift_date=gift_date, user_relation=self.giving_relation)
 
-        uri = f"/api/tickets/{second_special_ticket_in_month.id}/mark_special/"
+        uri = f"/api/tickets/{target_ticket.id}/mark_special/"
         response = self._send_put_request(self.user, uri, {})
 
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
@@ -148,12 +145,11 @@ class TestTicketViews(TestCase):
             ErrorMessages.SPECIAL_TICKET_LIMIT_VIOLATION.value,
             response.data["error_message"],
         )
-        self._assert_false__ticket_is_special(second_special_ticket_in_month)
+        target_ticket.refresh_from_db()
+        self._assert_false__ticket_is_special(target_ticket)
 
     def test_mark_special_case_error__receiving_relation(self):
-        receiving_ticket = Ticket.objects.filter_eq_user_relation_id(
-            self.receiving_relation.id
-        ).first()
+        receiving_ticket = TicketFactory(user_relation=self.receiving_relation)
 
         uri = f"/api/tickets/{receiving_ticket.id}/mark_special/"
         response = self._send_put_request(self.user, uri, {})
@@ -163,10 +159,7 @@ class TestTicketViews(TestCase):
         self._assert_false__ticket_is_special(receiving_ticket)
 
     def test_mark_special_case_error__unrelated_relation(self):
-        unrelated_relation_id = self.seeds.user_relations[2].id
-        unrelated_ticket = Ticket.objects.filter_eq_user_relation_id(
-            unrelated_relation_id
-        ).first()
+        unrelated_ticket = TicketFactory()
 
         uri = f"/api/tickets/{unrelated_ticket.id}/mark_special/"
         response = self._send_put_request(self.user, uri, {})
@@ -176,13 +169,7 @@ class TestTicketViews(TestCase):
         self._assert_false__ticket_is_special(unrelated_ticket)
 
     def test_mark_special_case_error__used_ticket(self):
-        used_ticket = Ticket(
-            description="used_ticket",
-            user_relation=self.giving_relation,
-            gift_date=date.today(),
-            use_date=date.today(),
-        )
-        used_ticket.save()
+        used_ticket = UsedTicketFactory(user_relation=self.giving_relation)
 
         uri = f"/api/tickets/{used_ticket.id}/mark_special/"
         response = self._send_put_request(self.user, uri, {})
@@ -208,11 +195,7 @@ class TestTicketViews(TestCase):
         slack_instance_mock = mock.Mock()
         slack_mock.return_value = slack_instance_mock
 
-        ticket = (
-            Ticket.objects.filter_eq_user_relation_id(self.receiving_relation.id)
-            .filter(use_date__isnull=True, is_special=False)
-            .first()
-        )
+        ticket = TicketFactory(user_relation=self.receiving_relation)
 
         params = {
             "ticket": {
@@ -220,18 +203,16 @@ class TestTicketViews(TestCase):
             }
         }
         uri = f"/api/tickets/{ticket.id}/use/"
-
         response = self._send_put_request(self.user, uri, params)
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
-
         self.assertEqual(str(ticket.id), response.data["id"])
 
     def test_read_ticket(self):
         """
         Put /api/tickets/{ticket_id}/read/
         """
-        unread_ticket = self.seeds.tickets[0]
+        unread_ticket = TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.receiving_relation)
 
         uri = f"/api/tickets/{unread_ticket.id}/read/"
 

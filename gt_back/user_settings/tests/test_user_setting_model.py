@@ -1,17 +1,12 @@
 from django.test import TestCase
-from tickets.test_utils.test_seeds import TestSeed
 from user_settings.models import UserSetting
+from user_settings.tests.user_setting_factory import UserSettingFactory
 
 
 class TestUserSettingModel(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.seeds = TestSeed()
-        cls.seeds.setUp()
-
     def test_get_by_user_id(self):
-        user = self.seeds.users[0]
+        user_setting = UserSettingFactory()
 
-        result = UserSetting.objects.get_by_user_id(user.id)
+        result = UserSetting.objects.get_by_user_id(user_setting.user_id)
 
-        self.assertEqual(result.user, user)
+        self.assertEqual(user_setting, result)

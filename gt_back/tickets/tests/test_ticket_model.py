@@ -2,63 +2,68 @@ from datetime import date
 
 from django.test import TestCase
 from tickets.models import Ticket
-from tickets.test_utils.test_seeds import TestSeed
+from tickets.tests.ticket_factory import TicketFactory, UsedTicketFactory
+from user_relations.tests.user_relation_factory import UserRelationFactory
 
 
 class TestTicketModel(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.seeds = TestSeed()
-        cls.seeds.setUp()
-
     def test_filter_eq_user_relation_id(self):
-        user_relation_id = self.seeds.user_relations[0].id
-        tickets = self.seeds.tickets
+        user_relation = UserRelationFactory()
+        expected_tickets = TicketFactory.create_batch(5, user_relation=user_relation)
+        _another_relation_ticket = TicketFactory()
 
-        result = Ticket.objects.filter_eq_user_relation_id(user_relation_id)
-        expected = tickets[0:16]
+        result = Ticket.objects.filter_eq_user_relation_id(user_relation.id).all()
 
-        self.assertEqual(list(result.all()), expected)
+        self.assertEqual(expected_tickets, list(result))
 
     def test_filter_unused_tickets(self):
-        tickets = self.seeds.tickets
+        expected_tickets = [
+            TicketFactory(gift_date=date(2022, 1, 4)),
+            TicketFactory(gift_date=date(2022, 1, 3)),
+            TicketFactory(gift_date=date(2022, 1, 2)),
+            TicketFactory(gift_date=date(2022, 1, 1)),
+        ]
+        _used_ticket = UsedTicketFactory()
 
-        result = Ticket.objects.filter_unused_tickets()
+        result = Ticket.objects.filter_unused_tickets().all()
 
-        list1 = tickets[0:4]
-        list2 = tickets[8:12]
-        list3 = tickets[16:22]
-        list4 = tickets[22:24]
-        expected = list(reversed(list1 + list2 + list3 + list4))
-
-        self.assertEqual(list(result.all()), expected)
+        self.assertEqual(expected_tickets, list(result))
 
     def test_filter_used_tickets(self):
-        tickets = self.seeds.tickets
+        expected_tickets = [
+            TicketFactory(use_date=date(2022, 1, 4)),
+            TicketFactory(use_date=date(2022, 1, 3)),
+            TicketFactory(use_date=date(2022, 1, 2)),
+            TicketFactory(use_date=date(2022, 1, 1)),
+        ]
+        _unused_ticket = TicketFactory()
 
-        result = Ticket.objects.filter_used_tickets()
+        result = Ticket.objects.filter_used_tickets().all()
 
-        list1 = tickets[4:8]
-        list2 = tickets[12:16]
-        expected = list(reversed(list1 + list2))
-
-        self.assertEqual(list(result.all()), expected)
+        self.assertEqual(expected_tickets, list(result))
 
     def test_filter_special_tickets(self):
         target_date = date(2022, 6, 11)
 
-        tickets = self.seeds.tickets
-        result = Ticket.objects.filter_special_tickets(target_date)
-        expected = [tickets[19]]
+        expected_tickets = [TicketFactory(gift_date=date(2022, 6, 1), is_special=True)]
+        _other_tickets = [
+            TicketFactory(gift_date=date(2022, 6, 11)),
+            *TicketFactory.create_batch(3),
+        ]
 
-        self.assertEqual(list(result.all()), expected)
+        result = Ticket.objects.filter_special_tickets(target_date)
+
+        self.assertEqual(expected_tickets, list(result.all()))
 
     def test_exclude_eq_status(self):
-        target = Ticket.STATUS_DRAFT
-        result = Ticket.objects.exclude_eq_status(target)
+        exclude_target = Ticket.STATUS_DRAFT
+        _excluded_tickets = TicketFactory.create_batch(5, status=exclude_target)
+        expected_tickets = [
+            TicketFactory(status=Ticket.STATUS_READ),
+            TicketFactory(status=Ticket.STATUS_UNREAD),
+            TicketFactory(status=Ticket.STATUS_EDITED),
+        ]
 
-        all_tickets_count = Ticket.objects.count()
-        draft_tickets_count = Ticket.objects.filter(status=target).count()
-        expected_count = all_tickets_count - draft_tickets_count
+        result = Ticket.objects.exclude_eq_status(exclude_target).all()
 
-        self.assertEqual(expected_count, result.count())
+        self.assertEqual(expected_tickets, list(result))
