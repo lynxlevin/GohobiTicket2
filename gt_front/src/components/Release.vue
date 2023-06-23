@@ -22,6 +22,12 @@ export default {
     return {
       releaseNotes: [
         {
+          date: '2023年6月23日（金）',
+          contents: [
+            {text: '使用済みチケットへ移動するボタンを復活しました。'}
+          ]
+        },
+        {
           date: '2023年6月8日（木）',
           contents: [
             {text: '画面デザインのブラッシュアップを行いました。'},
