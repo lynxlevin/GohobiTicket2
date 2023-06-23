@@ -7,7 +7,8 @@ const store = new Vuex.Store({
   state: {
     availableTicketCount: 0,
     allTicketCount: 0,
-    isSearchModalActive: false
+    isSearchModalActive: false,
+    isUsedTicketsOnScreen: false
   },
   mutations: {
     addToAvailableTicketCount (state, num) {
@@ -21,6 +22,9 @@ const store = new Vuex.Store({
     },
     updateSearchModalActive (state, bool) {
       state.isSearchModalActive = bool
+    },
+    setisUsedTicketsOnScreen (state, bool) {
+      state.isUsedTicketsOnScreen = bool
     }
   },
   actions: {
@@ -40,6 +44,9 @@ const store = new Vuex.Store({
     },
     setSearchModalActive (context, bool) {
       context.commit('updateSearchModalActive', bool)
+    },
+    setisUsedTicketsOnScreen (context, bool) {
+      context.commit('setisUsedTicketsOnScreen', bool)
     }
   }
 })
