@@ -91,7 +91,7 @@ export default {
           this.$set(this.ticket, 'use_date', Date())
           this.$set(this.ticket, 'use_description', this.use_description)
           this.used = true
-          utils.removeIsHidden('#logo')
+          utils.removeIsHidden('#logo-fixed')
         })
         .catch(error => {
           this.errorCode = error.response.status

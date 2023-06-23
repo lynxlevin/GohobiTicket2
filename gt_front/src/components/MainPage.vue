@@ -19,11 +19,15 @@
           <img
             :src="ticketImage"
             alt="ticket image"
-            :class="{
-              'logo': !isLogoFixed,
-              'logo-fixed': isLogoFixed,
-            }"
-            id="logo"
+            class="logo"
+          >
+        </div>
+        <div>
+          <img
+            :src="ticketImage"
+            alt="ticket image"
+            class="logo-fixed"
+            id="logo-fixed"
             @click="scrollToPageTop"
           >
         </div>
@@ -180,7 +184,7 @@ export default {
     },
     // 以下はsearch_modal用の関数
     deactivateSearchModal () {
-      utils.removeIsHidden('#logo')
+      utils.removeIsHidden('#logo-fixed')
       utils.allowScroll()
       this.$store.dispatch('setSearchModalActive', false)
     },

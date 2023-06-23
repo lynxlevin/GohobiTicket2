@@ -335,13 +335,13 @@ export default {
         })
     },
     activateModal (modal) {
-      utils.addIsHidden('#logo')
+      utils.addIsHidden('#logo-fixed')
       utils.preventScroll()
       this[modal] = true
     },
     deactivateModal (modal) {
       // FIXME: 二重モーダルの片方を閉じたときにこれが動いてしまう
-      utils.removeIsHidden('#logo')
+      utils.removeIsHidden('#logo-fixed')
       // FIXME: 二重モーダルの片方を閉じたときにこれが動いてしまう
       utils.allowScroll()
       this[modal] = false
