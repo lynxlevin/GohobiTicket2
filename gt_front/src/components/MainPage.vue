@@ -19,17 +19,19 @@
           <img
             :src="ticketImage"
             alt="ticket image"
-            :class="{
-              'logo': !isLogoFixed,
-              'logo-fixed': isLogoFixed,
-            }"
-            id="logo"
+            class="logo"
+          >
+        </div>
+        <div>
+          <img
+            :src="ticketImage"
+            alt="ticket image"
+            class="logo-fixed"
+            id="logo-fixed"
             @click="scrollToPageTop"
           >
         </div>
         <h4 class="subtitle is-3" id="ticket-count">
-          <!-- MYMEMO: consider whether to delete availableTicketCount for good. -->
-          <!-- 手持ち{{ availableTicketCount }}枚 / 合計{{ allTicketCount }}枚 -->
           計{{ allTicketCount }}枚
         </h4>
         <div class="field">
@@ -180,7 +182,7 @@ export default {
     },
     // 以下はsearch_modal用の関数
     deactivateSearchModal () {
-      utils.removeIsHidden('#logo')
+      utils.removeIsHidden('#logo-fixed')
       utils.allowScroll()
       this.$store.dispatch('setSearchModalActive', false)
     },

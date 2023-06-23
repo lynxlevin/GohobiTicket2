@@ -199,12 +199,12 @@ export default {
       div.prepend(instance.$el)
     },
     activateModal () {
-      utils.addIsHidden('#logo')
+      utils.addIsHidden('#logo-fixed')
       utils.preventScroll()
       this.isModalActive = true
     },
     deactivateModal () {
-      utils.removeIsHidden('#logo')
+      utils.removeIsHidden('#logo-fixed')
       utils.allowScroll()
       this.isModalActive = false
     }

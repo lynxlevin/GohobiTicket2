@@ -88,7 +88,7 @@ export default {
     },
     activateSearchModal () {
       // MYMEMO: refactor this
-      utils.addIsHidden('#logo')
+      utils.addIsHidden('#logo-fixed')
       utils.preventScroll()
       this.$store.dispatch('setSearchModalActive', true)
     }
