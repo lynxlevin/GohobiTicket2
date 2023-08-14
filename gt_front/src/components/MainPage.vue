@@ -59,6 +59,7 @@
             :scrollPosition="scrollPosition"
             :visibleSpecialOnly="visibleSpecialOnly"
             :visibleUsedOnly="visibleUsedOnly"
+            :deleteTicketFromMain="deleteTicketFromMain"
           />
         </div>
         <transition name="fade">
@@ -231,6 +232,11 @@ export default {
     },
     addAvailableTicket (createdTicket) {
       this.availableTickets.unshift(createdTicket)
+    },
+    deleteTicketFromMain (ticketId) {
+      const ticket = this.availableTickets.find(ticket => ticket.id === ticketId)
+      const index = this.availableTickets.indexOf(ticket)
+      this.availableTickets.splice(index, 1)
     }
   }
 }
