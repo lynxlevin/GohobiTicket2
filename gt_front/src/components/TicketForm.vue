@@ -153,9 +153,12 @@ export default {
         })
     },
     prepareData (isDraft = false) {
+      const paddedMonth = (this.gift_date.getMonth() + 1).toString().padStart(2, '0')
+      const paddedDate = this.gift_date.getDate().toString().padStart(2, '0')
+      const formattedDate = `${this.gift_date.getFullYear()}-${paddedMonth}-${paddedDate}`
       const data = {
         ticket: {
-          gift_date: this.gift_date.toISOString().slice(0, 10),
+          gift_date: formattedDate,
           description: this.description,
           user_relation_id: this.userRelationId
         }
