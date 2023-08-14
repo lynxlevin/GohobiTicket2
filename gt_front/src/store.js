@@ -18,7 +18,7 @@ const store = new Vuex.Store({
       state.allTicketCount += num
     },
     updateTicketCountDisplay (state) {
-      document.getElementById('ticket-count').innerText = `手持ち${state.availableTicketCount}枚 / 合計${state.allTicketCount}枚`
+      document.getElementById('ticket-count').innerText = `計${state.allTicketCount}枚`
     },
     updateSearchModalActive (state, bool) {
       state.isSearchModalActive = bool
