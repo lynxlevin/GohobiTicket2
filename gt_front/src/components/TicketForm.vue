@@ -73,10 +73,8 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import axios from 'axios'
 import Datepicker from 'vuejs-datepicker'
-import Ticket from './Ticket'
 import SpecialTicketNoticeModal from './modals/SpecialTicketNoticeModal'
 import utils from '../utils'
 
@@ -135,7 +133,7 @@ export default {
           axios.put(`/api/tickets/${data.ticket.id}/mark_special/`, {}, utils.getCsrfHeader())
             .then(_ => {
               data.ticket.is_special = true
-              this.addTicketComponent(data)
+              this.$emit('addAvailableTicket', data.ticket)
               this.$store.dispatch('addTicket')
               this.resetForm()
             })
@@ -172,7 +170,7 @@ export default {
       axios
         .post(url, data, utils.getCsrfHeader())
         .then((response) => {
-          this.addTicketComponent(response.data)
+          this.$emit('addAvailableTicket', response.data.ticket)
           this.$store.dispatch('addTicket') // MYMEMO: draft の時は発火したくない
           this.resetForm()
         })
@@ -187,19 +185,6 @@ export default {
       this.errorCode = ''
       this.errorMessage = ''
       this.toBeSpecial = false
-    },
-    addTicketComponent (data) {
-      const ComponentClass = Vue.extend(Ticket)
-      const instance = new ComponentClass({
-        propsData: {
-          ticket: data.ticket,
-          index: data.ticket.id,
-          isGivingRelation: true
-        }
-      })
-      const div = document.getElementById('tickets')
-      instance.$mount()
-      div.prepend(instance.$el)
     },
     activateModal () {
       utils.addIsHidden('#logo-fixed')

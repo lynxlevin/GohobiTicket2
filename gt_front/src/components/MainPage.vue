@@ -50,6 +50,7 @@
           <ticket-form
             :userRelationId = "userRelationId"
             v-if="isGivingRelation"
+            @addAvailableTicket="addAvailableTicket"
           />
           <tickets
             :availableTickets="availableTickets"
@@ -227,6 +228,9 @@ export default {
       } else {
         this.searchErrorMessage = '見つかりませんでした。'
       }
+    },
+    addAvailableTicket (createdTicket) {
+      this.availableTickets.unshift(createdTicket)
     }
   }
 }
