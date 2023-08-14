@@ -249,11 +249,8 @@ export default {
       axios
         .delete(`/api/tickets/${this.ticket.id}/`, utils.getCsrfHeader())
         .then(() => {
-          this.$el.style = 'display: none;' // 応急処置
-          // 付与⇨削除すると、正規のコンポーネントではないので、以下の３行が動かない。
           this.$store.dispatch('deleteTicket')
-          this.$el.parentNode.removeChild(this.$el)
-          this.$destroy()
+          this.$emit('deleteTicketFromMain', this.ticket.id)
         })
         .catch((error) => {
           this.errorCode = error.response.status

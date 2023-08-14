@@ -13,6 +13,7 @@
                     v-if="!visibleSpecialOnly || available_ticket.is_special"
                     :index="index + 1"
                     :key="available_ticket.id"
+                    @deleteTicketFromMain="deleteTicketFromMain"
                 ></Ticket>
             </template>
           </div>
@@ -46,7 +47,8 @@ export default {
     'isGivingRelation',
     'scrollPosition',
     'visibleSpecialOnly',
-    'visibleUsedOnly'
+    'visibleUsedOnly',
+    'deleteTicketFromMain'
   ],
   watch: {
     scrollPosition () {
