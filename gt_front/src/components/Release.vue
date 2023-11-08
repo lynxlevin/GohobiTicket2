@@ -22,6 +22,12 @@ export default {
     return {
       releaseNotes: [
         {
+          date: '2023年11月8日（水）',
+          contents: [
+            {text: 'favicon を追加しました。'}
+          ]
+        },
+        {
           date: '2023年8月14日（月）',
           contents: [
             {text: '朝チケットを付与すると前日になってしまうバグを修正しました。'},
