@@ -8,7 +8,7 @@ DEBUG = False
 env = environ.Env()
 env.read_env(".env")
 
-ALLOWED_HOSTS = [env.get_value("ALLOWED_HOSTS")]
+ALLOWED_HOSTS = [env.get_value("ALLOWED_HOSTS").split(",")]
 
 
 # Logging
