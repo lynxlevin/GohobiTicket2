@@ -1,10 +1,14 @@
-from .base import *
+import environ
 
+from .base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["54.250.80.22"]
+env = environ.Env()
+env.read_env(".env")
+
+ALLOWED_HOSTS = [env.get_value("ALLOWED_HOSTS")]
 
 
 # Logging
