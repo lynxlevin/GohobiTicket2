@@ -19,16 +19,16 @@ class TestDiaryViews(TestCase):
 
     def test_list(self):
         """
-        Get /api/diaries/?relation={relation_id}
+        Get /api/diaries/?user_relation_ids={relation_id}
         """
         diary_entries = [
             DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=2))),
             DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=1))),
             DiaryFactory(user_relation=self.relation, date=date.today()),
         ]
+        _another_relation_entry = DiaryFactory()
 
-
-        status_code, body = self._make_get_request(self.user, f"{self.base_path}?relation={self.relation.id}")
+        status_code, body = self._make_get_request(self.user, f"{self.base_path}?user_relation_id={self.relation.id}")
 
         self.assertEqual(status.HTTP_200_OK, status_code)
 

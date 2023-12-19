@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from gt_back.exception_handler import exception_handler_with_logging
 
 from ..models import Diary
-from ..serializers import DiariesSerializer, DiarySerializer
+from ..serializers import DiariesSerializer, DiarySerializer, ListDiaryQuerySerializer
 from ..use_cases import ListDiary
 
 logger = logging.getLogger(__name__)
@@ -22,11 +22,11 @@ class DiaryViewSet(viewsets.GenericViewSet):
 
     def list(self, request, use_case=ListDiary(), format=None):
         try:
-            # serializer = TicketCreateSerializer(data=request.data)
-            # serializer.is_valid(raise_exception=True)
+            serializer = ListDiaryQuerySerializer(data=request.GET.dict())
+            serializer.is_valid(raise_exception=True)
 
-            # data = serializer.validated_data["ticket"]
-            diaries = use_case.execute(user=request.user, queries={})
+            queries = serializer.validated_data
+            diaries = use_case.execute(user=request.user, queries=queries)
 
             serializer = DiariesSerializer({"diaries": diaries})
             return Response(serializer.data, status=status.HTTP_200_OK)

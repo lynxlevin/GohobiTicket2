@@ -18,8 +18,10 @@ class ListDiary:
     def execute(self, user: User, queries: dict) -> "DiaryQuerySet":
         logger.info(self.__class__.__name__, extra={"user": user, "queries": queries})
 
-        # qs = Diary.objects.all()
+        user_relation_id = queries["user_relation_id"]
 
-        diaries = Diary.objects.order_by_date_desc().all()
+        qs = Diary.objects.filter_eq_user_relation_id(user_relation_id)
+
+        diaries = qs.order_by_date_desc().all()
 
         return diaries

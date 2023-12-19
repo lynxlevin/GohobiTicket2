@@ -9,3 +9,8 @@ class DiarySerializer(serializers.Serializer):
 class DiariesSerializer(serializers.Serializer):
     diaries = DiarySerializer(many=True, read_only=True)
 
+
+class ListDiaryQuerySerializer(serializers.Serializer):
+    user_relation_id = serializers.IntegerField()
+
+
