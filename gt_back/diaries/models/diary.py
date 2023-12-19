@@ -12,7 +12,10 @@ class DiaryQuerySet(models.QuerySet):
             return None
 
     def filter_eq_user_relation_id(self, user_relation_id: str) -> "DiaryQuerySet":
-        return Diary.objects.filter(user_relation__id=user_relation_id)
+        return self.filter(user_relation__id=user_relation_id)
+
+    def order_by_date_desc(self) -> "DiaryQuerySet":
+        return self.order_by("-date")
 
 
 class Diary(models.Model):

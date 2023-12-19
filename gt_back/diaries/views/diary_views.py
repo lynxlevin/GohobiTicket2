@@ -8,26 +8,28 @@ from rest_framework.response import Response
 from gt_back.exception_handler import exception_handler_with_logging
 
 from ..models import Diary
+from ..serializers import DiariesSerializer, DiarySerializer
+from ..use_cases import ListDiary
 
 logger = logging.getLogger(__name__)
 
 
 class DiaryViewSet(viewsets.GenericViewSet):
     queryset = Diary.objects.all()
-    # serializer_class = TicketSerializer
+    serializer_class = DiarySerializer
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def list(self, request, format=None):
+    def list(self, request, use_case=ListDiary(), format=None):
         try:
             # serializer = TicketCreateSerializer(data=request.data)
             # serializer.is_valid(raise_exception=True)
 
             # data = serializer.validated_data["ticket"]
-            # ticket = use_case.execute(user=request.user, data=data)
+            diaries = use_case.execute(user=request.user, queries={})
 
-            # serializer = self.get_serializer(ticket)
-            return Response({"diaries": []}, status=status.HTTP_200_OK)
+            serializer = DiariesSerializer({"diaries": diaries})
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as exc:
             return exception_handler_with_logging(exc)
