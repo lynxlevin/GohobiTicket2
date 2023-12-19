@@ -1,3 +1,4 @@
+import uuid
 from typing import Optional
 
 from django.db import models
@@ -19,6 +20,7 @@ class DiaryQuerySet(models.QuerySet):
 
 
 class Diary(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE)
     entry = models.TextField(default="", blank=True)
     date = models.DateField()
