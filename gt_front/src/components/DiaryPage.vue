@@ -21,14 +21,8 @@
             v-if="isGivingRelation"
             @addAvailableTicket="addAvailableTicket"
           /> -->
-          <tickets
-            :availableTickets="availableTickets"
-            :usedTickets="usedTickets"
-            :isGivingRelation="isGivingRelation"
-            :scrollPosition="scrollPosition"
-            :visibleSpecialOnly="visibleSpecialOnly"
-            :visibleUsedOnly="visibleUsedOnly"
-            :deleteTicketFromMain="deleteTicketFromMain"
+          <diaries
+            :diaries="diaries"
           />
         </div>
       </div>
@@ -38,27 +32,25 @@
 
 <script>
 import HeaderNav from './HeaderNav'
-import Tickets from './Tickets'
+import Diaries from './Diaries'
 import axios from 'axios'
 
 export default {
   components: {
     HeaderNav,
-    Tickets
+    Diaries
   },
   name: 'DiaryPage',
   data: function () {
     return {
-      scrollPosition: 0,
       userRelationId: 0,
       apiAccessed: false,
       otherReceivingRelations: [],
-      availableTickets: [],
-      usedTickets: [],
       isGivingRelation: false,
       backgroundColor: '#FFFFFF',
       relatedUserNickname: '',
-      correspondingRelationId: ''
+      correspondingRelationId: '',
+      diaries: []
     }
   },
   created: function () {
@@ -76,8 +68,6 @@ export default {
     getInitialData () {
       axios.get(`/api/user_relations/${this.userRelationId}/`).then(res => {
         this.otherReceivingRelations = res.data.other_receiving_relations
-        this.availableTickets = res.data.available_tickets
-        this.usedTickets = res.data.used_tickets
         this.apiAccessed = true
 
         this.isGivingRelation = res.data.user_relation_info.is_giving_relation
@@ -89,21 +79,19 @@ export default {
           this.$router.push('/login')
         }
       })
-    },
+      axios.get(`/api/diaries/?user_relation_id=${this.userRelationId}`).then(res => {
+        console.log(res.data)
+        this.diaries = res.data.diaries
+      }).catch(err => {
+        if (err.response.status === 403) this.$router.push('/login')
+      })
+    }
     // formatDate (date) {
     //   const yyyy = date.getFullYear()
     //   const mm = ('00' + (date.getMonth() + 1)).slice(-2)
     //   const dd = ('00' + (date.getDate())).slice(-2)
     //   return `${yyyy}-${mm}-${dd}`
     // },
-    addAvailableTicket (createdTicket) {
-      this.availableTickets.unshift(createdTicket)
-    },
-    deleteTicketFromMain (ticketId) {
-      const ticket = this.availableTickets.find(ticket => ticket.id === ticketId)
-      const index = this.availableTickets.indexOf(ticket)
-      this.availableTickets.splice(index, 1)
-    }
   }
 }
 </script>
