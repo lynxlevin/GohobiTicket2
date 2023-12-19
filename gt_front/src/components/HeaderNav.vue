@@ -4,9 +4,12 @@
       <router-link class="navbar-item" :to="'/user_relations/' + correspondingRelationId">
         {{navbarMessage}}
       </router-link>
-      <div class="icon search-button" @click="activateSearchModal">
+      <div class="icon icon-button" @click="activateSearchModal">
         <i class="fas fa-search"></i>
       </div>
+      <router-link to="/release" class="icon icon-button">
+        <i class="fa-solid fa-book"></i>
+      </router-link>
       <a
         role="button"
         class="navbar-burger"
@@ -103,13 +106,14 @@ export default {
         align-items: flex-end;
     }
 }
-.search-button {
+.icon-button {
+  color: rgba(0,0,0,.7);
   height: 52px;
   width: 52px;
   cursor: pointer;
   margin-left: auto;
 }
-.search-button:hover {
+.icon-button:hover {
   background-color: rgba(0,0,0,.05);
 }
 </style>
