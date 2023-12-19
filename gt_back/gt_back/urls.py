@@ -13,13 +13,14 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from diaries import views as diary_views
 from django.contrib import admin
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.shortcuts import render
 from django.urls import include, path
 from rest_framework import routers
 from tickets import views as ticket_views
 from user_relations import views as user_relation_views
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 
 def index_view(request, pk=0):
@@ -29,6 +30,7 @@ def index_view(request, pk=0):
 router = routers.DefaultRouter()
 router.register(r"tickets", ticket_views.TicketViewSet)
 router.register(r"user_relations", user_relation_views.UserRelationViewSet)
+router.register(r"diaries", diary_views.DiaryViewSet)
 
 
 urlpatterns = [
