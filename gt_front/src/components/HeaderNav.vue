@@ -7,8 +7,13 @@
       <div class="icon icon-button" @click="activateSearchModal">
         <i class="fas fa-search"></i>
       </div>
-      <router-link to="/release" class="icon icon-button">
+      <!-- MYMEMO: どうやってrelation_id を指定するか？ -->
+      <router-link to="/diaries/1" class="icon icon-button" v-if="!isDiaryPage">
         <i class="fa-solid fa-book"></i>
+      </router-link>
+      <!-- MYMEMO: どうやってrelation_id を指定するか？ -->
+      <router-link to="/user_relations/1" class="icon icon-button" v-if="isDiaryPage">
+        <i class="fa-solid fa-gift"></i>
       </router-link>
       <a
         role="button"
@@ -62,7 +67,8 @@ export default {
   props: [
     'isGivingRelation',
     'otherReceivingRelations',
-    'correspondingRelationId'
+    'correspondingRelationId',
+    'isDiaryPage'
   ],
   data: function () {
     return {

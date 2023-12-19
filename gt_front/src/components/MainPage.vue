@@ -5,6 +5,7 @@
         :isGivingRelation = "isGivingRelation"
         :otherReceivingRelations = "otherReceivingRelations"
         :correspondingRelationId = "correspondingRelationId"
+        :isDiaryPage = false
       ></header-nav>
       <div
         class="container is-max-desktop has-text-centered"
