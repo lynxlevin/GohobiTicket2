@@ -18,6 +18,9 @@ class DiaryQuerySet(models.QuerySet):
     def order_by_date_desc(self) -> "DiaryQuerySet":
         return self.order_by("-date")
 
+    def order_by_created_at_desc(self) -> "DiaryQuerySet":
+        return self.order_by("-created_at")
+
 
 class Diary(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

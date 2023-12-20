@@ -22,6 +22,6 @@ class ListDiary:
 
         qs = Diary.objects.filter_eq_user_relation_id(user_relation_id)
 
-        diaries = qs.order_by_date_desc().all()
+        diaries = qs.order_by_date_desc().order_by_created_at_desc().all()
 
         return diaries
