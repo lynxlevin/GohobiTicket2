@@ -36,15 +36,14 @@ class DiaryViewSet(viewsets.GenericViewSet):
 
     def create(self, request, use_case=CreateDiary(), format=None):
         try:
-            # serializer = UpdateWineSerializer(data=request.data)
-            # serializer.is_valid(raise_exception=True)
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
 
-            # data = serializer.validated_data
-            diary = use_case.execute(user=request.user, data=request.data)
+            data = serializer.validated_data
+            diary = use_case.execute(user=request.user, data=data)
 
-            # serializer = UpdateWineSerializer(wine)
-            # return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response({"id": diary.id}, status=status.HTTP_201_CREATED)
+            serializer = self.get_serializer(diary)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as exc:
             return exception_handler_with_logging(exc)
