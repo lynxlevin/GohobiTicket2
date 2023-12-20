@@ -9,7 +9,7 @@ from gt_back.exception_handler import exception_handler_with_logging
 
 from ..models import Diary
 from ..serializers import DiariesSerializer, DiarySerializer, ListDiaryQuerySerializer
-from ..use_cases import ListDiary
+from ..use_cases import CreateDiary, ListDiary
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,21 @@ class DiaryViewSet(viewsets.GenericViewSet):
 
             serializer = DiariesSerializer({"diaries": diaries})
             return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            return exception_handler_with_logging(exc)
+
+    def create(self, request, use_case=CreateDiary(), format=None):
+        try:
+            # serializer = UpdateWineSerializer(data=request.data)
+            # serializer.is_valid(raise_exception=True)
+
+            # data = serializer.validated_data
+            diary = use_case.execute(user=request.user, data=request.data)
+
+            # serializer = UpdateWineSerializer(wine)
+            # return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response({"id": diary.id}, status=status.HTTP_201_CREATED)
 
         except Exception as exc:
             return exception_handler_with_logging(exc)
