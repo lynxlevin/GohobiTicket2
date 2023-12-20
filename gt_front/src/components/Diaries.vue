@@ -6,9 +6,10 @@
                 v-for="(diary, index) in diaries"
             >
                 <Diary
-                    :diary="diary"
-                    :index="index + 1"
-                    :key="diary.id"
+                    :diary = "diary"
+                    :index = "index + 1"
+                    :key = "diary.id"
+                    :refreshDiaryList = "refreshDiaryList"
                 ></Diary>
             </template>
           </div>
@@ -25,7 +26,8 @@ export default {
   },
   name: 'Diaries',
   props: [
-    'diaries'
+    'diaries',
+    'refreshDiaryList'
   ]
 }
 </script>

@@ -21,7 +21,8 @@
             :refreshDiaryList = "refreshDiaryList"
           />
           <diaries
-            :diaries="diaries"
+            :diaries = "diaries"
+            :refreshDiaryList = "refreshDiaryList"
           />
         </div>
       </div>
