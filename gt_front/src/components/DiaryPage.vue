@@ -16,11 +16,10 @@
           </span>
         </h1>
         <div class="diaries">
-          <!-- <ticket-form
+          <diary-form
             :userRelationId = "userRelationId"
-            v-if="isGivingRelation"
-            @addAvailableTicket="addAvailableTicket"
-          /> -->
+            :refreshDiaryList = "refreshDiaryList"
+          />
           <diaries
             :diaries="diaries"
           />
@@ -33,12 +32,14 @@
 <script>
 import HeaderNav from './HeaderNav'
 import Diaries from './Diaries'
+import DiaryForm from './DiaryForm'
 import axios from 'axios'
 
 export default {
   components: {
     HeaderNav,
-    Diaries
+    Diaries,
+    DiaryForm
   },
   name: 'DiaryPage',
   data: function () {
@@ -80,7 +81,13 @@ export default {
         }
       })
       axios.get(`/api/diaries/?user_relation_id=${this.userRelationId}`).then(res => {
-        console.log(res.data)
+        this.diaries = res.data.diaries
+      }).catch(err => {
+        if (err.response.status === 403) this.$router.push('/login')
+      })
+    },
+    refreshDiaryList () {
+      axios.get(`/api/diaries/?user_relation_id=${this.userRelationId}`).then(res => {
         this.diaries = res.data.diaries
       }).catch(err => {
         if (err.response.status === 403) this.$router.push('/login')
