@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from gt_back.exception_handler import exception_handler_with_logging
 
 from ..models import Diary
-from ..serializers import DiariesSerializer, DiarySerializer, ListDiaryQuerySerializer
-from ..use_cases import CreateDiary, ListDiary
+from ..serializers import CreateDiaryRequestSerializer, DiariesSerializer, DiarySerializer, ListDiaryQuerySerializer
+from ..use_cases import CreateDiary, ListDiary, UpdateDiary
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class DiaryViewSet(viewsets.GenericViewSet):
 
     def create(self, request, use_case=CreateDiary(), format=None):
         try:
-            serializer = self.get_serializer(data=request.data)
+            serializer = CreateDiaryRequestSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
             data = serializer.validated_data
@@ -44,6 +44,20 @@ class DiaryViewSet(viewsets.GenericViewSet):
 
             serializer = self.get_serializer(diary)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Exception as exc:
+            return exception_handler_with_logging(exc)
+
+    def update(self, request, use_case=UpdateDiary(), format=None, pk=None):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            data = serializer.validated_data
+            diary = use_case.execute(user=request.user, id=pk, data=data)
+
+            serializer = self.get_serializer(diary)
+            return Response(serializer.data)
 
         except Exception as exc:
             return exception_handler_with_logging(exc)

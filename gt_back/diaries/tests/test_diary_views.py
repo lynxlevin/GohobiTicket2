@@ -59,6 +59,27 @@ class TestDiaryViews(TestCase):
 
     # def test_create__400_on_wrong_user_relation_id(self):
 
+    def test_update(self):
+        """
+        Put /api/diaries/{diary_id}/
+        """
+        diary = DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=1)))
+        params = {
+            "entry": "Newly updated entry.",
+            "date": date.today().isoformat(),
+        }
+
+        status_code, body = self._make_put_request(self.user, f"{self.base_path}{diary.id}/", params)
+
+        self.assertEqual(status.HTTP_200_OK, status_code)
+
+        diary.refresh_from_db()
+        self.assertEqual(str(self.relation.id), str(diary.user_relation.id))
+        self.assertEqual(params["entry"], diary.entry)
+        self.assertEqual(params["date"], diary.date.isoformat())
+
+    # def test_update__404_on_wrong_user_relations_diary(self):
+
 
     """
     Utility Functions
@@ -74,4 +95,10 @@ class TestDiaryViews(TestCase):
         client = Client()
         client.force_login(user)
         response = client.post(path, params, content_type="application/json")
+        return (response.status_code, response.json())
+
+    def _make_put_request(self, user, path, params):
+        client = Client()
+        client.force_login(user)
+        response = client.put(path, params, content_type="application/json")
         return (response.status_code, response.json())
