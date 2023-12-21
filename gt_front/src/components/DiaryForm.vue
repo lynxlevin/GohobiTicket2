@@ -1,5 +1,5 @@
 <template>
-  <div class="section block pt-4 pb-4">
+  <div class="section block pt-0 pb-4">
     <form>
       <div class="field">
         <label class="label">日付</label>
@@ -11,6 +11,24 @@
             input-class="formDatePickerInput"
           ></Datepicker>
         </div>
+      </div>
+
+      <div class="field">
+        <label class="label">タグ</label>
+        <div class="select is-multiple">
+          <select multiple v-model=tags>
+            <template v-for="(tag, index) in tag_master">
+              <option :value="tag.text" :key="index">{{tag.text}}</option>
+            </template>
+          </select>
+        </div>
+        <p>{{tags.join('、')}}</p>
+      </div>
+      <div class="section pt-5 pb-5">
+        <!-- MYMEMO: どうやってrelation_id を指定するか？ -->
+        <router-link to="/diary_tags/1" class="icon icon-button" style="display:inline">
+          タグを編集 <i class="fa-solid fa-pen-to-square" />
+        </router-link>
       </div>
 
       <div class="field">
@@ -55,16 +73,26 @@ export default {
   data: function () {
     return {
       datePickerFormat: 'yyyy-MM-dd D',
+      tag_master: [],
       date: '',
       entry: '',
+      tags: [],
       errorCode: '',
       errorMessage: ''
     }
   },
   mounted: function () {
     this.date = new Date()
+    this.getTagMaster()
   },
   methods: {
+    getTagMaster () {
+      axios.get(`/api/diary_tags/?user_relation_id=${this.userRelationId}`).then(res => {
+        this.tag_master = res.data.diary_tags
+      }).catch(err => {
+        if (err.response.status === 403) this.$router.push('/login')
+      })
+    },
     submit () {
       const paddedMonth = (this.date.getMonth() + 1).toString().padStart(2, '0')
       const paddedDate = this.date.getDate().toString().padStart(2, '0')
