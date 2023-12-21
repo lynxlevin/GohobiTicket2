@@ -14,6 +14,11 @@
               </button>
           </div>
           <div class="column has-text-justified" ref="textBlock">
+              <p>
+                  タグ: {{ diary.tags.map(tag => tag.text).join('、') }}
+              </p>
+          </div>
+          <div class="column has-text-justified" ref="textBlock">
               <p v-for="(line, index) in entryLines" :key='index'>
                   {{ line }}
               </p>
