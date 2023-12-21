@@ -24,11 +24,11 @@
         <div class="select is-multiple is-medium">
           <select multiple v-model=tags>
             <template v-for="(tag, index) in tag_master">
-              <option :value="tag.text" :key="index">{{tag.text}}</option>
+              <option :value="tag" :key="index">{{tag.text}}</option>
             </template>
           </select>
         </div>
-        <p>{{tags.join('、')}}</p>
+        <p>{{tags.map(tag => tag.text).join('、')}}</p>
       </div>
 
       <div class="field">
@@ -100,7 +100,8 @@ export default {
       const data = {
         date: formattedDate,
         entry: this.entry,
-        user_relation_id: this.userRelationId
+        user_relation_id: this.userRelationId,
+        tag_ids: this.tags.map(tag => tag.id)
       }
       axios
         .post('/api/diaries/', data, utils.getCsrfHeader())
