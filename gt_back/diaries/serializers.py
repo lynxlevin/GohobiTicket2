@@ -17,7 +17,7 @@ class ListDiaryQuerySerializer(serializers.Serializer):
 class CreateDiaryRequestSerializer(serializers.Serializer):
     entry = serializers.CharField()
     date = serializers.DateField()
-    user_relation_id = serializers.IntegerField(write_only=True)
+    user_relation_id = serializers.IntegerField()
 
 
 class DiaryTagSerializer(serializers.Serializer):
@@ -30,6 +30,11 @@ class DiaryTagsSerializer(serializers.Serializer):
 
 
 class ListDiaryTagQuerySerializer(serializers.Serializer):
+    user_relation_id = serializers.IntegerField()
+
+
+class CreateDiaryTagRequestSerializer(serializers.Serializer):
+    text = serializers.CharField()
     user_relation_id = serializers.IntegerField()
 
 
