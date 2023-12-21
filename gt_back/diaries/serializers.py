@@ -23,7 +23,7 @@ class DiarySerializer(serializers.Serializer):
     id = serializers.UUIDField(required=False)
     entry = serializers.CharField()
     date = serializers.DateField()
-    tags = DiaryTagSerializer(many=True)
+    tags = DiaryTagSerializer(many=True, required=False)
 
 class DiariesSerializer(serializers.Serializer):
     diaries = DiarySerializer(many=True, read_only=True)
@@ -37,6 +37,12 @@ class CreateDiaryRequestSerializer(serializers.Serializer):
     entry = serializers.CharField()
     date = serializers.DateField()
     user_relation_id = serializers.IntegerField()
+    tag_ids = serializers.ListField(child=serializers.UUIDField())
+
+
+class UpdateDiaryRequestSerializer(serializers.Serializer):
+    entry = serializers.CharField()
+    date = serializers.DateField()
     tag_ids = serializers.ListField(child=serializers.UUIDField())
 
 

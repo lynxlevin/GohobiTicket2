@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from gt_back.exception_handler import exception_handler_with_logging
 
 from ..models import Diary
-from ..serializers import CreateDiaryRequestSerializer, DiariesSerializer, DiarySerializer, ListDiaryQuerySerializer
+from ..serializers import CreateDiaryRequestSerializer, DiariesSerializer, DiarySerializer, ListDiaryQuerySerializer, UpdateDiaryRequestSerializer
 from ..use_cases import CreateDiary, ListDiary, UpdateDiary
 
 logger = logging.getLogger(__name__)
@@ -50,7 +50,7 @@ class DiaryViewSet(viewsets.GenericViewSet):
 
     def update(self, request, use_case=UpdateDiary(), format=None, pk=None):
         try:
-            serializer = self.get_serializer(data=request.data)
+            serializer = UpdateDiaryRequestSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
             data = serializer.validated_data

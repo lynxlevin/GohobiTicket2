@@ -22,6 +22,7 @@ class ListDiary:
 
         qs = Diary.objects.filter_eq_user_relation_id(user_relation_id)
 
+        # MYMEMO: add prefetch_tags
         diaries = qs.order_by_created_at_desc().order_by_date_desc().all()
 
         return diaries

@@ -5,7 +5,7 @@ from rest_framework import status
 from user_relations.tests.user_relation_factory import UserRelationFactory
 from users.tests.user_factory import UserFactory
 
-from ..models import Diary
+from ..models import Diary, DiaryTagRelation
 from .diary_factory import DiaryFactory, DiaryTagFactory
 
 
@@ -33,7 +33,7 @@ class TestDiaryViews(TestCase):
 
         self.assertEqual(status.HTTP_200_OK, status_code)
 
-        expected = [{"id": str(entry.id), "entry": entry.entry, "date": entry.date.isoformat()} for entry in sorted(diary_entries, key=lambda entry: entry.date, reverse=True)]
+        expected = [{"id": str(entry.id), "entry": entry.entry, "date": entry.date.isoformat(), "tags": []} for entry in sorted(diary_entries, key=lambda entry: entry.date, reverse=True)]
         self.assertListEqual(expected, body["diaries"])
 
     # def test_list__404_on_wrong_user_relation_id(self):
@@ -71,10 +71,18 @@ class TestDiaryViews(TestCase):
         """
         Put /api/diaries/{diary_id}/
         """
+        tags = [
+            DiaryTagFactory(user_relation=self.relation),
+            DiaryTagFactory(user_relation=self.relation, sort_no=2),
+            DiaryTagFactory(user_relation=self.relation, sort_no=3),
+        ]
         diary = DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=1)))
+        DiaryTagRelation.objects.create(diary=diary, tag_master=tags[1])
+
         params = {
             "entry": "Newly updated entry.",
             "date": date.today().isoformat(),
+            "tag_ids": [str(tags[0].id), str(tags[2].id)],
         }
 
         status_code, body = self._make_put_request(self.user, f"{self.base_path}{diary.id}/", params)
@@ -85,6 +93,10 @@ class TestDiaryViews(TestCase):
         self.assertEqual(str(self.relation.id), str(diary.user_relation.id))
         self.assertEqual(params["entry"], diary.entry)
         self.assertEqual(params["date"], diary.date.isoformat())
+
+        associated_tags = diary.tags.order_by_sort_no().all()
+        self.assertEqual(tags[0].id, associated_tags[0].id)
+        self.assertEqual(tags[2].id, associated_tags[1].id)
 
     # def test_update__404_on_wrong_user_relations_diary(self):
 
