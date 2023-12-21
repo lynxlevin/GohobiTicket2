@@ -14,6 +14,10 @@
           <span class="subtitle is-4">
             {{relatedUserNickname}}との日記のタグ
           </span>
+          <!-- MYMEMO: どうやってrelation_id を指定するか？ -->
+          <router-link to="/diaries/1" class="icon icon-button pl-5" style="font-size: 24px">
+            <i class="fa-solid fa-rotate-left" />
+          </router-link>
         </h1>
         <div class="diary-tags">
           <div class="section block pt-0 pb-4">
@@ -28,6 +32,8 @@
                   />
                 </div>
               </div>
+
+              <div class="box has-text-danger" v-if="errorMessage !== ''">{{ errorCode }}<br>{{ errorMessage }}</div>
 
               <div class="is-relative">
                 <div class="field">
@@ -62,6 +68,7 @@
 <script>
 import HeaderNav from './HeaderNav'
 import axios from 'axios'
+import utils from '../utils'
 
 export default {
   components: {
@@ -78,7 +85,9 @@ export default {
       relatedUserNickname: '',
       correspondingRelationId: '',
       tags: [],
-      text: ''
+      text: '',
+      errorCode: '',
+      errorMessage: ''
     }
   },
   created: function () {
@@ -107,18 +116,35 @@ export default {
           this.$router.push('/login')
         }
       })
+      this.getTagMaster()
+    },
+    getTagMaster () {
       axios.get(`/api/diary_tags/?user_relation_id=${this.userRelationId}`).then(res => {
         this.tags = res.data.diary_tags
       }).catch(err => {
         if (err.response.status === 403) this.$router.push('/login')
       })
     },
-    refreshDiaryTagList () {
-      axios.get(`/api/diary_tags/?user_relation_id=${this.userRelationId}`).then(res => {
-        this.tags = res.data.diary_tags
-      }).catch(err => {
-        if (err.response.status === 403) this.$router.push('/login')
-      })
+    submit () {
+      const data = {
+        text: this.text,
+        user_relation_id: this.userRelationId
+      }
+      axios
+        .post('/api/diary_tags/', data, utils.getCsrfHeader())
+        .then((_) => {
+          this.resetForm()
+          this.getTagMaster()
+        })
+        .catch((error) => {
+          this.errorCode = error.response.status
+          this.errorMessage = error.response.data
+        })
+    },
+    resetForm () {
+      this.text = ''
+      this.errorCode = ''
+      this.errorMessage = ''
     }
   }
 }

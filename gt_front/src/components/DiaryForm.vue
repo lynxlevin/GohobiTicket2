@@ -14,8 +14,14 @@
       </div>
 
       <div class="field">
-        <label class="label">タグ</label>
-        <div class="select is-multiple">
+        <label class="label">
+          タグ
+          <!-- MYMEMO: どうやってrelation_id を指定するか？ -->
+          <router-link to="/diary_tags/1" class="icon icon-button pl-3">
+            <i class="fa-solid fa-pen-to-square" />
+          </router-link>
+        </label>
+        <div class="select is-multiple is-medium">
           <select multiple v-model=tags>
             <template v-for="(tag, index) in tag_master">
               <option :value="tag.text" :key="index">{{tag.text}}</option>
@@ -23,12 +29,6 @@
           </select>
         </div>
         <p>{{tags.join('、')}}</p>
-      </div>
-      <div class="section pt-5 pb-5">
-        <!-- MYMEMO: どうやってrelation_id を指定するか？ -->
-        <router-link to="/diary_tags/1" class="icon icon-button" style="display:inline">
-          タグを編集 <i class="fa-solid fa-pen-to-square" />
-        </router-link>
       </div>
 
       <div class="field">
