@@ -27,6 +27,7 @@ class Diary(models.Model):
     user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE)
     entry = models.TextField(default="", blank=True)
     date = models.DateField()
+    tags = models.ManyToManyField("DiaryTag", through="DiaryTagRelation")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

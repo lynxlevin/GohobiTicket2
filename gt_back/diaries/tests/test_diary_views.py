@@ -6,7 +6,7 @@ from user_relations.tests.user_relation_factory import UserRelationFactory
 from users.tests.user_factory import UserFactory
 
 from ..models import Diary
-from .diary_factory import DiaryFactory
+from .diary_factory import DiaryFactory, DiaryTagFactory
 
 
 class TestDiaryViews(TestCase):
@@ -42,10 +42,15 @@ class TestDiaryViews(TestCase):
         """
         Post /api/diaries/
         """
+        tags = [
+            DiaryTagFactory(user_relation=self.relation),
+            DiaryTagFactory(user_relation=self.relation, sort_no=2),
+        ]
         params = {
             "user_relation_id": str(self.relation.id),
             "entry": "Newly created entry.",
             "date": date.today().isoformat(),
+            "tag_ids": [str(tag.id) for tag in tags],
         }
 
         status_code, body = self._make_post_request(self.user, self.base_path, params)
@@ -56,6 +61,9 @@ class TestDiaryViews(TestCase):
         self.assertEqual(params["user_relation_id"], str(created_diary.user_relation.id))
         self.assertEqual(params["entry"], created_diary.entry)
         self.assertEqual(params["date"], created_diary.date.isoformat())
+        associated_tags = created_diary.tags.order_by_sort_no().all()
+        self.assertEqual(tags[0].id, associated_tags[0].id)
+        self.assertEqual(tags[1].id, associated_tags[1].id)
 
     # def test_create__400_on_wrong_user_relation_id(self):
 

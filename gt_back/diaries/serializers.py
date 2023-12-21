@@ -18,6 +18,7 @@ class CreateDiaryRequestSerializer(serializers.Serializer):
     entry = serializers.CharField()
     date = serializers.DateField()
     user_relation_id = serializers.IntegerField()
+    tag_ids = serializers.ListField(child=serializers.UUIDField())
 
 
 class DiaryTagSerializer(serializers.Serializer):

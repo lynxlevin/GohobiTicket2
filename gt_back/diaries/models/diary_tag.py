@@ -6,7 +6,7 @@ from user_relations.models import UserRelation
 
 
 class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
-    def get_by_id(self, id) -> Optional["DiaryTag"]:
+    def get_by_id(self, id: uuid.UUID) -> Optional["DiaryTag"]:
         try:
             return self.get(id=id)
         except DiaryTag.DoesNotExist:
@@ -15,8 +15,12 @@ class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
     def filter_eq_user_relation_id(self, user_relation_id: str) -> "DiaryTagQuerySet":
         return self.filter(user_relation__id=user_relation_id)
 
-    def order_by_sort_no(self) -> "DiaryTagQuerySet":
-        return self.order_by("sort_no")
+    def filter_in_tag_ids(self, tag_ids: list[uuid.UUID]) -> "DiaryTagQuerySet":
+        return self.filter(id__in=tag_ids)
+
+    def order_by_sort_no(self, reverse: bool=False) -> "DiaryTagQuerySet":
+        key = "-sort_no" if reverse else "sort_no"
+        return self.order_by(key)
 
 
 class DiaryTag(models.Model):
