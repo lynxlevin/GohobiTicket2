@@ -31,6 +31,7 @@ router = routers.DefaultRouter()
 router.register(r"tickets", ticket_views.TicketViewSet)
 router.register(r"user_relations", user_relation_views.UserRelationViewSet)
 router.register(r"diaries", diary_views.DiaryViewSet)
+router.register(r"diary_tags", diary_views.DiaryTagViewSet)
 
 
 urlpatterns = [

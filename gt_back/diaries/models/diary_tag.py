@@ -12,6 +12,12 @@ class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
         except DiaryTag.DoesNotExist:
             return None
 
+    def filter_eq_user_relation_id(self, user_relation_id: str) -> "DiaryTagQuerySet":
+        return self.filter(user_relation__id=user_relation_id)
+
+    def order_by_sort_no(self) -> "DiaryTagQuerySet":
+        return self.order_by("sort_no")
+
 
 class DiaryTag(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
