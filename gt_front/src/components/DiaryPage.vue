@@ -23,6 +23,7 @@
           <diaries
             :diaries = "diaries"
             :refreshDiaryList = "refreshDiaryList"
+            :userRelationId = "userRelationId"
           />
         </div>
       </div>

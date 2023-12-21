@@ -10,6 +10,7 @@
                     :index = "index + 1"
                     :key = "diary.id"
                     :refreshDiaryList = "refreshDiaryList"
+                    :userRelationId = "userRelationId"
                 ></Diary>
             </template>
           </div>
@@ -27,7 +28,8 @@ export default {
   name: 'Diaries',
   props: [
     'diaries',
-    'refreshDiaryList'
+    'refreshDiaryList',
+    'userRelationId'
   ]
 }
 </script>

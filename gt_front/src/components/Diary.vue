@@ -46,6 +46,18 @@
             </div>
 
             <div class="field">
+              <label class="label has-text-white">タグ</label>
+              <div class="control select is-multiple is-medium">
+                <select multiple v-model=editedTags>
+                  <template v-for="(tag, index) in tag_master">
+                    <option :value="tag" :key="index">{{tag.text}}</option>
+                  </template>
+                </select>
+              </div>
+              <p>{{editedTags.map(tag => tag.text).join('、')}}</p>
+            </div>
+
+            <div class="field">
                 <div class="control">
                     <textarea v-model="editedEntry" class="textarea" rows="10" />
                 </div>
@@ -81,14 +93,17 @@ export default {
   props: [
     'diary',
     'index',
-    'refreshDiaryList'
+    'refreshDiaryList',
+    'userRelationId'
   ],
   data: function () {
     return {
       datePickerFormat: 'yyyy-MM-dd D',
       isEditModalActive: false,
+      tag_master: [],
       editedEntry: '',
-      editedDate: ''
+      editedDate: '',
+      editedTags: []
     }
   },
   computed: {
@@ -99,9 +114,20 @@ export default {
       return this.diary.entry.split('\n')
     }
   },
+  mounted: function () {
+    this.getTagMaster()
+  },
   methods: {
+    getTagMaster () {
+      axios.get(`/api/diary_tags/?user_relation_id=${this.userRelationId}`).then(res => {
+        this.tag_master = res.data.diary_tags
+      }).catch(err => {
+        if (err.response.status === 403) this.$router.push('/login')
+      })
+    },
     openEdit () {
       this.editedEntry = this.diary.entry
+      this.editedTags = this.diary.tags
       this.editedDate = new Date(this.diary.date)
       this.isEditModalActive = true
     },
@@ -109,7 +135,11 @@ export default {
       const paddedMonth = (this.editedDate.getMonth() + 1).toString().padStart(2, '0')
       const paddedDate = this.editedDate.getDate().toString().padStart(2, '0')
       const formattedDate = `${this.editedDate.getFullYear()}-${paddedMonth}-${paddedDate}`
-      const data = {entry: this.editedEntry, date: formattedDate}
+      const data = {
+        entry: this.editedEntry,
+        date: formattedDate,
+        tag_ids: this.editedTags.map(tag => tag.id)
+      }
       axios
         .put(`/api/diaries/${this.diary.id}/`, data, utils.getCsrfHeader())
         .then(() => {
