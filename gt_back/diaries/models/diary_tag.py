@@ -1,0 +1,47 @@
+import uuid
+from typing import Optional
+
+from django.db import models
+from user_relations.models import UserRelation
+
+
+class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
+    def get_by_id(self, id: uuid.UUID) -> Optional["DiaryTag"]:
+        try:
+            return self.get(id=id)
+        except DiaryTag.DoesNotExist:
+            return None
+
+    def filter_eq_user_relation_id(self, user_relation_id: str) -> "DiaryTagQuerySet":
+        return self.filter(user_relation__id=user_relation_id)
+
+    def filter_in_tag_ids(self, tag_ids: list[uuid.UUID]) -> "DiaryTagQuerySet":
+        return self.filter(id__in=tag_ids)
+
+    def order_by_sort_no(self, desc: bool=False) -> "DiaryTagQuerySet":
+        key = "-sort_no" if desc else "sort_no"
+        return self.order_by(key)
+
+
+class DiaryTag(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    text = models.CharField(max_length=256)
+    user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE)
+    sort_no = models.IntegerField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = (
+            models.UniqueConstraint(
+                fields=["text", "user_relation"],
+                name="unique_text_user_relation",
+            ),
+            models.UniqueConstraint(
+                fields=["sort_no", "user_relation"],
+                name="unique_sort_no_user_relation",
+            ),
+        )
+
+    objects: DiaryTagQuerySet = DiaryTagQuerySet.as_manager()

@@ -1,11 +1,22 @@
 <template>
   <nav class="navbar is-fixed-top is-light" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <router-link class="navbar-item" :to="'/user_relations/' + correspondingRelationId">
-        {{navbarMessage}}
-      </router-link>
-      <div class="icon search-button" @click="activateSearchModal">
-        <i class="fas fa-search"></i>
+      <div class="navbar-item" v-if="!isDiaryPage">
+        <router-link class="navbar-item" :to="'/user_relations/' + correspondingRelationId">
+          {{navbarMessage}}
+        </router-link>
+      </div>
+      <!-- MYMEMO: どうやってrelation_id を指定するか？ -->
+      <div class="navbar-item" v-if="!isDiaryPage">
+        <router-link to="/diaries/1" class="icon icon-button">
+          <i class="fa-solid fa-book"></i>
+        </router-link>
+      </div>
+      <!-- MYMEMO: どうやってrelation_id を指定するか？ -->
+      <div class="navbar-item" v-if="isDiaryPage">
+        <router-link to="/user_relations/1" class="icon icon-button">
+          <i class="fa-solid fa-gift"></i>
+        </router-link>
       </div>
       <a
         role="button"
@@ -25,7 +36,7 @@
       <div class="navbar-start">
       </div>
       <div class="navbar-end">
-        <div class="navbar-item has-dropdown is-hoverable">
+        <div class="navbar-item has-dropdown is-hoverable" v-if="!isDiaryPage">
           <a class="navbar-link">ほかの相手</a>
           <div class="navbar-dropdown">
             <router-link
@@ -38,13 +49,14 @@
             </router-link>
           </div>
         </div>
-        <router-link to="/release" class="navbar-item">
-          更新履歴
-        </router-link>
+        <div class="navbar-item" v-if="!isDiaryPage">
+          <button class="button is-ghost" @click="activateSearchModal">日付で検索</button>
+        </div>
         <div class="navbar-item">
-          <div class="buttons">
-            <button @click="logout" class="button is-light">ログアウト</button>
-          </div>
+          <router-link class="button is-ghost" to="/release">更新履歴</router-link>
+        </div>
+        <div class="navbar-item">
+          <button @click="logout" class="button is-ghost">ログアウト</button>
         </div>
       </div>
     </div>
@@ -59,7 +71,8 @@ export default {
   props: [
     'isGivingRelation',
     'otherReceivingRelations',
-    'correspondingRelationId'
+    'correspondingRelationId',
+    'isDiaryPage'
   ],
   data: function () {
     return {
@@ -103,13 +116,14 @@ export default {
         align-items: flex-end;
     }
 }
-.search-button {
-  height: 52px;
-  width: 52px;
+.icon-button {
+  color: rgba(0,0,0,.7);
+  height: 40px;
+  width: 40px;
   cursor: pointer;
   margin-left: auto;
 }
-.search-button:hover {
+.icon-button:hover {
   background-color: rgba(0,0,0,.05);
 }
 </style>
