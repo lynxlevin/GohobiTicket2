@@ -18,8 +18,8 @@ class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
     def filter_in_tag_ids(self, tag_ids: list[uuid.UUID]) -> "DiaryTagQuerySet":
         return self.filter(id__in=tag_ids)
 
-    def order_by_sort_no(self, reverse: bool=False) -> "DiaryTagQuerySet":
-        key = "-sort_no" if reverse else "sort_no"
+    def order_by_sort_no(self, desc: bool=False) -> "DiaryTagQuerySet":
+        key = "-sort_no" if desc else "sort_no"
         return self.order_by(key)
 
 

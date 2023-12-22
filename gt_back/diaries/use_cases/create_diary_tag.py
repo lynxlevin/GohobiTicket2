@@ -14,8 +14,7 @@ class CreateDiaryTag:
     def execute(self, user: User, data: dict) -> DiaryTag:
         logger.info(self.__class__.__name__, extra={"user": user, "data": data})
 
-        text = data["text"]
-        user_relation_id = data["user_relation_id"]
+        text, user_relation_id = data.values()
 
         existing_tags_count = DiaryTag.objects.filter_eq_user_relation_id(user_relation_id).count()
 

@@ -14,10 +14,7 @@ class CreateDiary:
     def execute(self, user: User, data: dict) -> Diary:
         logger.info(self.__class__.__name__, extra={"user": user, "data": data})
 
-        entry = data["entry"]
-        date = data["date"]
-        user_relation_id = data["user_relation_id"]
-        tag_ids = data["tag_ids"]
+        entry, date, user_relation_id, tag_ids = data.values()
 
         diary = Diary(
             entry=entry,

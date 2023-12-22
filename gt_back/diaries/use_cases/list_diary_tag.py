@@ -18,7 +18,7 @@ class ListDiaryTag:
     def execute(self, user: User, queries: dict) -> "DiaryTagQuerySet":
         logger.info(self.__class__.__name__, extra={"user": user, "queries": queries})
 
-        user_relation_id = queries["user_relation_id"]
+        user_relation_id, = queries.values()
 
         qs = DiaryTag.objects.filter_eq_user_relation_id(user_relation_id)
 

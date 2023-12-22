@@ -18,9 +18,7 @@ class UpdateDiary:
     def execute(self, user: User, id: "UUID", data: dict) -> Diary:
         logger.info(self.__class__.__name__, extra={"user": user, "id": id, "data": data})
 
-        entry = data["entry"]
-        date = data["date"]
-        tag_ids = data["tag_ids"]
+        entry, date, tag_ids = data.values()
 
         diary = Diary.objects.get_by_id(id)
 
