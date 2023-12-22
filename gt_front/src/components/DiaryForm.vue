@@ -6,7 +6,7 @@
         <div class="control is-flex is-justify-content-center">
           <Datepicker
             v-model="date"
-            :format="datePickerFormat"
+            format="yyyy-MM-dd D"
             calendar-class='formDatePicker'
             input-class="formDatePickerInput"
           ></Datepicker>
@@ -23,12 +23,12 @@
         </label>
         <div class="select is-multiple is-medium">
           <select multiple v-model=tags>
-            <template v-for="(tag, index) in tag_master">
+            <template v-for="(tag, index) in tagMaster">
               <option :value="tag" :key="index">{{tag.text}}</option>
             </template>
           </select>
         </div>
-        <p>{{tags.map(tag => tag.text).join('、')}}</p>
+        <p>{{getTagTexts(tags)}}</p>
       </div>
 
       <div class="field">
@@ -66,14 +66,12 @@ import Datepicker from 'vuejs-datepicker'
 import utils from '../utils'
 
 export default {
-  props: ['userRelationId', 'refreshDiaryList'],
+  props: ['userRelationId', 'refreshDiaryList', 'tagMaster'],
   components: {
     Datepicker
   },
   data: function () {
     return {
-      datePickerFormat: 'yyyy-MM-dd D',
-      tag_master: [],
       date: '',
       entry: '',
       tags: [],
@@ -83,16 +81,8 @@ export default {
   },
   mounted: function () {
     this.date = new Date()
-    this.getTagMaster()
   },
   methods: {
-    getTagMaster () {
-      axios.get(`/api/diary_tags/?user_relation_id=${this.userRelationId}`).then(res => {
-        this.tag_master = res.data.diary_tags
-      }).catch(err => {
-        if (err.response.status === 403) this.$router.push('/login')
-      })
-    },
     submit () {
       const paddedMonth = (this.date.getMonth() + 1).toString().padStart(2, '0')
       const paddedDate = this.date.getDate().toString().padStart(2, '0')
@@ -119,6 +109,9 @@ export default {
       this.entry = ''
       this.errorCode = ''
       this.errorMessage = ''
+    },
+    getTagTexts (tags) {
+      return tags.map(tag => tag.text).join('、')
     }
   }
 }

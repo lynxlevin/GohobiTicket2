@@ -104,13 +104,14 @@ export default {
   methods: {
     getInitialData () {
       axios.get(`/api/user_relations/${this.userRelationId}/`).then(res => {
-        this.otherReceivingRelations = res.data.other_receiving_relations
         this.apiAccessed = true
+        this.otherReceivingRelations = res.data.other_receiving_relations
 
-        this.isGivingRelation = res.data.user_relation_info.is_giving_relation
-        this.backgroundColor = res.data.user_relation_info.background_color
-        this.relatedUserNickname = res.data.user_relation_info.related_user_nickname
-        this.correspondingRelationId = res.data.user_relation_info.corresponding_relation_id
+        const relationInfo = res.data.user_relation_info
+        this.isGivingRelation = relationInfo.is_giving_relation
+        this.backgroundColor = relationInfo.background_color
+        this.relatedUserNickname = relationInfo.related_user_nickname
+        this.correspondingRelationId = relationInfo.corresponding_relation_id
       }).catch(err => {
         if (err.response.status === 403) {
           this.$router.push('/login')

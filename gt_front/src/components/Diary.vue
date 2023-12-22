@@ -5,24 +5,22 @@
         style="margin-bottom: 25px"
     >
         <div style="width: 100%">
-          <div class="is-flex w-170">
-              <div class="column is-narrow has-text-weight-bold">
-                  {{ diary.date }} {{ dayOfWeekDate }}
-              </div>
-              <button @click="openEdit" class="button is-white edit-button">
-                <i class="fa-solid fa-pen-to-square" />
-              </button>
-          </div>
-          <div class="column has-text-justified" ref="textBlock">
-              <p>
-                  タグ: {{ diary.tags.map(tag => tag.text).join('、') }}
-              </p>
-          </div>
-          <div class="column has-text-justified" ref="textBlock">
-              <p v-for="(line, index) in entryLines" :key='index'>
-                  {{ line }}
-              </p>
-          </div>
+            <div class="is-flex w-170">
+                <div class="column is-narrow has-text-weight-bold">
+                    {{ diary.date }} {{ dayOfWeekDate }}
+                </div>
+                <button @click="openEdit" class="button is-white edit-button">
+                    <i class="fa-solid fa-pen-to-square" />
+                </button>
+            </div>
+            <div class="column has-text-justified" ref="textBlock">
+                タグ: {{getTagTexts(diary.tags)}}
+            </div>
+            <div class="column has-text-justified" ref="textBlock">
+                <p v-for="(line, index) in entryLines" :key='index'>
+                    {{ line }}
+                </p>
+            </div>
         </div>
         <!-- 編集モーダル -->
         <Modal
@@ -32,48 +30,48 @@
             :hideBoxDiv="true"
             :placeTop="true"
         >
-          <div class="section block">
-            <div class="field">
-              <label class="label has-text-white">日付</label>
-              <div class="control is-flex is-justify-content-center">
-                <Datepicker
-                  v-model="editedDate"
-                  :format="datePickerFormat"
-                  calendar-class='formDatePicker'
-                  input-class="formDatePickerInput"
-                ></Datepicker>
-              </div>
-            </div>
+            <div class="section block">
+                <div class="field">
+                    <label class="label has-text-white">日付</label>
+                    <div class="control is-flex is-justify-content-center">
+                        <Datepicker
+                        v-model="editedDate"
+                        format="yyyy-MM-dd D"
+                        calendar-class='formDatePicker'
+                        input-class="formDatePickerInput"
+                        ></Datepicker>
+                    </div>
+                </div>
 
-            <div class="field">
-              <label class="label has-text-white">タグ</label>
-              <div class="control select is-multiple is-medium">
-                <select multiple v-model=editedTags>
-                  <template v-for="(tag, index) in tag_master">
-                    <option :value="tag" :key="index">{{tag.text}}</option>
-                  </template>
-                </select>
-              </div>
-              <p>{{editedTags.map(tag => tag.text).join('、')}}</p>
-            </div>
+                <div class="field">
+                    <label class="label has-text-white">タグ</label>
+                    <div class="control select is-multiple is-medium">
+                        <select multiple v-model=editedTags>
+                        <template v-for="(tag, index) in tagMaster">
+                            <option :value="tag" :key="index">{{tag.text}}</option>
+                        </template>
+                        </select>
+                    </div>
+                    <p class="has-text-white">{{getTagTexts(editedTags)}}</p>
+                </div>
 
-            <div class="field">
-                <div class="control">
-                    <textarea v-model="editedEntry" class="textarea" rows="10" />
+                <div class="field">
+                    <div class="control">
+                        <textarea v-model="editedEntry" class="textarea" rows="10" />
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="control">
+                        <button @click="editDiary();" class="button is-link">
+                            修正する
+                        </button>
+                        <button @click="cancelEdit();" class="button">
+                            キャンセル
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            <div class="field">
-                <div class="control">
-                    <button @click="editDiary();" class="button is-link">
-                        修正する
-                    </button>
-                    <button @click="cancelEdit();" class="button">
-                        キャンセル
-                    </button>
-                </div>
-            </div>
-          </div>
         </Modal>
     </div>
 </template>
@@ -92,15 +90,14 @@ export default {
   name: 'Diary',
   props: [
     'diary',
+    'tagMaster',
     'index',
     'refreshDiaryList',
     'userRelationId'
   ],
   data: function () {
     return {
-      datePickerFormat: 'yyyy-MM-dd D',
       isEditModalActive: false,
-      tag_master: [],
       editedEntry: '',
       editedDate: '',
       editedTags: []
@@ -114,22 +111,16 @@ export default {
       return this.diary.entry.split('\n')
     }
   },
-  mounted: function () {
-    this.getTagMaster()
-  },
   methods: {
-    getTagMaster () {
-      axios.get(`/api/diary_tags/?user_relation_id=${this.userRelationId}`).then(res => {
-        this.tag_master = res.data.diary_tags
-      }).catch(err => {
-        if (err.response.status === 403) this.$router.push('/login')
-      })
-    },
     openEdit () {
       this.editedEntry = this.diary.entry
       this.editedTags = this.diary.tags
       this.editedDate = new Date(this.diary.date)
       this.isEditModalActive = true
+    },
+    cancelEdit () {
+      utils.allowScroll()
+      this.isEditModalActive = false
     },
     async editDiary () {
       const paddedMonth = (this.editedDate.getMonth() + 1).toString().padStart(2, '0')
@@ -150,9 +141,8 @@ export default {
           this.isEditModalActive = false
         })
     },
-    cancelEdit () {
-      utils.allowScroll()
-      this.isEditModalActive = false
+    getTagTexts (tags) {
+      return tags.map(tag => tag.text).join('、')
     }
   }
 }

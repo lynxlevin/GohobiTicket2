@@ -1,20 +1,17 @@
 <template>
     <div class="section block pt-4">
-        <div id="diaries">
-          <div>
-            <template
-                v-for="(diary, index) in diaries"
-            >
-                <Diary
-                    :diary = "diary"
-                    :index = "index + 1"
-                    :key = "diary.id"
-                    :refreshDiaryList = "refreshDiaryList"
-                    :userRelationId = "userRelationId"
-                ></Diary>
-            </template>
-          </div>
-        </div>
+        <template
+            v-for="(diary, index) in diaries"
+        >
+            <Diary
+                :diary = "diary"
+                :tagMaster = "tagMaster"
+                :index = "index + 1"
+                :key = "diary.id"
+                :refreshDiaryList = "refreshDiaryList"
+                :userRelationId = "userRelationId"
+            ></Diary>
+        </template>
     </div>
 </template>
 
@@ -28,6 +25,7 @@ export default {
   name: 'Diaries',
   props: [
     'diaries',
+    'tagMaster',
     'refreshDiaryList',
     'userRelationId'
   ]
