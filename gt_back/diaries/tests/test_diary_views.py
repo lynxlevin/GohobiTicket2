@@ -65,7 +65,23 @@ class TestDiaryViews(TestCase):
         self.assertEqual(tags[0].id, associated_tags[0].id)
         self.assertEqual(tags[1].id, associated_tags[1].id)
 
-    # def test_create__400_on_wrong_user_relation_id(self):
+    # MYMEMO: add this after refactoring UserRelation
+    # def test_create__403_on_wrong_user_relation_id(self):
+    #     """
+    #     Post /api/diaries/
+    #     Wrong user_relation
+    #     """
+    #     other_relation = UserRelationFactory()
+    #     params = {
+    #         "user_relation_id": str(other_relation.id),
+    #         "entry": "Newly created entry.",
+    #         "date": date.today().isoformat(),
+    #         "tag_ids": [],
+    #     }
+
+    #     status_code, body = self._make_post_request(self.user, self.base_path, params)
+
+    #     self.assertEqual(status.HTTP_403_FORBIDDEN, status_code)
 
     def test_update(self):
         """
