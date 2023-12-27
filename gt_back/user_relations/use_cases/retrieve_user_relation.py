@@ -27,7 +27,7 @@ class RetrieveUserRelation:
         if not user_relation:
             raise exceptions.NotFound()
 
-        if not user_id in [
+        if user_id not in [
             user_relation.giving_user.id,
             user_relation.receiving_user.id,
         ]:
@@ -70,7 +70,7 @@ class RetrieveUserRelation:
             "is_giving_relation": is_giving_relation,
             "ticket_image": user_relation.ticket_img,
             "background_color": user_relation.background_color,
-            "corresponding_relation_id": user_relation.corresponding_relation.id,
+            "corresponding_relation_id": user_relation.corresponding_relation.id if user_relation.corresponding_relation else "",
         }
 
         return user_relation_info
