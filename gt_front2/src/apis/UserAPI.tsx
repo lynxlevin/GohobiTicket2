@@ -8,6 +8,7 @@ interface LoginProps {
 
 interface SessionResponse {
     is_authenticated: boolean;
+    default_page?: string;
 }
 
 export const UserAPI = {

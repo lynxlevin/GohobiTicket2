@@ -5,13 +5,13 @@ import { Navigate } from 'react-router-dom';
 import useUserAPI from '../hooks/useUserAPI';
 import { UserContext } from '../contexts/user-context';
 
-const Login = () => {
-    useUserAPI();
+const Tickets = () => {
+    const { handleLogout } = useUserAPI();
     const userContext = useContext(UserContext);
     const { errorMessage, handleLogin, handleEmailInput, handlePasswordInput } = useLoginPage();
 
-    if (userContext.isLoggedIn === true && userContext.defaultRelationId) {
-        return <Navigate to={`/tickets?user_relation_id=${userContext.defaultRelationId}`} />;
+    if (userContext.isLoggedIn !== true) {
+        return <Navigate to="/login" />;
     }
     return (
         <Container component="main" maxWidth="xs">
@@ -25,8 +25,9 @@ const Login = () => {
                 }}
             >
                 <Typography component="h1" variant="h5">
-                    Sign in
+                    Tickets
                 </Typography>
+                <Button onClick={handleLogout}>Logout</Button>
                 <Box sx={{ mt: 1 }}>
                     <TextField
                         margin="normal"
@@ -64,4 +65,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default Tickets;

@@ -24,6 +24,8 @@ const useLoginPage = () => {
                 await UserAPI.login({ email, password });
                 const session_res = await UserAPI.session();
                 userContext.setIsLoggedIn(session_res.data.is_authenticated);
+                const defaultPage = session_res.data.default_page;
+                userContext.setDefaultRelationId(defaultPage ? defaultPage.split('/')[2] : null);
             } catch (err: any) {
                 setErrorMessage(err.response.data.detail);
             }

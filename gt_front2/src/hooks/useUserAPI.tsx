@@ -8,6 +8,7 @@ const useUserAPI = () => {
     const handleLogout = async () => {
         await UserAPI.logout();
         userContext.setIsLoggedIn(false);
+        userContext.setDefaultRelationId(null);
     };
 
     useEffect(() => {
@@ -15,6 +16,8 @@ const useUserAPI = () => {
             const session_res = await UserAPI.session();
             const isAuthenticated = session_res.data.is_authenticated;
             userContext.setIsLoggedIn(isAuthenticated);
+            const defaultPage = session_res.data.default_page;
+            userContext.setDefaultRelationId(defaultPage ? defaultPage.split('/')[2] : null);
             // if (isAuthenticated) {
             //     // MYMEMO(後日): length ではなく、フラグを立てるべき
             //     if (wineTagContext.wineTagList.length === 0) {
