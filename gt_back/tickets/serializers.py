@@ -17,6 +17,15 @@ class TicketSerializer(serializers.ModelSerializer):
         ]
 
 
+class ListTicketQuerySerializer(serializers.Serializer):
+    user_relation_id = serializers.IntegerField()
+
+
+class ListTicketSerializer(serializers.Serializer):
+    available_tickets = TicketSerializer(many=True)
+    used_tickets = TicketSerializer(many=True)
+
+
 class TicketCreateSerializer(serializers.Serializer):
     class TicketCreateRequestSerializer(serializers.Serializer):
         gift_date = serializers.DateField()

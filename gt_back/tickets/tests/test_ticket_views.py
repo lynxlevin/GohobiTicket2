@@ -17,7 +17,83 @@ class TestTicketViews(TestCase):
     def setUpTestData(cls):
         cls.user = UserFactory()
         cls.giving_relation = UserRelationFactory(giving_user=cls.user)
-        cls.receiving_relation = UserRelationFactory(receiving_user=cls.user, giving_user=cls.giving_relation.receiving_user)
+        cls.receiving_relation = UserRelationFactory(
+            receiving_user=cls.user, giving_user=cls.giving_relation.receiving_user
+        )
+
+    def test_list__receiving_relation(self):
+        """
+        Get /api/tickets/?user_relation_id={user_relation_id}
+        """
+        expected_available_tickets = [
+            TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.receiving_relation),
+            TicketFactory(status=Ticket.STATUS_READ, user_relation=self.receiving_relation),
+            TicketFactory(status=Ticket.STATUS_EDITED, user_relation=self.receiving_relation),
+        ]
+        expected_used_tickets = [
+            UsedTicketFactory(status=Ticket.STATUS_READ, user_relation=self.receiving_relation),
+            UsedTicketFactory(status=Ticket.STATUS_READ, user_relation=self.receiving_relation),
+        ]
+        _tickets_not_returned = [
+            TicketFactory(status=Ticket.STATUS_DRAFT, user_relation=self.receiving_relation),
+            TicketFactory(status=Ticket.STATUS_UNREAD),
+        ]
+
+        response = self._send_get_request(self.user, f"/api/tickets/?user_relation_id={self.receiving_relation.id}")
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+
+        body = response.json()
+        available_tickets = body["available_tickets"]
+        for expected, available_ticket in zip(
+            sorted(expected_available_tickets, key=lambda ticket: f"{ticket.gift_date}-{ticket.id}", reverse=True),
+            available_tickets,
+        ):
+            self.assertEqual(expected.id, available_ticket["id"])
+
+        used_tickets = body["used_tickets"]
+        for expected, used_ticket in zip(
+            sorted(expected_used_tickets, key=lambda ticket: f"{ticket.gift_date}-{ticket.id}", reverse=True),
+            used_tickets,
+        ):
+            self.assertEqual(expected.id, used_ticket["id"])
+
+    def test_list__giving_relation(self):
+        """
+        Get /api/tickets/?user_relation_id={user_relation_id}
+        """
+        expected_available_tickets = [
+            TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.giving_relation),
+            TicketFactory(status=Ticket.STATUS_READ, user_relation=self.giving_relation),
+            TicketFactory(status=Ticket.STATUS_EDITED, user_relation=self.giving_relation),
+            TicketFactory(status=Ticket.STATUS_DRAFT, user_relation=self.giving_relation),
+        ]
+        expected_used_tickets = [
+            UsedTicketFactory(status=Ticket.STATUS_READ, user_relation=self.giving_relation),
+            UsedTicketFactory(status=Ticket.STATUS_READ, user_relation=self.giving_relation),
+        ]
+        _tickets_not_returned = [
+            TicketFactory(status=Ticket.STATUS_UNREAD),
+        ]
+
+        response = self._send_get_request(self.user, f"/api/tickets/?user_relation_id={self.giving_relation.id}")
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+
+        body = response.json()
+        available_tickets = body["available_tickets"]
+        for expected, available_ticket in zip(
+            sorted(expected_available_tickets, key=lambda ticket: f"{ticket.gift_date}-{ticket.id}", reverse=True),
+            available_tickets,
+        ):
+            self.assertEqual(expected.id, available_ticket["id"])
+
+        used_tickets = body["used_tickets"]
+        for expected, used_ticket in zip(
+            sorted(expected_used_tickets, key=lambda ticket: f"{ticket.gift_date}-{ticket.id}", reverse=True),
+            used_tickets,
+        ):
+            self.assertEqual(expected.id, used_ticket["id"])
 
     def test_create(self):
         """
@@ -134,7 +210,9 @@ class TestTicketViews(TestCase):
 
     def test_mark_special_case_error__multiple_special_tickets_in_month(self):
         gift_date = date(2022, 5, 1)
-        _first_special_ticket_in_month = TicketFactory(is_special=True, gift_date=gift_date, user_relation=self.giving_relation)
+        _first_special_ticket_in_month = TicketFactory(
+            is_special=True, gift_date=gift_date, user_relation=self.giving_relation
+        )
         target_ticket = TicketFactory(gift_date=gift_date, user_relation=self.giving_relation)
 
         uri = f"/api/tickets/{target_ticket.id}/mark_special/"
@@ -228,6 +306,12 @@ class TestTicketViews(TestCase):
     """
     Utility Functions
     """
+
+    def _send_get_request(self, user, uri):
+        client = Client()
+        client.force_login(user)
+        response = client.get(uri)
+        return response
 
     def _send_post_request(self, user, uri, params):
         client = Client()

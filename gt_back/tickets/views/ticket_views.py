@@ -13,14 +13,16 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND,
 )
 from tickets.models.ticket import Ticket
-from tickets.serializers import *
-from tickets.use_cases import (
-    CreateTicket,
-    DestroyTicket,
-    PartialUpdateTicket,
-    UseTicket,
-    ReadTicket,
+from tickets.serializers import (
+    ListTicketQuerySerializer,
+    ListTicketSerializer,
+    TicketCreateSerializer,
+    TicketIdResponseSerializer,
+    TicketPartialUpdateSerializer,
+    TicketSerializer,
+    TicketUseSerializer,
 )
+from tickets.use_cases import CreateTicket, DestroyTicket, ListTicket, PartialUpdateTicket, ReadTicket, UseTicket
 from tickets.utils import _is_none, _is_not_giving_user, _is_used
 
 from gt_back.exception_handler import exception_handler_with_logging
@@ -34,6 +36,20 @@ class TicketViewSet(viewsets.GenericViewSet):
     serializer_class = TicketSerializer
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def list(self, request, use_case=ListTicket(), format=None):
+        try:
+            serializer = ListTicketQuerySerializer(data=request.GET.dict())
+            serializer.is_valid(raise_exception=True)
+
+            data = serializer.validated_data
+            tickets = use_case.execute(user=request.user, queries={"user_relation_id": data["user_relation_id"]})
+
+            serializer = ListTicketSerializer(tickets)
+            return Response(serializer.data)
+
+        except Exception as exc:
+            return exception_handler_with_logging(exc)
 
     def create(self, request, use_case=CreateTicket(), format=None):
         try:
@@ -49,9 +65,7 @@ class TicketViewSet(viewsets.GenericViewSet):
         except Exception as exc:
             return exception_handler_with_logging(exc)
 
-    def partial_update(
-        self, request, use_case=PartialUpdateTicket(), format=None, pk=None
-    ):
+    def partial_update(self, request, use_case=PartialUpdateTicket(), format=None, pk=None):
         try:
             serializer = TicketPartialUpdateSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -95,9 +109,7 @@ class TicketViewSet(viewsets.GenericViewSet):
             return Response(status=HTTP_403_FORBIDDEN)
 
         has_other_special_tickets_in_month = (
-            Ticket.objects.filter_eq_user_relation_id(user_relation.id)
-            .filter_special_tickets(ticket.gift_date)
-            .count()
+            Ticket.objects.filter_eq_user_relation_id(user_relation.id).filter_special_tickets(ticket.gift_date).count()
             != 0
         )
 

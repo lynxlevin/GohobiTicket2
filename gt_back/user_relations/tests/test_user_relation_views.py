@@ -19,8 +19,12 @@ class TestUserRelationViews(TestCase):
         """
         giving_relation_1 = UserRelationFactory(giving_user=self.user)
         giving_relation_2 = UserRelationFactory(giving_user=self.user)
-        receiving_relation_1 = UserRelationFactory(receiving_user=self.user, giving_user=giving_relation_1.receiving_user)
-        receiving_relation_2 = UserRelationFactory(receiving_user=self.user, giving_user=giving_relation_2.receiving_user)
+        receiving_relation_1 = UserRelationFactory(
+            receiving_user=self.user, giving_user=giving_relation_1.receiving_user
+        )
+        receiving_relation_2 = UserRelationFactory(
+            receiving_user=self.user, giving_user=giving_relation_2.receiving_user
+        )
         relations = [giving_relation_1, giving_relation_2, receiving_relation_1, receiving_relation_2]
 
         client = Client()
@@ -33,12 +37,15 @@ class TestUserRelationViews(TestCase):
             "user_relations": [
                 {
                     "id": str(relation.id),
-                    "related_username": relation.receiving_user.username if relation.giving_user == self.user else relation.giving_user.username,
+                    "related_username": relation.receiving_user.username
+                    if relation.giving_user == self.user
+                    else relation.giving_user.username,
                     "is_giving_relation": relation.giving_user == self.user,
                     "ticket_image": relation.ticket_img,
                     "background_color": relation.background_color,
                     "corresponding_relation_id": str(relation.corresponding_relation.id),
-                } for relation in relations
+                }
+                for relation in relations
             ]
         }
         self.assertDictEqual(expected, response.data)
@@ -109,14 +116,14 @@ class TestUserRelationViews(TestCase):
     def test_retrieve__non_related_user(self):
         """
         Get /api/user_relations/{id}
-        403 Forbidden: when wrong login
+        404 NotFound: when wrong login
         """
         non_related_relation = UserRelationFactory()
         client = Client()
         client.force_login(self.user)
         response = client.get(f"/api/user_relations/{non_related_relation.id}/")
 
-        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
     def test_check_special_ticket_availablity__True(self):
         """
@@ -137,7 +144,9 @@ class TestUserRelationViews(TestCase):
         Get /api/user_relations/{user_relation_id}/special_ticket_availability/?year={year}&month={month}
         """
         giving_relation = UserRelationFactory(giving_user=self.user)
-        _special_ticket_already_exists = TicketFactory(is_special=True, gift_date=date(2022, 5, 1), user_relation=giving_relation)
+        _special_ticket_already_exists = TicketFactory(
+            is_special=True, gift_date=date(2022, 5, 1), user_relation=giving_relation
+        )
 
         response = self._send_special_ticket_availability_request(
             self.user, giving_relation.id, year="2022", month="05"
@@ -187,9 +196,7 @@ class TestUserRelationViews(TestCase):
     Utility Functions
     """
 
-    def _send_special_ticket_availability_request(
-        self, user, user_relation_id, year, month
-    ):
+    def _send_special_ticket_availability_request(self, user, user_relation_id, year, month):
         client = Client()
         client.force_login(user)
         response = client.get(
