@@ -25,7 +25,7 @@ function App() {
     const [defaultRelationId, setDefaultRelationId] = useState<string | null>(null);
 
     return (
-        <div className="App">
+        <div className="App" style={{backgroundColor: 'rgb(250, 255, 255)'}}>
             <UserContext.Provider value={{ isLoggedIn, setIsLoggedIn, defaultRelationId, setDefaultRelationId }}>
                 <ThemeProvider theme={theme}>
                     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ja} dateFormats={{keyboardDate: 'yyyy/MM/dd (E)', normalDate: 'yyyy/MM/dd (E)'}}>

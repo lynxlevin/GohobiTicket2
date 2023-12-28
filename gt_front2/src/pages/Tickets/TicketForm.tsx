@@ -8,7 +8,6 @@ import {
 } from '@mui/material';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 
-// Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const TicketForm = () => {
     return (
         <FormGroup sx={{mt:3}}>
