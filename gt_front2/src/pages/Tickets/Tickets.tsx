@@ -9,13 +9,13 @@ import {
     FormGroup,
     FormControlLabel,
     Checkbox,
-    TextField,
     Box,
     Typography,
     Container,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import TicketAppBar from './TicketsAppBar';
+import TicketForm from './TicketForm';
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -66,13 +66,7 @@ const Tickets = () => {
                         <FormControlLabel label="特別チケットのみ表示" control={<Checkbox />} />
                         <FormControlLabel label="使用済みチケットのみ表示" control={<Checkbox />} />
                     </FormGroup>
-                    <FormGroup>
-
-                        <FormControlLabel label="特別チケットにする" control={<Checkbox />} />
-                        <TextField label="内容" multiline minRows={5}/>
-                        <Button variant="contained">チケット付与</Button>
-                        <Button variant="outlined" sx={{color: 'primary.dark'}}>下書き保存</Button>
-                    </FormGroup>
+                    <TicketForm />
                 </Container>
             </Box>
             {/* End hero unit */}
