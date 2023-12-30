@@ -9,21 +9,21 @@ import {
     Typography,
 } from '@mui/material';
 import { format } from 'date-fns';
+import SpecialStamp from './SpecialStamp';
 
 const Ticket = (props: any) => {
     const { ticket, isUsed } = props;
     return (
         <Grid item xs={12} sm={6} md={4}>
             <Badge color='primary' badgeContent='NEW!!' sx={{display: 'block', mr: 3.5}} />
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                 <CardContent sx={{ flexGrow: 1 }}>
                     <Grid container>
-                        <Grid item xs={6}>
-                            <Typography gutterBottom variant="subtitle1" sx={{textAlign: 'left', pl: 1}}>
+                        <Grid item xs={12}>
+                            <Typography gutterBottom variant="subtitle1" sx={{pt: 1, pb: 1}}>
                                 {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
                             </Typography>
                         </Grid>
-                    <Button variant="contained">このチケットを使う</Button>
                         {!isUsed && (
                             <Grid item xs={6}>
                                 <Button size="small">Edit</Button>
@@ -31,7 +31,7 @@ const Ticket = (props: any) => {
                             </Grid>
                         )}
                     </Grid>
-                    <Typography sx={{whiteSpace: 'pre-wrap', mt: 1}}>
+                    <Typography sx={{whiteSpace: 'pre-wrap', mb: 2}}>
                         {ticket.description}
                     </Typography>
                 </CardContent>
@@ -40,6 +40,7 @@ const Ticket = (props: any) => {
                         <Button variant="contained">このチケットを使う</Button>
                     </CardActions>
                 )}
+                {ticket.is_special && <SpecialStamp />}
             </Card>
         </Grid>
     );
