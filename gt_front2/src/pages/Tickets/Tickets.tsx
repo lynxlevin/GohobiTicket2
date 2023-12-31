@@ -14,11 +14,13 @@ import TicketAppBar from './TicketsAppBar';
 import TicketForm from './TicketForm';
 import Ticket from './Ticket';
 import { ITicket, TicketAPI } from '../../apis/TicketAPI';
+import useUserAPI from '../../hooks/useUserAPI';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = () => {
     const [availableTickets, setAvailableTickets] = useState<ITicket[]>([]);
     const [usedTickets, setUsedTickets] = useState<ITicket[]>([]);
+    useUserAPI();
 
     useEffect(() => {
         const getTickets = async () => {

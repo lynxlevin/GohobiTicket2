@@ -42,7 +42,6 @@ class TestUserRelationViews(TestCase):
                     else relation.giving_user.username,
                     "is_giving_relation": relation.giving_user == self.user,
                     "ticket_image": relation.ticket_img,
-                    "background_color": relation.background_color,
                     "corresponding_relation_id": str(relation.corresponding_relation.id),
                 }
                 for relation in relations

@@ -7,7 +7,6 @@ class UserRelationSerializer(serializers.Serializer):
     related_username = serializers.CharField()
     is_giving_relation = serializers.BooleanField()
     ticket_image = serializers.CharField()
-    background_color = serializers.CharField()
     corresponding_relation_id = serializers.CharField()
 
 

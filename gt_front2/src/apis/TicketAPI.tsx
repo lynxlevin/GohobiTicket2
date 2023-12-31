@@ -18,10 +18,10 @@ interface ListTicketResponse {
 }
 
 export const TicketAPI = {
-    BASE_URL: '/api/tickets',
+    BASE_URL: '/api/tickets/',
 
     list: async (userRelationId: number): Promise<AxiosResponse<ListTicketResponse>> => {
-        const url = `${TicketAPI.BASE_URL}/?user_relation_id=${userRelationId}`;
+        const url = `${TicketAPI.BASE_URL}?user_relation_id=${userRelationId}`;
         return await client.get(url);
     },
 };
