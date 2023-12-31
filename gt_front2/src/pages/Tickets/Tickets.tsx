@@ -43,9 +43,10 @@ const Tickets = () => {
     }, [userContext.isLoggedIn, userRelationId]);
 
 
-    if (userContext.isLoggedIn === false || !currentRelation) {
+    if (userContext.isLoggedIn === false) {
         return <Navigate to="/login" />;
     }
+    if (!currentRelation) return <></>
     return (
         <>
         <TicketAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
@@ -54,15 +55,15 @@ const Tickets = () => {
             <Box sx={{ pt: 8, pb: 6 }}>
                 <Container maxWidth="sm">
                     <Typography variant="h5" align="center" color="text.primary" sx={{ mt: 3 }} gutterBottom>
-                    ちひろにあげる
+                    {currentRelation.related_username}に{currentRelation.is_giving_relation ? 'あげる' : 'もらった'}
                     </Typography>
                     <Typography variant="h4" align="center" color="text.primary" sx={{ fontWeight: 600 }} gutterBottom>
                     ごほうびチケット
                     </Typography>
-                    <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component="div" image="/IMG_5777.jpeg" />
-                    {/* <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component="div" image="/IMG_5928.jpeg" /> */}
+                    {/* TODO: チケット画像の配信方法 */}
+                    <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component="div" image={currentRelation.ticket_image} />
                     <Typography variant="h5" align="center" color="text.primary" gutterBottom>
-                        計747枚
+                        計{availableTickets.length + usedTickets.length}枚
                     </Typography>
                     <FormGroup>
                         <FormControlLabel label="特別チケットのみ表示" control={<Checkbox />} />
