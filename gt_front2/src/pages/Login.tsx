@@ -18,7 +18,7 @@ const Login = () => {
             <CssBaseline />
             <Box
                 sx={{
-                    marginTop: 8,
+                    pt: 8,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',

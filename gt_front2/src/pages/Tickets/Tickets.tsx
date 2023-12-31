@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import {
     CardMedia,
     Grid,
@@ -9,32 +9,46 @@ import {
     Typography,
     Container,
 } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import TicketAppBar from './TicketsAppBar';
 import TicketForm from './TicketForm';
 import Ticket from './Ticket';
 import { ITicket, TicketAPI } from '../../apis/TicketAPI';
 import useUserAPI from '../../hooks/useUserAPI';
+import { UserContext } from '../../contexts/user-context';
+import { UserRelationContext } from '../../contexts/user-relation-context';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = () => {
+    const userContext = useContext(UserContext);
+    const userRelationContext = useContext(UserRelationContext);
+
     const [availableTickets, setAvailableTickets] = useState<ITicket[]>([]);
     const [usedTickets, setUsedTickets] = useState<ITicket[]>([]);
-    useUserAPI();
+    const { handleLogout } = useUserAPI();
+
+    const [searchParams] = useSearchParams();
+    const userRelationId = Number(searchParams.get('user_relation_id'));
+
+    const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId)!;
 
     useEffect(() => {
+        // MYMEMO: Too slow rendering. https://blog.logrocket.com/render-large-lists-react-5-methods-examples/#react-viewport-list
         const getTickets = async () => {
-            const res = await TicketAPI.list(1);
+            const res = await TicketAPI.list(userRelationId);
             setAvailableTickets(res.data.available_tickets);
             setUsedTickets(res.data.used_tickets);
         }
-        getTickets();
-    }, []);
+        if (userContext.isLoggedIn === true && userRelationId > 0) getTickets();
+    }, [userContext.isLoggedIn, userRelationId]);
 
 
+    if (userContext.isLoggedIn === false || !currentRelation) {
+        return <Navigate to="/login" />;
+    }
     return (
         <>
-        <TicketAppBar />
+        <TicketAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
         <main>
             {/* Hero unit */}
             <Box sx={{ pt: 8, pb: 6 }}>
