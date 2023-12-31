@@ -40,7 +40,7 @@ const Ticket = (props: any) => {
                         <Button variant="contained">このチケットを使う</Button>
                     </CardActions>
                 )}
-                {ticket.is_special && <SpecialStamp />}
+                {ticket.is_special && <SpecialStamp randKey={ticket.id} />}
             </Card>
         </Grid>
     );

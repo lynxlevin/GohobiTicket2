@@ -2,12 +2,18 @@ import {
     CardMedia,
 } from '@mui/material';
 import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 
-const SpecialStamp = () => {
-    // MYMEMO: id を元に 角度や位置をランダムにしてみる？
+interface SpecialStampProps {
+    randKey?: number;
+}
+
+const SpecialStamp = (props: SpecialStampProps) => {
+    const { randKey } = props;
+
     return (
         // https://www.pressman.ne.jp/archives/18598
-        <SpecialStampDiv>
+        <SpecialStampDiv randKey={randKey ?? 0}>
             <CardMedia
                 className='stamp'
                 component="img"
@@ -18,6 +24,55 @@ const SpecialStamp = () => {
             </div>
         </SpecialStampDiv>
     );
+}
+
+const postmarkPosition = (props: { randKey: number; }) => {
+    let top, left;
+    switch (props.randKey % 5) {
+        case 0:
+            top = 60;
+            left = 60;
+            break;
+        case 1:
+            top = 60;
+            left = 50;
+            break;
+        case 2:
+            top = 50;
+            left = 60;
+            break;
+        case 3:
+            top = 50;
+            left = 50;
+            break;
+        case 4:
+            top = 40;
+            left = 50;
+            break;
+    }
+    return css`
+        top: ${top}px;
+        left: ${left}px;
+    `
+}
+
+const postmarkRotation = (props: { randKey: number; }) => {
+    let deg;
+    switch (props.randKey % 3) {
+        case 0:
+            deg = '3deg';
+            break;
+        case 1:
+            deg = '-8deg';
+            break;
+        case 2:
+            deg = '-25deg';
+            break;
+    }
+    return css`
+        -webkit-transform: rotate(${deg});
+        transform: rotate(${deg});
+    `
 }
 
 const SpecialStampDiv = styled.div`
@@ -42,8 +97,7 @@ const SpecialStampDiv = styled.div`
 
     .postmark-div {
         position: absolute;
-        top: 60px;
-        left: 50px;
+        ${postmarkPosition};
     }
     .postmark {
         position: relative;
@@ -59,8 +113,7 @@ const SpecialStampDiv = styled.div`
         text-align: center;
         font-size: 22px;
         line-height: 100px;
-        -webkit-transform: rotate(-16deg);
-        transform: rotate(-16deg);
+        ${postmarkRotation};
     }
     .postmark::before {
         position: absolute;
