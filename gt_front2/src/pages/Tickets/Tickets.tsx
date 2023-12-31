@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     CardMedia,
     Grid,
@@ -13,85 +13,23 @@ import { Link } from 'react-router-dom';
 import TicketAppBar from './TicketsAppBar';
 import TicketForm from './TicketForm';
 import Ticket from './Ticket';
-
-const availableTickets = [
-    {
-        "id": 1862,
-        "user_relation": 1,
-        "description": "いつもありがとうね。\n明日も楽しみ\n\n↑空行",
-        "gift_date": "2023-12-28",
-        "use_description": "",
-        "use_date": null,
-        "status": "draft",
-        "is_special": false
-    },
-    {
-        "id": 1861,
-        "user_relation": 1,
-        "description": "いつもありがとう。これは長い文章です。適切に折り返しされるでしょうか？",
-        "gift_date": "2023-12-27",
-        "use_description": "",
-        "use_date": null,
-        "status": "unread",
-        "is_special": false
-    },
-    {
-        "id": 1860,
-        "user_relation": 1,
-        "description": "マッサージありがとう",
-        "gift_date": "2023-12-25",
-        "use_description": "",
-        "use_date": null,
-        "status": "read",
-        "is_special": true
-    },
-    {
-        "id": 1859,
-        "user_relation": 1,
-        "description": "一緒に楽しい夜を過ごせた。",
-        "gift_date": "2023-12-21",
-        "use_description": "",
-        "use_date": null,
-        "status": "edited",
-        "is_special": false
-    },
-];
-
-const usedTickets = [
-    {
-        "id": 1858,
-        "user_relation": 1,
-        "description": "ありがとう。",
-        "gift_date": "2023-12-20",
-        "use_description": "",
-        "use_date": "2023-12-25",
-        "status": "read",
-        "is_special": false
-    },
-    {
-        "id": 1857,
-        "user_relation": 1,
-        "description": "マッサージありがとう",
-        "gift_date": "2023-12-19",
-        "use_description": "",
-        "use_date": "2023-12-24",
-        "status": "read",
-        "is_special": true
-    },
-    {
-        "id": 1856,
-        "user_relation": 1,
-        "description": "一緒に楽しい夜を過ごせた。",
-        "gift_date": "2023-12-18",
-        "use_description": "マッサージしてほしい",
-        "use_date": "2023-12-23",
-        "status": "read",
-        "is_special": false
-    },
-];
+import { ITicket, TicketAPI } from '../../apis/TicketAPI';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = () => {
+    const [availableTickets, setAvailableTickets] = useState<ITicket[]>([]);
+    const [usedTickets, setUsedTickets] = useState<ITicket[]>([]);
+
+    useEffect(() => {
+        const getTickets = async () => {
+            const res = await TicketAPI.list(1);
+            setAvailableTickets(res.data.available_tickets);
+            setUsedTickets(res.data.used_tickets);
+        }
+        getTickets();
+    }, []);
+
+
     return (
         <>
         <TicketAppBar />
