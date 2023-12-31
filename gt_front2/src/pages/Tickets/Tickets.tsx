@@ -97,13 +97,7 @@ const Tickets = () => {
         <TicketAppBar />
         <main>
             {/* Hero unit */}
-            <Box
-            sx={{
-                bgcolor: 'background.paper',
-                pt: 8,
-                pb: 6,
-            }}
-            >
+            <Box sx={{ pt: 8, pb: 6 }}>
                 <Container maxWidth="sm">
                     <Typography variant="h5" align="center" color="text.primary" sx={{ mt: 3 }} gutterBottom>
                     ちひろにあげる
