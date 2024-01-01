@@ -54,7 +54,7 @@ const Tickets = () => {
         <>
             <TicketAppBar getTickets={getTickets} handleLogout={handleLogout} currentRelation={currentRelation} />
             <main>
-                <Box sx={{ pt: 8, pb: 6 }}>
+                <Box sx={{ pt: 8 }}>
                     <Container maxWidth="sm">
                         <Typography variant="h5" align="center" color="text.primary" sx={{ mt: 3 }} gutterBottom>
                         {currentRelation.related_username}に{currentRelation.is_giving_relation ? 'あげる' : 'もらった'}
@@ -62,16 +62,16 @@ const Tickets = () => {
                         <Typography variant="h4" align="center" color="text.primary" sx={{ fontWeight: 600 }} gutterBottom>
                         ごほうびチケット
                         </Typography>
-                        {/* TODO: チケット画像の配信方法 */}
-                        <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component="div" image={currentRelation.ticket_image} />
                         <Typography variant="h5" align="center" color="text.primary" gutterBottom>
                             計{availableTickets.length + usedTickets.length}枚
                         </Typography>
+                        {/* TODO: チケット画像の配信方法 */}
+                        <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component="div" image={currentRelation.ticket_image} />
+                        {currentRelation.is_giving_relation && <TicketForm userRelationId={userRelationId} setAvailableTickets={setAvailableTickets} />}
                         <FormGroup>
                             <FormControlLabel label="特別チケットのみ表示" control={<Checkbox onChange={event => setShowOnlySpecialTickets(event.target.checked)} />} />
                             <FormControlLabel label="使用済みチケットのみ表示" control={<Checkbox onChange={event => setShowOnlyUsedTickets(event.target.checked)} />} />
                         </FormGroup>
-                        {currentRelation.is_giving_relation && <TicketForm userRelationId={userRelationId} setAvailableTickets={setAvailableTickets} />}
                     </Container>
                 </Box>
                 <Container sx={{ py: 8 }} maxWidth="md">

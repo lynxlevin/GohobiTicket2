@@ -56,7 +56,7 @@ const TicketForm = (props: {userRelationId: number, setAvailableTickets: any}) =
     }, [checkSpecialTicketAvailability]);
 
     return (
-        <FormGroup sx={{mt:3}}>
+        <FormGroup sx={{mt:3, mb:3}}>
             <MobileDatePicker label="あげる日" value={giftDate} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{mb: 1}} />
             <TextField value={description} onChange={event => setDescription(event.target.value)} label="内容" multiline minRows={5}/>
             <FormControlLabel disabled={!isSpecialTicketAvailable} label="特別チケットにする" control={<Checkbox checked={isSpecial} onChange={event => setIsSpecial(event.target.checked)} />} />
