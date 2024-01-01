@@ -202,6 +202,3 @@ class TestUserRelationViews(TestCase):
             f"/api/user_relations/{user_relation_id}/special_ticket_availability/?year={year}&month={month}"
         )
         return response
-        return response
-        return response
-        return response

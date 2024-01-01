@@ -24,7 +24,7 @@ export const TicketAPI = {
         const url = `${TicketAPI.BASE_URL}?user_relation_id=${userRelationId}`;
         return await client.get(url);
     },
-    post: async (props: {gift_date: string, description: string, user_relation_id: number}) => {
+    post: async (props: {gift_date: string, description: string, user_relation_id: number, is_special: boolean}) => {
         return await client.post(TicketAPI.BASE_URL, {ticket: props}, { headers: { 'content-type': 'application/json' } })
     }
 };

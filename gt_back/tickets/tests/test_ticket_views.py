@@ -148,6 +148,63 @@ class TestTicketViews(TestCase):
         self.assertFalse(ticket["is_special"])
         self.assertIsNone(ticket.get("use_date"))
 
+    def test_create_special(self):
+        """
+        Post /api/tickets/
+        """
+        params = {
+            "ticket": {
+                "gift_date": "2022-08-24",
+                "description": "test_ticket",
+                "user_relation_id": self.giving_relation.id,
+                "is_special": True,
+            }
+        }
+
+        response = self._send_post_request(self.user, "/api/tickets/", params)
+
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+
+        body = response.json()
+        ticket = body["ticket"]
+
+        self.assertIsNotNone(ticket["id"])
+        self.assertEqual(params["ticket"]["gift_date"], ticket["gift_date"])
+        self.assertEqual(params["ticket"]["description"], ticket["description"])
+        self.assertEqual(Ticket.STATUS_UNREAD, ticket["status"])
+        self.assertTrue(ticket["is_special"])
+        self.assertIsNone(ticket.get("use_date"))
+
+    def test_create_special__already_exists(self):
+        """
+        Post /api/tickets/
+        """
+        _existingSpecialTicket = TicketFactory(
+            gift_date="2022-08-24", is_special=True, user_relation_id=self.giving_relation.id
+        )
+        params = {
+            "ticket": {
+                "gift_date": "2022-08-24",
+                "description": "test_ticket",
+                "user_relation_id": self.giving_relation.id,
+                "is_special": True,
+            }
+        }
+
+        response = self._send_post_request(self.user, "/api/tickets/", params)
+
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+
+        body = response.json()
+        ticket = body["ticket"]
+
+        self.assertIsNotNone(ticket["id"])
+        self.assertEqual(params["ticket"]["gift_date"], ticket["gift_date"])
+        self.assertEqual(params["ticket"]["description"], ticket["description"])
+        self.assertEqual(Ticket.STATUS_UNREAD, ticket["status"])
+        self.assertFalse(ticket["is_special"])
+        self.assertIsNone(ticket.get("use_date"))
+
     def test_partial_update__description(self):
         """
         Patch /api/tickets/{ticket_id}/

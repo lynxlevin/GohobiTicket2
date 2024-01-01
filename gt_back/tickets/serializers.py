@@ -31,6 +31,7 @@ class TicketCreateSerializer(serializers.Serializer):
         gift_date = serializers.DateField()
         description = serializers.CharField()
         user_relation_id = serializers.CharField()
+        is_special = serializers.BooleanField(required=False)
         status = serializers.ChoiceField(choices=Ticket.STATUS_CHOICES, required=False)
 
     id = serializers.CharField(read_only=True)

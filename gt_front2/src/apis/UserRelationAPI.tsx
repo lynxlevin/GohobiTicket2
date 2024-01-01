@@ -12,4 +12,8 @@ export const UserRelationAPI = {
     list: async (): Promise<AxiosResponse<ListUserRelationResponse>> => {
         return await client.get(UserRelationAPI.BASE_URL);
     },
+    checkSpecialTicketAvailability: async (data: {userRelationId: number, year: number, month: number}): Promise<AxiosResponse<boolean>> => {
+        const url = `${UserRelationAPI.BASE_URL}${data.userRelationId}/special_ticket_availability/?year=${data.year}&month=${data.month}`;
+        return await client.get(url);
+    },
 };
