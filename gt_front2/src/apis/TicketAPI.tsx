@@ -17,6 +17,14 @@ interface ListTicketResponse {
     used_tickets: ITicket[];
 }
 
+export interface CreateTicketRequest {
+    gift_date: string;
+    description: string;
+    user_relation_id: number;
+    is_special: boolean;
+    status?: string;
+}
+
 export const TicketAPI = {
     BASE_URL: '/api/tickets/',
 
@@ -24,7 +32,7 @@ export const TicketAPI = {
         const url = `${TicketAPI.BASE_URL}?user_relation_id=${userRelationId}`;
         return await client.get(url);
     },
-    post: async (props: {gift_date: string, description: string, user_relation_id: number, is_special: boolean}) => {
+    create: async (props: CreateTicketRequest) => {
         return await client.post(TicketAPI.BASE_URL, {ticket: props}, { headers: { 'content-type': 'application/json' } })
-    }
+    },
 };

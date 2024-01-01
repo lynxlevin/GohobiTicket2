@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { format } from 'date-fns';
 import { MobileDatePicker } from '@mui/x-date-pickers';
-import { ITicket, TicketAPI } from '../../apis/TicketAPI';
+import { CreateTicketRequest, ITicket, TicketAPI } from '../../apis/TicketAPI';
 import { UserRelationAPI } from '../../apis/UserRelationAPI';
 
 const TicketForm = (props: {userRelationId: number, setAvailableTickets: any}) => {
@@ -17,14 +17,24 @@ const TicketForm = (props: {userRelationId: number, setAvailableTickets: any}) =
     const [description, setDescription] = useState('');
     const [isSpecial, setIsSpecial] = useState(false);
     const [isSpecialTicketAvailable, setIsSpecialTicketAvailable] = useState(false);
+    const [isDraft, setIsDraft] = useState(false);
 
     const createTicket = async () => {
-        const ticket = (await TicketAPI.post({gift_date: format(giftDate, 'yyyy-MM-dd'), description, is_special: isSpecial, user_relation_id: userRelationId})).data.ticket;
+        const data: CreateTicketRequest = {
+            gift_date: format(giftDate, 'yyyy-MM-dd'),
+            description,
+            is_special: isSpecial,
+            user_relation_id: userRelationId,
+        }
+        if (isDraft) data.status = 'draft';
+        const ticket = (await TicketAPI.create(data)).data.ticket;
         setAvailableTickets((prev: ITicket[]) => {
             return [ticket, ...prev].sort((a, b) => a.gift_date < b.gift_date ? 1 : -1)
         });
         setGiftDate(new Date());
         setDescription('');
+        setIsSpecial(false);
+        setIsDraft(false);
     }
 
     const checkSpecialTicketAvailability = useCallback(async (date: Date) => {
@@ -50,8 +60,8 @@ const TicketForm = (props: {userRelationId: number, setAvailableTickets: any}) =
             <MobileDatePicker label="あげる日" value={giftDate} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{mb: 1}} />
             <TextField value={description} onChange={event => setDescription(event.target.value)} label="内容" multiline minRows={5}/>
             <FormControlLabel disabled={!isSpecialTicketAvailable} label="特別チケットにする" control={<Checkbox checked={isSpecial} onChange={event => setIsSpecial(event.target.checked)} />} />
-            <Button variant="contained" onClick={createTicket}>チケット付与</Button>
-            <Button variant="outlined" sx={{color: 'primary.dark', mt: 2}}>❌下書き保存</Button>
+            <FormControlLabel label="下書きにする" control={<Checkbox checked={isDraft} onChange={event => setIsDraft(event.target.checked)} />} />
+            <Button variant={isDraft ? "outlined" : "contained"} onClick={createTicket} sx={isDraft ? {color: 'primary.dark'} : {}}>{isDraft ? '下書き保存' : 'チケット付与'}</Button>
         </FormGroup>
     );
 }
