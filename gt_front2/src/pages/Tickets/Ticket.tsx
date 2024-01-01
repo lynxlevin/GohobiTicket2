@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import {
     Badge,
     Button,
@@ -61,4 +61,4 @@ const Ticket = (props: any) => {
     );
 }
 
-export default Ticket;
+export default memo(Ticket);
