@@ -71,7 +71,7 @@ const Tickets = () => {
                             <FormControlLabel label="特別チケットのみ表示" control={<Checkbox onChange={event => setShowOnlySpecialTickets(event.target.checked)} />} />
                             <FormControlLabel label="使用済みチケットのみ表示" control={<Checkbox onChange={event => setShowOnlyUsedTickets(event.target.checked)} />} />
                         </FormGroup>
-                        {currentRelation.is_giving_relation && <TicketForm />}
+                        {currentRelation.is_giving_relation && <TicketForm userRelationId={userRelationId} setAvailableTickets={setAvailableTickets} />}
                     </Container>
                 </Box>
                 <Container sx={{ py: 8 }} maxWidth="md">
