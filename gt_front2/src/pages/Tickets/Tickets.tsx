@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import {
     CardMedia,
     Grid,
@@ -32,15 +32,16 @@ const Tickets = () => {
 
     const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId)!;
 
+    const getTickets = useCallback(async () => {
+        const res = await TicketAPI.list(userRelationId);
+        setAvailableTickets(res.data.available_tickets);
+        setUsedTickets(res.data.used_tickets);
+    }, [userRelationId])
+
     useEffect(() => {
         // MYMEMO: Too slow rendering. https://blog.logrocket.com/render-large-lists-react-5-methods-examples/#react-viewport-list
-        const getTickets = async () => {
-            const res = await TicketAPI.list(userRelationId);
-            setAvailableTickets(res.data.available_tickets);
-            setUsedTickets(res.data.used_tickets);
-        }
         if (userContext.isLoggedIn === true && userRelationId > 0) getTickets();
-    }, [userContext.isLoggedIn, userRelationId]);
+    }, [getTickets, userContext.isLoggedIn, userRelationId]);
 
 
     if (userContext.isLoggedIn === false) {
@@ -49,7 +50,7 @@ const Tickets = () => {
     if (!currentRelation) return <></>
     return (
         <>
-        <TicketAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
+        <TicketAppBar getTickets={getTickets} handleLogout={handleLogout} currentRelation={currentRelation} />
         <main>
             {/* Hero unit */}
             <Box sx={{ pt: 8, pb: 6 }}>
