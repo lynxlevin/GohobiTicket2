@@ -13,6 +13,7 @@ import { UserRelationAPI } from '../../apis/UserRelationAPI';
 
 const TicketForm = (props: {userRelationId: number, setAvailableTickets: any}) => {
     const {userRelationId, setAvailableTickets} = props;
+
     const [giftDate, setGiftDate] = useState<Date>(new Date());
     const [description, setDescription] = useState('');
     const [isSpecial, setIsSpecial] = useState(false);

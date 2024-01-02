@@ -14,10 +14,11 @@ import SpecialStamp from './SpecialStamp';
 import EditIcon from '@mui/icons-material/Edit';
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
+import EditDialog from './EditDialog';
 
 const Ticket = (props: any) => {
     const { ticket, isUsed } = props;
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
     const getStatusBadge = useMemo(() => {
         let text;
@@ -45,7 +46,7 @@ const Ticket = (props: any) => {
                             {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
                         </Typography>
                         {!isUsed && (
-                            <IconButton className="edit-button" onClick={() => setIsEditModalOpen(true)} size='small'><EditIcon /></IconButton>
+                            <IconButton className="edit-button" onClick={() => setIsEditDialogOpen(true)} size='small'><EditIcon /></IconButton>
                         )}
                     </div>
                     <Typography className='ticket-description'>
@@ -59,6 +60,7 @@ const Ticket = (props: any) => {
                 )}
                 {ticket.is_special && <SpecialStamp randKey={ticket.id} />}
             </Card>
+            {isEditDialogOpen && <EditDialog onClose={() => {setIsEditDialogOpen(false)}} ticket={ticket} />}
         </StyledGrid>
     );
 }

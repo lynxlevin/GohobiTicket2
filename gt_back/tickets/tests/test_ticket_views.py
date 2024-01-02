@@ -219,7 +219,7 @@ class TestTicketViews(TestCase):
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
 
         ticket.refresh_from_db()
-        self.assertEqual(str(ticket.id), response.data["id"])
+        self.assertEqual(ticket.id, response.data["id"])
         self.assertEqual(params["ticket"]["description"], ticket.description)
 
     def test_partial_update__status(self):
@@ -236,7 +236,7 @@ class TestTicketViews(TestCase):
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
 
         ticket.refresh_from_db()
-        self.assertEqual(str(ticket.id), response.data["id"])
+        self.assertEqual(ticket.id, response.data["id"])
         self.assertEqual(params["ticket"]["status"], ticket.status)
 
     def test_destroy(self):

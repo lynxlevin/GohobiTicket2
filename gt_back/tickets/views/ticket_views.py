@@ -74,7 +74,7 @@ class TicketViewSet(viewsets.GenericViewSet):
 
             ticket = use_case.execute(user=request.user, ticket_id=pk, data=data)
 
-            serializer = TicketPartialUpdateSerializer({"id": ticket.id})
+            serializer = TicketSerializer(ticket)
 
             return Response(serializer.data, status=HTTP_202_ACCEPTED)
 
