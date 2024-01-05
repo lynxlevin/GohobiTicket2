@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext } from 'react';
 import { CreateTicketRequest, TicketAPI } from '../apis/TicketAPI';
 import { ITicket, TicketContext } from '../contexts/ticket-context';
 
@@ -7,11 +7,9 @@ const useTicketContext = () => {
 
     const getTickets = useCallback(
         async (userRelationId: number | string) => {
-            const {
-                data: { tickets },
-            } = await TicketAPI.list(Number(userRelationId));
-
-            ticketContext.setTickets(tickets);
+            TicketAPI.list(Number(userRelationId)).then(({ data: { tickets } }) => {
+                ticketContext.setTickets(tickets);
+            });
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [ticketContext.setTickets],
@@ -38,12 +36,10 @@ const useTicketContext = () => {
     );
 
     const createTicket = useCallback(async (data: CreateTicketRequest) => {
-        const {
-            data: { ticket },
-        } = await TicketAPI.create(data);
-
-        ticketContext.setTickets(prev => {
-            return [ticket, ...prev].sort(sortConditions);
+        TicketAPI.create(data).then(({ data: { ticket } }) => {
+            ticketContext.setTickets(prev => {
+                return [ticket, ...prev].sort(sortConditions);
+            });
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -52,12 +48,19 @@ const useTicketContext = () => {
         const payload = {
             description,
         };
-        const { data: ticket } = await TicketAPI.update(ticketId, payload);
+        TicketAPI.update(ticketId, payload).then(({ data: ticket }) => {
+            ticketContext.setTickets(prev => {
+                const tickets = [...prev];
+                tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;
+                return tickets;
+            });
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-        ticketContext.setTickets(prev => {
-            const tickets = [...prev];
-            tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;
-            return tickets;
+    const deleteTicket = useCallback(async (ticketId: number) => {
+        TicketAPI.delete(ticketId).then(_ => {
+            ticketContext.setTickets(prev => prev.filter(ticket => ticket.id !== ticketId));
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -67,6 +70,7 @@ const useTicketContext = () => {
         getSortedTickets,
         createTicket,
         updateTicket,
+        deleteTicket,
     };
 };
 

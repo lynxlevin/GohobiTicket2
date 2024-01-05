@@ -16,7 +16,8 @@ const EditDialog = (props: EditDialogProps) => {
     const [isSpecial, setIsSpecial] = useState(false);
     const [isSpecialTicketAvailable, setIsSpecialTicketAvailable] = useState(false);
     const [willFinalize, setWillFinalize] = useState(false);
-    const { updateTicket } = useTicketContext();
+    const [willDelete, setWillDelete] = useState(false);
+    const { updateTicket, deleteTicket } = useTicketContext();
 
     // MYMEMO: runs twice on render
     useEffect(() => {
@@ -41,6 +42,7 @@ const EditDialog = (props: EditDialogProps) => {
     return (
         <Dialog open={true} onClose={onClose}>
             <DialogContent>
+                <FormControlLabel label='削除' control={<Checkbox checked={willDelete} onChange={event => setWillDelete(event.target.checked)} />} />
                 <Typography gutterBottom variant='subtitle1' className='ticket-date'>
                     {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
                 </Typography>
@@ -60,12 +62,20 @@ const EditDialog = (props: EditDialogProps) => {
                 )}
             </DialogContent>
             <DialogActions sx={{ justifyContent: 'center', paddingBottom: 3 }}>
-                <Button variant='contained' onClick={handleSubmit}>
-                    修正する
-                </Button>
-                <Button variant='outlined' onClick={onClose} sx={{ color: 'primary.dark' }}>
-                    キャンセル
-                </Button>
+                {willDelete ? (
+                    <Button variant='contained' color='error' onClick={() => deleteTicket(ticket.id)}>
+                        削除する
+                    </Button>
+                ) : (
+                    <>
+                        <Button variant='contained' onClick={handleSubmit}>
+                            修正する
+                        </Button>
+                        <Button variant='outlined' onClick={onClose} sx={{ color: 'primary.dark' }}>
+                            キャンセル
+                        </Button>
+                    </>
+                )}
             </DialogActions>
         </Dialog>
     );
