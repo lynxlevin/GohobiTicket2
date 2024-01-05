@@ -4,7 +4,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Badge, Button, Card, CardActions, CardContent, Grid, IconButton, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { memo, useMemo, useState } from 'react';
-import { ITicket } from '../../apis/TicketAPI';
+import { ITicket } from '../../contexts/ticket-context';
 import EditDialog from './EditDialog';
 import SpecialStamp from './SpecialStamp';
 

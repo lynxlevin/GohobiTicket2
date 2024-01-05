@@ -2,8 +2,9 @@ import { Button, Checkbox, FormControlLabel, FormGroup, TextField } from '@mui/m
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { format } from 'date-fns';
 import { useCallback, useEffect, useState } from 'react';
-import { CreateTicketRequest, ITicket, TicketAPI } from '../../apis/TicketAPI';
+import { CreateTicketRequest, TicketAPI } from '../../apis/TicketAPI';
 import { UserRelationAPI } from '../../apis/UserRelationAPI';
+import { ITicket } from '../../contexts/ticket-context';
 
 interface TicketFormProps {
     userRelationId: number;

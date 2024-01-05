@@ -1,16 +1,6 @@
 import { AxiosResponse } from 'axios';
+import { ITicket } from '../contexts/ticket-context';
 import client from './axios';
-
-export interface ITicket {
-    id: number;
-    user_relation_id: number;
-    description: string;
-    gift_date: string;
-    use_description: string;
-    use_date: string;
-    status: string;
-    is_special: boolean;
-}
 
 interface ListTicketResponse {
     tickets: ITicket[];

@@ -1,8 +1,9 @@
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, FormControlLabel, TextField, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
-import { ITicket, TicketAPI } from '../../apis/TicketAPI';
+import { TicketAPI } from '../../apis/TicketAPI';
 import { UserRelationAPI } from '../../apis/UserRelationAPI';
+import { ITicket } from '../../contexts/ticket-context';
 
 interface EditDialogProps {
     onClose: () => void;

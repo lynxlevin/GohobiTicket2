@@ -1,7 +1,9 @@
 import { Box, CardMedia, Checkbox, Container, FormControlLabel, FormGroup, Grid, Typography } from '@mui/material';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
-import { ITicket, TicketAPI } from '../../apis/TicketAPI';
+import { TicketAPI } from '../../apis/TicketAPI';
+import { ITicket } from '../../contexts/ticket-context';
+import { TicketContext } from '../../contexts/ticket-context';
 import { UserContext } from '../../contexts/user-context';
 import { UserRelationContext } from '../../contexts/user-relation-context';
 import useUserAPI from '../../hooks/useUserAPI';
@@ -13,8 +15,8 @@ import TicketAppBar from './TicketsAppBar';
 const Tickets = () => {
     const userContext = useContext(UserContext);
     const userRelationContext = useContext(UserRelationContext);
+    const ticketContext = useContext(TicketContext);
 
-    const [allTickets, setAllTickets] = useState<ITicket[]>([]);
     const [showOnlySpecialTickets, setShowOnlySpecialTickets] = useState(false);
     const [showOnlyUsedTickets, setShowOnlyUsedTickets] = useState(false);
     const { handleLogout } = useUserAPI();
@@ -26,8 +28,8 @@ const Tickets = () => {
 
     const getTickets = useCallback(async () => {
         const res = await TicketAPI.list(userRelationId);
-        setAllTickets(res.data.tickets);
-    }, [userRelationId]);
+        ticketContext.setTickets(res.data.tickets);
+    }, [ticketContext, userRelationId]);
 
     const sortConditions = useCallback((a: ITicket, b: ITicket) => {
         const aIsNewer = a.gift_date > b.gift_date;
@@ -40,11 +42,11 @@ const Tickets = () => {
     }, []);
 
     const sortedAllTickets = useMemo(() => {
-        return allTickets
+        return ticketContext.tickets
             .filter(ticket => !showOnlySpecialTickets || ticket.is_special)
             .filter(ticket => !showOnlyUsedTickets || ticket.use_date !== null)
             .sort(sortConditions);
-    }, [allTickets, showOnlySpecialTickets, showOnlyUsedTickets, sortConditions]);
+    }, [showOnlySpecialTickets, showOnlyUsedTickets, sortConditions, ticketContext.tickets]);
 
     useEffect(() => {
         // MYMEMO: Too slow rendering. https://blog.logrocket.com/render-large-lists-react-5-methods-examples/#react-viewport-list
@@ -68,12 +70,12 @@ const Tickets = () => {
                             ごほうびチケット
                         </Typography>
                         <Typography variant='h5' align='center' color='text.primary' gutterBottom>
-                            計{allTickets.length}枚
+                            計{ticketContext.tickets.length}枚
                         </Typography>
                         {/* TODO: チケット画像の配信方法 */}
                         <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={currentRelation.ticket_image} />
                         {currentRelation.is_giving_relation && (
-                            <TicketForm userRelationId={userRelationId} setAllTickets={setAllTickets} sortConditions={sortConditions} />
+                            <TicketForm userRelationId={userRelationId} setAllTickets={ticketContext.setTickets} sortConditions={sortConditions} />
                         )}
                         <FormGroup>
                             <FormControlLabel
