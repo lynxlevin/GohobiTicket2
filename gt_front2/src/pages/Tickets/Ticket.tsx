@@ -7,6 +7,7 @@ import { memo, useMemo, useState } from 'react';
 import { ITicket } from '../../contexts/ticket-context';
 import EditDialog from './EditDialog';
 import SpecialStamp from './SpecialStamp';
+import UseDetailDialog from './UseDetailDialog';
 
 interface TicketProps {
     ticket: ITicket;
@@ -16,6 +17,7 @@ interface TicketProps {
 const Ticket = (props: TicketProps) => {
     const { ticket, isGivingRelation } = props;
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [isUseDetailDialogOpen, setIsUseDetailDialogOpen] = useState(false);
 
     const getStatusBadge = useMemo(() => {
         let text;
@@ -58,7 +60,9 @@ const Ticket = (props: TicketProps) => {
                 )}
                 {ticket.use_date !== null && (
                     <CardActions className='use-button'>
-                        <Button variant='contained'>おねがいの内容を見る</Button>
+                        <Button variant='outlined' onClick={() => setIsUseDetailDialogOpen(true)}>
+                            おねがいの内容を見る
+                        </Button>
                     </CardActions>
                 )}
                 {ticket.is_special && <SpecialStamp randKey={ticket.id} />}
@@ -67,6 +71,14 @@ const Ticket = (props: TicketProps) => {
                 <EditDialog
                     onClose={() => {
                         setIsEditDialogOpen(false);
+                    }}
+                    ticket={ticket}
+                />
+            )}
+            {isUseDetailDialogOpen && (
+                <UseDetailDialog
+                    onClose={() => {
+                        setIsUseDetailDialogOpen(false);
                     }}
                     ticket={ticket}
                 />
