@@ -1,8 +1,8 @@
-import { useEffect, useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { UserAPI } from '../apis/UserAPI';
+import { UserRelationAPI } from '../apis/UserRelationAPI';
 import { UserContext } from '../contexts/user-context';
 import { UserRelationContext } from '../contexts/user-relation-context';
-import { UserRelationAPI } from '../apis/UserRelationAPI';
 
 const useUserAPI = () => {
     const userContext = useContext(UserContext);

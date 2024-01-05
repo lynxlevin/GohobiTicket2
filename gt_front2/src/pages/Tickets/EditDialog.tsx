@@ -1,9 +1,9 @@
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, FormControlLabel, TextField, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
-import { TicketAPI } from '../../apis/TicketAPI';
 import { UserRelationAPI } from '../../apis/UserRelationAPI';
 import { ITicket } from '../../contexts/ticket-context';
+import useTicketContext from '../../hooks/useTicketContext';
 
 interface EditDialogProps {
     onClose: () => void;
@@ -16,6 +16,7 @@ const EditDialog = (props: EditDialogProps) => {
     const [isSpecial, setIsSpecial] = useState(false);
     const [isSpecialTicketAvailable, setIsSpecialTicketAvailable] = useState(false);
     const [willFinalize, setWillFinalize] = useState(false);
+    const { updateTicket } = useTicketContext();
 
     // MYMEMO: runs twice on render
     useEffect(() => {
@@ -32,13 +33,9 @@ const EditDialog = (props: EditDialogProps) => {
         checkSpecialTicketAvailability(new Date());
     }, [ticket.gift_date, ticket.user_relation_id]);
 
-    const updateTicket = async () => {
-        const payload = {
-            description,
-        };
-        const res = await TicketAPI.update(ticket.id, payload);
+    const handleSubmit = async () => {
+        await updateTicket(ticket.id, description);
         onClose();
-        // updateTicketList(res.data.ticket);
     };
 
     return (
@@ -63,7 +60,7 @@ const EditDialog = (props: EditDialogProps) => {
                 )}
             </DialogContent>
             <DialogActions sx={{ justifyContent: 'center', paddingBottom: 3 }}>
-                <Button variant='contained' onClick={updateTicket}>
+                <Button variant='contained' onClick={handleSubmit}>
                     修正する
                 </Button>
                 <Button variant='outlined' onClick={onClose} sx={{ color: 'primary.dark' }}>

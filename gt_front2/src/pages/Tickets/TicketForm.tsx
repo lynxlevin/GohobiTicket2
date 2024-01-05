@@ -2,26 +2,25 @@ import { Button, Checkbox, FormControlLabel, FormGroup, TextField } from '@mui/m
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { format } from 'date-fns';
 import { useCallback, useEffect, useState } from 'react';
-import { CreateTicketRequest, TicketAPI } from '../../apis/TicketAPI';
+import { CreateTicketRequest } from '../../apis/TicketAPI';
 import { UserRelationAPI } from '../../apis/UserRelationAPI';
-import { ITicket } from '../../contexts/ticket-context';
+import useTicketContext from '../../hooks/useTicketContext';
 
 interface TicketFormProps {
     userRelationId: number;
-    setAllTickets: React.Dispatch<React.SetStateAction<ITicket[]>>;
-    sortConditions: (a: ITicket, b: ITicket) => 1 | -1;
 }
 
 const TicketForm = (props: TicketFormProps) => {
-    const { userRelationId, setAllTickets, sortConditions } = props;
+    const { userRelationId } = props;
 
     const [giftDate, setGiftDate] = useState<Date>(new Date());
     const [description, setDescription] = useState('');
     const [isSpecial, setIsSpecial] = useState(false);
     const [isSpecialTicketAvailable, setIsSpecialTicketAvailable] = useState(false);
     const [isDraft, setIsDraft] = useState(false);
+    const { createTicket } = useTicketContext();
 
-    const createTicket = async () => {
+    const handleSubmit = async () => {
         const data: CreateTicketRequest = {
             gift_date: format(giftDate, 'yyyy-MM-dd'),
             description,
@@ -29,10 +28,9 @@ const TicketForm = (props: TicketFormProps) => {
             user_relation_id: userRelationId,
         };
         if (isDraft) data.status = 'draft';
-        const ticket = (await TicketAPI.create(data)).data.ticket;
-        setAllTickets((prev: ITicket[]) => {
-            return [ticket, ...prev].sort(sortConditions);
-        });
+
+        createTicket(data);
+
         setGiftDate(new Date());
         setDescription('');
         setIsSpecial(false);
@@ -74,7 +72,7 @@ const TicketForm = (props: TicketFormProps) => {
                 control={<Checkbox checked={isSpecial} onChange={event => setIsSpecial(event.target.checked)} />}
             />
             <FormControlLabel label='下書きにする' control={<Checkbox checked={isDraft} onChange={event => setIsDraft(event.target.checked)} />} />
-            <Button variant={isDraft ? 'outlined' : 'contained'} onClick={createTicket} sx={isDraft ? { color: 'primary.dark' } : {}}>
+            <Button variant={isDraft ? 'outlined' : 'contained'} onClick={handleSubmit} sx={isDraft ? { color: 'primary.dark' } : {}}>
                 {isDraft ? '下書き保存' : 'チケット付与'}
             </Button>
         </FormGroup>
