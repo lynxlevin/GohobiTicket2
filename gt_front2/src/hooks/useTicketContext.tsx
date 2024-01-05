@@ -10,6 +10,7 @@ const useTicketContext = () => {
             const {
                 data: { tickets },
             } = await TicketAPI.list(Number(userRelationId));
+
             ticketContext.setTickets(tickets);
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -33,13 +34,14 @@ const useTicketContext = () => {
                 .filter(ticket => !showOnlyUsed || ticket.use_date !== null)
                 .sort(sortConditions);
         },
-        [ticketContext.tickets],
+        [ticketContext],
     );
 
     const createTicket = useCallback(async (data: CreateTicketRequest) => {
         const {
             data: { ticket },
         } = await TicketAPI.create(data);
+
         ticketContext.setTickets(prev => {
             return [ticket, ...prev].sort(sortConditions);
         });
@@ -50,8 +52,14 @@ const useTicketContext = () => {
         const payload = {
             description,
         };
-        const res = await TicketAPI.update(ticketId, payload);
-        // updateTicketList(res.data.ticket);
+        const { data: ticket } = await TicketAPI.update(ticketId, payload);
+
+        ticketContext.setTickets(prev => {
+            const tickets = [...prev];
+            tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;
+            return tickets;
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return {
