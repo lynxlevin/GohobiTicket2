@@ -1,30 +1,20 @@
-import { useState, useEffect, useContext, useCallback } from 'react';
-import {
-    CardMedia,
-    Grid,
-    FormGroup,
-    FormControlLabel,
-    Checkbox,
-    Box,
-    Typography,
-    Container,
-} from '@mui/material';
+import { Box, CardMedia, Checkbox, Container, FormControlLabel, FormGroup, Grid, Typography } from '@mui/material';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
-import TicketAppBar from './TicketsAppBar';
-import TicketForm from './TicketForm';
-import Ticket from './Ticket';
 import { ITicket, TicketAPI } from '../../apis/TicketAPI';
-import useUserAPI from '../../hooks/useUserAPI';
 import { UserContext } from '../../contexts/user-context';
 import { UserRelationContext } from '../../contexts/user-relation-context';
+import useUserAPI from '../../hooks/useUserAPI';
+import Ticket from './Ticket';
+import TicketForm from './TicketForm';
+import TicketAppBar from './TicketsAppBar';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = () => {
     const userContext = useContext(UserContext);
     const userRelationContext = useContext(UserRelationContext);
 
-    const [availableTickets, setAvailableTickets] = useState<ITicket[]>([]);
-    const [usedTickets, setUsedTickets] = useState<ITicket[]>([]);
+    const [allTickets, setAllTickets] = useState<ITicket[]>([]);
     const [showOnlySpecialTickets, setShowOnlySpecialTickets] = useState(false);
     const [showOnlyUsedTickets, setShowOnlyUsedTickets] = useState(false);
     const { handleLogout } = useUserAPI();
@@ -36,57 +26,77 @@ const Tickets = () => {
 
     const getTickets = useCallback(async () => {
         const res = await TicketAPI.list(userRelationId);
-        setAvailableTickets(res.data.available_tickets);
-        setUsedTickets(res.data.used_tickets);
-    }, [userRelationId])
+        setAllTickets(res.data.tickets);
+    }, [userRelationId]);
+
+    const sortConditions = useCallback((a: ITicket, b: ITicket) => {
+        const aIsNewer = a.gift_date > b.gift_date;
+        const onlyAIsUsed = a.use_date !== null && b.use_date === null;
+        const onlyBIsUsed = a.use_date === null && b.use_date !== null;
+
+        if (onlyAIsUsed) return 1;
+        if (onlyBIsUsed) return -1;
+        return aIsNewer ? -1 : 1;
+    }, []);
+
+    const sortedAllTickets = useMemo(() => {
+        return allTickets
+            .filter(ticket => !showOnlySpecialTickets || ticket.is_special)
+            .filter(ticket => !showOnlyUsedTickets || ticket.use_date !== null)
+            .sort(sortConditions);
+    }, [allTickets, showOnlySpecialTickets, showOnlyUsedTickets, sortConditions]);
 
     useEffect(() => {
         // MYMEMO: Too slow rendering. https://blog.logrocket.com/render-large-lists-react-5-methods-examples/#react-viewport-list
         if (userContext.isLoggedIn === true && userRelationId > 0) getTickets();
     }, [getTickets, userContext.isLoggedIn, userRelationId]);
 
-
     if (userContext.isLoggedIn === false) {
-        return <Navigate to="/login" />;
+        return <Navigate to='/login' />;
     }
-    if (!currentRelation) return <></>
+    if (!currentRelation) return <></>;
     return (
         <>
             <TicketAppBar getTickets={getTickets} handleLogout={handleLogout} currentRelation={currentRelation} />
             <main>
                 <Box sx={{ pt: 8 }}>
-                    <Container maxWidth="sm">
-                        <Typography variant="h5" align="center" color="text.primary" sx={{ mt: 3 }} gutterBottom>
-                        {currentRelation.related_username}に{currentRelation.is_giving_relation ? 'あげる' : 'もらった'}
+                    <Container maxWidth='sm'>
+                        <Typography variant='h5' align='center' color='text.primary' sx={{ mt: 3 }} gutterBottom>
+                            {currentRelation.related_username}に{currentRelation.is_giving_relation ? 'あげる' : 'もらった'}
                         </Typography>
-                        <Typography variant="h4" align="center" color="text.primary" sx={{ fontWeight: 600 }} gutterBottom>
-                        ごほうびチケット
+                        <Typography variant='h4' align='center' color='text.primary' sx={{ fontWeight: 600 }} gutterBottom>
+                            ごほうびチケット
                         </Typography>
-                        <Typography variant="h5" align="center" color="text.primary" gutterBottom>
-                            計{availableTickets.length + usedTickets.length}枚
+                        <Typography variant='h5' align='center' color='text.primary' gutterBottom>
+                            計{allTickets.length}枚
                         </Typography>
                         {/* TODO: チケット画像の配信方法 */}
-                        <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component="div" image={currentRelation.ticket_image} />
-                        {currentRelation.is_giving_relation && <TicketForm userRelationId={userRelationId} setAvailableTickets={setAvailableTickets} />}
+                        <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={currentRelation.ticket_image} />
+                        {currentRelation.is_giving_relation && (
+                            <TicketForm userRelationId={userRelationId} setAllTickets={setAllTickets} sortConditions={sortConditions} />
+                        )}
                         <FormGroup>
-                            <FormControlLabel label="特別チケットのみ表示" control={<Checkbox onChange={event => setShowOnlySpecialTickets(event.target.checked)} />} />
-                            <FormControlLabel label="使用済みチケットのみ表示" control={<Checkbox onChange={event => setShowOnlyUsedTickets(event.target.checked)} />} />
+                            <FormControlLabel
+                                label='特別チケットのみ表示'
+                                control={<Checkbox onChange={event => setShowOnlySpecialTickets(event.target.checked)} />}
+                            />
+                            <FormControlLabel
+                                label='使用済みチケットのみ表示'
+                                control={<Checkbox onChange={event => setShowOnlyUsedTickets(event.target.checked)} />}
+                            />
                         </FormGroup>
                     </Container>
                 </Box>
-                <Container sx={{ py: 8 }} maxWidth="md">
+                <Container sx={{ py: 8 }} maxWidth='md'>
                     <Grid container spacing={4}>
-                        {!showOnlyUsedTickets && availableTickets.filter(ticket => !showOnlySpecialTickets || ticket.is_special).map(ticket => (
-                            <Ticket key={ticket.id} ticket={ticket} isUsed={false} />
-                        ))}
-                        {usedTickets.filter(ticket => !showOnlySpecialTickets || ticket.is_special).map((ticket) => (
-                            <Ticket key={ticket.id} ticket={ticket} isUsed={true} />
+                        {sortedAllTickets.map(ticket => (
+                            <Ticket key={ticket.id} ticket={ticket} />
                         ))}
                     </Grid>
                 </Container>
             </main>
         </>
     );
-}
+};
 
 export default Tickets;

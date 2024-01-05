@@ -1,23 +1,19 @@
-import { useState, useMemo, memo } from 'react';
-import {
-    Badge,
-    Button,
-    IconButton,
-    Card,
-    CardActions,
-    CardContent,
-    Grid,
-    Typography,
-} from '@mui/material';
-import { format } from 'date-fns';
-import SpecialStamp from './SpecialStamp';
-import EditIcon from '@mui/icons-material/Edit';
-import styled from '@emotion/styled';
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import EditIcon from '@mui/icons-material/Edit';
+import { Badge, Button, Card, CardActions, CardContent, Grid, IconButton, Typography } from '@mui/material';
+import { format } from 'date-fns';
+import { memo, useMemo, useState } from 'react';
+import { ITicket } from '../../apis/TicketAPI';
 import EditDialog from './EditDialog';
+import SpecialStamp from './SpecialStamp';
 
-const Ticket = (props: any) => {
-    const { ticket, isUsed } = props;
+interface TicketProps {
+    ticket: ITicket;
+}
+
+const Ticket = (props: TicketProps) => {
+    const { ticket } = props;
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
     const getStatusBadge = useMemo(() => {
@@ -33,8 +29,8 @@ const Ticket = (props: any) => {
                 text = 'DRAFT';
                 break;
         }
-        return <Badge className='badge' color='primary' badgeContent={text} />
-    }, [ticket.status])
+        return <Badge className='badge' color='primary' badgeContent={text} />;
+    }, [ticket.status]);
 
     return (
         <StyledGrid item xs={12} sm={6} md={4} status={ticket.status}>
@@ -42,33 +38,44 @@ const Ticket = (props: any) => {
             <Card className='card'>
                 <CardContent>
                     <div className='relative-div'>
-                        <Typography gutterBottom variant="subtitle1" className='ticket-date'>
+                        <Typography gutterBottom variant='subtitle1' className='ticket-date'>
                             {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
                         </Typography>
-                        {!isUsed && (
-                            <IconButton className="edit-button" onClick={() => setIsEditDialogOpen(true)} size='small'><EditIcon /></IconButton>
+                        {/* TODO */}
+                        {true && (
+                            <IconButton className='edit-button' onClick={() => setIsEditDialogOpen(true)} size='small'>
+                                <EditIcon />
+                            </IconButton>
                         )}
                     </div>
-                    <Typography className='ticket-description'>
-                        {ticket.description}
-                    </Typography>
+                    <Typography className='ticket-description'>{ticket.description}</Typography>
                 </CardContent>
-                {isUsed && (
+                {ticket.use_date === null && (
                     <CardActions className='use-button'>
-                        <Button variant="contained">このチケットを使う</Button>
+                        <Button variant='contained'>このチケットを使う</Button>
                     </CardActions>
                 )}
                 {ticket.is_special && <SpecialStamp randKey={ticket.id} />}
             </Card>
-            {isEditDialogOpen && <EditDialog onClose={() => {setIsEditDialogOpen(false)}} ticket={ticket} />}
+            {isEditDialogOpen && (
+                <EditDialog
+                    onClose={() => {
+                        setIsEditDialogOpen(false);
+                    }}
+                    ticket={ticket}
+                />
+            )}
         </StyledGrid>
     );
-}
+};
 
-const StyledGrid = styled(Grid)((props: {status: string}) => {
-    const draftCardBGC = props.status === 'draft' ? css`
+const StyledGrid = styled(Grid)((props: { status: string }) => {
+    const draftCardBGC =
+        props.status === 'draft'
+            ? css`
         background-color: rgb(245, 245, 245);
-    ` : css``;
+    `
+            : css``;
     return css`
         .badge {
             display: block;
@@ -106,7 +113,7 @@ const StyledGrid = styled(Grid)((props: {status: string}) => {
             justify-content: center;
             margin-bottom: 8px;
         }
-    `
+    `;
 });
 
 export default memo(Ticket);

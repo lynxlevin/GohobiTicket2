@@ -6,14 +6,17 @@
     "linter": {
         "enabled": true,
         "rules": {
-            "recommended": true
+            "recommended": true,
+            "style": {
+                "noNonNullAssertion": "off"
+            }
         }
     },
     "formatter": {
         "enabled": true,
         "formatWithErrors": false,
         "ignore": [],
-        "indentSize": 4,
+        "indentWidth": 4,
         "indentStyle": "space",
         "lineWidth": 160
     },
@@ -23,9 +26,9 @@
             "quoteStyle": "single",
             "jsxQuoteStyle": "single",
             "trailingComma": "all",
-            "semicolons": "asNeeded",
+            "semicolons": "always",
             "arrowParentheses": "asNeeded",
-            "indentSize": 4,
+            "indentWidth": 4,
             "indentStyle": "space",
             "lineWidth": 160,
             "quoteProperties": "asNeeded"

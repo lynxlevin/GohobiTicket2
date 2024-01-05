@@ -1,5 +1,5 @@
-import client from './axios';
 import { AxiosResponse } from 'axios';
+import client from './axios';
 
 export interface ITicket {
     id: number;
@@ -13,8 +13,7 @@ export interface ITicket {
 }
 
 interface ListTicketResponse {
-    available_tickets: ITicket[];
-    used_tickets: ITicket[];
+    tickets: ITicket[];
 }
 
 export interface CreateTicketRequest {
@@ -33,10 +32,10 @@ export const TicketAPI = {
         return await client.get(url);
     },
     create: async (props: CreateTicketRequest) => {
-        return await client.post(TicketAPI.BASE_URL, {ticket: props}, { headers: { 'content-type': 'application/json' } })
+        return await client.post(TicketAPI.BASE_URL, { ticket: props }, { headers: { 'content-type': 'application/json' } });
     },
-    update: async (ticket_id: number, props: {description: string}): Promise<AxiosResponse<ITicket>> => {
+    update: async (ticket_id: number, props: { description: string }): Promise<AxiosResponse<ITicket>> => {
         const url = `${TicketAPI.BASE_URL}${ticket_id}/`;
-        return await client.patch(url, {ticket: props}, { headers: { 'content-type': 'application/json' } })
-    }
+        return await client.patch(url, { ticket: props }, { headers: { 'content-type': 'application/json' } });
+    },
 };
