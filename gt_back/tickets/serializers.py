@@ -22,8 +22,7 @@ class ListTicketQuerySerializer(serializers.Serializer):
 
 
 class ListTicketSerializer(serializers.Serializer):
-    available_tickets = TicketSerializer(many=True)
-    used_tickets = TicketSerializer(many=True)
+    tickets = TicketSerializer(many=True)
 
 
 class TicketCreateSerializer(serializers.Serializer):

@@ -29,25 +29,15 @@ class ListTicket:
 
         is_giving_relation = user_relation.giving_user == user
 
-        available_tickets = self._get_available_tickets(user_relation.id, is_giving_relation)
-        used_tickets = self._get_used_tickets(user_relation.id)
+        tickets = self._get_tickets(user_relation.id, is_giving_relation)
 
-        return {"available_tickets": available_tickets, "used_tickets": used_tickets}
+        return tickets
 
-    def _get_available_tickets(self, user_relation_id: str, is_giving_relation: bool) -> list[Ticket]:
-        qs = Ticket.objects.filter_eq_user_relation_id(user_relation_id).filter_unused_tickets()
+    def _get_tickets(self, user_relation_id: str, is_giving_relation: bool) -> list[Ticket]:
+        qs = Ticket.objects.filter_eq_user_relation_id(user_relation_id)
 
         if not is_giving_relation:
             qs = qs.exclude_eq_status(Ticket.STATUS_DRAFT)
 
-        available_tickets = list(qs.order_by("-gift_date", "-id").all())
-        return available_tickets
-
-    def _get_used_tickets(self, user_reltaion_id: str) -> list[Ticket]:
-        used_tickets = list(
-            Ticket.objects.filter_eq_user_relation_id(user_reltaion_id)
-            .filter_used_tickets()
-            .order_by("-gift_date", "-id")
-            .all()
-        )
-        return used_tickets
+        all_tickets = list(qs.order_by("-gift_date", "-id").all())
+        return all_tickets

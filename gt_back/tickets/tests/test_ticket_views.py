@@ -44,19 +44,16 @@ class TestTicketViews(TestCase):
         self.assertEqual(status.HTTP_200_OK, response.status_code)
 
         body = response.json()
-        available_tickets = body["available_tickets"]
-        for expected, available_ticket in zip(
-            sorted(expected_available_tickets, key=lambda ticket: f"{ticket.gift_date}-{ticket.id}", reverse=True),
-            available_tickets,
+        tickets = body["tickets"]
+        for expected, ticket in zip(
+            sorted(
+                [*expected_available_tickets, *expected_used_tickets],
+                key=lambda ticket: f"{ticket.gift_date}-{ticket.id}",
+                reverse=True,
+            ),
+            tickets,
         ):
-            self.assertEqual(expected.id, available_ticket["id"])
-
-        used_tickets = body["used_tickets"]
-        for expected, used_ticket in zip(
-            sorted(expected_used_tickets, key=lambda ticket: f"{ticket.gift_date}-{ticket.id}", reverse=True),
-            used_tickets,
-        ):
-            self.assertEqual(expected.id, used_ticket["id"])
+            self.assertEqual(expected.id, ticket["id"])
 
     def test_list__giving_relation(self):
         """
@@ -81,19 +78,16 @@ class TestTicketViews(TestCase):
         self.assertEqual(status.HTTP_200_OK, response.status_code)
 
         body = response.json()
-        available_tickets = body["available_tickets"]
-        for expected, available_ticket in zip(
-            sorted(expected_available_tickets, key=lambda ticket: f"{ticket.gift_date}-{ticket.id}", reverse=True),
-            available_tickets,
+        tickets = body["tickets"]
+        for expected, ticket in zip(
+            sorted(
+                [*expected_available_tickets, *expected_used_tickets],
+                key=lambda ticket: f"{ticket.gift_date}-{ticket.id}",
+                reverse=True,
+            ),
+            tickets,
         ):
-            self.assertEqual(expected.id, available_ticket["id"])
-
-        used_tickets = body["used_tickets"]
-        for expected, used_ticket in zip(
-            sorted(expected_used_tickets, key=lambda ticket: f"{ticket.gift_date}-{ticket.id}", reverse=True),
-            used_tickets,
-        ):
-            self.assertEqual(expected.id, used_ticket["id"])
+            self.assertEqual(expected.id, ticket["id"])
 
     def test_create(self):
         """
