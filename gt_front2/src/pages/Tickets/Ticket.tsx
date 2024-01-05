@@ -10,10 +10,11 @@ import SpecialStamp from './SpecialStamp';
 
 interface TicketProps {
     ticket: ITicket;
+    isGivingRelation: boolean;
 }
 
 const Ticket = (props: TicketProps) => {
-    const { ticket } = props;
+    const { ticket, isGivingRelation } = props;
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
     const getStatusBadge = useMemo(() => {
@@ -42,7 +43,7 @@ const Ticket = (props: TicketProps) => {
                             {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
                         </Typography>
                         {/* TODO */}
-                        {true && (
+                        {isGivingRelation && ticket.use_date === null && (
                             <IconButton className='edit-button' onClick={() => setIsEditDialogOpen(true)} size='small'>
                                 <EditIcon />
                             </IconButton>
@@ -50,9 +51,14 @@ const Ticket = (props: TicketProps) => {
                     </div>
                     <Typography className='ticket-description'>{ticket.description}</Typography>
                 </CardContent>
-                {ticket.use_date === null && (
+                {!isGivingRelation && ticket.use_date === null && (
                     <CardActions className='use-button'>
                         <Button variant='contained'>このチケットを使う</Button>
+                    </CardActions>
+                )}
+                {ticket.use_date !== null && (
+                    <CardActions className='use-button'>
+                        <Button variant='contained'>おねがいの内容を見る</Button>
                     </CardActions>
                 )}
                 {ticket.is_special && <SpecialStamp randKey={ticket.id} />}
@@ -106,7 +112,6 @@ const StyledGrid = styled(Grid)((props: { status: string }) => {
 
         .ticket-description {
             white-space: pre-wrap;
-            margin-bottom: 16px;
         }
 
         .use-button {

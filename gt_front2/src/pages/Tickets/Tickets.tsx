@@ -90,7 +90,7 @@ const Tickets = () => {
                 <Container sx={{ py: 8 }} maxWidth='md'>
                     <Grid container spacing={4}>
                         {sortedAllTickets.map(ticket => (
-                            <Ticket key={ticket.id} ticket={ticket} />
+                            <Ticket key={ticket.id} ticket={ticket} isGivingRelation={currentRelation.is_giving_relation} />
                         ))}
                     </Grid>
                 </Container>
