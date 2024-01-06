@@ -39,7 +39,8 @@ const Ticket = (props: TicketProps) => {
 
     return (
         <StyledGrid item xs={12} sm={6} md={4} status={ticket.status}>
-            {ticket.status !== 'read' && getStatusBadge}
+            {isGivingRelation && ticket.status === 'draft' && getStatusBadge}
+            {!isGivingRelation && ticket.status !== 'read' && getStatusBadge}
             <Card className='card'>
                 <CardContent>
                     <div className='relative-div'>
