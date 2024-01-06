@@ -50,7 +50,6 @@ class TicketUseSerializer(serializers.Serializer):
     class TicketUseRequestSerializer(serializers.Serializer):
         use_description = serializers.CharField()
 
-    id = serializers.CharField(read_only=True)
     ticket = TicketUseRequestSerializer(write_only=True)
 
 

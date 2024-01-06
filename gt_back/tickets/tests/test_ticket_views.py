@@ -335,7 +335,7 @@ class TestTicketViews(TestCase):
         response = self._send_put_request(self.user, uri, params)
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
-        self.assertEqual(str(ticket.id), response.data["id"])
+        self.assertEqual(ticket.id, response.data["id"])
 
     def test_read_ticket(self):
         """

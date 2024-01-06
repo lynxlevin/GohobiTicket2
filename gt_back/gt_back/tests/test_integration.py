@@ -50,9 +50,7 @@ class TestTicketViews(TestCase):
         self._make_ticket_read(giving_client, ticket)
         self._use_ticket(receiving_client, ticket)
 
-    def _create_ticket_and_return_id(
-        self, client: Client, giving_relation: UserRelation
-    ):
+    def _create_ticket_and_return_id(self, client: Client, giving_relation: UserRelation):
         params = {
             "ticket": {
                 "gift_date": "2022-08-24",
@@ -76,9 +74,7 @@ class TestTicketViews(TestCase):
 
         return ticket["id"]
 
-    def _list_tickets(
-        self, client: Client, user_relation: UserRelation, expected_ticket: Ticket
-    ):
+    def _list_tickets(self, client: Client, user_relation: UserRelation, expected_ticket: Ticket):
         response = client.get(f"/api/user_relations/{user_relation.id}/")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -90,9 +86,7 @@ class TestTicketViews(TestCase):
             if expected_ticket.gift_date is not None
             else None,
             "use_description": expected_ticket.use_description,
-            "use_date": expected_ticket.use_date.strftime("%Y-%m-%d")
-            if expected_ticket.use_date is not None
-            else None,
+            "use_date": expected_ticket.use_date.strftime("%Y-%m-%d") if expected_ticket.use_date is not None else None,
             "status": expected_ticket.status,
             "is_special": expected_ticket.is_special,
         }
@@ -106,9 +100,7 @@ class TestTicketViews(TestCase):
             }
         }
 
-        response = client.patch(
-            f"/api/tickets/{ticket.id}/", params, content_type="application/json"
-        )
+        response = client.patch(f"/api/tickets/{ticket.id}/", params, content_type="application/json")
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
 
@@ -126,12 +118,10 @@ class TestTicketViews(TestCase):
             }
         }
 
-        response = client.put(
-            f"/api/tickets/{ticket.id}/use/", params, content_type="application/json"
-        )
+        response = client.put(f"/api/tickets/{ticket.id}/use/", params, content_type="application/json")
 
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
-        self.assertEqual(str(ticket.id), response.data["id"])
+        self.assertEqual(ticket.id, response.data["id"])
 
         TestUseTicket()._then_ticket_should_be(ticket)
         TestUseTicket()._then_slack_message_is_sent(ticket, slack_instance_mock)
