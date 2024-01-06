@@ -35,7 +35,7 @@ const EditDialog = (props: EditDialogProps) => {
     }, [ticket.gift_date, ticket.user_relation_id]);
 
     const handleSubmit = async () => {
-        await updateTicket(ticket.id, description);
+        await updateTicket(ticket.id, description, willFinalize);
         onClose();
     };
 

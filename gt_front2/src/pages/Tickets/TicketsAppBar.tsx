@@ -82,22 +82,6 @@ const TicketAppBar = (props: TicketAppBarProps) => {
                             ))}
                         </List>
                         <ListItem>
-                            <ListItemButton disableGutters>
-                                <ListItemIcon>
-                                    <SearchIcon />
-                                </ListItemIcon>
-                                <ListItemText>❌日付で検索</ListItemText>
-                            </ListItemButton>
-                        </ListItem>
-                        <ListItem>
-                            <ListItemButton disableGutters>
-                                <ListItemIcon>
-                                    <HistoryIcon />
-                                </ListItemIcon>
-                                <ListItemText>❌更新履歴</ListItemText>
-                            </ListItemButton>
-                        </ListItem>
-                        <ListItem>
                             <ListItemButton disableGutters onClick={handleLogout}>
                                 <ListItemIcon>
                                     <LogoutIcon />

@@ -44,10 +44,11 @@ const useTicketContext = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const updateTicket = useCallback(async (ticketId: number, description: string) => {
-        const payload = {
+    const updateTicket = useCallback(async (ticketId: number, description: string, willFinalize?: boolean) => {
+        const payload: { description: string; status?: string } = {
             description,
         };
+        if (willFinalize) payload.status = 'unread';
         TicketAPI.update(ticketId, payload).then(({ data: ticket }) => {
             ticketContext.setTickets(prev => {
                 const tickets = [...prev];
