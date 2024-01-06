@@ -3,8 +3,9 @@ import styled from '@emotion/styled';
 import EditIcon from '@mui/icons-material/Edit';
 import { Badge, Button, Card, CardActions, CardContent, Grid, IconButton, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useRef, useState } from 'react';
 import { ITicket } from '../../contexts/ticket-context';
+import useOnScreen from '../../hooks/useOnScreen';
 import EditDialog from './EditDialog';
 import SpecialStamp from './SpecialStamp';
 import UseDetailDialog from './UseDetailDialog';
@@ -20,6 +21,10 @@ const Ticket = (props: TicketProps) => {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isUseDialogOpen, setIsUseDialogOpen] = useState(false);
     const [isUseDetailDialogOpen, setIsUseDetailDialogOpen] = useState(false);
+
+    const ref = useRef(null);
+    const observeVisibility = !isGivingRelation && ticket.status !== 'read';
+    const { isVisible } = useOnScreen(ref, observeVisibility);
 
     const getStatusBadge = useMemo(() => {
         let text;
@@ -54,7 +59,7 @@ const Ticket = (props: TicketProps) => {
                     <Typography className='ticket-description'>{ticket.description}</Typography>
                 </CardContent>
                 {!isGivingRelation && ticket.use_date === null && (
-                    <CardActions className='use-button'>
+                    <CardActions ref={ref} className='use-button'>
                         <Button variant='contained' onClick={() => setIsUseDialogOpen(true)}>
                             このチケットを使う
                         </Button>
