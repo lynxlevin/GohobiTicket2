@@ -36,4 +36,8 @@ export const TicketAPI = {
         const url = `${TicketAPI.BASE_URL}${ticketId}/use/`;
         return await client.put(url, { ticket: props }, { headers: { 'content-type': 'application/json' } });
     },
+    read: async (ticketId: number) => {
+        const url = `${TicketAPI.BASE_URL}${ticketId}/read/`;
+        return await client.put(url, {}, { headers: { 'content-type': 'application/json' } });
+    },
 };

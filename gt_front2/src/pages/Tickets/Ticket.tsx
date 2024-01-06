@@ -3,9 +3,10 @@ import styled from '@emotion/styled';
 import EditIcon from '@mui/icons-material/Edit';
 import { Badge, Button, Card, CardActions, CardContent, Grid, IconButton, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import { memo, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { ITicket } from '../../contexts/ticket-context';
 import useOnScreen from '../../hooks/useOnScreen';
+import useTicketContext from '../../hooks/useTicketContext';
 import EditDialog from './EditDialog';
 import SpecialStamp from './SpecialStamp';
 import UseDetailDialog from './UseDetailDialog';
@@ -21,14 +22,33 @@ const Ticket = (props: TicketProps) => {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isUseDialogOpen, setIsUseDialogOpen] = useState(false);
     const [isUseDetailDialogOpen, setIsUseDetailDialogOpen] = useState(false);
+    const { readTicket } = useTicketContext();
 
     const ref = useRef(null);
     const observeVisibility = !isGivingRelation && ticket.status !== 'read';
     const { isVisible } = useOnScreen(ref, observeVisibility);
+    const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+    const [prevStatus, setPrevStatus] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (isVisible) {
+            setTimer(
+                setTimeout(async () => {
+                    setPrevStatus(ticket.status);
+                    await readTicket(ticket.id);
+                }, 3000),
+            );
+        }
+        if (!isVisible && timer !== null) {
+            clearTimeout(timer);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isVisible]);
 
     const getStatusBadge = useMemo(() => {
         let text;
-        switch (ticket.status) {
+        const status = prevStatus ? prevStatus : ticket.status;
+        switch (status) {
             case 'unread':
                 text = 'NEW!!';
                 break;
@@ -39,8 +59,8 @@ const Ticket = (props: TicketProps) => {
                 text = 'DRAFT';
                 break;
         }
-        return <Badge className='badge' color='primary' badgeContent={text} />;
-    }, [ticket.status]);
+        return <Badge className='badge' color='primary' sx={prevStatus ? { opacity: 0.45, transition: '0.5s', zIndex: 100 } : {}} badgeContent={text} />;
+    }, [prevStatus, ticket.status]);
 
     return (
         <StyledGrid item xs={12} sm={6} md={4} status={ticket.status}>

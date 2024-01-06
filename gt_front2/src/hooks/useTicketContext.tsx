@@ -80,6 +80,16 @@ const useTicketContext = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const readTicket = useCallback(async (ticketId: number) => {
+        TicketAPI.read(ticketId).then(() => {
+            ticketContext.setTickets(prev => {
+                // Intentionally not triggering re-render.
+                prev[prev.findIndex(p => p.id === ticketId)].status = 'read';
+                return prev;
+            });
+        });
+    }, []);
+
     return {
         getTickets,
         getSortedTickets,
@@ -87,6 +97,7 @@ const useTicketContext = () => {
         updateTicket,
         deleteTicket,
         consumeTicket,
+        readTicket,
     };
 };
 
