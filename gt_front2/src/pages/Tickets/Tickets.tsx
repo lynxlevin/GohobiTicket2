@@ -1,4 +1,4 @@
-import { Box, CardMedia, Checkbox, Container, FormControlLabel, FormGroup, Grid, Typography } from '@mui/material';
+import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, Switch, Typography } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { TicketContext } from '../../contexts/ticket-context';
@@ -54,14 +54,8 @@ const Tickets = () => {
                         <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={currentRelation.ticket_image} />
                         {currentRelation.is_giving_relation && <TicketForm userRelationId={userRelationId} />}
                         <FormGroup>
-                            <FormControlLabel
-                                label='特別チケットのみ表示'
-                                control={<Checkbox onChange={event => setShowOnlySpecial(event.target.checked)} />}
-                            />
-                            <FormControlLabel
-                                label='使用済みチケットのみ表示'
-                                control={<Checkbox onChange={event => setShowOnlyUsed(event.target.checked)} />}
-                            />
+                            <FormControlLabel label='特別チケットのみ表示' control={<Switch onChange={event => setShowOnlySpecial(event.target.checked)} />} />
+                            <FormControlLabel label='使用済みチケットのみ表示' control={<Switch onChange={event => setShowOnlyUsed(event.target.checked)} />} />
                         </FormGroup>
                     </Container>
                 </Box>
