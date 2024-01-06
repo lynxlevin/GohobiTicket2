@@ -13,10 +13,10 @@ const UseDetailDialog = (props: UseDetailDialogProps) => {
     return (
         <Dialog open={true} onClose={onClose}>
             <DialogContent>
-                <Typography gutterBottom variant='subtitle1' sx={{ pt: 1, pb: 1 }}>
+                <Typography gutterBottom variant='subtitle1' mt={1} mb={1}>
                     {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
                 </Typography>
-                <Typography sx={{ whiteSpace: 'pre-wrap' }}>{ticket.use_description}</Typography>
+                <Typography whiteSpace='pre-wrap'>{ticket.use_description}</Typography>
             </DialogContent>
         </Dialog>
     );

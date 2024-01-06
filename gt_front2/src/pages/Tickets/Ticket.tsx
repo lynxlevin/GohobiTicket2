@@ -8,6 +8,7 @@ import { ITicket } from '../../contexts/ticket-context';
 import EditDialog from './EditDialog';
 import SpecialStamp from './SpecialStamp';
 import UseDetailDialog from './UseDetailDialog';
+import UseDialog from './UseDialog';
 
 interface TicketProps {
     ticket: ITicket;
@@ -17,6 +18,7 @@ interface TicketProps {
 const Ticket = (props: TicketProps) => {
     const { ticket, isGivingRelation } = props;
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [isUseDialogOpen, setIsUseDialogOpen] = useState(false);
     const [isUseDetailDialogOpen, setIsUseDetailDialogOpen] = useState(false);
 
     const getStatusBadge = useMemo(() => {
@@ -41,12 +43,9 @@ const Ticket = (props: TicketProps) => {
             <Card className='card'>
                 <CardContent>
                     <div className='relative-div'>
-                        <Typography gutterBottom variant='subtitle1' className='ticket-date'>
-                            {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
-                        </Typography>
-                        {/* TODO */}
+                        <Typography className='ticket-date'>{format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}</Typography>
                         {isGivingRelation && ticket.use_date === null && (
-                            <IconButton className='edit-button' onClick={() => setIsEditDialogOpen(true)} size='small'>
+                            <IconButton className='edit-button' onClick={() => setIsEditDialogOpen(true)}>
                                 <EditIcon />
                             </IconButton>
                         )}
@@ -55,7 +54,9 @@ const Ticket = (props: TicketProps) => {
                 </CardContent>
                 {!isGivingRelation && ticket.use_date === null && (
                     <CardActions className='use-button'>
-                        <Button variant='contained'>このチケットを使う</Button>
+                        <Button variant='contained' onClick={() => setIsUseDialogOpen(true)}>
+                            このチケットを使う
+                        </Button>
                     </CardActions>
                 )}
                 {ticket.use_date !== null && (
@@ -71,6 +72,14 @@ const Ticket = (props: TicketProps) => {
                 <EditDialog
                     onClose={() => {
                         setIsEditDialogOpen(false);
+                    }}
+                    ticket={ticket}
+                />
+            )}
+            {isUseDialogOpen && (
+                <UseDialog
+                    onClose={() => {
+                        setIsUseDialogOpen(false);
                     }}
                     ticket={ticket}
                 />
@@ -113,13 +122,13 @@ const StyledGrid = styled(Grid)((props: { status: string }) => {
 
         .ticket-date {
             padding-top: 8px;
-            padding-bottom: 8px;
+            padding-bottom: 16px;
         }
 
         .edit-button {
             position: absolute;
-            top: -5px;
-            right: -4px;
+            top: -8px;
+            right: -7px;
         }
 
         .ticket-description {

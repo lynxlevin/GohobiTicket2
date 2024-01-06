@@ -32,4 +32,8 @@ export const TicketAPI = {
         const url = `${TicketAPI.BASE_URL}${ticketId}/`;
         return await client.delete(url);
     },
+    use: async (ticketId: number, props: { use_description: string }): Promise<AxiosResponse<ITicket>> => {
+        const url = `${TicketAPI.BASE_URL}${ticketId}/use/`;
+        return await client.put(url, { ticket: props }, { headers: { 'content-type': 'application/json' } });
+    },
 };

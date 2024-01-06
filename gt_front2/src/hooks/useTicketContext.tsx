@@ -65,12 +65,27 @@ const useTicketContext = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const consumeTicket = useCallback(async (ticketId: number, useDescription: string) => {
+        const payload = {
+            use_description: useDescription,
+        };
+        TicketAPI.use(ticketId, payload).then(({ data: ticket }) => {
+            ticketContext.setTickets(prev => {
+                const tickets = [...prev];
+                tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;
+                return tickets;
+            });
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     return {
         getTickets,
         getSortedTickets,
         createTicket,
         updateTicket,
         deleteTicket,
+        consumeTicket,
     };
 };
 

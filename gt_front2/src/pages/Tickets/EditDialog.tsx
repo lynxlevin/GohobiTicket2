@@ -21,7 +21,7 @@ const EditDialog = (props: EditDialogProps) => {
 
     // MYMEMO: runs twice on render
     useEffect(() => {
-        const checkSpecialTicketAvailability = async (date: Date) => {
+        const checkSpecialTicketAvailability = async () => {
             const giftDate = new Date(ticket.gift_date);
             const payload = {
                 userRelationId: ticket.user_relation_id,
@@ -31,7 +31,7 @@ const EditDialog = (props: EditDialogProps) => {
             const { data: available } = await UserRelationAPI.checkSpecialTicketAvailability(payload);
             setIsSpecialTicketAvailable(available);
         };
-        checkSpecialTicketAvailability(new Date());
+        checkSpecialTicketAvailability();
     }, [ticket.gift_date, ticket.user_relation_id]);
 
     const handleSubmit = async () => {
@@ -43,7 +43,7 @@ const EditDialog = (props: EditDialogProps) => {
         <Dialog open={true} onClose={onClose}>
             <DialogContent>
                 <FormControlLabel label='削除' control={<Checkbox checked={willDelete} onChange={event => setWillDelete(event.target.checked)} />} />
-                <Typography gutterBottom variant='subtitle1' className='ticket-date'>
+                <Typography gutterBottom variant='subtitle1'>
                     {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
                 </Typography>
                 <TextField value={description} onChange={event => setDescription(event.target.value)} label='内容' multiline fullWidth minRows={5} />
