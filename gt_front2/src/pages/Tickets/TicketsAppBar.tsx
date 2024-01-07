@@ -48,7 +48,6 @@ const TicketAppBar = (props: TicketAppBarProps) => {
                 <IconButton onClick={() => getTickets(currentRelation.id)} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
                     <RefreshIcon />
                 </IconButton>
-                {/* TODO */}
                 <IconButton onClick={() => navigate('/')} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
                     <BookIcon />
                 </IconButton>

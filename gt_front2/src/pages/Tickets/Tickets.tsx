@@ -26,8 +26,9 @@ const Tickets = () => {
 
     const [searchParams] = useSearchParams();
     const userRelationId = Number(searchParams.get('user_relation_id'));
-
     const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId)!;
+
+    const imageSrc = `ticket_images/${currentRelation.ticket_image}`;
 
     useEffect(() => {
         // MYMEMO: Too slow rendering. https://blog.logrocket.com/render-large-lists-react-5-methods-examples/#react-viewport-list
@@ -53,8 +54,7 @@ const Tickets = () => {
                         <Typography variant='h5' align='center' color='text.primary' gutterBottom>
                             計{ticketContext.tickets.length}枚
                         </Typography>
-                        {/* TODO: チケット画像の配信方法 publicにgitignore指定して、そこに画像を保存する。backには一応gitのまま残しておく。ちゃんとicloudなりできたら、backの画像も消す */}
-                        <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={currentRelation.ticket_image} />
+                        <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={imageSrc} />
                         {currentRelation.is_giving_relation && <TicketForm userRelationId={userRelationId} />}
                         <FormGroup>
                             <FormControlLabel label='特別チケットのみ表示' control={<Switch onChange={event => setShowOnlySpecial(event.target.checked)} />} />
@@ -88,7 +88,7 @@ const Tickets = () => {
                         <KeyboardDoubleArrowDownIcon />
                     </ToLastAvailableTicketButton>
                 )}
-                <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={currentRelation.ticket_image} alt='mini-ticket' />
+                <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={imageSrc} alt='mini-ticket' />
             </main>
         </>
     );
