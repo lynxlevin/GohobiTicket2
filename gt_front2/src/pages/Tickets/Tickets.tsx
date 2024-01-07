@@ -1,3 +1,4 @@
+import styled from '@emotion/styled';
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, Switch, Typography } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
@@ -50,7 +51,7 @@ const Tickets = () => {
                         <Typography variant='h5' align='center' color='text.primary' gutterBottom>
                             計{ticketContext.tickets.length}枚
                         </Typography>
-                        {/* TODO: チケット画像の配信方法 */}
+                        {/* TODO: チケット画像の配信方法 publicにgitignore指定して、そこに画像を保存する。backには一応gitのまま残しておく。ちゃんとicloudなりできたら、backの画像も消す */}
                         <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={currentRelation.ticket_image} />
                         {currentRelation.is_giving_relation && <TicketForm userRelationId={userRelationId} />}
                         <FormGroup>
@@ -66,9 +67,24 @@ const Tickets = () => {
                         ))}
                     </Grid>
                 </Container>
+                <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={currentRelation.ticket_image} alt='mini-ticket' />
             </main>
         </>
     );
 };
+
+const MiniTicket = styled.img`
+    height: 50px;
+    position: fixed;
+    bottom: 13px;
+    right: 13px;
+    box-shadow: 2px 2px 7px rgba(18, 47, 61, 0.5), -5px -5px 15px rgba(248, 253, 255, 0.9), inset 5px 5px 15px transparent, inset -5px -5px 15px transparent;
+    z-index: 100;
+
+    &:hover {
+        opacity: 0.95;
+        filter: brightness(105%);
+    }
+`;
 
 export default Tickets;
