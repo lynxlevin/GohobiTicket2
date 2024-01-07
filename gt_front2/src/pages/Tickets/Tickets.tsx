@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Switch, Typography } from '@mui/material';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { TicketContext } from '../../contexts/ticket-context';
 import { UserContext } from '../../contexts/user-context';
@@ -28,7 +28,10 @@ const Tickets = () => {
     const userRelationId = Number(searchParams.get('user_relation_id'));
     const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId)!;
 
-    const imageSrc = `ticket_images/${currentRelation.ticket_image}`;
+    const imageSrc = useMemo(() => {
+        if (!currentRelation) return '';
+        return `ticket_images/${currentRelation.ticket_image}`;
+    }, [currentRelation]);
 
     useEffect(() => {
         // MYMEMO: Too slow rendering. https://blog.logrocket.com/render-large-lists-react-5-methods-examples/#react-viewport-list
