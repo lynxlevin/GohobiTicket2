@@ -1,11 +1,9 @@
 import BookIcon from '@mui/icons-material/Book';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import HistoryIcon from '@mui/icons-material/History';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import SearchIcon from '@mui/icons-material/Search';
 import WifiProtectedSetupIcon from '@mui/icons-material/WifiProtectedSetup';
 import { AppBar, Button, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import { useContext, useState } from 'react';
@@ -24,7 +22,7 @@ const TicketAppBar = (props: TicketAppBarProps) => {
     const userRelationContext = useContext(UserRelationContext);
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
-    const { getTickets } = useTicketContext();
+    const { getTickets, clearTickets } = useTicketContext();
 
     const otherRelations = userRelationContext.userRelations.filter(
         (relation, index, self) =>
@@ -36,6 +34,7 @@ const TicketAppBar = (props: TicketAppBarProps) => {
             <Toolbar>
                 <Button
                     onClick={() => {
+                        clearTickets();
                         navigate(`/tickets?user_relation_id=${currentRelation.corresponding_relation_id}`);
                         window.scroll({ top: 0 });
                     }}
@@ -70,6 +69,7 @@ const TicketAppBar = (props: TicketAppBarProps) => {
                                 <ListItem key={relation.id} sx={{ pl: 4 }}>
                                     <ListItemButton
                                         onClick={() => {
+                                            clearTickets();
                                             navigate(`/tickets?user_relation_id=${relation.id}`);
                                             setTopBarDrawerOpen(false);
                                             window.scroll({ top: 0 });

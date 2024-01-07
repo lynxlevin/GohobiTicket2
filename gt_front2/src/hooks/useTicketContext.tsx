@@ -96,6 +96,12 @@ const useTicketContext = () => {
                 return prev;
             });
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const clearTickets = useCallback(() => {
+        ticketContext.setTickets([]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return {
@@ -107,6 +113,7 @@ const useTicketContext = () => {
         deleteTicket,
         consumeTicket,
         readTicket,
+        clearTickets,
     };
 };
 
