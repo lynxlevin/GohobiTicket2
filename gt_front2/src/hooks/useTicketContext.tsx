@@ -1,4 +1,4 @@
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { CreateTicketRequest, TicketAPI } from '../apis/TicketAPI';
 import { ITicket, TicketContext } from '../contexts/ticket-context';
 
@@ -34,6 +34,14 @@ const useTicketContext = () => {
         },
         [ticketContext],
     );
+
+    const lastAvailableTicketId = useMemo(() => {
+        if (ticketContext.tickets.length === 0) return 0;
+        return ticketContext.tickets
+            .filter(ticket => ticket.use_date === null)
+            .sort(sortConditions)
+            .slice(-1)[0].id;
+    }, [ticketContext.tickets]);
 
     const createTicket = useCallback(async (data: CreateTicketRequest) => {
         TicketAPI.create(data).then(({ data: { ticket } }) => {
@@ -93,6 +101,7 @@ const useTicketContext = () => {
     return {
         getTickets,
         getSortedTickets,
+        lastAvailableTicketId,
         createTicket,
         updateTicket,
         deleteTicket,

@@ -15,10 +15,11 @@ import UseDialog from './UseDialog';
 interface TicketProps {
     ticket: ITicket;
     isGivingRelation: boolean;
+    lastAvailableTicketRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 const Ticket = (props: TicketProps) => {
-    const { ticket, isGivingRelation } = props;
+    const { ticket, isGivingRelation, lastAvailableTicketRef } = props;
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isUseDialogOpen, setIsUseDialogOpen] = useState(false);
     const [isUseDetailDialogOpen, setIsUseDetailDialogOpen] = useState(false);
@@ -63,7 +64,7 @@ const Ticket = (props: TicketProps) => {
     }, [prevStatus, ticket.status]);
 
     return (
-        <StyledGrid item xs={12} sm={6} md={4} status={ticket.status}>
+        <StyledGrid item xs={12} sm={6} md={4} status={ticket.status} ref={lastAvailableTicketRef}>
             {isGivingRelation && ticket.status === 'draft' && getStatusBadge}
             {!isGivingRelation && ticket.status !== 'read' && getStatusBadge}
             <Card className='card'>

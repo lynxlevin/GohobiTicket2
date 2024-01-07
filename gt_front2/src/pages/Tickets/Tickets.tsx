@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
-import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, Switch, Typography } from '@mui/material';
-import { useContext, useEffect, useState } from 'react';
+import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
+import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Switch, Typography } from '@mui/material';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { TicketContext } from '../../contexts/ticket-context';
 import { UserContext } from '../../contexts/user-context';
@@ -16,11 +17,12 @@ const Tickets = () => {
     const userContext = useContext(UserContext);
     const userRelationContext = useContext(UserRelationContext);
     const ticketContext = useContext(TicketContext);
+    const lastAvailableTicketRef = useRef<HTMLDivElement | null>(null);
 
     const [showOnlySpecial, setShowOnlySpecial] = useState(false);
     const [showOnlyUsed, setShowOnlyUsed] = useState(false);
     const { handleLogout } = useUserAPI();
-    const { getTickets, getSortedTickets } = useTicketContext();
+    const { getTickets, getSortedTickets, lastAvailableTicketId } = useTicketContext();
 
     const [searchParams] = useSearchParams();
     const userRelationId = Number(searchParams.get('user_relation_id'));
@@ -62,16 +64,48 @@ const Tickets = () => {
                 </Box>
                 <Container sx={{ py: 8 }} maxWidth='md'>
                     <Grid container spacing={4}>
-                        {getSortedTickets({ showOnlySpecial, showOnlyUsed }).map(ticket => (
-                            <Ticket key={ticket.id} ticket={ticket} isGivingRelation={currentRelation.is_giving_relation} />
-                        ))}
+                        {getSortedTickets({ showOnlySpecial, showOnlyUsed }).map(ticket => {
+                            if (ticket.id === lastAvailableTicketId) {
+                                return (
+                                    <Ticket
+                                        key={ticket.id}
+                                        lastAvailableTicketRef={lastAvailableTicketRef}
+                                        ticket={ticket}
+                                        isGivingRelation={currentRelation.is_giving_relation}
+                                    />
+                                );
+                            }
+                            return <Ticket key={ticket.id} ticket={ticket} isGivingRelation={currentRelation.is_giving_relation} />;
+                        })}
                     </Grid>
                 </Container>
+                {!showOnlyUsed && (
+                    <ToLastAvailableTicketButton
+                        onClick={() => {
+                            if (lastAvailableTicketRef.current !== null) window.scrollTo({ top: lastAvailableTicketRef.current.offsetTop, behavior: 'smooth' });
+                        }}
+                    >
+                        <KeyboardDoubleArrowDownIcon />
+                    </ToLastAvailableTicketButton>
+                )}
                 <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={currentRelation.ticket_image} alt='mini-ticket' />
             </main>
         </>
     );
 };
+
+const ToLastAvailableTicketButton = styled(IconButton)`
+    font-size: 30px;
+    background: white !important;
+    border-radius: 999px;
+    position: fixed;
+    left: 16px;
+    bottom: 20px;
+    border: 2px solid #ddd;
+    width: 40px;
+    height: 40px;
+    z-index: 100;
+`;
 
 const MiniTicket = styled.img`
     height: 50px;
