@@ -19,7 +19,6 @@ const EditDialog = (props: EditDialogProps) => {
     const [willDelete, setWillDelete] = useState(false);
     const { updateTicket, deleteTicket } = useTicketContext();
 
-    // MYMEMO: runs twice on render
     useEffect(() => {
         const checkSpecialTicketAvailability = async () => {
             const giftDate = new Date(ticket.gift_date);

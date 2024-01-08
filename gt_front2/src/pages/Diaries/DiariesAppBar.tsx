@@ -22,6 +22,7 @@ const DiariesAppBar = (props: DiariesAppBarProps) => {
     return (
         <AppBar position='fixed' sx={{ bgcolor: 'primary.light' }}>
             <Toolbar>
+                {/* TODO TagListPage */}
                 {/* <IconButton onClick={() => navigate('/')} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
                     <SellIcon />
                 </IconButton> */}

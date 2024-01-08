@@ -47,7 +47,8 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
                 <IconButton onClick={() => getTickets(currentRelation.id)} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
                     <RefreshIcon />
                 </IconButton>
-                <IconButton onClick={() => navigate(`/diaries?user_relation_id=${currentRelation.id}`)} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
+                {/* TODO: dynamic user_relation_id */}
+                <IconButton onClick={() => navigate('/diaries?user_relation_id=1')} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
                     <BookIcon />
                 </IconButton>
                 <IconButton onClick={() => setTopBarDrawerOpen(true)}>

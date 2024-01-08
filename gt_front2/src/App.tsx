@@ -17,10 +17,11 @@ import Tickets from './pages/Tickets';
 const theme = createTheme({
     palette: {
         primary: {
-            main: '#3dd4cf',
+            main: '#60C8C7',
+            // main: '#47BFBE',  // Logo blue-green color.
         },
         secondary: {
-            main: '#009ef1',
+            main: '#009ef1', // Logo blue color.
         },
     },
 });

@@ -57,7 +57,6 @@ const TicketForm = (props: TicketFormProps) => {
         }
     };
 
-    // MYMEMO: runs twice on render
     useEffect(() => {
         checkSpecialTicketAvailability(new Date());
     }, [checkSpecialTicketAvailability]);
