@@ -159,6 +159,7 @@ const StyledGrid = styled(Grid)((props: { status: string }) => {
         }
 
         .ticket-description {
+            text-align: start;
             white-space: pre-wrap;
         }
 

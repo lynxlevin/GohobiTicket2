@@ -65,7 +65,7 @@ const Tickets = () => {
                         </FormGroup>
                     </Container>
                 </Box>
-                <Container sx={{ py: 8 }} maxWidth='md'>
+                <Container sx={{ pt: 4 }} maxWidth='md'>
                     <Grid container spacing={4}>
                         {getSortedTickets({ showOnlySpecial, showOnlyUsed }).map(ticket => {
                             if (ticket.id === lastAvailableTicketId) {

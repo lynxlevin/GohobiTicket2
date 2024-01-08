@@ -20,7 +20,7 @@ const UseDialog = (props: UseDialogProps) => {
     };
 
     return (
-        <Dialog open={true} onClose={onClose}>
+        <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>
                 <Typography gutterBottom variant='subtitle1'>
                     {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
@@ -33,9 +33,12 @@ const UseDialog = (props: UseDialogProps) => {
                 </Typography>
                 <TextField value={useDescription} onChange={event => setUseDescription(event.target.value)} multiline fullWidth minRows={5} />
             </DialogContent>
-            <DialogActions sx={{ justifyContent: 'center', paddingBottom: 3 }}>
+            <DialogActions sx={{ justifyContent: 'center', py: 2 }}>
                 <Button variant='contained' onClick={handleSubmit}>
                     チケットを使う
+                </Button>
+                <Button variant='outlined' onClick={onClose} sx={{ color: 'primary.dark' }}>
+                    キャンセル
                 </Button>
             </DialogActions>
         </Dialog>

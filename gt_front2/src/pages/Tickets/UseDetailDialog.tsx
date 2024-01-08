@@ -11,7 +11,7 @@ const UseDetailDialog = (props: UseDetailDialogProps) => {
     const { onClose, ticket } = props;
 
     return (
-        <Dialog open={true} onClose={onClose}>
+        <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>
                 <Typography gutterBottom variant='subtitle1' mt={1} mb={1}>
                     {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}

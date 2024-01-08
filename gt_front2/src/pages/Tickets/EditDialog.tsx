@@ -40,7 +40,7 @@ const EditDialog = (props: EditDialogProps) => {
     };
 
     return (
-        <Dialog open={true} onClose={onClose}>
+        <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>
                 <FormControlLabel label='削除' control={<Checkbox checked={willDelete} onChange={event => setWillDelete(event.target.checked)} />} />
                 <Typography gutterBottom variant='subtitle1'>
@@ -61,7 +61,7 @@ const EditDialog = (props: EditDialogProps) => {
                     </>
                 )}
             </DialogContent>
-            <DialogActions sx={{ justifyContent: 'center', paddingBottom: 3 }}>
+            <DialogActions sx={{ justifyContent: 'center', py: 2 }}>
                 {willDelete ? (
                     <Button variant='contained' color='error' onClick={() => deleteTicket(ticket.id)}>
                         削除する

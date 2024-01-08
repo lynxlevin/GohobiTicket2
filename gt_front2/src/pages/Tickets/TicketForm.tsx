@@ -63,19 +63,25 @@ const TicketForm = (props: TicketFormProps) => {
     }, [checkSpecialTicketAvailability]);
 
     return (
-        <FormGroup sx={{ mt: 3, mb: 3 }}>
-            <MobileDatePicker label='あげる日' value={giftDate} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{ mb: 1 }} />
-            <TextField value={description} onChange={event => setDescription(event.target.value)} label='内容' multiline minRows={5} />
-            <FormControlLabel
-                disabled={!isSpecialTicketAvailable}
-                label='特別チケットにする'
-                control={<Checkbox checked={isSpecial} onChange={event => setIsSpecial(event.target.checked)} />}
-            />
-            <FormControlLabel label='下書きにする' control={<Checkbox checked={isDraft} onChange={event => setIsDraft(event.target.checked)} />} />
-            <Button variant={isDraft ? 'outlined' : 'contained'} onClick={handleSubmit} sx={isDraft ? { color: 'primary.dark' } : {}}>
+        <>
+            <FormGroup sx={{ mt: 3 }}>
+                <MobileDatePicker label='あげる日' value={giftDate} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{ mb: 1 }} />
+                <TextField value={description} onChange={event => setDescription(event.target.value)} label='内容' multiline minRows={5} />
+                <FormControlLabel
+                    disabled={!isSpecialTicketAvailable}
+                    label='特別チケットにする'
+                    control={<Checkbox checked={isSpecial} onChange={event => setIsSpecial(event.target.checked)} />}
+                />
+                <FormControlLabel label='下書きにする' control={<Checkbox checked={isDraft} onChange={event => setIsDraft(event.target.checked)} />} />
+            </FormGroup>
+            <Button
+                variant={isDraft ? 'outlined' : 'contained'}
+                onClick={handleSubmit}
+                sx={isDraft ? { color: 'primary.dark', mt: 2, mb: 2 } : { mt: 2, mb: 2 }}
+            >
                 {isDraft ? '下書き保存' : 'チケット付与'}
             </Button>
-        </FormGroup>
+        </>
     );
 };
 
