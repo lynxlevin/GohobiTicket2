@@ -4,15 +4,18 @@ import { Box, Card, CardContent, Chip, Grid, IconButton, Typography } from '@mui
 import { format } from 'date-fns';
 import { memo, useState } from 'react';
 import { IDiary } from '../../apis/DiaryAPI';
-import EditDialog from './EditDialog';
+import { IDiaryTag } from '../../apis/DiaryTagAPI';
+import EditDiaryDialog from './EditDiaryDialog';
 
 interface DiaryProps {
     diary: IDiary;
+    tagMaster: IDiaryTag[] | null;
+    setDiaries: React.Dispatch<React.SetStateAction<IDiary[]>>;
 }
 
 const Diary = (props: DiaryProps) => {
-    const { diary } = props;
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const { diary, tagMaster, setDiaries } = props;
+    const [isEditDiaryDialogOpen, setIsEditDiaryDialogOpen] = useState(false);
 
     return (
         <StyledGrid item xs={12} sm={6} md={4}>
@@ -20,7 +23,7 @@ const Diary = (props: DiaryProps) => {
                 <CardContent>
                     <div className='relative-div'>
                         <Typography className='diary-date'>{format(new Date(diary.date), 'yyyy-MM-dd E')}</Typography>
-                        <IconButton className='edit-button' onClick={() => setIsEditDialogOpen(true)}>
+                        <IconButton className='edit-button' onClick={() => setIsEditDiaryDialogOpen(true)}>
                             <EditIcon />
                         </IconButton>
                     </div>
@@ -32,14 +35,16 @@ const Diary = (props: DiaryProps) => {
                     <Typography className='diary-description'>{diary.entry}</Typography>
                 </CardContent>
             </Card>
-            {/* {isEditDialogOpen && (
-                <EditDialog
+            {isEditDiaryDialogOpen && (
+                <EditDiaryDialog
                     onClose={() => {
-                        setIsEditDialogOpen(false);
+                        setIsEditDiaryDialogOpen(false);
                     }}
-                    ticket={diary}
+                    diary={diary}
+                    tagMaster={tagMaster}
+                    setDiaries={setDiaries}
                 />
-            )} */}
+            )}
         </StyledGrid>
     );
 };

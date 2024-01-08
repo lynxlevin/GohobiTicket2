@@ -1,38 +1,51 @@
-import { Box, Button, Chip, FormControl, FormGroup, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from '@mui/material';
+import {
+    Box,
+    Button,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    SelectChangeEvent,
+    TextField,
+} from '@mui/material';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { format } from 'date-fns';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DiaryAPI, IDiary } from '../../apis/DiaryAPI';
 import { IDiaryTag } from '../../apis/DiaryTagAPI';
 
-interface DiaryFormProps {
-    userRelationId: number;
-    setDiaries: React.Dispatch<React.SetStateAction<IDiary[]>>;
+interface EditDiaryDialogProps {
+    onClose: () => void;
+    diary: IDiary;
     tagMaster: IDiaryTag[] | null;
+    setDiaries: React.Dispatch<React.SetStateAction<IDiary[]>>;
 }
 
-const DiaryForm = (props: DiaryFormProps) => {
-    const { userRelationId, setDiaries, tagMaster } = props;
+const EditDiaryDialog = (props: EditDiaryDialogProps) => {
+    const { onClose, diary, tagMaster, setDiaries } = props;
 
-    const [date, setDate] = useState<Date>(new Date());
-    const [tags, setTags] = useState<IDiaryTag[]>([]);
-    const [entry, setEntry] = useState('');
+    const [date, setDate] = useState<Date>(new Date(diary.date));
+    const [tags, setTags] = useState<IDiaryTag[]>(diary.tags);
+    const [entry, setEntry] = useState(diary.entry);
 
     const handleSubmit = async () => {
         const data = {
             entry,
             date: format(date, 'yyyy-MM-dd'),
             tag_ids: tags.map(tag => tag.id),
-            user_relation_id: userRelationId,
         };
 
-        DiaryAPI.create(data).then(({ data: diary }) => {
-            setDate(new Date());
-            setEntry('');
-            setTags([]);
+        DiaryAPI.update(diary.id, data).then(({ data: diary }) => {
             setDiaries(prev => {
-                return [diary, ...prev];
+                const diaries = [...prev];
+                diaries[diaries.findIndex(p => p.id === diary.id)] = diary;
+                return diaries;
             });
+            onClose();
         });
     };
 
@@ -43,8 +56,8 @@ const DiaryForm = (props: DiaryFormProps) => {
     };
 
     return (
-        <>
-            <FormGroup sx={{ mt: 3 }}>
+        <Dialog open={true} onClose={onClose} fullWidth>
+            <DialogContent>
                 <MobileDatePicker label='日付' value={date} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{ mb: 1 }} />
                 {tagMaster !== null && (
                     <FormControl sx={{ width: '100%', mb: 1 }}>
@@ -83,13 +96,18 @@ const DiaryForm = (props: DiaryFormProps) => {
                         </Select>
                     </FormControl>
                 )}
-                <TextField value={entry} onChange={event => setEntry(event.target.value)} label='内容' multiline minRows={5} />
-            </FormGroup>
-            <Button variant='contained' onClick={handleSubmit} sx={{ mt: 2, mb: 2 }}>
-                保存
-            </Button>
-        </>
+                <TextField value={entry} onChange={event => setEntry(event.target.value)} label='内容' multiline fullWidth minRows={5} />
+            </DialogContent>
+            <DialogActions sx={{ justifyContent: 'center', py: 2 }}>
+                <Button variant='contained' onClick={handleSubmit}>
+                    修正する
+                </Button>
+                <Button variant='outlined' onClick={onClose} sx={{ color: 'primary.dark' }}>
+                    キャンセル
+                </Button>
+            </DialogActions>
+        </Dialog>
     );
 };
 
-export default DiaryForm;
+export default EditDiaryDialog;

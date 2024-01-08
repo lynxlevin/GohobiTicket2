@@ -22,14 +22,20 @@ const DiariesAppBar = (props: DiariesAppBarProps) => {
     return (
         <AppBar position='fixed' sx={{ bgcolor: 'primary.light' }}>
             <Toolbar>
-                <IconButton onClick={() => navigate('/')} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
+                {/* <IconButton onClick={() => navigate('/')} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
                     <SellIcon />
-                </IconButton>
+                </IconButton> */}
                 <div style={{ flexGrow: 1 }} />
                 <IconButton onClick={refreshDiaries} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
                     <RefreshIcon />
                 </IconButton>
-                <IconButton onClick={() => navigate(`/tickets?user_relation_id=${userRelationId}`)} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
+                <IconButton
+                    onClick={() => {
+                        window.scroll({ top: 0 });
+                        navigate(`/tickets?user_relation_id=${userRelationId}`);
+                    }}
+                    sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}
+                >
                     <RedeemIcon />
                 </IconButton>
                 <IconButton onClick={() => setTopBarDrawerOpen(true)}>

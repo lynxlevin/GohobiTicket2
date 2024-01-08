@@ -20,6 +20,12 @@ interface CreateDiaryRequest {
     user_relation_id: number;
 }
 
+interface UpdateDiaryRequest {
+    entry: string;
+    date: string;
+    tag_ids: string[];
+}
+
 export const DiaryAPI = {
     BASE_URL: '/api/diaries/',
 
@@ -29,5 +35,9 @@ export const DiaryAPI = {
     },
     create: async (props: CreateDiaryRequest): Promise<AxiosResponse<IDiary>> => {
         return await client.post(DiaryAPI.BASE_URL, props, { headers: { 'content-type': 'application/json' } });
+    },
+    update: async (diaryId: string, props: UpdateDiaryRequest): Promise<AxiosResponse<IDiary>> => {
+        const url = `${DiaryAPI.BASE_URL}${diaryId}/`;
+        return await client.put(url, props, { headers: { 'content-type': 'application/json' } });
     },
 };

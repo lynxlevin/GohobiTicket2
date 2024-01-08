@@ -3,6 +3,7 @@ import { Box, Container, Grid, Typography } from '@mui/material';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { DiaryAPI, IDiary } from '../../apis/DiaryAPI';
+import { DiaryTagAPI, IDiaryTag } from '../../apis/DiaryTagAPI';
 import { UserContext } from '../../contexts/user-context';
 import { UserRelationContext } from '../../contexts/user-relation-context';
 import useUserAPI from '../../hooks/useUserAPI';
@@ -16,6 +17,7 @@ const Diaries = () => {
     const userRelationContext = useContext(UserRelationContext);
 
     const [diaries, setDiaries] = useState<IDiary[]>([]);
+    const [tagMaster, setTagMaster] = useState<IDiaryTag[] | null>(null);
     const { handleLogout } = useUserAPI();
 
     const [searchParams] = useSearchParams();
@@ -31,7 +33,11 @@ const Diaries = () => {
     useEffect(() => {
         if (userContext.isLoggedIn !== true && userRelationId < 1) return;
         getDiaries();
-    }, [getDiaries, userContext.isLoggedIn, userRelationId]);
+        if (tagMaster !== null) return;
+        DiaryTagAPI.list(userRelationId).then(({ data: { diary_tags } }) => {
+            setTagMaster(diary_tags);
+        });
+    }, [getDiaries, tagMaster, userContext.isLoggedIn, userRelationId]);
 
     if (userContext.isLoggedIn === false) {
         return <Navigate to='/login' />;
@@ -46,13 +52,13 @@ const Diaries = () => {
                         <Typography variant='h4' align='center' color='text.primary' sx={{ mt: 3, fontWeight: 600 }} gutterBottom>
                             {currentRelation.related_username}との日記
                         </Typography>
-                        <DiaryForm userRelationId={userRelationId} setDiaries={setDiaries} />
+                        <DiaryForm userRelationId={userRelationId} setDiaries={setDiaries} tagMaster={tagMaster} />
                     </Container>
                 </Box>
-                <Container sx={{ pt: 2 }} maxWidth='md'>
+                <Container sx={{ pt: 2, pb: 4 }} maxWidth='md'>
                     <Grid container spacing={4}>
                         {diaries.map(diary => (
-                            <Diary key={diary.id} diary={diary} />
+                            <Diary key={diary.id} diary={diary} tagMaster={tagMaster} setDiaries={setDiaries} />
                         ))}
                     </Grid>
                 </Container>
