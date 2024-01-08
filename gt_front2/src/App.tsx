@@ -10,8 +10,9 @@ import { TicketContext } from './contexts/ticket-context';
 import { UserContext } from './contexts/user-context';
 import { UserRelationContext } from './contexts/user-relation-context';
 import { IUserRelation } from './contexts/user-relation-context';
+import Diaries from './pages/Diaries';
 import Login from './pages/Login';
-import Tickets from './pages/Tickets/Tickets';
+import Tickets from './pages/Tickets';
 
 const theme = createTheme({
     palette: {
@@ -45,6 +46,7 @@ function App() {
                                     <Route path='/' element={<Login />} />
                                     <Route path='/login' element={<Login />} />
                                     <Route path='/tickets' element={<Tickets />} />
+                                    <Route path='/diaries' element={<Diaries />} />
                                 </Routes>
                             </LocalizationProvider>
                         </ThemeProvider>

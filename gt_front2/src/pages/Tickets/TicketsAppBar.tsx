@@ -11,12 +11,12 @@ import { useNavigate } from 'react-router-dom';
 import { IUserRelation, UserRelationContext } from '../../contexts/user-relation-context';
 import useTicketContext from '../../hooks/useTicketContext';
 
-interface TicketAppBarProps {
+interface TicketsAppBarProps {
     handleLogout: () => Promise<void>;
     currentRelation: IUserRelation;
 }
 
-const TicketAppBar = (props: TicketAppBarProps) => {
+const TicketsAppBar = (props: TicketsAppBarProps) => {
     const { handleLogout, currentRelation } = props;
 
     const userRelationContext = useContext(UserRelationContext);
@@ -47,7 +47,7 @@ const TicketAppBar = (props: TicketAppBarProps) => {
                 <IconButton onClick={() => getTickets(currentRelation.id)} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
                     <RefreshIcon />
                 </IconButton>
-                <IconButton onClick={() => navigate('/')} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
+                <IconButton onClick={() => navigate(`/diaries?user_relation_id=${currentRelation.id}`)} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
                     <BookIcon />
                 </IconButton>
                 <IconButton onClick={() => setTopBarDrawerOpen(true)}>
@@ -94,4 +94,4 @@ const TicketAppBar = (props: TicketAppBarProps) => {
         </AppBar>
     );
 };
-export default TicketAppBar;
+export default TicketsAppBar;

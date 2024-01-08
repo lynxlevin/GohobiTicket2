@@ -10,7 +10,7 @@ import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
 import Ticket from './Ticket';
 import TicketForm from './TicketForm';
-import TicketAppBar from './TicketsAppBar';
+import TicketsAppBar from './TicketsAppBar';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = () => {
@@ -44,7 +44,7 @@ const Tickets = () => {
     if (!currentRelation) return <></>;
     return (
         <>
-            <TicketAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
+            <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>
