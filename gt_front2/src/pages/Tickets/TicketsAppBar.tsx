@@ -48,7 +48,13 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
                     <RefreshIcon />
                 </IconButton>
                 {/* TODO: dynamic user_relation_id */}
-                <IconButton onClick={() => navigate('/diaries?user_relation_id=1')} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
+                <IconButton
+                    onClick={() => {
+                        clearTickets();
+                        navigate('/diaries?user_relation_id=1');
+                    }}
+                    sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}
+                >
                     <BookIcon />
                 </IconButton>
                 <IconButton onClick={() => setTopBarDrawerOpen(true)}>
@@ -67,7 +73,7 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
                         </ListItem>
                         <List component='div' disablePadding>
                             {otherRelations.map(relation => (
-                                <ListItem key={relation.id} sx={{ pl: 4 }}>
+                                <ListItem key={relation.id}>
                                     <ListItemButton
                                         onClick={() => {
                                             clearTickets();
@@ -76,7 +82,7 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
                                             window.scroll({ top: 0 });
                                         }}
                                     >
-                                        <ListItemText>{relation.related_username}</ListItemText>
+                                        <ListItemText inset>{relation.related_username}</ListItemText>
                                     </ListItemButton>
                                 </ListItem>
                             ))}
