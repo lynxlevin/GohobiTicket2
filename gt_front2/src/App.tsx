@@ -3,7 +3,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import ja from 'date-fns/locale/ja';
 import { useState } from 'react';
-import { Link, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import './App.css';
 import { ITicket } from './contexts/ticket-context';
 import { TicketContext } from './contexts/ticket-context';
@@ -42,17 +42,7 @@ function App() {
                                 dateFormats={{ keyboardDate: 'yyyy/MM/dd (E)', normalDate: 'yyyy/MM/dd (E)' }}
                             >
                                 <Routes>
-                                    <Route
-                                        path='/'
-                                        element={
-                                            <>
-                                                <br />
-                                                <Link to='/login'>Login</Link>
-                                                <br />
-                                                <Link to='/tickets?user_relation_id=1'>Tickets</Link>
-                                            </>
-                                        }
-                                    />
+                                    <Route path='/' element={<Login />} />
                                     <Route path='/login' element={<Login />} />
                                     <Route path='/tickets' element={<Tickets />} />
                                 </Routes>
