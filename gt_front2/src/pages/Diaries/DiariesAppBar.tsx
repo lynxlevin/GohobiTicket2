@@ -11,10 +11,11 @@ interface DiariesAppBarProps {
     handleLogout: () => Promise<void>;
     userRelationId: number;
     refreshDiaries: () => void;
+    setIsDiaryTagDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const DiariesAppBar = (props: DiariesAppBarProps) => {
-    const { handleLogout, userRelationId, refreshDiaries } = props;
+    const { handleLogout, userRelationId, refreshDiaries, setIsDiaryTagDialogOpen } = props;
 
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
@@ -22,10 +23,6 @@ const DiariesAppBar = (props: DiariesAppBarProps) => {
     return (
         <AppBar position='fixed' sx={{ bgcolor: 'primary.light' }}>
             <Toolbar>
-                {/* TODO TagListPage */}
-                {/* <IconButton onClick={() => navigate('/')} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
-                    <SellIcon />
-                </IconButton> */}
                 <div style={{ flexGrow: 1 }} />
                 <IconButton onClick={refreshDiaries} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
                     <RefreshIcon />
@@ -43,6 +40,16 @@ const DiariesAppBar = (props: DiariesAppBarProps) => {
                     <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
                 </IconButton>
                 <Drawer anchor='right' open={topBarDrawerOpen} onClose={() => setTopBarDrawerOpen(false)}>
+                    <List>
+                        <ListItem>
+                            <ListItemButton disableGutters onClick={() => setIsDiaryTagDialogOpen(true)}>
+                                <ListItemIcon>
+                                    <SellIcon />
+                                </ListItemIcon>
+                                <ListItemText>タグ編集</ListItemText>
+                            </ListItemButton>
+                        </ListItem>
+                    </List>
                     <List>
                         <ListItem>
                             <ListItemButton disableGutters onClick={handleLogout}>

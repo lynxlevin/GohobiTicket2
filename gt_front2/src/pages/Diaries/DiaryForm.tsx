@@ -86,7 +86,7 @@ const DiaryForm = (props: DiaryFormProps) => {
                 <TextField value={entry} onChange={event => setEntry(event.target.value)} label='内容' multiline minRows={5} />
             </FormGroup>
             <Button variant='contained' onClick={handleSubmit} sx={{ mt: 2, mb: 2 }}>
-                保存
+                保存する
             </Button>
         </>
     );

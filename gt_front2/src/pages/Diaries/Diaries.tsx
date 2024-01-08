@@ -10,12 +10,14 @@ import useUserAPI from '../../hooks/useUserAPI';
 import DiariesAppBar from './DiariesAppBar';
 import Diary from './Diary';
 import DiaryForm from './DiaryForm';
+import DiaryTagDialog from './DiaryTagDialog';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Diaries = () => {
     const userContext = useContext(UserContext);
     const userRelationContext = useContext(UserRelationContext);
 
+    const [isDiaryTagDialogOpen, setIsDiaryTagDialogOpen] = useState(false);
     const [diaries, setDiaries] = useState<IDiary[]>([]);
     const [tagMaster, setTagMaster] = useState<IDiaryTag[] | null>(null);
     const { handleLogout } = useUserAPI();
@@ -45,7 +47,12 @@ const Diaries = () => {
     if (!currentRelation) return <></>;
     return (
         <>
-            <DiariesAppBar handleLogout={handleLogout} userRelationId={userRelationId} refreshDiaries={getDiaries} />
+            <DiariesAppBar
+                handleLogout={handleLogout}
+                userRelationId={userRelationId}
+                refreshDiaries={getDiaries}
+                setIsDiaryTagDialogOpen={setIsDiaryTagDialogOpen}
+            />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>
@@ -62,13 +69,22 @@ const Diaries = () => {
                         ))}
                     </Grid>
                 </Container>
-                <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src='/apple-touch-icon.png' alt='mini-ticket' />
+                <MiniLogo onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src='/apple-touch-icon.png' alt='mini-ticket' />
             </main>
+            {isDiaryTagDialogOpen && tagMaster !== null && (
+                <DiaryTagDialog
+                    onClose={() => {
+                        setIsDiaryTagDialogOpen(false);
+                    }}
+                    tagMaster={tagMaster}
+                    setTagMaster={setTagMaster}
+                />
+            )}
         </>
     );
 };
 
-const MiniTicket = styled.img`
+const MiniLogo = styled.img`
     height: 50px;
     position: fixed;
     bottom: 13px;
