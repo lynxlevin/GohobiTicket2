@@ -73,5 +73,9 @@ LOGGING = {
             "handlers": ["file"],
             "level": "INFO",
         },
+        "diaries": {
+            "handlers": ["file"],
+            "level": "INFO",
+        },
     },
 }

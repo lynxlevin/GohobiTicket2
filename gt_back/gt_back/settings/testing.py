@@ -1,6 +1,5 @@
 from .base import *
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -66,6 +65,10 @@ LOGGING = {
             "level": "DEBUG",
         },
         "users": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+        },
+        "diaries": {
             "handlers": ["file"],
             "level": "DEBUG",
         },
