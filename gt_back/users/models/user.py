@@ -1,5 +1,3 @@
-from typing import Optional
-
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.db import models
 

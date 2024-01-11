@@ -2,12 +2,14 @@ from rest_framework import serializers
 
 
 class DiaryTagSerializer(serializers.Serializer):
-    id = serializers.UUIDField(required=False)
+    id = serializers.UUIDField(required=False, allow_null=True)
     text = serializers.CharField()
     sort_no = serializers.IntegerField()
 
+
 class DiaryTagsSerializer(serializers.Serializer):
-    diary_tags = DiaryTagSerializer(many=True, read_only=True)
+    diary_tags = DiaryTagSerializer(many=True)
+    user_relation_id = serializers.IntegerField(write_only=True)
 
 
 class ListDiaryTagQuerySerializer(serializers.Serializer):
@@ -17,6 +19,3 @@ class ListDiaryTagQuerySerializer(serializers.Serializer):
 class CreateDiaryTagRequestSerializer(serializers.Serializer):
     text = serializers.CharField()
     user_relation_id = serializers.IntegerField()
-
-
-

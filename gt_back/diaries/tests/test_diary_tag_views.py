@@ -33,8 +33,7 @@ class TestDiaryTagViews(TestCase):
 
         expected = [
             {"id": str(tag.id), "text": tag.text, "sort_no": tag.sort_no}
-            for tag
-            in sorted(diary_tags, key=lambda tag: tag.sort_no)
+            for tag in sorted(diary_tags, key=lambda tag: tag.sort_no)
         ]
         self.assertListEqual(expected, body["diary_tags"])
 
@@ -66,27 +65,45 @@ class TestDiaryTagViews(TestCase):
 
     # def test_create__400_on_wrong_user_relation_id(self):
 
-    # def test_update(self):
-    #     """
-    #     Put /api/diaries/{diary_id}/
-    #     """
-    #     diary = DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=1)))
-    #     params = {
-    #         "entry": "Newly updated entry.",
-    #         "date": date.today().isoformat(),
-    #     }
+    def test_bulk_update(self):
+        """
+        Post /api/diary_tags/bulk_update/
+        全部送るタイプにする。追加も削除も。最初にバリデーションをかける。sort_no 1~len && 重複なし。DBと付き合わせて変更分だけ反映。全部返す。
+        """
+        existing_tags = [
+            DiaryTagFactory(user_relation=self.relation, sort_no=1, text="tag_1"),
+            DiaryTagFactory(user_relation=self.relation, sort_no=2, text="tag_2"),
+            DiaryTagFactory(user_relation=self.relation, sort_no=3, text="tag_3"),
+            DiaryTagFactory(user_relation=self.relation, sort_no=4, text="tag_4"),
+        ]
 
-    #     status_code, body = self._make_put_request(self.user, f"{self.base_path}{diary.id}/", params)
+        params = {
+            "diary_tags": [
+                {"id": str(existing_tags[0].id), "text": "tag_1->1", "sort_no": 1},
+                {"id": str(existing_tags[1].id), "text": "tag_2->4", "sort_no": 4},
+                {"id": str(existing_tags[2].id), "text": "tag_3->2", "sort_no": 2},
+                {"id": None, "text": "new_tag", "sort_no": 3},
+            ],
+            "user_relation_id": str(self.relation.id),
+        }
 
-    #     self.assertEqual(status.HTTP_200_OK, status_code)
+        status_code, body = self._make_post_request(self.user, f"{self.base_path}bulk_update/", params)
 
-    #     diary.refresh_from_db()
-    #     self.assertEqual(str(self.relation.id), str(diary.user_relation.id))
-    #     self.assertEqual(params["entry"], diary.entry)
-    #     self.assertEqual(params["date"], diary.date.isoformat())
+        self.assertEqual(status.HTTP_200_OK, status_code)
 
-    # def test_update__404_on_wrong_user_relations_diary(self):
+        tags = body["diary_tags"]
+        expected = [
+            *params["diary_tags"],
+            {"id": str(existing_tags[3].id), "text": existing_tags[3].text, "sort_no": 5},
+        ]
+        self.assertEqual(len(expected), len(tags))
+        for param_tag, tag in zip(sorted(expected, key=lambda t: t["sort_no"]), tags):
+            if param_tag["id"]:
+                self.assertEqual(param_tag["id"], tag["id"])
+            self.assertEqual(param_tag["text"], tag["text"])
+            self.assertEqual(param_tag["sort_no"], tag["sort_no"])
 
+    # def test_bulk_update__404_on_wrong_user_relations_diary(self):
 
     """
     Utility Functions
