@@ -105,6 +105,22 @@ class TestDiaryTagViews(TestCase):
 
     # def test_bulk_update__404_on_wrong_user_relations_diary(self):
 
+    def test_bulk_update__validation_error_on_duplicate_sort_nos(self):
+        """
+        Post /api/diary_tags/bulk_update/
+        """
+        params = {
+            "diary_tags": [
+                {"id": None, "text": "new_tag_1", "sort_no": 1},
+                {"id": None, "text": "new_tag_2", "sort_no": 1},
+            ],
+            "user_relation_id": str(self.relation.id),
+        }
+
+        status_code, _ = self._make_post_request(self.user, f"{self.base_path}bulk_update/", params)
+
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, status_code)
+
     """
     Utility Functions
     """

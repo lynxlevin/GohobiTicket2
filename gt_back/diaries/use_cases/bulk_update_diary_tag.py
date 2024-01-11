@@ -54,7 +54,4 @@ class BulkUpdateDiaryTag:
         DiaryTag.objects.bulk_update([*updated_tags, *untouched_tags], fields=["text", "sort_no", "updated_at"])
         DiaryTag.objects.bulk_create(new_tags)
 
-        # MYMEMO: check integrity of sort_nos
-        # MYMEMO: check if all the tags belongs to the user's relation.
-
         return sorted([*new_tags, *updated_tags, *untouched_tags], key=lambda t: t.sort_no)
