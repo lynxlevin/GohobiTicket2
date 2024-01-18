@@ -16,19 +16,19 @@ import {
     SelectChangeEvent,
     TextField,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { IDiaryTag } from '../../apis/DiaryTagAPI';
+import { useContext, useEffect, useState } from 'react';
+import { DiaryTagContext, IDiaryTag } from '../../contexts/diary-tag-context';
 
 interface DiaryTagDialogProps {
     onClose: () => void;
-    tagMaster: IDiaryTag[];
-    setTagMaster: React.Dispatch<React.SetStateAction<IDiaryTag[] | null>>;
 }
 
 const DiaryTagDialog = (props: DiaryTagDialogProps) => {
-    const { onClose, tagMaster } = props;
+    const { onClose } = props;
 
-    const [tags, setTags] = useState<IDiaryTag[]>(JSON.parse(JSON.stringify(tagMaster)));
+    const diaryTagContext = useContext(DiaryTagContext);
+
+    const [tags, setTags] = useState<IDiaryTag[]>(JSON.parse(JSON.stringify(diaryTagContext.diaryTags)));
 
     const handleSubmit = () => {
         setTags(prev => {

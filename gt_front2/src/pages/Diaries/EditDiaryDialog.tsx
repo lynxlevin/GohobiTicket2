@@ -14,19 +14,20 @@ import {
 } from '@mui/material';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { format } from 'date-fns';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { DiaryAPI, IDiary } from '../../apis/DiaryAPI';
-import { IDiaryTag } from '../../apis/DiaryTagAPI';
+import { DiaryTagContext, IDiaryTag } from '../../contexts/diary-tag-context';
 
 interface EditDiaryDialogProps {
     onClose: () => void;
     diary: IDiary;
-    tagMaster: IDiaryTag[] | null;
     setDiaries: React.Dispatch<React.SetStateAction<IDiary[]>>;
 }
 
 const EditDiaryDialog = (props: EditDiaryDialogProps) => {
-    const { onClose, diary, tagMaster, setDiaries } = props;
+    const { onClose, diary, setDiaries } = props;
+
+    const diaryTagContext = useContext(DiaryTagContext);
 
     const [date, setDate] = useState<Date>(new Date(diary.date));
     const [tags, setTags] = useState<IDiaryTag[]>(diary.tags);
@@ -59,7 +60,7 @@ const EditDiaryDialog = (props: EditDiaryDialogProps) => {
         <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>
                 <MobileDatePicker label='日付' value={date} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{ mb: 1 }} />
-                {tagMaster !== null && (
+                {diaryTagContext.diaryTags !== null && (
                     <FormControl sx={{ width: '100%', mb: 1 }}>
                         <InputLabel id='tags-select-label'>タグ</InputLabel>
                         <Select
@@ -76,7 +77,7 @@ const EditDiaryDialog = (props: EditDiaryDialogProps) => {
                                     tagTexts.map((tagText: string) => {
                                         const exists = cur.find(c => c.text === tagText);
                                         if (exists) return exists;
-                                        return tagMaster.find(tag => tag.text === tagText)!;
+                                        return diaryTagContext.diaryTags!.find(tag => tag.text === tagText)!;
                                     }),
                                 );
                             }}
@@ -88,7 +89,7 @@ const EditDiaryDialog = (props: EditDiaryDialogProps) => {
                                 </Box>
                             )}
                         >
-                            {tagMaster.map(tag => (
+                            {diaryTagContext.diaryTags.map(tag => (
                                 <MenuItem key={tag.id} value={tag.text}>
                                     {tag.text}
                                 </MenuItem>

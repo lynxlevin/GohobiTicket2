@@ -4,17 +4,16 @@ import { Box, Card, CardContent, Chip, Grid, IconButton, Typography } from '@mui
 import { format } from 'date-fns';
 import { memo, useState } from 'react';
 import { IDiary } from '../../apis/DiaryAPI';
-import { IDiaryTag } from '../../apis/DiaryTagAPI';
 import EditDiaryDialog from './EditDiaryDialog';
 
 interface DiaryProps {
     diary: IDiary;
-    tagMaster: IDiaryTag[] | null;
     setDiaries: React.Dispatch<React.SetStateAction<IDiary[]>>;
 }
 
 const Diary = (props: DiaryProps) => {
-    const { diary, tagMaster, setDiaries } = props;
+    const { diary, setDiaries } = props;
+
     const [isEditDiaryDialogOpen, setIsEditDiaryDialogOpen] = useState(false);
 
     return (
@@ -41,7 +40,6 @@ const Diary = (props: DiaryProps) => {
                         setIsEditDiaryDialogOpen(false);
                     }}
                     diary={diary}
-                    tagMaster={tagMaster}
                     setDiaries={setDiaries}
                 />
             )}

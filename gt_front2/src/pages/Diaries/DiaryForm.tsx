@@ -1,18 +1,19 @@
 import { Box, Button, Chip, FormControl, FormGroup, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from '@mui/material';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { format } from 'date-fns';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { DiaryAPI, IDiary } from '../../apis/DiaryAPI';
-import { IDiaryTag } from '../../apis/DiaryTagAPI';
+import { DiaryTagContext, IDiaryTag } from '../../contexts/diary-tag-context';
 
 interface DiaryFormProps {
     userRelationId: number;
     setDiaries: React.Dispatch<React.SetStateAction<IDiary[]>>;
-    tagMaster: IDiaryTag[] | null;
 }
 
 const DiaryForm = (props: DiaryFormProps) => {
-    const { userRelationId, setDiaries, tagMaster } = props;
+    const { userRelationId, setDiaries } = props;
+
+    const diaryTagContext = useContext(DiaryTagContext);
 
     const [date, setDate] = useState<Date>(new Date());
     const [tags, setTags] = useState<IDiaryTag[]>([]);
@@ -46,7 +47,7 @@ const DiaryForm = (props: DiaryFormProps) => {
         <>
             <FormGroup sx={{ mt: 3 }}>
                 <MobileDatePicker label='日付' value={date} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{ mb: 1 }} />
-                {tagMaster !== null && (
+                {diaryTagContext.diaryTags !== null && (
                     <FormControl sx={{ width: '100%', mb: 1 }}>
                         <InputLabel id='tags-select-label'>タグ</InputLabel>
                         <Select
@@ -63,7 +64,7 @@ const DiaryForm = (props: DiaryFormProps) => {
                                     tagTexts.map((tagText: string) => {
                                         const exists = cur.find(c => c.text === tagText);
                                         if (exists) return exists;
-                                        return tagMaster.find(tag => tag.text === tagText)!;
+                                        return diaryTagContext.diaryTags!.find(tag => tag.text === tagText)!;
                                     }),
                                 );
                             }}
@@ -75,7 +76,7 @@ const DiaryForm = (props: DiaryFormProps) => {
                                 </Box>
                             )}
                         >
-                            {tagMaster.map(tag => (
+                            {diaryTagContext.diaryTags.map(tag => (
                                 <MenuItem key={tag.id} value={tag.text}>
                                     {tag.text}
                                 </MenuItem>

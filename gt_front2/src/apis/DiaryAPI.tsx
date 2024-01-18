@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios';
-import { IDiaryTag } from './DiaryTagAPI';
+import { IDiaryTag } from '../contexts/diary-tag-context';
 import client from './axios';
 
 export interface IDiary {

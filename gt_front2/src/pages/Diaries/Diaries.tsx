@@ -3,7 +3,8 @@ import { Box, Container, Grid, Typography } from '@mui/material';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { DiaryAPI, IDiary } from '../../apis/DiaryAPI';
-import { DiaryTagAPI, IDiaryTag } from '../../apis/DiaryTagAPI';
+import { DiaryTagAPI } from '../../apis/DiaryTagAPI';
+import { DiaryTagContext } from '../../contexts/diary-tag-context';
 import { UserContext } from '../../contexts/user-context';
 import { UserRelationContext } from '../../contexts/user-relation-context';
 import useUserAPI from '../../hooks/useUserAPI';
@@ -16,10 +17,10 @@ import DiaryTagDialog from './DiaryTagDialog';
 const Diaries = () => {
     const userContext = useContext(UserContext);
     const userRelationContext = useContext(UserRelationContext);
+    const diaryTagContext = useContext(DiaryTagContext);
 
     const [isDiaryTagDialogOpen, setIsDiaryTagDialogOpen] = useState(false);
     const [diaries, setDiaries] = useState<IDiary[]>([]);
-    const [tagMaster, setTagMaster] = useState<IDiaryTag[] | null>(null);
     const { handleLogout } = useUserAPI();
 
     const [searchParams] = useSearchParams();
@@ -35,11 +36,12 @@ const Diaries = () => {
     useEffect(() => {
         if (userContext.isLoggedIn !== true && userRelationId < 1) return;
         getDiaries();
-        if (tagMaster !== null) return;
+        if (diaryTagContext.diaryTags !== null) return;
         DiaryTagAPI.list(userRelationId).then(({ data: { diary_tags } }) => {
-            setTagMaster(diary_tags);
+            diaryTagContext.setDiaryTags(diary_tags);
         });
-    }, [getDiaries, tagMaster, userContext.isLoggedIn, userRelationId]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [getDiaries, userContext.isLoggedIn, userRelationId]);
 
     if (userContext.isLoggedIn === false) {
         return <Navigate to='/login' />;
@@ -59,25 +61,23 @@ const Diaries = () => {
                         <Typography variant='h4' align='center' color='text.primary' sx={{ mt: 3, fontWeight: 600 }} gutterBottom>
                             {currentRelation.related_username}との日記
                         </Typography>
-                        <DiaryForm userRelationId={userRelationId} setDiaries={setDiaries} tagMaster={tagMaster} />
+                        <DiaryForm userRelationId={userRelationId} setDiaries={setDiaries} />
                     </Container>
                 </Box>
                 <Container sx={{ pt: 2, pb: 4 }} maxWidth='md'>
                     <Grid container spacing={4}>
                         {diaries.map(diary => (
-                            <Diary key={diary.id} diary={diary} tagMaster={tagMaster} setDiaries={setDiaries} />
+                            <Diary key={diary.id} diary={diary} setDiaries={setDiaries} />
                         ))}
                     </Grid>
                 </Container>
                 <MiniLogo onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src='/apple-touch-icon.png' alt='mini-ticket' />
             </main>
-            {isDiaryTagDialogOpen && tagMaster !== null && (
+            {isDiaryTagDialogOpen && (
                 <DiaryTagDialog
                     onClose={() => {
                         setIsDiaryTagDialogOpen(false);
                     }}
-                    tagMaster={tagMaster}
-                    setTagMaster={setTagMaster}
                 />
             )}
         </>
