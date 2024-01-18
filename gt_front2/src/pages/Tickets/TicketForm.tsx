@@ -70,8 +70,12 @@ const TicketForm = (props: TicketFormProps) => {
                     disabled={!isSpecialTicketAvailable}
                     label='特別チケットにする'
                     control={<Checkbox checked={isSpecial} onChange={event => setIsSpecial(event.target.checked)} />}
+                    sx={{ mr: 'auto' }}
                 />
-                <FormControlLabel label='下書きにする' control={<Checkbox checked={isDraft} onChange={event => setIsDraft(event.target.checked)} />} />
+                <FormControlLabel
+                    label='下書きにする'
+                    control={<Checkbox checked={isDraft} onChange={event => setIsDraft(event.target.checked)} sx={{ mr: 'auto' }} />}
+                />
             </FormGroup>
             <Button
                 variant={isDraft ? 'outlined' : 'contained'}
