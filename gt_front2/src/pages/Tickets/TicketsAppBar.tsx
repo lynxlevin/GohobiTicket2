@@ -47,7 +47,7 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
                 <IconButton onClick={() => getTickets(currentRelation.id)} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
                     <RefreshIcon />
                 </IconButton>
-                {/* TODO: dynamic user_relation_id */}
+                {/* MYMEMO: dynamic user_relation_id */}
                 <IconButton
                     onClick={() => {
                         clearTickets();
