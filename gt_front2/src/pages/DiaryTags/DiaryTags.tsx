@@ -36,8 +36,8 @@ const DiaryTags = () => {
     const userRelationId = Number(searchParams.get('user_relation_id'));
 
     const handleSubmit = () => {
-        setTags(prev => {
-            return [...prev].sort((a, b) => (a.sort_no > b.sort_no ? 1 : -1));
+        DiaryTagAPI.bulkUpdate({ diary_tags: tags, user_relation_id: userRelationId }).then(res => {
+            setTags(res.data.diary_tags);
         });
     };
 

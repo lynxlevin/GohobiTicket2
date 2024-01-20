@@ -6,6 +6,15 @@ interface ListDiaryTagResponse {
     diary_tags: IDiaryTag[];
 }
 
+interface BulkUpdateDiaryTagRequest {
+    diary_tags: IDiaryTag[];
+    user_relation_id: number;
+}
+
+interface BulkUpdateDiaryTagResponse {
+    diary_tags: IDiaryTag[];
+}
+
 export const DiaryTagAPI = {
     BASE_URL: '/api/diary_tags/',
 
@@ -16,4 +25,8 @@ export const DiaryTagAPI = {
     // create: async (props: CreateDiaryRequest): Promise<AxiosResponse<IDiary>> => {
     //     return await client.post(DiaryAPI.BASE_URL, props, { headers: { 'content-type': 'application/json' } });
     // },
+    bulkUpdate: async (props: BulkUpdateDiaryTagRequest): Promise<AxiosResponse<BulkUpdateDiaryTagResponse>> => {
+        const url = `${DiaryTagAPI.BASE_URL}bulk_update/`;
+        return await client.post(url, props, { headers: { 'content-type': 'application/json' } });
+    },
 };
