@@ -11,7 +11,6 @@ import useUserAPI from '../../hooks/useUserAPI';
 import DiariesAppBar from './DiariesAppBar';
 import Diary from './Diary';
 import DiaryForm from './DiaryForm';
-import DiaryTagDialog from './DiaryTagDialog';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Diaries = () => {
@@ -19,7 +18,6 @@ const Diaries = () => {
     const userRelationContext = useContext(UserRelationContext);
     const diaryTagContext = useContext(DiaryTagContext);
 
-    const [isDiaryTagDialogOpen, setIsDiaryTagDialogOpen] = useState(false);
     const [diaries, setDiaries] = useState<IDiary[]>([]);
     const { handleLogout } = useUserAPI();
 
@@ -35,7 +33,9 @@ const Diaries = () => {
 
     useEffect(() => {
         if (userContext.isLoggedIn !== true && userRelationId < 1) return;
+        // MYMEMO: userRelationId が変わったら再度取得する必要あり
         getDiaries();
+        // MYMEMO: diaryTagContext にuserRelationIdを持たせて検証する必要あり
         if (diaryTagContext.diaryTags !== null) return;
         DiaryTagAPI.list(userRelationId).then(({ data: { diary_tags } }) => {
             diaryTagContext.setDiaryTags(diary_tags);
@@ -49,12 +49,7 @@ const Diaries = () => {
     if (!currentRelation) return <></>;
     return (
         <>
-            <DiariesAppBar
-                handleLogout={handleLogout}
-                userRelationId={userRelationId}
-                refreshDiaries={getDiaries}
-                setIsDiaryTagDialogOpen={setIsDiaryTagDialogOpen}
-            />
+            <DiariesAppBar handleLogout={handleLogout} userRelationId={userRelationId} refreshDiaries={getDiaries} />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>
@@ -73,13 +68,6 @@ const Diaries = () => {
                 </Container>
                 <MiniLogo onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src='/apple-touch-icon.png' alt='mini-ticket' />
             </main>
-            {isDiaryTagDialogOpen && (
-                <DiaryTagDialog
-                    onClose={() => {
-                        setIsDiaryTagDialogOpen(false);
-                    }}
-                />
-            )}
         </>
     );
 };

@@ -11,11 +11,10 @@ interface DiariesAppBarProps {
     handleLogout: () => Promise<void>;
     userRelationId: number;
     refreshDiaries: () => void;
-    setIsDiaryTagDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const DiariesAppBar = (props: DiariesAppBarProps) => {
-    const { handleLogout, userRelationId, refreshDiaries, setIsDiaryTagDialogOpen } = props;
+    const { handleLogout, userRelationId, refreshDiaries } = props;
 
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
@@ -42,15 +41,19 @@ const DiariesAppBar = (props: DiariesAppBarProps) => {
                 <Drawer anchor='right' open={topBarDrawerOpen} onClose={() => setTopBarDrawerOpen(false)}>
                     <List>
                         <ListItem>
-                            <ListItemButton disableGutters onClick={() => setIsDiaryTagDialogOpen(true)}>
+                            <ListItemButton
+                                disableGutters
+                                onClick={() => {
+                                    window.scroll({ top: 0 });
+                                    navigate(`/diary_tags?user_relation_id=${userRelationId}`);
+                                }}
+                            >
                                 <ListItemIcon>
                                     <SellIcon />
                                 </ListItemIcon>
                                 <ListItemText>タグ編集</ListItemText>
                             </ListItemButton>
                         </ListItem>
-                    </List>
-                    <List>
                         <ListItem>
                             <ListItemButton disableGutters onClick={handleLogout}>
                                 <ListItemIcon>

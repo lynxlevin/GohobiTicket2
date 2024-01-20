@@ -13,6 +13,7 @@ import { UserContext } from './contexts/user-context';
 import { UserRelationContext } from './contexts/user-relation-context';
 import { IUserRelation } from './contexts/user-relation-context';
 import Diaries from './pages/Diaries';
+import DiaryTags from './pages/DiaryTags';
 import Login from './pages/Login';
 import Tickets from './pages/Tickets';
 
@@ -36,7 +37,7 @@ function App() {
     const [diaryTags, setDiaryTags] = useState<IDiaryTag[] | null>(null);
 
     return (
-        <div className='App' style={{ backgroundColor: 'rgb(250, 255, 255)' }}>
+        <div className='App'>
             <UserContext.Provider value={{ isLoggedIn, setIsLoggedIn, defaultRelationId, setDefaultRelationId }}>
                 <UserRelationContext.Provider value={{ userRelations, setUserRelations }}>
                     <TicketContext.Provider value={{ tickets, setTickets }}>
@@ -52,6 +53,7 @@ function App() {
                                         <Route path='/login' element={<Login />} />
                                         <Route path='/tickets' element={<Tickets />} />
                                         <Route path='/diaries' element={<Diaries />} />
+                                        <Route path='/diary_tags' element={<DiaryTags />} />
                                     </Routes>
                                 </LocalizationProvider>
                             </ThemeProvider>
