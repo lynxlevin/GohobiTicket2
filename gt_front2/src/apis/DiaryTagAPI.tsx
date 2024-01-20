@@ -1,13 +1,18 @@
 import { AxiosResponse } from 'axios';
 import { IDiaryTag } from '../contexts/diary-tag-context';
 import client from './axios';
-
 interface ListDiaryTagResponse {
     diary_tags: IDiaryTag[];
 }
 
+interface RequestDiaryTag {
+    id: string | null;
+    text: string;
+    sort_no: number;
+}
+
 interface BulkUpdateDiaryTagRequest {
-    diary_tags: IDiaryTag[];
+    diary_tags: RequestDiaryTag[];
     user_relation_id: number;
 }
 

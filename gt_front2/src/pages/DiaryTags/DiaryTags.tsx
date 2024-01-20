@@ -1,22 +1,5 @@
-import {
-    Box,
-    Button,
-    Chip,
-    Container,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    FormControl,
-    FormControlLabel,
-    Grid,
-    InputLabel,
-    List,
-    ListItem,
-    MenuItem,
-    Select,
-    SelectChangeEvent,
-    TextField,
-} from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { Box, Button, IconButton, List, ListItem, TextField } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { DiaryTagAPI } from '../../apis/DiaryTagAPI';
@@ -25,18 +8,32 @@ import { UserContext } from '../../contexts/user-context';
 import useUserAPI from '../../hooks/useUserAPI';
 import DiaryTagsAppBar from './DiaryTagsAppBar';
 
+interface InnerTag extends IDiaryTag {
+    isNew?: boolean;
+}
+
 const DiaryTags = () => {
     const userContext = useContext(UserContext);
     const diaryTagContext = useContext(DiaryTagContext);
 
-    const [tags, setTags] = useState<IDiaryTag[]>(JSON.parse(JSON.stringify(diaryTagContext.diaryTags)));
+    const [tags, setTags] = useState<InnerTag[]>(JSON.parse(JSON.stringify(diaryTagContext.diaryTags)));
     useUserAPI();
 
     const [searchParams] = useSearchParams();
     const userRelationId = Number(searchParams.get('user_relation_id'));
 
+    const handleAdd = () => {
+        setTags(prev => [...prev, { id: crypto.randomUUID(), text: '', sort_no: prev.length + 1, isNew: true }]);
+    };
+
     const handleSubmit = () => {
-        DiaryTagAPI.bulkUpdate({ diary_tags: tags, user_relation_id: userRelationId }).then(res => {
+        const payload = tags
+            .filter(tag => tag.text.trim() !== '')
+            .map(tag => {
+                if (tag.isNew) return { id: null, text: tag.text, sort_no: tag.sort_no };
+                return tag;
+            });
+        DiaryTagAPI.bulkUpdate({ diary_tags: payload, user_relation_id: userRelationId }).then(res => {
             setTags(res.data.diary_tags);
         });
     };
@@ -97,6 +94,11 @@ const DiaryTags = () => {
                                 />
                             </ListItem>
                         ))}
+                        <ListItem>
+                            <IconButton sx={{ display: 'block', ml: 'auto' }} onClick={handleAdd}>
+                                <AddCircleIcon />
+                            </IconButton>
+                        </ListItem>
                     </List>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
