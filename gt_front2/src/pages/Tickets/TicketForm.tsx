@@ -74,7 +74,8 @@ const TicketForm = (props: TicketFormProps) => {
                 />
                 <FormControlLabel
                     label='下書きにする'
-                    control={<Checkbox checked={isDraft} onChange={event => setIsDraft(event.target.checked)} sx={{ mr: 'auto' }} />}
+                    control={<Checkbox checked={isDraft} onChange={event => setIsDraft(event.target.checked)} />}
+                    sx={{ mr: 'auto' }}
                 />
             </FormGroup>
             <Button
