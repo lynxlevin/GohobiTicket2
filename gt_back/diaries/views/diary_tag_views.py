@@ -15,7 +15,7 @@ from ..serializers import (
     DiaryTagsSerializer,
     ListDiaryTagQuerySerializer,
 )
-from ..use_cases import BulkUpdateDiaryTag, CreateDiaryTag, ListDiaryTag
+from ..use_cases import BulkUpdateDiaryTag, CreateDiaryTag, DeleteDiaryTag, ListDiaryTag
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +65,15 @@ class DiaryTagViewSet(viewsets.GenericViewSet):
 
             serializer = DiaryTagsSerializer({"diary_tags": diary_tags})
             return Response(serializer.data)
+
+        except Exception as exc:
+            return exception_handler_with_logging(exc)
+
+    def destroy(self, request, use_case=DeleteDiaryTag(), format=None, pk=None):
+        try:
+            use_case.execute(user=request.user, tag_id=pk)
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         except Exception as exc:
             return exception_handler_with_logging(exc)

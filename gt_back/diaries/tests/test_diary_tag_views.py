@@ -121,6 +121,37 @@ class TestDiaryTagViews(TestCase):
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, status_code)
 
+    def test_delete(self):
+        """
+        Delete /api/diary_tags/{tag_id}/
+        """
+        tag_to_delete = DiaryTagFactory(user_relation=self.relation, sort_no=1, text="tag_1")
+        tag_to_remain = DiaryTagFactory(user_relation=self.relation, sort_no=2, text="tag_2")
+
+        status_code = self._make_delete_request(self.user, f"{self.base_path}{str(tag_to_delete.id)}/")
+
+        self.assertEqual(status.HTTP_204_NO_CONTENT, status_code)
+
+        diary_tags = list(DiaryTag.objects.all())
+        self.assertEqual(1, len(diary_tags))
+        self.assertEqual(tag_to_remain.id, diary_tags[0].id)
+
+    def test_delete_204_on_different_user(self):
+        """
+        Delete /api/diary_tags/{tag_id}/
+        """
+        tag_to_delete_different_user = DiaryTagFactory(sort_no=1, text="tag_1")
+        tag_to_remain = DiaryTagFactory(user_relation=self.relation, sort_no=1, text="tag_1_mine")
+
+        status_code = self._make_delete_request(self.user, f"{self.base_path}{str(tag_to_delete_different_user.id)}/")
+
+        self.assertEqual(status.HTTP_204_NO_CONTENT, status_code)
+
+        diary_tags = list(DiaryTag.objects.all())
+        self.assertEqual(2, len(diary_tags))
+        self.assertEqual(tag_to_delete_different_user.id, diary_tags[0].id)
+        self.assertEqual(tag_to_remain.id, diary_tags[1].id)
+
     """
     Utility Functions
     """
@@ -142,3 +173,9 @@ class TestDiaryTagViews(TestCase):
         client.force_login(user)
         response = client.put(path, params, content_type="application/json")
         return (response.status_code, response.json())
+
+    def _make_delete_request(self, user, path):
+        client = Client()
+        client.force_login(user)
+        response = client.delete(path)
+        return response.status_code
