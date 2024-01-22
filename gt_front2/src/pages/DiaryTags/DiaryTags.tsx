@@ -34,6 +34,7 @@ const DiaryTags = () => {
                 return tag;
             });
         DiaryTagAPI.bulkUpdate({ diary_tags: payload, user_relation_id: userRelationId }).then(res => {
+            diaryTagContext.setDiaryTags(res.data.diary_tags);
             setTags(res.data.diary_tags);
         });
     };
