@@ -18,13 +18,9 @@ class ListDiaryTag:
     def execute(self, user: "User", queries: dict) -> "DiaryTagQuerySet":
         logger.info(self.__class__.__name__, extra={"user": user, "queries": queries})
 
-        user_relation_id, include_diary_count = queries.values()
+        user_relation_id, = queries.values()
 
         qs = DiaryTag.objects.filter_eq_user_relation_id(user_relation_id)
-
-        if include_diary_count:
-            logger.debug("include_diary_count", extra={"include_diary_count": include_diary_count})  # MYMEMO: debug
-            qs = qs.annotate_diary_count()
 
         tags = qs.order_by_sort_no().all()
 
