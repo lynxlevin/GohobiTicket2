@@ -15,7 +15,7 @@ from ..serializers import (
     DiaryTagsSerializer,
     ListDiaryTagQuerySerializer,
 )
-from ..use_cases import BulkUpdateDiaryTag, CreateDiaryTag, DeleteDiaryTag, ListDiaryTag
+from ..use_cases import BulkUpdateDiaryTag, CreateDiaryTag, DeleteDiaryTag, GetDiaryTag, ListDiaryTag
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,16 @@ class DiaryTagViewSet(viewsets.GenericViewSet):
             diary_tags = use_case.execute(user=request.user, queries=queries)
 
             serializer = DiaryTagsSerializer({"diary_tags": diary_tags})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            return exception_handler_with_logging(exc)
+
+    def retrieve(self, request, use_case=GetDiaryTag(), format=None, pk=None):
+        try:
+            diary_tag = use_case.execute(user=request.user, tag_id=pk)
+
+            serializer = self.get_serializer(diary_tag)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as exc:

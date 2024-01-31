@@ -5,6 +5,7 @@ class DiaryTagSerializer(serializers.Serializer):
     id = serializers.UUIDField(required=False, allow_null=True)
     text = serializers.CharField()
     sort_no = serializers.IntegerField()
+    diary_count = serializers.IntegerField(required=False)
 
 
 class DiaryTagsSerializer(serializers.Serializer):

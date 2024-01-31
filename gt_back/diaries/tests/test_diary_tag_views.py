@@ -4,7 +4,7 @@ from user_relations.tests.user_relation_factory import UserRelationFactory
 from users.tests.user_factory import UserFactory
 
 from ..models import DiaryTag
-from .diary_factory import DiaryTagFactory
+from .diary_factory import DiaryFactory, DiaryTagFactory
 
 
 class TestDiaryTagViews(TestCase):
@@ -18,7 +18,7 @@ class TestDiaryTagViews(TestCase):
 
     def test_list(self):
         """
-        Get /api/diary_tags/?user_relation_ids={relation_id}
+        Get /api/diary_tags/?user_relation_id={relation_id}
         """
         diary_tags = [
             DiaryTagFactory(user_relation=self.relation, sort_no=3),
@@ -38,6 +38,21 @@ class TestDiaryTagViews(TestCase):
         self.assertListEqual(expected, body["diary_tags"])
 
     # def test_list__404_on_wrong_user_relation_id(self):
+
+    def test_get(self):
+        """
+        Get /api/diary_tags/{tag_id}/
+        """
+        diary_tag = DiaryTagFactory(user_relation=self.relation, sort_no=1)
+        diary = DiaryFactory(user_relation=self.relation)
+        diary.tags.set([diary_tag])
+
+        status_code, body = self._make_get_request(self.user, f"{self.base_path}{diary_tag.id}/")
+
+        self.assertEqual(status.HTTP_200_OK, status_code)
+
+        expected = {"id": str(diary_tag.id), "text": diary_tag.text, "sort_no": diary_tag.sort_no, "diary_count": 1}
+        self.assertDictEqual(expected, body)
 
     def test_create(self):
         """

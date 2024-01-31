@@ -22,6 +22,9 @@ class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
         key = "-sort_no" if desc else "sort_no"
         return self.order_by(key)
 
+    def annotate_diary_count(self) -> "DiaryTagQuerySet":
+        return self.annotate(diary_count=models.Count("diary"))
+
 
 class DiaryTag(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -1,0 +1,28 @@
+# DiaryTag
+
+###
+# @name get_csrf
+GET {{endpoint}}/user/csrf/
+
+###
+# @name login
+POST {{endpoint}}/user/login/
+Content-Type: application/json
+X-CSRFToken: {{get_csrf.response.headers.X-CSRFToken}}
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+###
+@relation_id=1
+@tag_id=d211fac4-9271-4407-bf58-5e4ac3c077b0
+
+###
+# @name list_all
+GET {{endpoint}}/api/diary_tags/?user_relation_id={{relation_id}}
+
+###
+# @name get
+GET {{endpoint}}/api/diary_tags/{{tag_id}}/
