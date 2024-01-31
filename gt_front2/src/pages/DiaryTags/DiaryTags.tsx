@@ -1,5 +1,6 @@
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { Box, Button, IconButton, List, ListItem, TextField } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Box, Button, Dialog, DialogContent, IconButton, List, ListItem, TextField } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { DiaryTagAPI } from '../../apis/DiaryTagAPI';
@@ -17,6 +18,7 @@ const DiaryTags = () => {
     const diaryTagContext = useContext(DiaryTagContext);
 
     const [tags, setTags] = useState<InnerTag[]>(JSON.parse(JSON.stringify(diaryTagContext.diaryTags)));
+    const [diaryCountForTagToDelete, setDiaryCountForTagToDelete] = useState(0);
     useUserAPI();
 
     const [searchParams] = useSearchParams();
@@ -24,6 +26,21 @@ const DiaryTags = () => {
 
     const handleAdd = () => {
         setTags(prev => [...prev, { id: crypto.randomUUID(), text: '', sort_no: prev.length + 1, isNew: true }]);
+    };
+
+    const handleDelete = async (tag: InnerTag) => {
+        const getTagResponse = await DiaryTagAPI.get(tag.id);
+        const diaryCount = getTagResponse.data.diary_count;
+        if (diaryCount > 0) {
+            setDiaryCountForTagToDelete(diaryCount);
+            return;
+        }
+
+        await DiaryTagAPI.delete(tag.id);
+        DiaryTagAPI.list(userRelationId).then(({ data: { diary_tags } }) => {
+            diaryTagContext.setDiaryTags(diary_tags);
+            setTags(JSON.parse(JSON.stringify(diary_tags)));
+        });
     };
 
     const handleSubmit = () => {
@@ -93,6 +110,9 @@ const DiaryTags = () => {
                                         })
                                     }
                                 />
+                                <IconButton onClick={() => handleDelete(tag)}>
+                                    <DeleteIcon />
+                                </IconButton>
                             </ListItem>
                         ))}
                         <ListItem>
@@ -110,6 +130,9 @@ const DiaryTags = () => {
                         リセット
                     </Button>
                 </Box>
+                <Dialog open={diaryCountForTagToDelete > 0} onClose={() => setDiaryCountForTagToDelete(0)}>
+                    <DialogContent>このタグは {diaryCountForTagToDelete} つの日記に登録されているため、削除することができません。</DialogContent>
+                </Dialog>
             </main>
         </>
     );
