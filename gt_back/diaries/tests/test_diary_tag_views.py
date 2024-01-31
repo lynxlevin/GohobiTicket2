@@ -4,7 +4,7 @@ from user_relations.tests.user_relation_factory import UserRelationFactory
 from users.tests.user_factory import UserFactory
 
 from ..models import DiaryTag
-from .diary_factory import DiaryTagFactory
+from .diary_factory import DiaryFactory, DiaryTagFactory
 
 
 class TestDiaryTagViews(TestCase):
@@ -18,7 +18,7 @@ class TestDiaryTagViews(TestCase):
 
     def test_list(self):
         """
-        Get /api/diary_tags/?user_relation_ids={relation_id}
+        Get /api/diary_tags/?user_relation_id={relation_id}
         """
         diary_tags = [
             DiaryTagFactory(user_relation=self.relation, sort_no=3),
@@ -38,6 +38,50 @@ class TestDiaryTagViews(TestCase):
         self.assertListEqual(expected, body["diary_tags"])
 
     # def test_list__404_on_wrong_user_relation_id(self):
+
+    def test_list__include_diary_count(self):
+        """
+        Get /api/diary_tags/?user_relation_id={relation_id}&include_diary_count=true
+        """
+        diary_tags = [
+            DiaryTagFactory(user_relation=self.relation, sort_no=1),
+            DiaryTagFactory(user_relation=self.relation, sort_no=2),
+            DiaryTagFactory(user_relation=self.relation, sort_no=3),
+        ]
+        diaries = [
+            DiaryFactory(user_relation=self.relation),
+            DiaryFactory(user_relation=self.relation),
+        ]
+        diaries[0].tags.set(diary_tags[0:2])
+        diaries[1].tags.set(diary_tags[0:1])
+
+        status_code, body = self._make_get_request(
+            self.user, f"{self.base_path}?user_relation_id={self.relation.id}&include_diary_count=true"
+        )
+
+        self.assertEqual(status.HTTP_200_OK, status_code)
+
+        expected = [
+            {
+                "id": str(diary_tags[0].id),
+                "text": diary_tags[0].text,
+                "sort_no": diary_tags[0].sort_no,
+                "diary_count": 2,
+            },
+            {
+                "id": str(diary_tags[1].id),
+                "text": diary_tags[1].text,
+                "sort_no": diary_tags[1].sort_no,
+                "diary_count": 1,
+            },
+            {
+                "id": str(diary_tags[2].id),
+                "text": diary_tags[2].text,
+                "sort_no": diary_tags[2].sort_no,
+                "diary_count": 0,
+            },
+        ]
+        self.assertListEqual(expected, body["diary_tags"])
 
     def test_create(self):
         """
