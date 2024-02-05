@@ -14,44 +14,21 @@ print(gr())
 6. build fixture data
 <!-- MYMEMO: details on fixtures -->
 
-## How to run locally (retrieving static files from backend)
-
-1. build frontend
-
-```
-cd gt_front
-npm run build
-rm -rf ../gt_back/static/dist
-mv dist ../gt_back/static/dist
-```
-
-2. run server
-
-```
-poetry shell
-cd gt_back
-python manage.py runserver
-```
-
-3. access `http://127.0.0.1:8000/`
-
-
-## How to run locally (retrieving static files from backend)
+## How to run locally
 
 1. run server
 
 ```
 poetry shell
 cd gt_back
+poetry install
+python manage.py migrate
 python manage.py runserver
 ```
 
-2. run frontend server
+2. build frontend
 
 ```
-cd gt_front
+cd gt_front2
 npm start
 ```
-
-3. access `http://localhost:8080`
-
