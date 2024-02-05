@@ -26,8 +26,3 @@ class DiaryTagsSerializer(serializers.Serializer):
 
 class ListDiaryTagQuerySerializer(serializers.Serializer):
     user_relation_id = serializers.IntegerField()
-
-
-class CreateDiaryTagRequestSerializer(serializers.Serializer):
-    text = serializers.CharField()
-    user_relation_id = serializers.IntegerField()

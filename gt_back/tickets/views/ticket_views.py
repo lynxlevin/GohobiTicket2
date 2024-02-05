@@ -5,13 +5,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import (
-    HTTP_201_CREATED,
-    HTTP_202_ACCEPTED,
-    HTTP_204_NO_CONTENT,
-    HTTP_403_FORBIDDEN,
-    HTTP_404_NOT_FOUND,
-)
+from rest_framework.status import HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT
 from tickets.models.ticket import Ticket
 from tickets.serializers import (
     ListTicketQuerySerializer,
@@ -23,10 +17,8 @@ from tickets.serializers import (
     TicketUseSerializer,
 )
 from tickets.use_cases import CreateTicket, DestroyTicket, ListTicket, PartialUpdateTicket, ReadTicket, UseTicket
-from tickets.utils import _is_none, _is_not_giving_user, _is_used
 
 from gt_back.exception_handler import exception_handler_with_logging
-from gt_back.messages import ErrorMessages
 
 logger = logging.getLogger(__name__)
 
@@ -89,40 +81,6 @@ class TicketViewSet(viewsets.GenericViewSet):
 
         except Exception as exc:
             return exception_handler_with_logging(exc)
-
-    @action(detail=True, methods=["put"])
-    def mark_special(self, request, format=None, pk=None):
-        logger.info("MarkSpecialTicket", extra={"pk": pk})
-
-        ticket = Ticket.objects.get_by_id(pk)
-
-        if _is_none(ticket):
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        if _is_used(ticket):
-            return Response(status=HTTP_403_FORBIDDEN)
-
-        user = request.user
-        user_relation = ticket.user_relation
-
-        if _is_not_giving_user(user, user_relation):
-            return Response(status=HTTP_403_FORBIDDEN)
-
-        has_other_special_tickets_in_month = (
-            Ticket.objects.filter_eq_user_relation_id(user_relation.id).filter_special_tickets(ticket.gift_date).count()
-            != 0
-        )
-
-        if has_other_special_tickets_in_month:
-            # MYMEMO: use_case にしたいけど、このメッセージのハンドリング、テストが大変そう
-            data = {"error_message": ErrorMessages.SPECIAL_TICKET_LIMIT_VIOLATION.value}
-            return Response(data, status=HTTP_403_FORBIDDEN)
-
-        ticket.is_special = True
-        ticket.save(update_fields=["is_special"])
-
-        serializer = TicketIdResponseSerializer({"id": ticket.id})
-        return Response(serializer.data, status=HTTP_202_ACCEPTED)
 
     @action(detail=True, methods=["put"])
     def use(self, request, use_case=UseTicket(), format=None, pk=None):

@@ -54,32 +54,6 @@ class TestDiaryTagViews(TestCase):
         expected = {"id": str(diary_tag.id), "text": diary_tag.text, "sort_no": diary_tag.sort_no, "diary_count": 1}
         self.assertDictEqual(expected, body)
 
-    def test_create(self):
-        """
-        Post /api/diary_tags/
-        """
-        _diary_tags = [
-            DiaryTagFactory(user_relation=self.relation, sort_no=3),
-            DiaryTagFactory(user_relation=self.relation, sort_no=1),
-            DiaryTagFactory(user_relation=self.relation, sort_no=2),
-        ]
-
-        params = {
-            "user_relation_id": str(self.relation.id),
-            "text": "Newly created tag",
-        }
-
-        status_code, body = self._make_post_request(self.user, self.base_path, params)
-
-        self.assertEqual(status.HTTP_201_CREATED, status_code)
-
-        created_tag = DiaryTag.objects.get_by_id(body["id"])
-        self.assertEqual(params["user_relation_id"], str(created_tag.user_relation.id))
-        self.assertEqual(params["text"], created_tag.text)
-        self.assertEqual(4, created_tag.sort_no)
-
-    # def test_create__400_on_wrong_user_relation_id(self):
-
     def test_bulk_update(self):
         """
         Post /api/diary_tags/bulk_update/
