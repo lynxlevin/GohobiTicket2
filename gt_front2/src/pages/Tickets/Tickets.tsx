@@ -34,7 +34,6 @@ const Tickets = () => {
     }, [currentRelation]);
 
     useEffect(() => {
-        // MYMEMO: Too slow rendering. https://blog.logrocket.com/render-large-lists-react-5-methods-examples/#react-viewport-list
         if (userContext.isLoggedIn === true && userRelationId > 0) getTickets(userRelationId);
     }, [getTickets, userContext.isLoggedIn, userRelationId]);
 
