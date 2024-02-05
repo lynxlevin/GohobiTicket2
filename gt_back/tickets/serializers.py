@@ -7,7 +7,7 @@ class TicketSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = [
             "id",
-            "user_relation",
+            "user_relation_id",
             "description",
             "gift_date",
             "use_description",
@@ -17,11 +17,20 @@ class TicketSerializer(serializers.ModelSerializer):
         ]
 
 
+class ListTicketQuerySerializer(serializers.Serializer):
+    user_relation_id = serializers.IntegerField()
+
+
+class ListTicketSerializer(serializers.Serializer):
+    tickets = TicketSerializer(many=True)
+
+
 class TicketCreateSerializer(serializers.Serializer):
     class TicketCreateRequestSerializer(serializers.Serializer):
         gift_date = serializers.DateField()
         description = serializers.CharField()
         user_relation_id = serializers.CharField()
+        is_special = serializers.BooleanField(required=False)
         status = serializers.ChoiceField(choices=Ticket.STATUS_CHOICES, required=False)
 
     id = serializers.CharField(read_only=True)
@@ -41,7 +50,6 @@ class TicketUseSerializer(serializers.Serializer):
     class TicketUseRequestSerializer(serializers.Serializer):
         use_description = serializers.CharField()
 
-    id = serializers.CharField(read_only=True)
     ticket = TicketUseRequestSerializer(write_only=True)
 
 

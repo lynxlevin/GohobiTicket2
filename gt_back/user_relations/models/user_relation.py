@@ -1,6 +1,7 @@
 from typing import Optional
 
 from django.db import models
+from django.db.models import Q
 from users.models import User
 
 
@@ -16,6 +17,19 @@ class UserRelationQuerySet(models.QuerySet):
 
     def filter_by_giving_user_id(self, user_id) -> "UserRelationQuerySet":
         return self.filter(giving_user__id=user_id)
+
+    def filter_eq_user_id(self, user_id) -> "UserRelationQuerySet":
+        return self.filter(Q(giving_user_id=user_id) | Q(receiving_user_id=user_id))
+
+    def select_giving_user(self) -> "UserRelationQuerySet":
+        return self.select_related('giving_user')
+
+    def select_receiving_user(self) -> "UserRelationQuerySet":
+        return self.select_related('receiving_user')
+
+    def order_by_created_at(self, desc=False) -> "UserRelationQuerySet":
+        key = "-created_at" if desc else "created_at"
+        return self.order_by(key)
 
 
 class UserRelation(models.Model):

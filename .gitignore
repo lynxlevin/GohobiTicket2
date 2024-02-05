@@ -1,8 +1,5 @@
 __pycache__/
-db.sqlite3
 .env
-todos.md
 fixtures/
 django.log
 gt_back/static/dist
-gt_back/tmp

@@ -27,23 +27,17 @@ class RetrieveUserRelation:
         if not user_relation:
             raise exceptions.NotFound()
 
-        if not user_id in [
+        if user_id not in [
             user_relation.giving_user.id,
             user_relation.receiving_user.id,
         ]:
-            raise exceptions.PermissionDenied()
+            raise exceptions.NotFound()
 
         is_giving_relation = user_relation.giving_user.id == user_id
 
-        user_relation_info = self._get_user_relation_info(
-            user_relation, user_id, is_giving_relation
-        )
-        other_receiving_relations = self._get_other_receiving_relations(
-            user_relation, user_id
-        )
-        available_tickets = self._get_available_tickets(
-            user_relation_id, is_giving_relation
-        )
+        user_relation_info = self._get_user_relation_info(user_relation, user_id, is_giving_relation)
+        other_receiving_relations = self._get_other_receiving_relations(user_relation, user_id)
+        available_tickets = self._get_available_tickets(user_relation_id, is_giving_relation)
         used_tickets = self._get_used_tickets(user_relation_id)
 
         return {
@@ -56,45 +50,33 @@ class RetrieveUserRelation:
             "used_tickets": used_tickets,
         }
 
-    def _get_user_relation_info(
-        self, user_relation: UserRelation, user_id: str, is_giving_relation: bool
-    ) -> dict:
-        related_user = (
-            user_relation.receiving_user
-            if is_giving_relation
-            else user_relation.giving_user
-        )
+    def _get_user_relation_info(self, user_relation: UserRelation, user_id: str, is_giving_relation: bool) -> dict:
+        related_user = user_relation.receiving_user if is_giving_relation else user_relation.giving_user
         user_relation_info = {
             "id": user_relation.id,
             "related_user_nickname": related_user.username,
             "is_giving_relation": is_giving_relation,
             "ticket_image": user_relation.ticket_img,
             "background_color": user_relation.background_color,
-            "corresponding_relation_id": user_relation.corresponding_relation.id,
+            "corresponding_relation_id": user_relation.corresponding_relation.id
+            if user_relation.corresponding_relation
+            else "",
         }
 
         return user_relation_info
 
-    def _get_other_receiving_relations(
-        self, user_relation: UserRelation, user_id: str
-    ) -> list[dict]:
+    def _get_other_receiving_relations(self, user_relation: UserRelation, user_id: str) -> list[dict]:
         # MYMEMO: resolve n + 1
         other_receiving_relations = list(
-            UserRelation.objects.filter_by_receiving_user_id(user_id)
-            .exclude(id=user_relation.id)
-            .all()
+            UserRelation.objects.filter_by_receiving_user_id(user_id).exclude(id=user_relation.id).all()
         )
         return [
             {"id": relation.id, "related_user_nickname": relation.giving_user.username}
             for relation in other_receiving_relations
         ]
 
-    def _get_available_tickets(
-        self, user_relation_id: str, is_giving_relation: bool
-    ) -> list[Ticket]:
-        qs = Ticket.objects.filter_eq_user_relation_id(
-            user_relation_id
-        ).filter_unused_tickets()
+    def _get_available_tickets(self, user_relation_id: str, is_giving_relation: bool) -> list[Ticket]:
+        qs = Ticket.objects.filter_eq_user_relation_id(user_relation_id).filter_unused_tickets()
 
         if not is_giving_relation:
             qs = qs.exclude_eq_status(Ticket.STATUS_DRAFT)

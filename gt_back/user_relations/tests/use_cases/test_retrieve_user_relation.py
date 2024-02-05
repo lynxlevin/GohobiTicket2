@@ -56,15 +56,11 @@ class TestUserRelationViews(TestCase):
     def test_retrieve_non_related_user(self):
         non_related_relation = UserRelationFactory()
 
-        with self.assertRaises(PermissionDenied):
-            RetrieveUserRelation().execute(
-                non_related_relation.id, self.user.id
-            )
+        with self.assertRaises(NotFound):
+            RetrieveUserRelation().execute(non_related_relation.id, self.user.id)
 
     def test_retrieve_non_existent_relation(self):
         non_existent_relation_id = "-1"
 
         with self.assertRaises(NotFound):
-            RetrieveUserRelation().execute(
-                non_existent_relation_id, self.user.id
-            )
+            RetrieveUserRelation().execute(non_existent_relation_id, self.user.id)

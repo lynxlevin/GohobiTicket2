@@ -18,9 +18,12 @@ class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
     def filter_in_tag_ids(self, tag_ids: list[uuid.UUID]) -> "DiaryTagQuerySet":
         return self.filter(id__in=tag_ids)
 
-    def order_by_sort_no(self, desc: bool=False) -> "DiaryTagQuerySet":
+    def order_by_sort_no(self, desc: bool = False) -> "DiaryTagQuerySet":
         key = "-sort_no" if desc else "sort_no"
         return self.order_by(key)
+
+    def annotate_diary_count(self) -> "DiaryTagQuerySet":
+        return self.annotate(diary_count=models.Count("diary"))
 
 
 class DiaryTag(models.Model):
@@ -31,17 +34,5 @@ class DiaryTag(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        constraints = (
-            models.UniqueConstraint(
-                fields=["text", "user_relation"],
-                name="unique_text_user_relation",
-            ),
-            models.UniqueConstraint(
-                fields=["sort_no", "user_relation"],
-                name="unique_sort_no_user_relation",
-            ),
-        )
 
     objects: DiaryTagQuerySet = DiaryTagQuerySet.as_manager()

@@ -1,0 +1,43 @@
+import logging
+
+from rest_framework import exceptions
+from tickets.models import Ticket
+from user_relations.models import UserRelation
+from users.models import User
+
+logger = logging.getLogger(__name__)
+
+
+class ListTicket:
+    def __init__(self):
+        self.exception_log_title = f"{__class__.__name__}_exception"
+
+    def execute(
+        self,
+        user: User,
+        queries: dict,
+    ):
+        logger.info(self.__class__.__name__, extra={"queries": queries, "user": user})
+
+        user_relation = UserRelation.objects.get_by_id(queries["user_relation_id"])
+
+        if user_relation is None:
+            raise exceptions.NotFound(detail=f"{self.exception_log_title}: UserRelation not found.")
+
+        if user not in [user_relation.giving_user, user_relation.receiving_user]:
+            raise exceptions.NotFound(detail=f"{self.exception_log_title}: UserRelation not found.")
+
+        is_giving_relation = user_relation.giving_user == user
+
+        tickets = self._get_tickets(user_relation.id, is_giving_relation)
+
+        return tickets
+
+    def _get_tickets(self, user_relation_id: str, is_giving_relation: bool) -> list[Ticket]:
+        qs = Ticket.objects.filter_eq_user_relation_id(user_relation_id)
+
+        if not is_giving_relation:
+            qs = qs.exclude_eq_status(Ticket.STATUS_DRAFT)
+
+        all_tickets = list(qs.order_by("-gift_date", "-id").all())
+        return all_tickets
