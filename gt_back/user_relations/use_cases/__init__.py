@@ -1,3 +1,2 @@
 from .list_user_relation import ListUserRelation
-from .retrieve_user_relation import RetrieveUserRelation
 from .special_ticket_availability import SpecialTicketAvailability

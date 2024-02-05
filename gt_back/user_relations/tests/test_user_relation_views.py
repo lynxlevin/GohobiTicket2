@@ -2,7 +2,6 @@ from datetime import date
 
 from django.test import Client, TestCase
 from rest_framework import status
-from tickets.models import Ticket
 from tickets.tests.ticket_factory import TicketFactory
 from user_relations.tests.user_relation_factory import UserRelationFactory
 from users.tests.user_factory import UserFactory
@@ -48,81 +47,6 @@ class TestUserRelationViews(TestCase):
             ]
         }
         self.assertDictEqual(expected, response.data)
-
-    # MYMEMO: 内容ごとに user_relations/id/tickets とかに分けるのが REST かも
-    def test_retrieve__receiving_relation(self):
-        """
-        Get /api/user_relations/{id}
-        When receiving relation
-        """
-        receiving_relation = UserRelationFactory(receiving_user=self.user)
-        tickets_to_be_returned = [
-            TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=receiving_relation),
-            TicketFactory(status=Ticket.STATUS_READ, user_relation=receiving_relation),
-            TicketFactory(status=Ticket.STATUS_EDITED, user_relation=receiving_relation),
-        ]
-        _tickets_not_returned = [
-            TicketFactory(status=Ticket.STATUS_DRAFT, user_relation=receiving_relation),
-            TicketFactory(status=Ticket.STATUS_UNREAD),
-        ]
-
-        client = Client()
-        client.force_login(self.user)
-        response = client.get(f"/api/user_relations/{receiving_relation.id}/")
-
-        self.assertEqual(status.HTTP_200_OK, response.status_code)
-
-        available_tickets = response.data["available_tickets"]
-        self.assertEqual(len(tickets_to_be_returned), len(available_tickets))
-
-    def test_retrieve__giving_relation(self):
-        """
-        Get /api/user_relations/{id}
-        When giving relation
-        """
-        giving_relation = UserRelationFactory(giving_user=self.user)
-        tickets_to_be_returned = [
-            TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=giving_relation),
-            TicketFactory(status=Ticket.STATUS_READ, user_relation=giving_relation),
-            TicketFactory(status=Ticket.STATUS_EDITED, user_relation=giving_relation),
-            TicketFactory(status=Ticket.STATUS_DRAFT, user_relation=giving_relation),
-        ]
-        _tickets_not_returned = [
-            TicketFactory(status=Ticket.STATUS_UNREAD),
-        ]
-
-        client = Client()
-        client.force_login(self.user)
-        response = client.get(f"/api/user_relations/{giving_relation.id}/")
-
-        self.assertEqual(status.HTTP_200_OK, response.status_code)
-
-        available_tickets = response.data["available_tickets"]
-        self.assertEqual(len(tickets_to_be_returned), len(available_tickets))
-
-    def test_retrieve__not_authenticated(self):
-        """
-        Get /api/user_relations/{id}
-        403 Forbidden: when not logged in
-        """
-        giving_relation = UserRelationFactory(giving_user=self.user)
-
-        client = Client()
-        response = client.get(f"/api/user_relations/{giving_relation.id}/")
-
-        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
-
-    def test_retrieve__non_related_user(self):
-        """
-        Get /api/user_relations/{id}
-        404 NotFound: when wrong login
-        """
-        non_related_relation = UserRelationFactory()
-        client = Client()
-        client.force_login(self.user)
-        response = client.get(f"/api/user_relations/{non_related_relation.id}/")
-
-        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
     def test_check_special_ticket_availablity__True(self):
         """
