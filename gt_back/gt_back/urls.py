@@ -1,5 +1,4 @@
 from diaries import views as diary_views
-from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 from tickets import views as ticket_views
@@ -15,5 +14,4 @@ router.register(r"diary_tags", diary_views.DiaryTagViewSet)
 urlpatterns = [
     path("api/", include(router.urls)),
     path("user/", include("users.urls")),
-    path("admin/", admin.site.urls),
 ]
