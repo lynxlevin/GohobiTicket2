@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
     "rest_framework",
     "tickets.apps.TicketsConfig",
     "user_relations.apps.UserRelationsConfig",
@@ -57,22 +56,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "gt_back.urls"
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "static")],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
 
 WSGI_APPLICATION = "gt_back.wsgi.application"
 
@@ -126,15 +109,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.0/howto/static-files/
-
-STATIC_URL = "static/"
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static", "dist", "static"),
-    os.path.join(BASE_DIR, "static", "images"),
-)
 
 # my reference: https://testdriven.io/blog/django-spa-auth/#frontend-served-from-django
 CSRF_COOKIE_SAMESITE = "Strict"
