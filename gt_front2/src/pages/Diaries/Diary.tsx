@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { memo, useState } from 'react';
 import { IDiary } from '../../apis/DiaryAPI';
 import EditDiaryDialog from './EditDiaryDialog';
+import MoonPhase from './MoonPhase';
 
 interface DiaryProps {
     diary: IDiary;
@@ -16,12 +17,15 @@ const Diary = (props: DiaryProps) => {
 
     const [isEditDiaryDialogOpen, setIsEditDiaryDialogOpen] = useState(false);
 
+    const date = new Date(diary.date);
+
     return (
         <StyledGrid item xs={12} sm={6} md={4}>
             <Card className='card'>
                 <CardContent>
+                    <MoonPhase date={date} />
                     <div className='relative-div'>
-                        <Typography className='diary-date'>{format(new Date(diary.date), 'yyyy-MM-dd E')}</Typography>
+                        <Typography className='diary-date'>{format(date, 'yyyy-MM-dd E')}</Typography>
                         <IconButton className='edit-button' onClick={() => setIsEditDiaryDialogOpen(true)}>
                             <EditIcon />
                         </IconButton>

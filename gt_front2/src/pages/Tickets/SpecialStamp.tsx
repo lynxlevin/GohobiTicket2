@@ -1,8 +1,6 @@
-import {
-    CardMedia,
-} from '@mui/material';
-import styled from '@emotion/styled';
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { CardMedia } from '@mui/material';
 
 interface SpecialStampProps {
     randKey?: number;
@@ -14,20 +12,17 @@ const SpecialStamp = (props: SpecialStampProps) => {
     return (
         // https://www.pressman.ne.jp/archives/18598
         <SpecialStampDiv randKey={randKey ?? 0}>
-            <CardMedia
-                className='stamp'
-                component="img"
-                image='/apple-touch-icon.png'
-            />
+            <CardMedia className='stamp' component='img' image='/apple-touch-icon.png' />
             <div className='postmark-div'>
                 <div className='postmark'>SPECIAL</div>
             </div>
         </SpecialStampDiv>
     );
-}
+};
 
-const postmarkPosition = (props: { randKey: number; }) => {
-    let top, left;
+const postmarkPosition = (props: { randKey: number }) => {
+    let top;
+    let left;
     switch (props.randKey % 5) {
         case 0:
             top = 60;
@@ -53,10 +48,10 @@ const postmarkPosition = (props: { randKey: number; }) => {
     return css`
         top: ${top}px;
         left: ${left}px;
-    `
-}
+    `;
+};
 
-const postmarkRotation = (props: { randKey: number; }) => {
+const postmarkRotation = (props: { randKey: number }) => {
     let deg;
     switch (props.randKey % 3) {
         case 0:
@@ -72,8 +67,8 @@ const postmarkRotation = (props: { randKey: number; }) => {
     return css`
         -webkit-transform: rotate(${deg});
         transform: rotate(${deg});
-    `
-}
+    `;
+};
 
 const SpecialStampDiv = styled.div`
     height: 200px;
