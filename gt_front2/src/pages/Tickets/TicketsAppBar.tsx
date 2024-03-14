@@ -2,11 +2,28 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
-import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
-import { useContext, useState } from 'react';
+import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
+import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IUserRelation, UserRelationContext } from '../../contexts/user-relation-context';
 import useTicketContext from '../../hooks/useTicketContext';
+
+interface HideOnScrollProps {
+    children: React.ReactElement;
+}
+
+const HideOnScroll = (props: HideOnScrollProps) => {
+    const { children } = props;
+    const trigger = useScrollTrigger({
+        target: window,
+    });
+
+    return (
+        <Slide appear={false} direction='down' in={!trigger}>
+            {children}
+        </Slide>
+    );
+};
 
 interface TicketsAppBarProps {
     handleLogout: () => Promise<void>;
@@ -27,51 +44,53 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
     );
 
     return (
-        <AppBar position='fixed' sx={{ bgcolor: 'primary.light' }}>
-            <Toolbar>
-                <div style={{ flexGrow: 1 }} />
-                <IconButton onClick={() => setTopBarDrawerOpen(true)}>
-                    <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
-                </IconButton>
-                <Drawer anchor='right' open={topBarDrawerOpen} onClose={() => setTopBarDrawerOpen(false)}>
-                    <List>
-                        <ListItem>
-                            <ListItemButton disableGutters>
-                                <ListItemIcon>
-                                    <PersonIcon />
-                                </ListItemIcon>
-                                <ListItemText>他の相手</ListItemText>
-                            </ListItemButton>
-                            <ExpandMore />
-                        </ListItem>
-                        <List component='div' disablePadding>
-                            {otherRelations.map(relation => (
-                                <ListItem key={relation.id}>
-                                    <ListItemButton
-                                        onClick={() => {
-                                            clearTickets();
-                                            navigate(`/tickets?user_relation_id=${relation.id}`);
-                                            setTopBarDrawerOpen(false);
-                                            window.scroll({ top: 0 });
-                                        }}
-                                    >
-                                        <ListItemText inset>{relation.related_username}</ListItemText>
-                                    </ListItemButton>
-                                </ListItem>
-                            ))}
+        <HideOnScroll>
+            <AppBar position='fixed' sx={{ bgcolor: 'primary.light' }}>
+                <Toolbar>
+                    <div style={{ flexGrow: 1 }} />
+                    <IconButton onClick={() => setTopBarDrawerOpen(true)}>
+                        <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
+                    </IconButton>
+                    <Drawer anchor='right' open={topBarDrawerOpen} onClose={() => setTopBarDrawerOpen(false)}>
+                        <List>
+                            <ListItem>
+                                <ListItemButton disableGutters>
+                                    <ListItemIcon>
+                                        <PersonIcon />
+                                    </ListItemIcon>
+                                    <ListItemText>他の相手</ListItemText>
+                                </ListItemButton>
+                                <ExpandMore />
+                            </ListItem>
+                            <List component='div' disablePadding>
+                                {otherRelations.map(relation => (
+                                    <ListItem key={relation.id}>
+                                        <ListItemButton
+                                            onClick={() => {
+                                                clearTickets();
+                                                navigate(`/tickets?user_relation_id=${relation.id}`);
+                                                setTopBarDrawerOpen(false);
+                                                window.scroll({ top: 0 });
+                                            }}
+                                        >
+                                            <ListItemText inset>{relation.related_username}</ListItemText>
+                                        </ListItemButton>
+                                    </ListItem>
+                                ))}
+                            </List>
+                            <ListItem>
+                                <ListItemButton disableGutters onClick={handleLogout}>
+                                    <ListItemIcon>
+                                        <LogoutIcon />
+                                    </ListItemIcon>
+                                    <ListItemText>ログアウト</ListItemText>
+                                </ListItemButton>
+                            </ListItem>
                         </List>
-                        <ListItem>
-                            <ListItemButton disableGutters onClick={handleLogout}>
-                                <ListItemIcon>
-                                    <LogoutIcon />
-                                </ListItemIcon>
-                                <ListItemText>ログアウト</ListItemText>
-                            </ListItemButton>
-                        </ListItem>
-                    </List>
-                </Drawer>
-            </Toolbar>
-        </AppBar>
+                    </Drawer>
+                </Toolbar>
+            </AppBar>
+        </HideOnScroll>
     );
 };
 export default TicketsAppBar;
