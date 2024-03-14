@@ -11,6 +11,7 @@ import useUserAPI from '../../hooks/useUserAPI';
 import Ticket from './Ticket';
 import TicketForm from './TicketForm';
 import TicketsAppBar from './TicketsAppBar';
+import TicketsBottomNav from './TicketsBottomNav';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = () => {
@@ -44,6 +45,7 @@ const Tickets = () => {
     return (
         <>
             <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
+            <TicketsBottomNav currentRelation={currentRelation} showOnlyUsed={showOnlyUsed} lastAvailableTicketRef={lastAvailableTicketRef} />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>
@@ -81,38 +83,16 @@ const Tickets = () => {
                         })}
                     </Grid>
                 </Container>
-                {!showOnlyUsed && (
-                    <ToLastAvailableTicketButton
-                        onClick={() => {
-                            if (lastAvailableTicketRef.current !== null) window.scrollTo({ top: lastAvailableTicketRef.current.offsetTop, behavior: 'smooth' });
-                        }}
-                    >
-                        <KeyboardDoubleArrowDownIcon />
-                    </ToLastAvailableTicketButton>
-                )}
                 <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={imageSrc} alt='mini-ticket' />
             </main>
         </>
     );
 };
 
-const ToLastAvailableTicketButton = styled(IconButton)`
-    font-size: 30px;
-    background: white !important;
-    border-radius: 999px;
-    position: fixed;
-    left: 16px;
-    bottom: 20px;
-    border: 2px solid #ddd;
-    width: 40px;
-    height: 40px;
-    z-index: 100;
-`;
-
 const MiniTicket = styled.img`
     height: 50px;
     position: fixed;
-    bottom: 13px;
+    bottom: 64px;
     right: 13px;
     box-shadow: 2px 2px 7px rgba(18, 47, 61, 0.5), -5px -5px 15px rgba(248, 253, 255, 0.9), inset 5px 5px 15px transparent, inset -5px -5px 15px transparent;
     z-index: 100;

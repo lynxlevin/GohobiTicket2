@@ -9,6 +9,7 @@ import { UserContext } from '../../contexts/user-context';
 import { UserRelationContext } from '../../contexts/user-relation-context';
 import useUserAPI from '../../hooks/useUserAPI';
 import DiariesAppBar from './DiariesAppBar';
+import DiariesBottomNav from './DiariesBottomNav';
 import Diary from './Diary';
 import DiaryForm from './DiaryForm';
 
@@ -49,7 +50,8 @@ const Diaries = () => {
     if (!currentRelation) return <></>;
     return (
         <>
-            <DiariesAppBar handleLogout={handleLogout} userRelationId={userRelationId} refreshDiaries={getDiaries} />
+            <DiariesAppBar handleLogout={handleLogout} userRelationId={userRelationId} />
+            <DiariesBottomNav userRelationId={userRelationId} refreshDiaries={getDiaries} />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>
@@ -75,7 +77,7 @@ const Diaries = () => {
 const MiniLogo = styled.img`
     height: 50px;
     position: fixed;
-    bottom: 13px;
+    bottom: 64px;
     right: 13px;
     box-shadow: 2px 2px 7px rgba(18, 47, 61, 0.5), -5px -5px 15px rgba(248, 253, 255, 0.9), inset 5px 5px 15px transparent, inset -5px -5px 15px transparent;
     z-index: 100;
