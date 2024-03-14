@@ -45,7 +45,7 @@ const Tickets = () => {
     return (
         <>
             <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
-            <TicketsBottomNav currentRelation={currentRelation} />
+            <TicketsBottomNav currentRelation={currentRelation} showOnlyUsed={showOnlyUsed} lastAvailableTicketRef={lastAvailableTicketRef} />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>
@@ -83,33 +83,11 @@ const Tickets = () => {
                         })}
                     </Grid>
                 </Container>
-                {!showOnlyUsed && (
-                    <ToLastAvailableTicketButton
-                        onClick={() => {
-                            if (lastAvailableTicketRef.current !== null) window.scrollTo({ top: lastAvailableTicketRef.current.offsetTop, behavior: 'smooth' });
-                        }}
-                    >
-                        <KeyboardDoubleArrowDownIcon />
-                    </ToLastAvailableTicketButton>
-                )}
                 <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={imageSrc} alt='mini-ticket' />
             </main>
         </>
     );
 };
-
-const ToLastAvailableTicketButton = styled(IconButton)`
-    font-size: 30px;
-    background: white !important;
-    border-radius: 999px;
-    position: fixed;
-    left: 16px;
-    bottom: 66px;
-    border: 2px solid #ddd;
-    width: 40px;
-    height: 40px;
-    z-index: 100;
-`;
 
 const MiniTicket = styled.img`
     height: 50px;
