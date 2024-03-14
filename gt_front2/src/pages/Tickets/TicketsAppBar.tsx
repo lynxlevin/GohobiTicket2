@@ -1,11 +1,8 @@
-import BookIcon from '@mui/icons-material/Book';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import WifiProtectedSetupIcon from '@mui/icons-material/WifiProtectedSetup';
-import { AppBar, Button, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
+import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IUserRelation, UserRelationContext } from '../../contexts/user-relation-context';
@@ -22,7 +19,7 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
     const userRelationContext = useContext(UserRelationContext);
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
-    const { getTickets, clearTickets } = useTicketContext();
+    const { clearTickets } = useTicketContext();
 
     const otherRelations = userRelationContext.userRelations.filter(
         (relation, index, self) =>
@@ -32,31 +29,7 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
     return (
         <AppBar position='fixed' sx={{ bgcolor: 'primary.light' }}>
             <Toolbar>
-                <Button
-                    onClick={() => {
-                        clearTickets();
-                        navigate(`/tickets?user_relation_id=${currentRelation.corresponding_relation_id}`);
-                        window.scroll({ top: 0 });
-                    }}
-                    sx={{ color: 'rgba(0,0,0,0.67)' }}
-                >
-                    {currentRelation.related_username}
-                    <WifiProtectedSetupIcon />
-                </Button>
                 <div style={{ flexGrow: 1 }} />
-                <IconButton onClick={() => getTickets(currentRelation.id)} sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}>
-                    <RefreshIcon />
-                </IconButton>
-                {/* MYMEMO: dynamic user_relation_id */}
-                <IconButton
-                    onClick={() => {
-                        clearTickets();
-                        navigate('/diaries?user_relation_id=1');
-                    }}
-                    sx={{ mr: 2, color: 'rgba(0,0,0,0.67)' }}
-                >
-                    <BookIcon />
-                </IconButton>
                 <IconButton onClick={() => setTopBarDrawerOpen(true)}>
                     <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
                 </IconButton>

@@ -11,6 +11,7 @@ import useUserAPI from '../../hooks/useUserAPI';
 import Ticket from './Ticket';
 import TicketForm from './TicketForm';
 import TicketsAppBar from './TicketsAppBar';
+import TicketsBottomNav from './TicketsBottomNav';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = () => {
@@ -44,6 +45,7 @@ const Tickets = () => {
     return (
         <>
             <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
+            <TicketsBottomNav currentRelation={currentRelation} />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>
@@ -102,7 +104,7 @@ const ToLastAvailableTicketButton = styled(IconButton)`
     border-radius: 999px;
     position: fixed;
     left: 16px;
-    bottom: 20px;
+    bottom: 66px;
     border: 2px solid #ddd;
     width: 40px;
     height: 40px;
@@ -112,7 +114,7 @@ const ToLastAvailableTicketButton = styled(IconButton)`
 const MiniTicket = styled.img`
     height: 50px;
     position: fixed;
-    bottom: 13px;
+    bottom: 64px;
     right: 13px;
     box-shadow: 2px 2px 7px rgba(18, 47, 61, 0.5), -5px -5px 15px rgba(248, 253, 255, 0.9), inset 5px 5px 15px transparent, inset -5px -5px 15px transparent;
     z-index: 100;
