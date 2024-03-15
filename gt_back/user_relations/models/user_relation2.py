@@ -26,7 +26,8 @@ class UserRelation2QuerySet(models.QuerySet):
 class UserRelation2(models.Model):
     user_1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="relations_1")
     user_2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="relations_2")
-    ticket_img = models.CharField(max_length=13)
+    user_1_giving_ticket_img = models.CharField(max_length=13)
+    user_2_giving_ticket_img = models.CharField(max_length=13)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

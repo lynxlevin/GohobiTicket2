@@ -4,6 +4,7 @@ from typing import Optional
 
 from django.db import models
 from user_relations.models import UserRelation, UserRelation2
+from users.models import User
 
 
 class TicketQuerySet(models.QuerySet):
@@ -53,6 +54,7 @@ class Ticket(models.Model):
 
     user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE)
     user_relation_2 = models.ForeignKey(UserRelation2, on_delete=models.CASCADE, blank=True, default=None)
+    giving_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, default=None)
     description = models.TextField(default="", blank=True)
     gift_date = models.DateField()
     use_description = models.TextField(default="", blank=True)
