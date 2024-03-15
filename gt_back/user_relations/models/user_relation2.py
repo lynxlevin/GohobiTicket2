@@ -32,3 +32,6 @@ class UserRelation2(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     objects: UserRelation2QuerySet = UserRelation2QuerySet.as_manager()
+
+    class Meta:
+        db_table = "user_relations_userrelation"

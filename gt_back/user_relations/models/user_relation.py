@@ -22,10 +22,10 @@ class UserRelationQuerySet(models.QuerySet):
         return self.filter(Q(giving_user_id=user_id) | Q(receiving_user_id=user_id))
 
     def select_giving_user(self) -> "UserRelationQuerySet":
-        return self.select_related('giving_user')
+        return self.select_related("giving_user")
 
     def select_receiving_user(self) -> "UserRelationQuerySet":
-        return self.select_related('receiving_user')
+        return self.select_related("receiving_user")
 
     def order_by_created_at(self, desc=False) -> "UserRelationQuerySet":
         key = "-created_at" if desc else "created_at"
@@ -36,18 +36,17 @@ class UserRelation(models.Model):
     # MYMEMO: constantsに移したい
     DEFAULT_BACKGROUND = "rgb(250, 255, 255)"
 
-    giving_user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="giving_relations"
-    )
-    receiving_user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="receiving_relations"
-    )
+    giving_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="giving_relations")
+    receiving_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="receiving_relations")
     ticket_img = models.CharField(max_length=13)
     background_color = models.CharField(max_length=18, default=DEFAULT_BACKGROUND)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     objects: UserRelationQuerySet = UserRelationQuerySet.as_manager()
+
+    class Meta:
+        db_table = "user_relations_userrelation_old"
 
     @property
     def corresponding_relation(self):
