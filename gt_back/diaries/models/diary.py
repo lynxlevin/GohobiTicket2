@@ -2,7 +2,7 @@ import uuid
 from typing import Optional
 
 from django.db import models
-from user_relations.models import UserRelation, UserRelation2
+from user_relations.models import UserRelation2, UserRelationOld
 
 
 class DiaryQuerySet(models.QuerySet):
@@ -28,7 +28,7 @@ class DiaryQuerySet(models.QuerySet):
 
 class Diary(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE)
+    user_relation = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE)
     user_relation_2 = models.ForeignKey(UserRelation2, on_delete=models.CASCADE, blank=True, null=True)
     entry = models.TextField(default="", blank=True)
     date = models.DateField()

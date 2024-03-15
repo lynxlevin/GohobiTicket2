@@ -3,7 +3,7 @@ from datetime import date
 from typing import Optional
 
 from django.db import models
-from user_relations.models import UserRelation, UserRelation2
+from user_relations.models import UserRelation2, UserRelationOld
 from users.models import User
 
 
@@ -52,7 +52,7 @@ class Ticket(models.Model):
         (STATUS_DRAFT, STATUS_DRAFT),
     )
 
-    user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE)
+    user_relation = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE)
     user_relation_2 = models.ForeignKey(UserRelation2, on_delete=models.CASCADE, blank=True, null=True)
     giving_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     description = models.TextField(default="", blank=True)

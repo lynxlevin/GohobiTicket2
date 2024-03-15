@@ -2,12 +2,12 @@ from diaries.models import Diary, DiaryTag
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from tickets.models import Ticket
-from user_relations.models import UserRelation, UserRelation2
+from user_relations.models import UserRelation2, UserRelationOld
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        old_relations: list[UserRelation] = UserRelation.objects.all()
+        old_relations: list[UserRelationOld] = UserRelationOld.objects.all()
 
         for old in old_relations:
             existing_new_relations = UserRelation2.objects.filter(
