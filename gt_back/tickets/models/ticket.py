@@ -3,7 +3,7 @@ from datetime import date
 from typing import Optional
 
 from django.db import models
-from user_relations.models import UserRelation
+from user_relations.models import UserRelation, UserRelation2
 
 
 class TicketQuerySet(models.QuerySet):
@@ -13,8 +13,10 @@ class TicketQuerySet(models.QuerySet):
         except Ticket.DoesNotExist:
             return None
 
-    def filter_eq_user_relation_id(self, user_relation_id: str) -> "TicketQuerySet":
-        return Ticket.objects.filter(user_relation__id=user_relation_id)
+    def filter_eq_user_relation_id(self, user_relation_id: str, use_old=False) -> "TicketQuerySet":
+        if use_old:
+            return Ticket.objects.filter(user_relation__id=user_relation_id)
+        return self.filter(user_relation_2__id=user_relation_id)
 
     def filter_unused_tickets(self) -> "TicketQuerySet":
         return self.filter(use_date=None).order_by("-gift_date", "-id")
@@ -29,9 +31,7 @@ class TicketQuerySet(models.QuerySet):
             target_date.month,
             monthrange(target_date.year, target_date.month)[1],
         )
-        return self.filter(
-            is_special=True, gift_date__gte=start_of_month, gift_date__lte=end_of_month
-        )
+        return self.filter(is_special=True, gift_date__gte=start_of_month, gift_date__lte=end_of_month)
 
     def exclude_eq_status(self, status) -> "TicketQuerySet":
         return self.exclude(status=status)
@@ -52,13 +52,12 @@ class Ticket(models.Model):
     )
 
     user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE)
+    user_relation_2 = models.ForeignKey(UserRelation2, on_delete=models.CASCADE, blank=True, default=None)
     description = models.TextField(default="", blank=True)
     gift_date = models.DateField()
     use_description = models.TextField(default="", blank=True)
     use_date = models.DateField(null=True)
-    status = models.CharField(
-        max_length=8, choices=STATUS_CHOICES, default=STATUS_UNREAD
-    )
+    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=STATUS_UNREAD)
     is_special = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
