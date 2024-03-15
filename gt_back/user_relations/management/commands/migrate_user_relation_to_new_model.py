@@ -23,13 +23,13 @@ class Command(BaseCommand):
                     existing_new_relation.user_1_giving_ticket_img = old.ticket_img
                 existing_new_relation.save()
                 Ticket.objects.filter_eq_user_relation_id(old.id, use_old=True).update(
-                    user_relation_2=existing_new_relation, giving_user=old.giving_user
+                    user_relation=existing_new_relation, giving_user=old.giving_user
                 )
                 Diary.objects.filter_eq_user_relation_id(old.id, use_old=True).update(
-                    user_relation_2=existing_new_relation
+                    user_relation=existing_new_relation
                 )
                 DiaryTag.objects.filter_eq_user_relation_id(old.id, use_old=True).update(
-                    user_relation_2=existing_new_relation
+                    user_relation=existing_new_relation
                 )
             else:
                 new_relation = UserRelation.objects.create(
@@ -39,7 +39,7 @@ class Command(BaseCommand):
                     user_2_giving_ticket_img="",
                 )
                 Ticket.objects.filter_eq_user_relation_id(old.id, use_old=True).update(
-                    user_relation_2=new_relation, giving_user=old.giving_user
+                    user_relation=new_relation, giving_user=old.giving_user
                 )
-                Diary.objects.filter_eq_user_relation_id(old.id, use_old=True).update(user_relation_2=new_relation)
-                DiaryTag.objects.filter_eq_user_relation_id(old.id, use_old=True).update(user_relation_2=new_relation)
+                Diary.objects.filter_eq_user_relation_id(old.id, use_old=True).update(user_relation=new_relation)
+                DiaryTag.objects.filter_eq_user_relation_id(old.id, use_old=True).update(user_relation=new_relation)

@@ -16,8 +16,8 @@ class TicketQuerySet(models.QuerySet):
 
     def filter_eq_user_relation_id(self, user_relation_id: str, use_old=False) -> "TicketQuerySet":
         if use_old:
-            return Ticket.objects.filter(user_relation__id=user_relation_id)
-        return self.filter(user_relation_2__id=user_relation_id)
+            return Ticket.objects.filter(user_relation_old__id=user_relation_id)
+        return self.filter(user_relation__id=user_relation_id)
 
     def filter_unused_tickets(self) -> "TicketQuerySet":
         return self.filter(use_date=None).order_by("-gift_date", "-id")
@@ -52,8 +52,8 @@ class Ticket(models.Model):
         (STATUS_DRAFT, STATUS_DRAFT),
     )
 
-    user_relation = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE)
-    user_relation_2 = models.ForeignKey(UserRelation, on_delete=models.CASCADE, blank=True, null=True)
+    user_relation_old = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE)
+    user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE, blank=True, null=True)
     giving_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     description = models.TextField(default="", blank=True)
     gift_date = models.DateField()

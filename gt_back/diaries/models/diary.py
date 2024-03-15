@@ -14,8 +14,8 @@ class DiaryQuerySet(models.QuerySet):
 
     def filter_eq_user_relation_id(self, user_relation_id: str, use_old=False) -> "DiaryQuerySet":
         if use_old:
-            return self.filter(user_relation__id=user_relation_id)
-        return self.filter(user_relation_2__id=user_relation_id)
+            return self.filter(user_relation_old__id=user_relation_id)
+        return self.filter(user_relation__id=user_relation_id)
 
     def order_by_date(self, desc: bool = False) -> "DiaryQuerySet":
         key = "-date" if desc else "date"
@@ -28,8 +28,8 @@ class DiaryQuerySet(models.QuerySet):
 
 class Diary(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_relation = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE)
-    user_relation_2 = models.ForeignKey(UserRelation, on_delete=models.CASCADE, blank=True, null=True)
+    user_relation_old = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE)
+    user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE, blank=True, null=True)
     entry = models.TextField(default="", blank=True)
     date = models.DateField()
     tags = models.ManyToManyField("DiaryTag", through="DiaryTagRelation")
