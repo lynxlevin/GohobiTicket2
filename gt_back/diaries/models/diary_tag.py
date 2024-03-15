@@ -2,7 +2,7 @@ import uuid
 from typing import Optional
 
 from django.db import models
-from user_relations.models import UserRelation2, UserRelationOld
+from user_relations.models import UserRelation, UserRelationOld
 
 
 class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
@@ -32,7 +32,7 @@ class DiaryTag(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     text = models.CharField(max_length=256)
     user_relation = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE)
-    user_relation_2 = models.ForeignKey(UserRelation2, on_delete=models.CASCADE, blank=True, null=True)
+    user_relation_2 = models.ForeignKey(UserRelation, on_delete=models.CASCADE, blank=True, null=True)
     sort_no = models.IntegerField()
 
     created_at = models.DateTimeField(auto_now_add=True)
