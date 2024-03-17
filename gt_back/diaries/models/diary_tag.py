@@ -31,7 +31,7 @@ class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
 class DiaryTag(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     text = models.CharField(max_length=256)
-    user_relation_old = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE)
+    user_relation_old = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE, blank=True, null=True)
     user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE, blank=True, null=True)
     sort_no = models.IntegerField()
 

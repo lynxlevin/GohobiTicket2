@@ -52,7 +52,7 @@ class Ticket(models.Model):
         (STATUS_DRAFT, STATUS_DRAFT),
     )
 
-    user_relation_old = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE)
+    user_relation_old = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE, blank=True, null=True)
     user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE, blank=True, null=True)
     giving_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     description = models.TextField(default="", blank=True)
