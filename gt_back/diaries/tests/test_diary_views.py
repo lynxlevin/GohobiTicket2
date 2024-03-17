@@ -16,7 +16,7 @@ class TestDiaryViews(TestCase):
 
         cls.user = UserFactory()
         cls.partner = UserFactory()
-        cls.relation = UserRelationFactory(giving_user=cls.user, receiving_user=cls.partner)
+        cls.relation = UserRelationFactory(user_1=cls.user, user_2=cls.partner)
 
     def test_list(self):
         """
@@ -33,7 +33,10 @@ class TestDiaryViews(TestCase):
 
         self.assertEqual(status.HTTP_200_OK, status_code)
 
-        expected = [{"id": str(entry.id), "entry": entry.entry, "date": entry.date.isoformat(), "tags": []} for entry in sorted(diary_entries, key=lambda entry: entry.date, reverse=True)]
+        expected = [
+            {"id": str(entry.id), "entry": entry.entry, "date": entry.date.isoformat(), "tags": []}
+            for entry in sorted(diary_entries, key=lambda entry: entry.date, reverse=True)
+        ]
         self.assertListEqual(expected, body["diaries"])
 
     # def test_list__404_on_wrong_user_relation_id(self):
@@ -115,7 +118,6 @@ class TestDiaryViews(TestCase):
         self.assertEqual(tags[2].id, associated_tags[1].id)
 
     # def test_update__404_on_wrong_user_relations_diary(self):
-
 
     """
     Utility Functions
