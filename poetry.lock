@@ -202,7 +202,7 @@ use_chardet_on_py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "ruff"
-version = "0.1.8"
+version = "0.1.15"
 description = "An extremely fast Python linter and code formatter, written in Rust."
 category = "dev"
 optional = false
@@ -275,7 +275,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "4ea4dd17d9963936f597ff0f46bf56aa3b38741ce3648651ae074f02e6521ec0"
+content-hash = "0948f12cdeced0dcd054999ec9d93bb171d220a121b90dc3ad009fed0a44792f"
 
 [metadata.files]
 asgiref = [

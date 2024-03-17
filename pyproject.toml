@@ -19,7 +19,7 @@ gunicorn = "^20.1.0"
 [tool.poetry.dev-dependencies]
 factory-boy = "^3.2.1"
 types-requests = "^2.31.0"
-ruff = "^0.1.8"
+ruff = "^0.1.15"
 
 [tool.black]
 line-length = 120
