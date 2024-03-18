@@ -27,7 +27,7 @@ class CreateTicket:
         if is_special := data.get("is_special", False):
             has_other_special_tickets_in_month = (
                 Ticket.objects.filter_eq_user_relation_id(user_relation.id)
-                .filter_eq_giving_user(user.id)
+                .filter_eq_giving_user_id(user.id)
                 .filter_special_tickets(data["gift_date"])
                 .count()
                 != 0

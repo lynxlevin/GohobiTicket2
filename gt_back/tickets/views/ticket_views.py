@@ -35,7 +35,7 @@ class TicketViewSet(viewsets.GenericViewSet):
             serializer.is_valid(raise_exception=True)
 
             data = serializer.validated_data
-            tickets = use_case.execute(user=request.user, queries={"user_relation_id": data["user_relation_id"]})
+            tickets = use_case.execute(user=request.user, queries=data)
 
             serializer = ListTicketSerializer({"tickets": tickets})
             return Response(serializer.data)

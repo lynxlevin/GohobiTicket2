@@ -19,25 +19,34 @@ class ListTicket:
     ):
         logger.info(self.__class__.__name__, extra={"queries": queries, "user": user})
 
-        user_relation = UserRelation.objects.get_by_id(queries["user_relation_id"])
+        user_relation_id = queries["user_relation_id"]
+        is_giving = queries["is_giving"]
+        is_receiving = queries["is_receiving"]
+
+        if not any([is_giving, is_receiving]):
+            is_giving = True
+
+        user_relation = UserRelation.objects.get_by_id(user_relation_id)
 
         if user_relation is None:
             raise exceptions.NotFound(detail=f"{self.exception_log_title}: UserRelation not found.")
 
-        if user not in [user_relation.giving_user, user_relation.receiving_user]:
+        if user not in [user_relation.user_1, user_relation.user_2]:
             raise exceptions.NotFound(detail=f"{self.exception_log_title}: UserRelation not found.")
 
-        is_giving_relation = user_relation.giving_user == user
-
-        tickets = self._get_tickets(user_relation.id, is_giving_relation)
+        tickets = self._get_tickets(user_relation.id, user.id, is_giving, is_receiving)
 
         return tickets
 
-    def _get_tickets(self, user_relation_id: str, is_giving_relation: bool) -> list[Ticket]:
+    def _get_tickets(self, user_relation_id: str, user_id: str, is_giving: bool, is_receiving: bool) -> list[Ticket]:
         qs = Ticket.objects.filter_eq_user_relation_id(user_relation_id)
 
-        if not is_giving_relation:
-            qs = qs.exclude_eq_status(Ticket.STATUS_DRAFT)
+        if is_giving:
+            qs = qs.filter_eq_giving_user_id(user_id)
+
+        if is_receiving:
+            # MYMEMO: givingもreceivingもTrueの時、なにも帰らないので変な感じ
+            qs = qs.exclude_eq_giving_user_id(user_id).exclude_eq_status(Ticket.STATUS_DRAFT)
 
         all_tickets = list(qs.order_by("-gift_date", "-id").all())
         return all_tickets

@@ -1,0 +1,27 @@
+# DiaryTag
+
+###
+# @name get_csrf
+GET {{endpoint}}/user/csrf/
+
+###
+# @name login
+POST {{endpoint}}/user/login/
+Content-Type: application/json
+X-CSRFToken: {{get_csrf.response.headers.X-CSRFToken}}
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+###
+@relation_id=1
+
+###
+# @name list_giving_tickets
+GET {{endpoint}}/api/tickets/?user_relation_id={{relation_id}}&is_giving
+
+###
+# @name list_receiving_tickets
+GET {{endpoint}}/api/tickets/?user_relation_id={{relation_id}}&is_receiving

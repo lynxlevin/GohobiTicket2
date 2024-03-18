@@ -19,8 +19,11 @@ class TicketQuerySet(models.QuerySet):
             return Ticket.objects.filter(user_relation_old__id=user_relation_id)
         return self.filter(user_relation__id=user_relation_id)
 
-    def filter_eq_giving_user(self, user_id: str) -> "TicketQuerySet":
+    def filter_eq_giving_user_id(self, user_id: str) -> "TicketQuerySet":
         return self.filter(giving_user_id=user_id)
+
+    def exclude_eq_giving_user_id(self, user_id: str) -> "TicketQuerySet":
+        return self.exclude(giving_user_id=user_id)
 
     def filter_unused_tickets(self) -> "TicketQuerySet":
         return self.filter(use_date=None).order_by("-gift_date", "-id")
