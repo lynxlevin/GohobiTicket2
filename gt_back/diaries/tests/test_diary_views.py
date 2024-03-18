@@ -20,7 +20,7 @@ class TestDiaryViews(TestCase):
 
     def test_list(self):
         """
-        Get /api/diaries/?user_relation_ids={relation_id}
+        Get /api/diaries/?user_relation_id={relation_id}
         """
         diary_entries = [
             DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=2))),
@@ -68,23 +68,22 @@ class TestDiaryViews(TestCase):
         self.assertEqual(tags[0].id, associated_tags[0].id)
         self.assertEqual(tags[1].id, associated_tags[1].id)
 
-    # MYMEMO: add this after refactoring UserRelation
-    # def test_create__403_on_wrong_user_relation_id(self):
-    #     """
-    #     Post /api/diaries/
-    #     Wrong user_relation
-    #     """
-    #     other_relation = UserRelationFactory()
-    #     params = {
-    #         "user_relation_id": str(other_relation.id),
-    #         "entry": "Newly created entry.",
-    #         "date": date.today().isoformat(),
-    #         "tag_ids": [],
-    #     }
+    def test_create__404_on_wrong_user_relation_id(self):
+        """
+        Post /api/diaries/
+        Wrong user_relation
+        """
+        other_relation = UserRelationFactory()
+        params = {
+            "user_relation_id": str(other_relation.id),
+            "entry": "Newly created entry.",
+            "date": date.today().isoformat(),
+            "tag_ids": [],
+        }
 
-    #     status_code, body = self._make_post_request(self.user, self.base_path, params)
+        status_code, body = self._make_post_request(self.user, self.base_path, params)
 
-    #     self.assertEqual(status.HTTP_403_FORBIDDEN, status_code)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, status_code)
 
     def test_update(self):
         """

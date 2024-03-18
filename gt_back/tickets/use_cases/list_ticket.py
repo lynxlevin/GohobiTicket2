@@ -26,12 +26,9 @@ class ListTicket:
         if not any([is_giving, is_receiving]):
             is_giving = True
 
-        user_relation = UserRelation.objects.get_by_id(user_relation_id)
+        user_relation = UserRelation.objects.filter_eq_user_id(user.id).get_by_id(user_relation_id)
 
         if user_relation is None:
-            raise exceptions.NotFound(detail=f"{self.exception_log_title}: UserRelation not found.")
-
-        if user not in [user_relation.user_1, user_relation.user_2]:
             raise exceptions.NotFound(detail=f"{self.exception_log_title}: UserRelation not found.")
 
         tickets = self._get_tickets(user_relation.id, user.id, is_giving, is_receiving)

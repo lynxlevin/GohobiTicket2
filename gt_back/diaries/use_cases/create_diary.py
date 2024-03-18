@@ -1,6 +1,9 @@
 import logging
 from typing import TYPE_CHECKING
 
+from rest_framework import exceptions
+from user_relations.models import UserRelation
+
 from ..models import Diary, DiaryTag
 
 if TYPE_CHECKING:
@@ -16,7 +19,14 @@ class CreateDiary:
     def execute(self, user: "User", data: dict) -> Diary:
         logger.info(self.__class__.__name__, extra={"user": user, "data": data})
 
-        entry, date, user_relation_id, tag_ids = data.values()
+        entry = data["entry"]
+        date = data["date"]
+        user_relation_id = data["user_relation_id"]
+        tag_ids = data["tag_ids"]
+
+        user_relation = UserRelation.objects.filter_eq_user_id(user.id).get_by_id(user_relation_id)
+        if user_relation is None:
+            raise exceptions.NotFound()
 
         diary = Diary(
             entry=entry,
