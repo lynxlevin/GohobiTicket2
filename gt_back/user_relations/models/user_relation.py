@@ -35,3 +35,10 @@ class UserRelation(models.Model):
 
     class Meta:
         db_table = "user_relations_userrelation"
+
+    def get_related_user(self, user_id: str) -> Optional[User]:
+        if user_id == self.user_1_id:
+            return self.user_2
+        if user_id == self.user_2_id:
+            return self.user_1
+        return None

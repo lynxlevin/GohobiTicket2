@@ -4,9 +4,8 @@ from rest_framework import serializers
 class UserRelationSerializer(serializers.Serializer):
     id = serializers.CharField()
     related_username = serializers.CharField()
-    is_giving_relation = serializers.BooleanField()
-    ticket_image = serializers.CharField()
-    corresponding_relation_id = serializers.CharField()
+    user_1_giving_ticket_img = serializers.CharField()
+    user_2_giving_ticket_img = serializers.CharField()
 
 
 class ListUserRelationSerializer(serializers.Serializer):
