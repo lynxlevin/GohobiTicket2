@@ -12,8 +12,8 @@ class TestSlackMessengerForUseTicket(TestCase):
     def test_generate_message(self):
         normal_ticket = TicketFactory()
 
-        receiving_user_name = normal_ticket.user_relation.receiving_user.username
-        giving_user_name = normal_ticket.user_relation.giving_user.username
+        giving_user_name = normal_ticket.giving_user.username
+        receiving_user_name = normal_ticket.receiving_user.username
         expected_normal_message = {
             "text": f"{receiving_user_name}がチケットを使ったよ",
             "blocks": [
@@ -44,8 +44,8 @@ class TestSlackMessengerForUseTicket(TestCase):
 
         special_ticket = TicketFactory(is_special=True)
 
-        receiving_user_name = special_ticket.user_relation.receiving_user.username
-        giving_user_name = special_ticket.user_relation.giving_user.username
+        giving_user_name = special_ticket.giving_user.username
+        receiving_user_name = special_ticket.receiving_user.username
         expected_special_message = {
             "text": f"{receiving_user_name}が特別チケットを使ったよ",
             "blocks": [
@@ -94,13 +94,9 @@ class TestSlackMessengerForUseTicket(TestCase):
                 messenger = SlackMessengerForUseTicket()
                 messenger.generate_message(condition["ticket"])
 
-                self.assertDictEqual(
-                    condition["expected_message"], messenger.message_dict
-                )
+                self.assertDictEqual(condition["expected_message"], messenger.message_dict)
 
-    @mock.patch(
-        "tickets.utils.slack_messenger.SlackMessenger.send_message", autospec=True
-    )
+    @mock.patch("tickets.utils.slack_messenger.SlackMessenger.send_message", autospec=True)
     def test_send_message(self, slack_messenger_mock):
         logger = logging.getLogger("tickets.utils.slack_messenger_for_use_ticket")
 
@@ -116,14 +112,10 @@ class TestSlackMessengerForUseTicket(TestCase):
 
         slack_messenger_mock.assert_called_once_with(messenger, url, message_dict)
 
-        expected_log = [
-            "INFO:tickets.utils.slack_messenger_for_use_ticket:Successfully sent message to Slack"
-        ]
+        expected_log = ["INFO:tickets.utils.slack_messenger_for_use_ticket:Successfully sent message to Slack"]
         self.assertEqual(cm.output, expected_log)
 
-    @mock.patch(
-        "tickets.utils.slack_messenger.SlackMessenger.send_message", autospec=True
-    )
+    @mock.patch("tickets.utils.slack_messenger.SlackMessenger.send_message", autospec=True)
     def test_send_message_error(self, slack_messenger_mock):
         stub_exception = requests.exceptions.HTTPError()
         stub_response = requests.Response()
@@ -142,8 +134,6 @@ class TestSlackMessengerForUseTicket(TestCase):
         with self.assertLogs(logger=logger, level=logging.INFO) as cm:
             messenger.send_message()
 
-        expected_log = [
-            "ERROR:tickets.utils.slack_messenger_for_use_ticket:Slack message error"
-        ]
+        expected_log = ["ERROR:tickets.utils.slack_messenger_for_use_ticket:Slack message error"]
         self.assertEqual(cm.output, expected_log)
         self.assertEqual(cm.output, expected_log)
