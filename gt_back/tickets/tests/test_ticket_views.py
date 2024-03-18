@@ -18,7 +18,7 @@ class TestTicketViews(TestCase):
 
     def test_list__receiving_relation(self):
         """
-        Get /api/tickets/?user_relation_id={user_relation_id}
+        Get /api/tickets/?user_relation_id={user_relation_id}&is_receiving
         """
         expected_available_tickets = [
             TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.relation, giving_user=self.partner),
@@ -53,7 +53,7 @@ class TestTicketViews(TestCase):
 
     def test_list__giving_relation(self):
         """
-        Get /api/tickets/?user_relation_id={user_relation_id}
+        Get /api/tickets/?user_relation_id={user_relation_id}&is_giving
         """
         expected_available_tickets = [
             TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.relation, giving_user=self.user),
@@ -192,12 +192,12 @@ class TestTicketViews(TestCase):
         body = response.json()
         ticket = body["ticket"]
 
-        # MYMEMO: このテストなんかおかしい？already_existsなのに作られているっぽい
+        # Non special ticket will be created
+        self.assertFalse(ticket["is_special"])
         self.assertIsNotNone(ticket["id"])
         self.assertEqual(params["ticket"]["gift_date"], ticket["gift_date"])
         self.assertEqual(params["ticket"]["description"], ticket["description"])
         self.assertEqual(Ticket.STATUS_UNREAD, ticket["status"])
-        self.assertFalse(ticket["is_special"])
         self.assertIsNone(ticket.get("use_date"))
 
     def test_partial_update__description(self):
