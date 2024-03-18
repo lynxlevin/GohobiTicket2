@@ -1,9 +1,8 @@
 import logging
-from typing import Set, Tuple
+from typing import Set
 
 from rest_framework import exceptions
 from tickets.models import Ticket
-from tickets.utils import _is_none, _is_not_giving_user
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -25,14 +24,15 @@ class PartialUpdateTicket:
 
         self.ticket = Ticket.objects.get_by_id(ticket_id)
 
-        if _is_none(self.ticket):
-            raise exceptions.NotFound(
-                detail=f"{self.exception_log_title}: Ticket not found."
-            )
+        if self.ticket is None:
+            raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
 
         user_relation = self.ticket.user_relation
 
-        if _is_not_giving_user(user, user_relation):
+        if user.id not in (user_relation.user_1_id, user_relation.user_2_id):
+            raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
+
+        if self.ticket.giving_user_id != user.id:
             raise exceptions.PermissionDenied(
                 detail=f"{self.exception_log_title}: Only the giving user may update ticket."
             )
@@ -57,9 +57,7 @@ class PartialUpdateTicket:
 
     def _check_legitimacy_of_status(self, status_to_be: str):
         if status_to_be == Ticket.STATUS_DRAFT:
-            raise exceptions.PermissionDenied(
-                detail=f"{self.exception_log_title}: Tickets cannot be updated to draft."
-            )
+            raise exceptions.PermissionDenied(detail=f"{self.exception_log_title}: Tickets cannot be updated to draft.")
 
     def _update_status(self, status_to_be: str):
         self.ticket.status = status_to_be

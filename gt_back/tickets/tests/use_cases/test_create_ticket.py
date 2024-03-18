@@ -3,7 +3,6 @@ from rest_framework import exceptions
 from tickets.models import Ticket
 from tickets.use_cases import CreateTicket
 from user_relations.tests.user_relation_factory import UserRelationFactory
-from users.models import User
 from users.tests.user_factory import UserFactory
 
 
@@ -13,25 +12,16 @@ class TestCreateTicket(TestCase):
         cls.use_case_name = "tickets.use_cases.create_ticket"
 
         cls.user = UserFactory()
-        cls.giving_relation_id = UserRelationFactory(giving_user=cls.user).id
-        cls.receiving_relation_id = UserRelationFactory(receiving_user=cls.user).id
+        cls.relation_id = UserRelationFactory(user_1=cls.user).id
         cls.unrelated_relation_id = UserRelationFactory().id
         cls.non_existent_relation_id = -1
 
     def test_execute_error_bad_relation(self):
-        with self.subTest(case="receiving_relation"):
-            self._when_created_should_raise_exception(
-                self.receiving_relation_id,
-                exception=exceptions.PermissionDenied,
-                exception_message="Only the giving user may create ticket.",
-            )
-            self._then_ticket_is_not_created()
-
         with self.subTest(case="unrelated_relation"):
             self._when_created_should_raise_exception(
                 self.unrelated_relation_id,
-                exception=exceptions.PermissionDenied,
-                exception_message="Only the giving user may create ticket.",
+                exception=exceptions.NotFound,
+                exception_message="UserRelation not found.",
             )
             self._then_ticket_is_not_created()
 

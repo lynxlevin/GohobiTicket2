@@ -16,28 +16,22 @@ class TestPartialUpdateTicket(TestCase):
         cls.use_case_name = "tickets.use_cases.partial_update_ticket"
 
         cls.user = UserFactory()
-        cls.giving_relation = UserRelationFactory(giving_user=cls.user)
-        cls.receiving_relation = UserRelationFactory(receiving_user=cls.user)
+        cls.partner = UserFactory()
+        cls.relation = UserRelationFactory(user_1=cls.user, user_2=cls.partner)
 
-    def test_update_status(self):
-        with self.subTest(case="unread_to_read"):
-            unread_ticket = TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.giving_relation)
-            cm = self._when_user_updates_ticket_status(unread_ticket, Ticket.STATUS_READ)
+    def test_update_status_from_draft_to_unread(self):
+        draft_ticket = TicketFactory(status=Ticket.STATUS_DRAFT, user_relation=self.relation, giving_user=self.user)
+        cm = self._execute_use_case(self.user, draft_ticket, {"status": Ticket.STATUS_UNREAD})
 
-            self._then_ticket_should_be(unread_ticket, Ticket.STATUS_READ)
-            self._then_info_log_is_output(cm.output)
-
-        with self.subTest(case="draft_to_unread"):
-            draft_ticket = TicketFactory(status=Ticket.STATUS_DRAFT, user_relation=self.giving_relation)
-            cm = self._when_user_updates_ticket_status(draft_ticket, Ticket.STATUS_UNREAD)
-
-            self._then_ticket_should_be(draft_ticket, Ticket.STATUS_UNREAD)
-            self._then_info_log_is_output(cm.output)
+        self._then_ticket_should_be(draft_ticket, Ticket.STATUS_UNREAD)
+        self._then_info_log_is_output(cm.output)
 
     def test_update_description(self):
         with self.subTest(case="unread_ticket"):
-            unread_ticket = TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.giving_relation)
-            cm = self._when_user_updates_ticket_description(unread_ticket)
+            unread_ticket = TicketFactory(
+                status=Ticket.STATUS_UNREAD, user_relation=self.relation, giving_user=self.user
+            )
+            cm = self._execute_use_case(self.user, unread_ticket, {"description": "edited_description"})
             self._then_ticket_should_be(
                 unread_ticket,
                 status=Ticket.STATUS_UNREAD,
@@ -46,8 +40,8 @@ class TestPartialUpdateTicket(TestCase):
             self._then_info_log_is_output(cm.output)
 
         with self.subTest(case="read_ticket"):
-            read_ticket = TicketFactory(status=Ticket.STATUS_READ, user_relation=self.giving_relation)
-            cm = self._when_user_updates_ticket_description(read_ticket)
+            read_ticket = TicketFactory(status=Ticket.STATUS_READ, user_relation=self.relation, giving_user=self.user)
+            cm = self._execute_use_case(self.user, read_ticket, {"description": "edited_description"})
             self._then_ticket_should_be(
                 read_ticket,
                 status=Ticket.STATUS_EDITED,
@@ -57,10 +51,12 @@ class TestPartialUpdateTicket(TestCase):
 
     def test_update_error__bad_ticket(self):
         with self.subTest(case="receiving_ticket"):
-            receiving_ticket = TicketFactory(user_relation=self.receiving_relation)
+            receiving_ticket = TicketFactory(user_relation=self.relation, giving_user=self.partner)
 
-            self._when_updated_should_raise_exception(
+            self._execute_use_case_raise_exception(
+                self.user,
                 receiving_ticket,
+                data={"description": "updated description"},
                 exception=PermissionDenied,
                 exception_message="Only the giving user may update ticket.",
             )
@@ -70,10 +66,12 @@ class TestPartialUpdateTicket(TestCase):
         with self.subTest(case="unrelated_ticket"):
             unrelated_ticket = TicketFactory()
 
-            self._when_updated_should_raise_exception(
+            self._execute_use_case_raise_exception(
+                self.user,
                 unrelated_ticket,
-                exception=PermissionDenied,
-                exception_message="Only the giving user may update ticket.",
+                data={"description": "updated description"},
+                exception=NotFound,
+                exception_message="Ticket not found.",
             )
 
             self._then_ticket_is_not_updated(unrelated_ticket)
@@ -81,18 +79,24 @@ class TestPartialUpdateTicket(TestCase):
         with self.subTest(case="non_existent_ticket"):
             non_existent_ticket = Ticket(id="-1", description="not_saved")
 
-            self._when_updated_should_raise_exception(
+            self._execute_use_case_raise_exception(
+                self.user,
                 non_existent_ticket,
+                data={"description": "updated description"},
                 exception=NotFound,
                 exception_message="Ticket not found.",
             )
 
     def test_update_status_error(self):
         with self.subTest(case="to_draft"):
-            unread_ticket = TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.giving_relation)
+            unread_ticket = TicketFactory(
+                status=Ticket.STATUS_UNREAD, user_relation=self.relation, giving_user=self.user
+            )
 
-            self._when_updated_to_draft_should_raise_exception(
+            self._execute_use_case_raise_exception(
+                self.user,
                 unread_ticket,
+                data={"status": Ticket.STATUS_DRAFT},
                 exception=PermissionDenied,
                 exception_message="Tickets cannot be updated to draft.",
             )
@@ -101,13 +105,6 @@ class TestPartialUpdateTicket(TestCase):
     """
     Utility Functions
     """
-    def _when_user_updates_ticket_status(self, ticket: Ticket, status: str):
-        return self._execute_use_case(self.user, ticket, {"status": status})
-
-    def _when_user_updates_ticket_description(self, ticket: Ticket):
-        return self._execute_use_case(
-            self.user, ticket, {"description": "edited_description"}
-        )
 
     def _execute_use_case(self, user: User, ticket: Ticket, data: dict):
         logger = logging.getLogger(self.use_case_name)
@@ -121,22 +118,6 @@ class TestPartialUpdateTicket(TestCase):
 
         return cm
 
-    def _when_updated_should_raise_exception(
-        self, ticket: Ticket, exception: Exception, exception_message: str
-    ):
-        data = {"description": "updated description"}
-        self._execute_use_case_raise_exception(
-            self.user, ticket, data, exception, exception_message
-        )
-
-    def _when_updated_to_draft_should_raise_exception(
-        self, ticket: Ticket, exception: Exception, exception_message: str
-    ):
-        data = {"status": Ticket.STATUS_DRAFT}
-        self._execute_use_case_raise_exception(
-            self.user, ticket, data, exception, exception_message
-        )
-
     def _execute_use_case_raise_exception(
         self,
         user: User,
@@ -149,9 +130,7 @@ class TestPartialUpdateTicket(TestCase):
         with self.assertRaisesRegex(exception, exc_detail):
             PartialUpdateTicket().execute(user=user, data=data, ticket_id=ticket.id)
 
-    def _then_ticket_should_be(
-        self, ticket: Ticket, status: str, description: str = ""
-    ):
+    def _then_ticket_should_be(self, ticket: Ticket, status: str, description: str = ""):
         original_updated_at = ticket.updated_at
         ticket.refresh_from_db()
         self.assertNotEqual(original_updated_at, ticket.updated_at)
@@ -171,6 +150,4 @@ class TestPartialUpdateTicket(TestCase):
 
     def _then_info_log_is_output(self, cm_output):
         expected_log = [f"INFO:{self.use_case_name}:PartialUpdateTicket"]
-        self.assertEqual(expected_log, cm_output)
-        self.assertEqual(expected_log, cm_output)
         self.assertEqual(expected_log, cm_output)
