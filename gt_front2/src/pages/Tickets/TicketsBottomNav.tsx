@@ -1,6 +1,5 @@
 import BookIcon from '@mui/icons-material/Book';
 import ExpandCircleDownOutlinedIcon from '@mui/icons-material/ExpandCircleDownOutlined';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import WifiProtectedSetupIcon from '@mui/icons-material/WifiProtectedSetup';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +17,7 @@ const TicketsBottomNav = (props: TicketsBottomNavProps) => {
     const { currentRelation, showOnlyUsed, lastAvailableTicketRef, isGivingRelation } = props;
 
     const navigate = useNavigate();
-    const { getTickets, clearTickets } = useTicketContext();
+    const { clearTickets } = useTicketContext();
 
     return (
         <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100 }} elevation={3}>
@@ -43,7 +42,6 @@ const TicketsBottomNav = (props: TicketsBottomNavProps) => {
                         window.scroll({ top: 0 });
                     }}
                 />
-                <BottomNavigationAction label='更新' icon={<RefreshIcon />} onClick={() => getTickets(currentRelation.id, isGivingRelation)} />
                 <BottomNavigationAction
                     label='日記'
                     icon={<BookIcon />}

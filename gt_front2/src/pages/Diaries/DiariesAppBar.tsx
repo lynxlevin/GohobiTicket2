@@ -1,5 +1,6 @@
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import SellIcon from '@mui/icons-material/Sell';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
 import { useState } from 'react';
@@ -25,10 +26,11 @@ const HideOnScroll = (props: HideOnScrollProps) => {
 interface DiariesAppBarProps {
     handleLogout: () => Promise<void>;
     userRelationId: number;
+    refreshDiaries: () => void;
 }
 
 const DiariesAppBar = (props: DiariesAppBarProps) => {
-    const { handleLogout, userRelationId } = props;
+    const { handleLogout, userRelationId, refreshDiaries } = props;
 
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
@@ -43,6 +45,19 @@ const DiariesAppBar = (props: DiariesAppBarProps) => {
                     </IconButton>
                     <Drawer anchor='right' open={topBarDrawerOpen} onClose={() => setTopBarDrawerOpen(false)}>
                         <List>
+                            <ListItem disableGutters>
+                                <ListItemButton
+                                    onClick={() => {
+                                        refreshDiaries();
+                                        setTopBarDrawerOpen(false);
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <RefreshIcon />
+                                    </ListItemIcon>
+                                    <ListItemText>更新</ListItemText>
+                                </ListItemButton>
+                            </ListItem>
                             <ListItem>
                                 <ListItemButton
                                     disableGutters

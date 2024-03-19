@@ -47,8 +47,8 @@ const Diaries = () => {
     if (!currentRelation) return <></>;
     return (
         <>
-            <DiariesAppBar handleLogout={handleLogout} userRelationId={userRelationId} />
-            <DiariesBottomNav userRelationId={userRelationId} refreshDiaries={getDiaries} />
+            <DiariesAppBar handleLogout={handleLogout} userRelationId={userRelationId} refreshDiaries={getDiaries} />
+            <DiariesBottomNav userRelationId={userRelationId} />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>

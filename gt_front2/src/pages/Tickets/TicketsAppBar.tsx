@@ -2,6 +2,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -28,17 +29,20 @@ const HideOnScroll = (props: HideOnScrollProps) => {
 interface TicketsAppBarProps {
     handleLogout: () => Promise<void>;
     currentRelation: IUserRelation;
+    isGivingRelation: boolean;
 }
 
 const TicketsAppBar = (props: TicketsAppBarProps) => {
-    const { handleLogout, currentRelation } = props;
+    const { handleLogout, currentRelation, isGivingRelation } = props;
 
     const userRelationContext = useContext(UserRelationContext);
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
-    const { clearTickets } = useTicketContext();
+    const { getTickets, clearTickets } = useTicketContext();
 
-    const otherRelations = userRelationContext.userRelations.filter((relation, _index, _self) => relation.related_username !== currentRelation.related_username);
+    const otherRelations = userRelationContext.userRelations.filter(
+        (relation, _index, _self) => relation.related_username !== currentRelation.related_username,
+    );
 
     return (
         <HideOnScroll>
@@ -50,6 +54,18 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
                     </IconButton>
                     <Drawer anchor='right' open={topBarDrawerOpen} onClose={() => setTopBarDrawerOpen(false)}>
                         <List>
+                            <ListItem disableGutters>
+                                <ListItemButton
+                                    onClick={() => {
+                                        getTickets(currentRelation.id, isGivingRelation).then(() => setTopBarDrawerOpen(false));
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <RefreshIcon />
+                                    </ListItemIcon>
+                                    <ListItemText>更新</ListItemText>
+                                </ListItemButton>
+                            </ListItem>
                             <ListItem>
                                 <ListItemButton disableGutters>
                                     <ListItemIcon>

@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
-import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
-import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Switch, Typography } from '@mui/material';
+import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, Switch, Typography } from '@mui/material';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { TicketContext } from '../../contexts/ticket-context';
@@ -47,8 +46,13 @@ const Tickets = () => {
     if (!currentRelation) return <></>;
     return (
         <>
-            <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
-            <TicketsBottomNav currentRelation={currentRelation} showOnlyUsed={showOnlyUsed} lastAvailableTicketRef={lastAvailableTicketRef} isGivingRelation={isGivingRelation} />
+            <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} isGivingRelation={isGivingRelation} />
+            <TicketsBottomNav
+                currentRelation={currentRelation}
+                showOnlyUsed={showOnlyUsed}
+                lastAvailableTicketRef={lastAvailableTicketRef}
+                isGivingRelation={isGivingRelation}
+            />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>
