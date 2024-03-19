@@ -1,5 +1,5 @@
-import client from './axios';
 import { AxiosResponse } from 'axios';
+import client from './axios';
 
 interface LoginProps {
     email: string;
@@ -8,7 +8,6 @@ interface LoginProps {
 
 interface SessionResponse {
     is_authenticated: boolean;
-    default_page?: string;
 }
 
 export const UserAPI = {

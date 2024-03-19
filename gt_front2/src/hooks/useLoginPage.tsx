@@ -1,9 +1,12 @@
 import { useContext, useState } from 'react';
 import { UserAPI } from '../apis/UserAPI';
+import { UserRelationAPI } from '../apis/UserRelationAPI';
 import { UserContext } from '../contexts/user-context';
+import { UserRelationContext } from '../contexts/user-relation-context';
 
 const useLoginPage = () => {
     const userContext = useContext(UserContext);
+    const userRelationContext = useContext(UserRelationContext);
 
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
@@ -23,10 +26,15 @@ const useLoginPage = () => {
             try {
                 await UserAPI.login({ email, password });
                 const session_res = await UserAPI.session();
-                userContext.setIsLoggedIn(session_res.data.is_authenticated);
-                const defaultPage = session_res.data.default_page;
-                // MYMEMO: list user_relations して、最初のものをとってもいいかも
-                userContext.setDefaultRelationId(defaultPage ? defaultPage.split('/')[2] : null);
+                const isAuthenticated = session_res.data.is_authenticated;
+                userContext.setIsLoggedIn(isAuthenticated);
+                if (isAuthenticated) {
+                    // MYMEMO: この方法だと、別ユーザーでログインしたときに再取得されない
+                    if (userRelationContext.userRelations.length === 0) {
+                        const res = await UserRelationAPI.list();
+                        userRelationContext.setUserRelations(res.data.user_relations);
+                    }
+                }
             } catch (err: any) {
                 setErrorMessage(err.response.data.detail);
             }
