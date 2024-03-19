@@ -34,7 +34,6 @@ class TestTicketViews(TestCase):
             TicketFactory(status=Ticket.STATUS_UNREAD),
         ]
 
-        # MYMEMO: add is_receiving query.
         response = self._send_get_request(self.user, f"/api/tickets/?user_relation_id={self.relation.id}&is_receiving")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -69,8 +68,7 @@ class TestTicketViews(TestCase):
             TicketFactory(status=Ticket.STATUS_UNREAD),
         ]
 
-        # MYMEMO: add is_giving query.
-        response = self._send_get_request(self.user, f"/api/tickets/?user_relation_id={self.relation.id}")
+        response = self._send_get_request(self.user, f"/api/tickets/?user_relation_id={self.relation.id}&is_giving")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
 
