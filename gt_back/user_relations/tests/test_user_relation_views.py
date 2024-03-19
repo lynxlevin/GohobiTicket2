@@ -18,7 +18,6 @@ class TestUserRelationViews(TestCase):
         """
         relation_1 = UserRelationFactory(user_1=self.user)
         relation_2 = UserRelationFactory(user_2=self.user)
-        relations = [relation_1, relation_2]
 
         client = Client()
         client.force_login(self.user)
@@ -29,12 +28,17 @@ class TestUserRelationViews(TestCase):
         expected = {
             "user_relations": [
                 {
-                    "id": str(relation.id),
-                    "related_username": relation.get_related_user(self.user.id).username,
-                    "user_1_giving_ticket_img": relation.user_1_giving_ticket_img,
-                    "user_2_giving_ticket_img": relation.user_2_giving_ticket_img,
-                }
-                for relation in relations
+                    "id": str(relation_1.id),
+                    "related_username": relation_1.get_related_user(self.user.id).username,
+                    "giving_ticket_img": relation_1.user_1_giving_ticket_img,
+                    "receiving_ticket_img": relation_1.user_2_giving_ticket_img,
+                },
+                {
+                    "id": str(relation_2.id),
+                    "related_username": relation_2.get_related_user(self.user.id).username,
+                    "giving_ticket_img": relation_2.user_2_giving_ticket_img,
+                    "receiving_ticket_img": relation_2.user_1_giving_ticket_img,
+                },
             ]
         }
         self.assertDictEqual(expected, response.data)

@@ -25,8 +25,12 @@ class ListUserRelation:
             {
                 "id": str(relation.id),
                 "related_username": relation.get_related_user(user_id).username,
-                "user_1_giving_ticket_img": relation.user_1_giving_ticket_img,
-                "user_2_giving_ticket_img": relation.user_2_giving_ticket_img,
+                "giving_ticket_img": relation.user_1_giving_ticket_img
+                if relation.user_1_id == user_id
+                else relation.user_2_giving_ticket_img,
+                "receiving_ticket_img": relation.user_2_giving_ticket_img
+                if relation.user_1_id == user_id
+                else relation.user_1_giving_ticket_img,
             }
             for relation in user_relations
         ]
