@@ -33,7 +33,7 @@ const Diaries = () => {
     }, [userRelationId]);
 
     useEffect(() => {
-        if (userContext.isLoggedIn !== true && userRelationId < 1) return;
+        if (userContext.isLoggedIn !== true || userRelationId < 1) return;
         // MYMEMO: userRelationId が変わったら再度取得する必要あり
         getDiaries();
         // MYMEMO: diaryTagContext にuserRelationIdを持たせて検証する必要あり
