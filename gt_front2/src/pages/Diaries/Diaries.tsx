@@ -34,10 +34,7 @@ const Diaries = () => {
 
     useEffect(() => {
         if (userContext.isLoggedIn !== true || userRelationId < 1) return;
-        // MYMEMO: userRelationId が変わったら再度取得する必要あり
         getDiaries();
-        // MYMEMO: diaryTagContext にuserRelationIdを持たせて検証する必要あり
-        if (diaryTagContext.diaryTags !== null) return;
         DiaryTagAPI.list(userRelationId).then(({ data: { diary_tags } }) => {
             diaryTagContext.setDiaryTags(diary_tags);
         });
