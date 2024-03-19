@@ -11,7 +11,7 @@ const Login = () => {
     const { errorMessage, handleLogin, handleEmailInput, handlePasswordInput } = useLoginPage();
 
     if (userContext.isLoggedIn === true && userContext.defaultRelationId) {
-        return <Navigate to={`/tickets?user_relation_id=${userContext.defaultRelationId}`} />;
+        return <Navigate to={`/tickets?user_relation_id=${userContext.defaultRelationId}&is_receiving`} />;
     }
     return (
         <Container component="main" maxWidth="xs">
