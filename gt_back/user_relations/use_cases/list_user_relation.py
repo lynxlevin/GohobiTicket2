@@ -16,12 +16,7 @@ class ListUserRelation:
             extra={"user_id": user_id},
         )
 
-        user_relations = (
-            UserRelation.objects.select_giving_user()
-            .select_receiving_user()
-            .filter_eq_user_id(user_id)
-            .order_by_created_at()
-        )
+        user_relations = UserRelation.objects.select_users().filter_eq_user_id(user_id).order_by_created_at()
 
         if not user_relations.exists():
             raise exceptions.NotFound()
@@ -29,12 +24,13 @@ class ListUserRelation:
         return [
             {
                 "id": str(relation.id),
-                "related_username": relation.receiving_user.username
-                if relation.giving_user_id == user_id
-                else relation.giving_user.username,
-                "is_giving_relation": relation.giving_user_id == user_id,
-                "ticket_image": relation.ticket_img,
-                "corresponding_relation_id": str(relation.corresponding_relation.id),
+                "related_username": relation.get_related_user(user_id).username,
+                "giving_ticket_img": relation.user_1_giving_ticket_img
+                if relation.user_1_id == user_id
+                else relation.user_2_giving_ticket_img,
+                "receiving_ticket_img": relation.user_2_giving_ticket_img
+                if relation.user_1_id == user_id
+                else relation.user_1_giving_ticket_img,
             }
             for relation in user_relations
         ]

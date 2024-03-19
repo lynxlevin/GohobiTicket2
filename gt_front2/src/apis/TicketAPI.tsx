@@ -17,8 +17,9 @@ export interface CreateTicketRequest {
 export const TicketAPI = {
     BASE_URL: '/api/tickets/',
 
-    list: async (userRelationId: number): Promise<AxiosResponse<ListTicketResponse>> => {
-        const url = `${TicketAPI.BASE_URL}?user_relation_id=${userRelationId}`;
+    list: async (userRelationId: number, isGiving: boolean): Promise<AxiosResponse<ListTicketResponse>> => {
+        const query = isGiving ? `user_relation_id=${userRelationId}&is_giving` : `user_relation_id=${userRelationId}&is_receiving`
+        const url = `${TicketAPI.BASE_URL}?${query}`;
         return await client.get(url);
     },
     create: async (props: CreateTicketRequest) => {

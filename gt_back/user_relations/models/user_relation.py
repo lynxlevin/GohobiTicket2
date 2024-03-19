@@ -12,20 +12,11 @@ class UserRelationQuerySet(models.QuerySet):
         except UserRelation.DoesNotExist:
             return None
 
-    def filter_by_receiving_user_id(self, user_id) -> "UserRelationQuerySet":
-        return self.filter(receiving_user__id=user_id)
-
-    def filter_by_giving_user_id(self, user_id) -> "UserRelationQuerySet":
-        return self.filter(giving_user__id=user_id)
-
     def filter_eq_user_id(self, user_id) -> "UserRelationQuerySet":
-        return self.filter(Q(giving_user_id=user_id) | Q(receiving_user_id=user_id))
+        return self.filter(Q(user_1_id=user_id) | Q(user_2_id=user_id))
 
-    def select_giving_user(self) -> "UserRelationQuerySet":
-        return self.select_related('giving_user')
-
-    def select_receiving_user(self) -> "UserRelationQuerySet":
-        return self.select_related('receiving_user')
+    def select_users(self) -> "UserRelationQuerySet":
+        return self.select_related("user_1").select_related("user_2")
 
     def order_by_created_at(self, desc=False) -> "UserRelationQuerySet":
         key = "-created_at" if desc else "created_at"
@@ -33,26 +24,21 @@ class UserRelationQuerySet(models.QuerySet):
 
 
 class UserRelation(models.Model):
-    # MYMEMO: constantsに移したい
-    DEFAULT_BACKGROUND = "rgb(250, 255, 255)"
-
-    giving_user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="giving_relations"
-    )
-    receiving_user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="receiving_relations"
-    )
-    ticket_img = models.CharField(max_length=13)
-    background_color = models.CharField(max_length=18, default=DEFAULT_BACKGROUND)
+    user_1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="relations_1")
+    user_2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="relations_2")
+    user_1_giving_ticket_img = models.CharField(max_length=13)
+    user_2_giving_ticket_img = models.CharField(max_length=13)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     objects: UserRelationQuerySet = UserRelationQuerySet.as_manager()
 
-    @property
-    def corresponding_relation(self):
-        return (
-            UserRelation.objects.filter_by_receiving_user_id(self.giving_user.id)
-            .filter_by_giving_user_id(self.receiving_user.id)
-            .first()
-        )
+    class Meta:
+        db_table = "user_relations_userrelation"
+
+    def get_related_user(self, user_id: str) -> Optional[User]:
+        if user_id == self.user_1_id:
+            return self.user_2
+        if user_id == self.user_2_id:
+            return self.user_1
+        return None

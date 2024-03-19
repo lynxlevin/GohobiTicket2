@@ -18,14 +18,14 @@ class TestUseTicket(TestCase):
         cls.use_case_name = "tickets.use_cases.use_ticket"
 
         cls.user = UserFactory()
-        cls.giving_relation = UserRelationFactory(giving_user=cls.user)
-        cls.receiving_relation = UserRelationFactory(receiving_user=cls.user)
+        cls.partner = UserFactory()
+        cls.relation = UserRelationFactory(user_1=cls.user, user_2=cls.partner)
 
     @mock.patch.object(SlackMessengerForUseTicket, "__new__")
     def test_use(self, slack_mock):
         with self.subTest(case="normal_ticket"):
             slack_instance_mock = self._prepare_mock(slack_mock)
-            normal_ticket = TicketFactory(user_relation=self.receiving_relation)
+            normal_ticket = TicketFactory(user_relation=self.relation, giving_user=self.partner)
 
             cm = self._when_ticket_is_used(normal_ticket)
 
@@ -35,7 +35,7 @@ class TestUseTicket(TestCase):
 
         with self.subTest(case="special_ticket"):
             slack_instance_mock = self._prepare_mock(slack_mock)
-            special_ticket = TicketFactory(is_special=True, user_relation=self.receiving_relation)
+            special_ticket = TicketFactory(is_special=True, user_relation=self.relation, giving_user=self.partner)
 
             cm = self._when_ticket_is_used(special_ticket)
 
@@ -45,7 +45,7 @@ class TestUseTicket(TestCase):
 
     def test_use_error__bad_ticket(self):
         with self.subTest(case="giving_ticket"):
-            giving_ticket = TicketFactory(user_relation=self.giving_relation)
+            giving_ticket = TicketFactory(user_relation=self.relation, giving_user=self.user)
 
             self._when_used_should_raise_exception(
                 giving_ticket,
@@ -60,8 +60,8 @@ class TestUseTicket(TestCase):
 
             self._when_used_should_raise_exception(
                 unrelated_ticket,
-                exception=PermissionDenied,
-                exception_message="Only the receiving user may use ticket.",
+                exception=NotFound,
+                exception_message="Ticket not found.",
             )
 
             self._then_ticket_is_not_used(unrelated_ticket)
@@ -76,7 +76,7 @@ class TestUseTicket(TestCase):
             )
 
         with self.subTest(case="used_ticket"):
-            used_ticket = UsedTicketFactory(user_relation=self.receiving_relation)
+            used_ticket = UsedTicketFactory(user_relation=self.relation, giving_user=self.partner)
 
             self._when_used_should_raise_exception(
                 used_ticket,
@@ -105,9 +105,7 @@ class TestUseTicket(TestCase):
 
         return cm
 
-    def _when_used_should_raise_exception(
-        self, ticket: Ticket, exception: Exception, exception_message: str
-    ):
+    def _when_used_should_raise_exception(self, ticket: Ticket, exception: Exception, exception_message: str):
         data = {"use_description": "test_use_case_error"}
 
         expected_exc_detail = f"UseTicket_exception: {exception_message}"
@@ -127,9 +125,7 @@ class TestUseTicket(TestCase):
         expected_log = [f"INFO:{self.use_case_name}:UseTicket"]
         self.assertEqual(expected_log, cm_output)
 
-    def _then_slack_message_is_sent(
-        self, ticket: Ticket, slack_instance_mock: mock.Mock
-    ):
+    def _then_slack_message_is_sent(self, ticket: Ticket, slack_instance_mock: mock.Mock):
         slack_instance_mock.generate_message.assert_called_once_with(ticket)
         slack_instance_mock.send_message.assert_called_once()
 

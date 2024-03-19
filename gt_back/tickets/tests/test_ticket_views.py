@@ -1,4 +1,3 @@
-from datetime import date
 from unittest import mock
 
 from django.test import Client, TestCase
@@ -9,37 +8,33 @@ from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTic
 from user_relations.tests.user_relation_factory import UserRelationFactory
 from users.tests.user_factory import UserFactory
 
-from gt_back.messages import ErrorMessages
-
 
 class TestTicketViews(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory()
-        cls.giving_relation = UserRelationFactory(giving_user=cls.user)
-        cls.receiving_relation = UserRelationFactory(
-            receiving_user=cls.user, giving_user=cls.giving_relation.receiving_user
-        )
+        cls.partner = UserFactory()
+        cls.relation = UserRelationFactory(user_1=cls.user, user_2=cls.partner)
 
     def test_list__receiving_relation(self):
         """
-        Get /api/tickets/?user_relation_id={user_relation_id}
+        Get /api/tickets/?user_relation_id={user_relation_id}&is_receiving
         """
         expected_available_tickets = [
-            TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.receiving_relation),
-            TicketFactory(status=Ticket.STATUS_READ, user_relation=self.receiving_relation),
-            TicketFactory(status=Ticket.STATUS_EDITED, user_relation=self.receiving_relation),
+            TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.relation, giving_user=self.partner),
+            TicketFactory(status=Ticket.STATUS_READ, user_relation=self.relation, giving_user=self.partner),
+            TicketFactory(status=Ticket.STATUS_EDITED, user_relation=self.relation, giving_user=self.partner),
         ]
         expected_used_tickets = [
-            UsedTicketFactory(status=Ticket.STATUS_READ, user_relation=self.receiving_relation),
-            UsedTicketFactory(status=Ticket.STATUS_READ, user_relation=self.receiving_relation),
+            UsedTicketFactory(status=Ticket.STATUS_READ, user_relation=self.relation, giving_user=self.partner),
+            UsedTicketFactory(status=Ticket.STATUS_READ, user_relation=self.relation, giving_user=self.partner),
         ]
         _tickets_not_returned = [
-            TicketFactory(status=Ticket.STATUS_DRAFT, user_relation=self.receiving_relation),
+            TicketFactory(status=Ticket.STATUS_DRAFT, user_relation=self.relation, giving_user=self.partner),
             TicketFactory(status=Ticket.STATUS_UNREAD),
         ]
 
-        response = self._send_get_request(self.user, f"/api/tickets/?user_relation_id={self.receiving_relation.id}")
+        response = self._send_get_request(self.user, f"/api/tickets/?user_relation_id={self.relation.id}&is_receiving")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
 
@@ -57,23 +52,23 @@ class TestTicketViews(TestCase):
 
     def test_list__giving_relation(self):
         """
-        Get /api/tickets/?user_relation_id={user_relation_id}
+        Get /api/tickets/?user_relation_id={user_relation_id}&is_giving
         """
         expected_available_tickets = [
-            TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.giving_relation),
-            TicketFactory(status=Ticket.STATUS_READ, user_relation=self.giving_relation),
-            TicketFactory(status=Ticket.STATUS_EDITED, user_relation=self.giving_relation),
-            TicketFactory(status=Ticket.STATUS_DRAFT, user_relation=self.giving_relation),
+            TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.relation, giving_user=self.user),
+            TicketFactory(status=Ticket.STATUS_READ, user_relation=self.relation, giving_user=self.user),
+            TicketFactory(status=Ticket.STATUS_EDITED, user_relation=self.relation, giving_user=self.user),
+            TicketFactory(status=Ticket.STATUS_DRAFT, user_relation=self.relation, giving_user=self.user),
         ]
         expected_used_tickets = [
-            UsedTicketFactory(status=Ticket.STATUS_READ, user_relation=self.giving_relation),
-            UsedTicketFactory(status=Ticket.STATUS_READ, user_relation=self.giving_relation),
+            UsedTicketFactory(status=Ticket.STATUS_READ, user_relation=self.relation, giving_user=self.user),
+            UsedTicketFactory(status=Ticket.STATUS_READ, user_relation=self.relation, giving_user=self.user),
         ]
         _tickets_not_returned = [
             TicketFactory(status=Ticket.STATUS_UNREAD),
         ]
 
-        response = self._send_get_request(self.user, f"/api/tickets/?user_relation_id={self.giving_relation.id}")
+        response = self._send_get_request(self.user, f"/api/tickets/?user_relation_id={self.relation.id}&is_giving")
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
 
@@ -97,7 +92,7 @@ class TestTicketViews(TestCase):
             "ticket": {
                 "gift_date": "2022-08-24",
                 "description": "test_ticket",
-                "user_relation_id": self.giving_relation.id,
+                "user_relation_id": self.relation.id,
             }
         }
 
@@ -109,6 +104,7 @@ class TestTicketViews(TestCase):
         ticket = body["ticket"]
 
         self.assertIsNotNone(ticket["id"])
+        self.assertEqual(self.user.id, ticket["giving_user_id"])
         self.assertEqual(params["ticket"]["gift_date"], ticket["gift_date"])
         self.assertEqual(params["ticket"]["description"], ticket["description"])
         self.assertEqual(Ticket.STATUS_UNREAD, ticket["status"])
@@ -123,7 +119,7 @@ class TestTicketViews(TestCase):
             "ticket": {
                 "gift_date": "2022-08-24",
                 "description": "test_ticket",
-                "user_relation_id": self.giving_relation.id,
+                "user_relation_id": self.relation.id,
                 "status": Ticket.STATUS_DRAFT,
             }
         }
@@ -136,6 +132,7 @@ class TestTicketViews(TestCase):
         ticket = body["ticket"]
 
         self.assertIsNotNone(ticket["id"])
+        self.assertEqual(self.user.id, ticket["giving_user_id"])
         self.assertEqual(params["ticket"]["gift_date"], ticket["gift_date"])
         self.assertEqual(params["ticket"]["description"], ticket["description"])
         self.assertEqual(Ticket.STATUS_DRAFT, ticket["status"])
@@ -150,7 +147,7 @@ class TestTicketViews(TestCase):
             "ticket": {
                 "gift_date": "2022-08-24",
                 "description": "test_ticket",
-                "user_relation_id": self.giving_relation.id,
+                "user_relation_id": self.relation.id,
                 "is_special": True,
             }
         }
@@ -163,6 +160,7 @@ class TestTicketViews(TestCase):
         ticket = body["ticket"]
 
         self.assertIsNotNone(ticket["id"])
+        self.assertEqual(self.user.id, ticket["giving_user_id"])
         self.assertEqual(params["ticket"]["gift_date"], ticket["gift_date"])
         self.assertEqual(params["ticket"]["description"], ticket["description"])
         self.assertEqual(Ticket.STATUS_UNREAD, ticket["status"])
@@ -174,13 +172,13 @@ class TestTicketViews(TestCase):
         Post /api/tickets/
         """
         _existingSpecialTicket = TicketFactory(
-            gift_date="2022-08-24", is_special=True, user_relation_id=self.giving_relation.id
+            gift_date="2022-08-24", is_special=True, user_relation_id=self.relation.id, giving_user=self.user
         )
         params = {
             "ticket": {
                 "gift_date": "2022-08-24",
                 "description": "test_ticket",
-                "user_relation_id": self.giving_relation.id,
+                "user_relation_id": self.relation.id,
                 "is_special": True,
             }
         }
@@ -192,18 +190,19 @@ class TestTicketViews(TestCase):
         body = response.json()
         ticket = body["ticket"]
 
+        # Non special ticket will be created
+        self.assertFalse(ticket["is_special"])
         self.assertIsNotNone(ticket["id"])
         self.assertEqual(params["ticket"]["gift_date"], ticket["gift_date"])
         self.assertEqual(params["ticket"]["description"], ticket["description"])
         self.assertEqual(Ticket.STATUS_UNREAD, ticket["status"])
-        self.assertFalse(ticket["is_special"])
         self.assertIsNone(ticket.get("use_date"))
 
     def test_partial_update__description(self):
         """
         Patch /api/tickets/{ticket_id}/
         """
-        ticket = TicketFactory(user_relation=self.giving_relation)
+        ticket = TicketFactory(user_relation=self.relation, giving_user=self.user)
 
         uri = f"/api/tickets/{ticket.id}/"
         params = {"ticket": {"description": "updated description"}}
@@ -220,7 +219,7 @@ class TestTicketViews(TestCase):
         """
         Patch /api/tickets/{ticket_id}/
         """
-        ticket = TicketFactory(user_relation=self.giving_relation, status=Ticket.STATUS_UNREAD)
+        ticket = TicketFactory(user_relation=self.relation, giving_user=self.user, status=Ticket.STATUS_UNREAD)
 
         uri = f"/api/tickets/{ticket.id}/"
         params = {"ticket": {"status": Ticket.STATUS_READ}}
@@ -237,7 +236,7 @@ class TestTicketViews(TestCase):
         """
         Delete /api/tickets/{ticket_id}/
         """
-        ticket = TicketFactory(user_relation=self.giving_relation)
+        ticket = TicketFactory(user_relation=self.relation, giving_user=self.user)
 
         response = self._send_delete_request(self.user, f"/api/tickets/{ticket.id}/")
 
@@ -251,7 +250,7 @@ class TestTicketViews(TestCase):
         slack_instance_mock = mock.Mock()
         slack_mock.return_value = slack_instance_mock
 
-        ticket = TicketFactory(user_relation=self.receiving_relation)
+        ticket = TicketFactory(user_relation=self.relation, giving_user=self.partner)
 
         params = {
             "ticket": {
@@ -268,7 +267,9 @@ class TestTicketViews(TestCase):
         """
         Put /api/tickets/{ticket_id}/read/
         """
-        unread_ticket = TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.receiving_relation)
+        unread_ticket = TicketFactory(
+            status=Ticket.STATUS_UNREAD, user_relation=self.relation, giving_user=self.partner
+        )
 
         uri = f"/api/tickets/{unread_ticket.id}/read/"
 

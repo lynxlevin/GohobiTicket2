@@ -38,10 +38,7 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
     const navigate = useNavigate();
     const { clearTickets } = useTicketContext();
 
-    const otherRelations = userRelationContext.userRelations.filter(
-        (relation, index, self) =>
-            relation.related_username !== currentRelation.related_username && self.findIndex(e => e.related_username === relation.related_username) === index,
-    );
+    const otherRelations = userRelationContext.userRelations.filter((relation, _index, _self) => relation.related_username !== currentRelation.related_username);
 
     return (
         <HideOnScroll>
@@ -68,7 +65,7 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
                                         <ListItemButton
                                             onClick={() => {
                                                 clearTickets();
-                                                navigate(`/tickets?user_relation_id=${relation.id}`);
+                                                navigate(`/tickets?user_relation_id=${relation.id}&is_receiving`);
                                                 setTopBarDrawerOpen(false);
                                                 window.scroll({ top: 0 });
                                             }}

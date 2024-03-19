@@ -24,14 +24,15 @@ from tickets.tests.use_cases import TestUseTicket
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
 from user_relations.models import UserRelation
 from user_relations.tests.user_relation_factory import UserRelationFactory
+from users.tests.user_factory import UserFactory
 
 
 class TestTicketViews(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.relation = UserRelationFactory()
-        cls.giving_user = cls.relation.giving_user
-        cls.receiving_user = cls.relation.receiving_user
+        cls.giving_user = UserFactory()
+        cls.receiving_user = UserFactory()
+        cls.relation = UserRelationFactory(user_1=cls.giving_user, user_2=cls.receiving_user)
 
     def test_integration(self):
         giving_client = Client()
@@ -45,8 +46,6 @@ class TestTicketViews(TestCase):
         ticket_id = self._create_ticket_and_return_id(giving_client, self.relation)
 
         ticket = Ticket.objects.get_by_id(ticket_id)
-        # MYMEMO: API じゃ無くした
-        # self._list_tickets(giving_client, giving_relation, ticket)
         self._make_ticket_read(giving_client, ticket)
         self._use_ticket(receiving_client, ticket)
 
@@ -73,25 +72,6 @@ class TestTicketViews(TestCase):
         self.assertIsNone(ticket.get("use_date"))
 
         return ticket["id"]
-
-    def _list_tickets(self, client: Client, user_relation: UserRelation, expected_ticket: Ticket):
-        response = client.get(f"/api/user_relations/{user_relation.id}/")
-
-        self.assertEqual(status.HTTP_200_OK, response.status_code)
-
-        expected_dict = {
-            "user_relation": user_relation.id,
-            "description": expected_ticket.description,
-            "gift_date": expected_ticket.gift_date.strftime("%Y-%m-%d")
-            if expected_ticket.gift_date is not None
-            else None,
-            "use_description": expected_ticket.use_description,
-            "use_date": expected_ticket.use_date.strftime("%Y-%m-%d") if expected_ticket.use_date is not None else None,
-            "status": expected_ticket.status,
-            "is_special": expected_ticket.is_special,
-        }
-
-        self.assertDictEqual(response.data[0], expected_dict)
 
     def _make_ticket_read(self, client: Client, ticket: Ticket):
         params = {

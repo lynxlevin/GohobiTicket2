@@ -33,25 +33,13 @@ class SpecialTicketAvailability:
 
         year_month = datetime(year=year, month=month, day=1)
 
-        user_relation = UserRelation.objects.get_by_id(user_relation_id)
+        user_relation = UserRelation.objects.filter_eq_user_id(user_id).get_by_id(user_relation_id)
 
         if not user_relation:
             raise exceptions.NotFound()
 
-        if not user_id in [
-            user_relation.giving_user.id,
-            user_relation.receiving_user.id,
-        ]:
-            raise exceptions.PermissionDenied()
-
-        if not user_id == user_relation.giving_user_id:
-            raise exceptions.PermissionDenied()
-
         has_other_special_tickets_in_month = (
-            Ticket.objects.filter_eq_user_relation_id(user_relation_id)
-            .filter_special_tickets(year_month)
-            .count()
-            > 0
+            Ticket.objects.filter_eq_user_relation_id(user_relation_id).filter_special_tickets(year_month).count() > 0
         )
 
         return not has_other_special_tickets_in_month

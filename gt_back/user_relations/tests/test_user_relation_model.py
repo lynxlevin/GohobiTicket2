@@ -1,10 +1,5 @@
-
-from datetime import date, timedelta
-
 from django.test import TestCase
-from tickets.tests.ticket_factory import TicketFactory
 from user_relations.models import UserRelation
-from users.tests.user_factory import UserFactory
 
 from .user_relation_factory import UserRelationFactory
 
@@ -16,55 +11,22 @@ class TestUserRelationModel(TestCase):
         result = UserRelation.objects.get_by_id(expected.id)
         self.assertEqual(expected, result)
 
-        # prefetchしなくてもuserは一緒に取得できている
-        self.assertIsNotNone(result.giving_user)
-        self.assertIsNotNone(result.receiving_user)
+    def test_filter_eq_user_id(self):
+        expected = UserRelationFactory()
 
-    def test_filter_by_receiving_user_id(self):
-        user = UserFactory()
-        expected = UserRelationFactory.create_batch(5, receiving_user=user)
+        result_1 = UserRelation.objects.filter_eq_user_id(expected.user_1.id)
+        self.assertEqual(1, result_1.count())
+        self.assertEqual(expected, result_1.first())
 
-        result = UserRelation.objects.filter_by_receiving_user_id(user.id)
+        result_2 = UserRelation.objects.filter_eq_user_id(expected.user_2.id)
+        self.assertEqual(1, result_2.count())
+        self.assertEqual(expected, result_2.first())
 
-        self.assertEqual(expected, list(result.all()))
+    def test_get_related_user(self):
+        relation = UserRelationFactory()
 
-    def test_filter_by_giving_user_id(self):
-        user = UserFactory()
-        expected = UserRelationFactory.create_batch(5, giving_user=user)
+        result_1 = relation.get_related_user(relation.user_1.id)
+        self.assertEqual(relation.user_2.id, result_1.id)
 
-        result = UserRelation.objects.filter_by_giving_user_id(user.id)
-
-        self.assertEqual(expected, list(result.all()))
-
-    def test_property_corresponding_relation(self):
-        user_relation = UserRelationFactory()
-        expected = UserRelationFactory(
-            giving_user=user_relation.receiving_user,
-            receiving_user=user_relation.giving_user,
-        )
-
-        result = user_relation.corresponding_relation
-
-        self.assertEqual(expected, result)
-
-    # sample for record fetching
-    def test_tickets(self):
-        user_relation = UserRelationFactory()
-        expected = TicketFactory.create_batch(5, user_relation=user_relation)
-
-        result = user_relation.ticket_set.all()
-
-        self.assertEqual(list(result), expected)
-
-    # sample for record fetching
-    def test_has_special_ticket(self):
-        target_date = date(2022, 6, 11)
-
-        user_relation = UserRelationFactory()
-        TicketFactory(user_relation=user_relation, is_special=True, gift_date=target_date - timedelta(days=31))
-        result1 = user_relation.ticket_set.filter_special_tickets(target_date).exists()
-        self.assertFalse(result1)
-
-        TicketFactory(user_relation=user_relation, is_special=True, gift_date=target_date)
-        result2 = user_relation.ticket_set.filter_special_tickets(target_date).exists()
-        self.assertTrue(result2)
+        result_2 = relation.get_related_user(relation.user_2.id)
+        self.assertEqual(relation.user_1.id, result_2.id)

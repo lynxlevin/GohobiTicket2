@@ -3,7 +3,7 @@ from datetime import date
 
 from rest_framework import exceptions
 from tickets.models import Ticket
-from tickets.utils import SlackMessengerForUseTicket, _is_none, _is_not_receiving_user, _is_used
+from tickets.utils import SlackMessengerForUseTicket
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -21,18 +21,21 @@ class UseTicket:
 
         ticket = Ticket.objects.get_by_id(ticket_id)
 
-        if _is_none(ticket):
+        if ticket is None:
             raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
-
-        if _is_used(ticket):
-            raise exceptions.PermissionDenied(detail=f"{self.exception_log_title}: This ticket is already used.")
 
         user_relation = ticket.user_relation
 
-        if _is_not_receiving_user(user, user_relation):
+        if user.id not in (user_relation.user_1_id, user_relation.user_2_id):
+            raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
+
+        if ticket.giving_user_id == user.id:
             raise exceptions.PermissionDenied(
                 detail=f"{self.exception_log_title}: Only the receiving user may use ticket."
             )
+
+        if ticket.use_date is not None:
+            raise exceptions.PermissionDenied(detail=f"{self.exception_log_title}: This ticket is already used.")
 
         ticket.use_description = data["use_description"]
         ticket.use_date = date.today()

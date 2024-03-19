@@ -6,8 +6,8 @@ const useTicketContext = () => {
     const ticketContext = useContext(TicketContext);
 
     const getTickets = useCallback(
-        async (userRelationId: number | string) => {
-            TicketAPI.list(Number(userRelationId)).then(({ data: { tickets } }) => {
+        async (userRelationId: number | string, isGivingRelation: boolean) => {
+            TicketAPI.list(Number(userRelationId), isGivingRelation).then(({ data: { tickets } }) => {
                 ticketContext.setTickets(tickets);
             });
         },

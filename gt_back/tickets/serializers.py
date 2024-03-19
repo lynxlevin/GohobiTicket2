@@ -8,6 +8,7 @@ class TicketSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "user_relation_id",
+            "giving_user_id",
             "description",
             "gift_date",
             "use_description",
@@ -19,6 +20,20 @@ class TicketSerializer(serializers.ModelSerializer):
 
 class ListTicketQuerySerializer(serializers.Serializer):
     user_relation_id = serializers.IntegerField()
+    is_giving = serializers.BooleanField(default=False, required=False, allow_null=True)
+    is_receiving = serializers.BooleanField(default=False, required=False, allow_null=True)
+
+    def validate_is_giving(self, attrs):
+        # So that empty query `?is_giving` should be considered True
+        if attrs is None:
+            return True
+        return attrs
+
+    def validate_is_receiving(self, attrs):
+        # So that empty query `?is_receiving` should be considered True
+        if attrs is None:
+            return True
+        return attrs
 
 
 class ListTicketSerializer(serializers.Serializer):

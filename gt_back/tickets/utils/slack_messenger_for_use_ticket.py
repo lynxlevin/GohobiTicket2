@@ -36,8 +36,8 @@ class SlackMessengerForUseTicket(SlackMessenger):
             logger.info("Successfully sent message to Slack")
 
     def _get_normal_message(self, ticket):
-        receiving_user_name = ticket.user_relation.receiving_user.username
-        giving_user_name = ticket.user_relation.giving_user.username
+        receiving_user_name = ticket.receiving_user.username
+        giving_user_name = ticket.giving_user.username
 
         title = f"{receiving_user_name}がチケットを使ったよ"
         main_text = f"{giving_user_name}へ: {ticket.use_description}"
@@ -65,8 +65,8 @@ class SlackMessengerForUseTicket(SlackMessenger):
         return normal_message
 
     def _get_special_message(self, ticket):
-        receiving_user_name = ticket.user_relation.receiving_user.username
-        giving_user_name = ticket.user_relation.giving_user.username
+        receiving_user_name = ticket.receiving_user.username
+        giving_user_name = ticket.giving_user.username
 
         title = f"{receiving_user_name}が特別チケットを使ったよ"
         main_text = f"{giving_user_name}へ: {ticket.use_description}"

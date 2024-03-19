@@ -1,7 +1,6 @@
 import { useContext, useState } from 'react';
 import { UserAPI } from '../apis/UserAPI';
 import { UserContext } from '../contexts/user-context';
-import { UserRelationAPI } from '../apis/UserRelationAPI';
 
 const useLoginPage = () => {
     const userContext = useContext(UserContext);
@@ -26,6 +25,7 @@ const useLoginPage = () => {
                 const session_res = await UserAPI.session();
                 userContext.setIsLoggedIn(session_res.data.is_authenticated);
                 const defaultPage = session_res.data.default_page;
+                // MYMEMO: list user_relations して、最初のものをとってもいいかも
                 userContext.setDefaultRelationId(defaultPage ? defaultPage.split('/')[2] : null);
             } catch (err: any) {
                 setErrorMessage(err.response.data.detail);

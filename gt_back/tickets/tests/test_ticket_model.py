@@ -4,6 +4,7 @@ from django.test import TestCase
 from tickets.models import Ticket
 from tickets.tests.ticket_factory import TicketFactory, UsedTicketFactory
 from user_relations.tests.user_relation_factory import UserRelationFactory
+from users.tests.user_factory import UserFactory
 
 
 class TestTicketModel(TestCase):
@@ -67,3 +68,13 @@ class TestTicketModel(TestCase):
         result = Ticket.objects.exclude_eq_status(exclude_target).all()
 
         self.assertEqual(expected_tickets, list(result))
+
+    def test_receiving_user(self):
+        giving_user = UserFactory()
+        receiving_user = UserFactory()
+        relation = UserRelationFactory(user_1=giving_user, user_2=receiving_user)
+        ticket = TicketFactory(user_relation=relation, giving_user=giving_user)
+
+        result = ticket.receiving_user
+
+        self.assertEqual(receiving_user.id, result.id)

@@ -14,7 +14,7 @@ class TestDiaryTagViews(TestCase):
 
         cls.user = UserFactory()
         cls.partner = UserFactory()
-        cls.relation = UserRelationFactory(giving_user=cls.user, receiving_user=cls.partner)
+        cls.relation = UserRelationFactory(user_1=cls.user, user_2=cls.partner)
 
     def test_list(self):
         """

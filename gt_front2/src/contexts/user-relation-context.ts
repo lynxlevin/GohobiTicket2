@@ -3,9 +3,8 @@ import { createContext } from 'react';
 export interface IUserRelation {
     id: string;
     related_username: string;
-    is_giving_relation: boolean;
-    ticket_image: string;
-    corresponding_relation_id: string;
+    giving_ticket_img: string;
+    receiving_ticket_img: string;
 }
 
 export interface UserRelationContextType {

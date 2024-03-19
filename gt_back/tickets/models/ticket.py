@@ -3,7 +3,8 @@ from datetime import date
 from typing import Optional
 
 from django.db import models
-from user_relations.models import UserRelation
+from user_relations.models import UserRelation, UserRelationOld
+from users.models import User
 
 
 class TicketQuerySet(models.QuerySet):
@@ -13,8 +14,16 @@ class TicketQuerySet(models.QuerySet):
         except Ticket.DoesNotExist:
             return None
 
-    def filter_eq_user_relation_id(self, user_relation_id: str) -> "TicketQuerySet":
-        return Ticket.objects.filter(user_relation__id=user_relation_id)
+    def filter_eq_user_relation_id(self, user_relation_id: str, use_old=False) -> "TicketQuerySet":
+        if use_old:
+            return Ticket.objects.filter(user_relation_old__id=user_relation_id)
+        return self.filter(user_relation__id=user_relation_id)
+
+    def filter_eq_giving_user_id(self, user_id: str) -> "TicketQuerySet":
+        return self.filter(giving_user_id=user_id)
+
+    def exclude_eq_giving_user_id(self, user_id: str) -> "TicketQuerySet":
+        return self.exclude(giving_user_id=user_id)
 
     def filter_unused_tickets(self) -> "TicketQuerySet":
         return self.filter(use_date=None).order_by("-gift_date", "-id")
@@ -29,9 +38,7 @@ class TicketQuerySet(models.QuerySet):
             target_date.month,
             monthrange(target_date.year, target_date.month)[1],
         )
-        return self.filter(
-            is_special=True, gift_date__gte=start_of_month, gift_date__lte=end_of_month
-        )
+        return self.filter(is_special=True, gift_date__gte=start_of_month, gift_date__lte=end_of_month)
 
     def exclude_eq_status(self, status) -> "TicketQuerySet":
         return self.exclude(status=status)
@@ -51,14 +58,14 @@ class Ticket(models.Model):
         (STATUS_DRAFT, STATUS_DRAFT),
     )
 
-    user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE)
+    user_relation_old = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE, blank=True, null=True)
+    user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE, blank=True, null=True)
+    giving_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     description = models.TextField(default="", blank=True)
     gift_date = models.DateField()
     use_description = models.TextField(default="", blank=True)
     use_date = models.DateField(null=True)
-    status = models.CharField(
-        max_length=8, choices=STATUS_CHOICES, default=STATUS_UNREAD
-    )
+    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=STATUS_UNREAD)
     is_special = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -67,3 +74,11 @@ class Ticket(models.Model):
 
     def __repr__(self):
         return f"<Ticket({str(self.id)})>"
+
+    @property
+    def receiving_user(self) -> User:
+        relation = self.user_relation
+        related_users = [relation.user_1, relation.user_2]
+        for user in related_users:
+            if user != self.giving_user:
+                return user

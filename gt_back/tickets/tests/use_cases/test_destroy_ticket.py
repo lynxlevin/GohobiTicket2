@@ -16,20 +16,33 @@ class TestDestroyTicket(TestCase):
         cls.use_case_name = "tickets.use_cases.destroy_ticket"
 
         cls.user = UserFactory()
-        cls.giving_relation = UserRelationFactory(giving_user=cls.user)
-        cls.receiving_relation = UserRelationFactory(receiving_user=cls.user)
+        cls.partner = UserFactory()
+        cls.relation = UserRelationFactory(user_1=cls.user, user_2=cls.partner)
 
     def test_destroy(self):
-        giving_ticket = TicketFactory(user_relation=self.giving_relation)
+        giving_ticket = TicketFactory(user_relation=self.relation, giving_user=self.user)
 
         cm = self._when_user_deletes_ticket(giving_ticket)
 
         self._then_ticket_is_deleted(giving_ticket.id)
-        self._then_info_log_is_output(cm.output)
+        expected_log = [f"INFO:{self.use_case_name}:DestroyTicket"]
+        self.assertEqual(expected_log, cm.output)
+
+    def test_destroy_unrelated_ticket(self):
+        unrelated_ticket = TicketFactory()
+
+        cm = self._when_user_deletes_ticket(unrelated_ticket)
+
+        self._then_ticket_is_not_deleted(unrelated_ticket.id)
+        expected_log = [
+            f"INFO:{self.use_case_name}:DestroyTicket",
+            f"INFO:{self.use_case_name}:DestroyTicket:delete_request_on_unrelated_ticket.",
+        ]
+        self.assertEqual(expected_log, cm.output)
 
     def test_delete_error__bad_ticket(self):
         with self.subTest(case="receiving_ticket"):
-            receiving_ticket = TicketFactory(user_relation=self.receiving_relation)
+            receiving_ticket = TicketFactory(user_relation=self.relation, giving_user=self.partner)
 
             self._when_deleted_should_raise_exception(
                 receiving_ticket,
@@ -38,17 +51,6 @@ class TestDestroyTicket(TestCase):
             )
 
             self._then_ticket_is_not_deleted(receiving_ticket.id)
-
-        with self.subTest(case="unrelated_ticket"):
-            unrelated_ticket = TicketFactory()
-
-            self._when_deleted_should_raise_exception(
-                unrelated_ticket,
-                exception=PermissionDenied,
-                exception_message="Only the giving user may delete ticket.",
-            )
-
-            self._then_ticket_is_not_deleted(unrelated_ticket.id)
 
         with self.subTest(case="non_existent_ticket"):
             non_existent_ticket = Ticket(id="-1", description="not_saved")
@@ -60,7 +62,7 @@ class TestDestroyTicket(TestCase):
             )
 
         with self.subTest(case="used_ticket"):
-            used_ticket = UsedTicketFactory(user_relation=self.giving_relation)
+            used_ticket = UsedTicketFactory(user_relation=self.relation, giving_user=self.user)
 
             self._when_deleted_should_raise_exception(
                 used_ticket,
@@ -73,6 +75,7 @@ class TestDestroyTicket(TestCase):
     """
     Util Functions
     """
+
     def _when_user_deletes_ticket(self, ticket: Ticket):
         logger = logging.getLogger(self.use_case_name)
 
@@ -81,9 +84,7 @@ class TestDestroyTicket(TestCase):
 
         return cm
 
-    def _when_deleted_should_raise_exception(
-        self, ticket: Ticket, exception: Exception, exception_message: str
-    ):
+    def _when_deleted_should_raise_exception(self, ticket: Ticket, exception: Exception, exception_message: str):
         expected_exc_detail = f"DestroyTicket_exception: {exception_message}"
         with self.assertRaisesRegex(exception, expected_exc_detail):
             DestroyTicket().execute(ticket_id=ticket.id, user=self.user)
@@ -93,10 +94,3 @@ class TestDestroyTicket(TestCase):
 
     def _then_ticket_is_not_deleted(self, ticket_id: int):
         self.assertIsNotNone(Ticket.objects.get_by_id(ticket_id))
-
-    def _then_info_log_is_output(self, cm_output: list[str]):
-        expected_log = [f"INFO:{self.use_case_name}:DestroyTicket"]
-        self.assertEqual(expected_log, cm_output)
-        self.assertEqual(expected_log, cm_output)
-        self.assertEqual(expected_log, cm_output)
-        self.assertEqual(expected_log, cm_output)

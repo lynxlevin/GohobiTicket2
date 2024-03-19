@@ -11,10 +11,11 @@ interface TicketsBottomNavProps {
     currentRelation: IUserRelation;
     showOnlyUsed: boolean;
     lastAvailableTicketRef: React.MutableRefObject<HTMLDivElement | null>;
+    isGivingRelation: boolean;
 }
 
 const TicketsBottomNav = (props: TicketsBottomNavProps) => {
-    const { currentRelation, showOnlyUsed, lastAvailableTicketRef } = props;
+    const { currentRelation, showOnlyUsed, lastAvailableTicketRef, isGivingRelation } = props;
 
     const navigate = useNavigate();
     const { getTickets, clearTickets } = useTicketContext();
@@ -36,18 +37,18 @@ const TicketsBottomNav = (props: TicketsBottomNavProps) => {
                     icon={<WifiProtectedSetupIcon />}
                     onClick={() => {
                         clearTickets();
-                        navigate(`/tickets?user_relation_id=${currentRelation.corresponding_relation_id}`);
+                        const relationType = isGivingRelation ? "is_receiving" : "is_giving";
+                        navigate(`/tickets?user_relation_id=${currentRelation.id}&${relationType}`);
                         window.scroll({ top: 0 });
                     }}
                 />
-                <BottomNavigationAction label='更新' icon={<RefreshIcon />} onClick={() => getTickets(currentRelation.id)} />
-                {/* MYMEMO: dynamic user_relation_id */}
+                <BottomNavigationAction label='更新' icon={<RefreshIcon />} onClick={() => getTickets(currentRelation.id, isGivingRelation)} />
                 <BottomNavigationAction
                     label='日記'
                     icon={<BookIcon />}
                     onClick={() => {
                         clearTickets();
-                        navigate('/diaries?user_relation_id=1');
+                        navigate(`/diaries?user_relation_id=${currentRelation.id}`);
                     }}
                 />
             </BottomNavigation>
