@@ -38,11 +38,7 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
     const navigate = useNavigate();
     const { clearTickets } = useTicketContext();
 
-    const otherRelations = userRelationContext.userRelations.filter(
-        (relation, index, self) =>
-        // MYMEMO self.findIndex の条件はいらなくなるはず
-            relation.related_username !== currentRelation.related_username && self.findIndex(e => e.related_username === relation.related_username) === index,
-    );
+    const otherRelations = userRelationContext.userRelations.filter((relation, _index, _self) => relation.related_username !== currentRelation.related_username);
 
     return (
         <HideOnScroll>

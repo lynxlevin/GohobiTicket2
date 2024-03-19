@@ -33,7 +33,6 @@ const Tickets = () => {
 
     const imageSrc = useMemo(() => {
         if (!currentRelation) return '';
-        // MYMEMO: find if the user is 1 or 2.
         const ticketImg = isGivingRelation ? currentRelation.giving_ticket_img : currentRelation.receiving_ticket_img;
         return `ticket_images/${ticketImg}`;
     }, [currentRelation, isGivingRelation]);
