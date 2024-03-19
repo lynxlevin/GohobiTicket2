@@ -11,6 +11,7 @@ const useUserAPI = () => {
     const handleLogout = async () => {
         await UserAPI.logout();
         userContext.setIsLoggedIn(false);
+        userRelationContext.setUserRelations([]);
     };
 
     useEffect(() => {
@@ -19,11 +20,12 @@ const useUserAPI = () => {
             const isAuthenticated = session_res.data.is_authenticated;
             userContext.setIsLoggedIn(isAuthenticated);
             if (isAuthenticated) {
-                // MYMEMO: この方法だと、別ユーザーでログインしたときに再取得されない
                 if (userRelationContext.userRelations.length === 0) {
                     const res = await UserRelationAPI.list();
                     userRelationContext.setUserRelations(res.data.user_relations);
                 }
+            } else {
+                userRelationContext.setUserRelations([]);
             }
         };
         void checkSession();

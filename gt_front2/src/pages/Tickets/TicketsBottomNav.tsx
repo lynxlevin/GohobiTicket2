@@ -37,7 +37,8 @@ const TicketsBottomNav = (props: TicketsBottomNavProps) => {
                     icon={<WifiProtectedSetupIcon />}
                     onClick={() => {
                         clearTickets();
-                        const relationType = isGivingRelation ? "is_receiving" : "is_giving";
+                        const relationType = isGivingRelation ? 'is_receiving' : 'is_giving';
+                        // MYMEMO: useUserAPI in Tickets does not re-run.
                         navigate(`/tickets?user_relation_id=${currentRelation.id}&${relationType}`);
                         window.scroll({ top: 0 });
                     }}

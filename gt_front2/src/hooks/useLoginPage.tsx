@@ -21,24 +21,15 @@ const useLoginPage = () => {
     };
 
     const handleLogin = async () => {
-        if (inputIsValid()) {
-            setErrorMessage(null);
-            try {
-                await UserAPI.login({ email, password });
-                const session_res = await UserAPI.session();
-                const isAuthenticated = session_res.data.is_authenticated;
-                userContext.setIsLoggedIn(isAuthenticated);
-                if (isAuthenticated) {
-                    // MYMEMO: この方法だと、別ユーザーでログインしたときに再取得されない
-                    if (userRelationContext.userRelations.length === 0) {
-                        const res = await UserRelationAPI.list();
-                        userRelationContext.setUserRelations(res.data.user_relations);
-                    }
-                }
-            } catch (err: any) {
-                setErrorMessage(err.response.data.detail);
-            }
-        }
+        if (!inputIsValid()) return;
+
+        setErrorMessage(null);
+        UserAPI.login({ email, password })
+            .then(() => {
+                userContext.setIsLoggedIn(true);
+                UserRelationAPI.list().then(res => userRelationContext.setUserRelations(res.data.user_relations));
+            })
+            .catch(err => setErrorMessage(err.response.data.detail));
     };
 
     const inputIsValid = () => {
