@@ -3,7 +3,7 @@ from datetime import date
 from typing import Optional
 
 from django.db import models
-from user_relations.models import UserRelation, UserRelationOld
+from user_relations.models import UserRelation
 from users.models import User
 
 
@@ -14,9 +14,7 @@ class TicketQuerySet(models.QuerySet):
         except Ticket.DoesNotExist:
             return None
 
-    def filter_eq_user_relation_id(self, user_relation_id: str, use_old=False) -> "TicketQuerySet":
-        if use_old:
-            return Ticket.objects.filter(user_relation_old__id=user_relation_id)
+    def filter_eq_user_relation_id(self, user_relation_id: str) -> "TicketQuerySet":
         return self.filter(user_relation__id=user_relation_id)
 
     def filter_eq_giving_user_id(self, user_id: str) -> "TicketQuerySet":
@@ -58,9 +56,8 @@ class Ticket(models.Model):
         (STATUS_DRAFT, STATUS_DRAFT),
     )
 
-    user_relation_old = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE, blank=True, null=True)
-    user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE, blank=True, null=True)
-    giving_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE)
+    giving_user = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.TextField(default="", blank=True)
     gift_date = models.DateField()
     use_description = models.TextField(default="", blank=True)

@@ -2,7 +2,7 @@ import uuid
 from typing import Optional
 
 from django.db import models
-from user_relations.models import UserRelation, UserRelationOld
+from user_relations.models import UserRelation
 
 
 class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
@@ -12,9 +12,7 @@ class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
         except DiaryTag.DoesNotExist:
             return None
 
-    def filter_eq_user_relation_id(self, user_relation_id: str, use_old=False) -> "DiaryTagQuerySet":
-        if use_old:
-            return self.filter(user_relation_old__id=user_relation_id)
+    def filter_eq_user_relation_id(self, user_relation_id: str) -> "DiaryTagQuerySet":
         return self.filter(user_relation__id=user_relation_id)
 
     def filter_in_tag_ids(self, tag_ids: list[uuid.UUID]) -> "DiaryTagQuerySet":
@@ -31,8 +29,7 @@ class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
 class DiaryTag(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     text = models.CharField(max_length=256)
-    user_relation_old = models.ForeignKey(UserRelationOld, on_delete=models.CASCADE, blank=True, null=True)
-    user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE, blank=True, null=True)
+    user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE)
     sort_no = models.IntegerField()
 
     created_at = models.DateTimeField(auto_now_add=True)
