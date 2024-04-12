@@ -2,6 +2,7 @@ from datetime import date
 
 from django.test import Client, TestCase
 from rest_framework import status
+
 from tickets.tests.ticket_factory import TicketFactory
 from user_relations.tests.user_relation_factory import UserRelationFactory
 from users.tests.user_factory import UserFactory
@@ -48,6 +49,9 @@ class TestUserRelationViews(TestCase):
         Get /api/user_relations/{user_relation_id}/special_ticket/availability/?year={year}&month={month}
         """
         relation = UserRelationFactory(user_1=self.user)
+        _receiving_special_ticket = TicketFactory(
+            is_special=True, gift_date=date(2022, 5, 1), user_relation=relation, giving_user=relation.user_2
+        )
 
         response = self._send_special_ticket_availability_request(self.user, relation.id, year="2022", month="05")
 
