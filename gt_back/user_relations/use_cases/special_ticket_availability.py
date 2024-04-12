@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 from rest_framework import exceptions
+
 from tickets.models import Ticket
 from user_relations.models import UserRelation
 
@@ -39,7 +40,10 @@ class SpecialTicketAvailability:
             raise exceptions.NotFound()
 
         has_other_special_tickets_in_month = (
-            Ticket.objects.filter_eq_user_relation_id(user_relation_id).filter_special_tickets(year_month).count() > 0
+            Ticket.objects.filter_eq_user_relation_id(user_relation_id)
+            .filter_eq_giving_user_id(user_id)
+            .filter_special_tickets(year_month)
+            .exists()
         )
 
         return not has_other_special_tickets_in_month
