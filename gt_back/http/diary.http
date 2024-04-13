@@ -1,4 +1,4 @@
-# Ticket
+# Diary
 
 ###
 # @name get_csrf
@@ -19,9 +19,5 @@ X-CSRFToken: {{get_csrf.response.headers.X-CSRFToken}}
 @relation_id=1
 
 ###
-# @name list_giving_tickets
-GET {{endpoint}}/api/tickets/?user_relation_id={{relation_id}}&is_giving
-
-###
-# @name list_receiving_tickets
-GET {{endpoint}}/api/tickets/?user_relation_id={{relation_id}}&is_receiving
+# @name list_diaries
+GET {{endpoint}}/api/diaries/?user_relation_id={{relation_id}}
