@@ -3,6 +3,7 @@ import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrow
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Switch, Typography } from '@mui/material';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
+import BottomNav from '../../BottomNav';
 import { TicketContext } from '../../contexts/ticket-context';
 import { UserContext } from '../../contexts/user-context';
 import { UserRelationContext } from '../../contexts/user-relation-context';
@@ -11,7 +12,6 @@ import useUserAPI from '../../hooks/useUserAPI';
 import Ticket from './Ticket';
 import TicketForm from './TicketForm';
 import TicketsAppBar from './TicketsAppBar';
-import TicketsBottomNav from './TicketsBottomNav';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = () => {
@@ -48,7 +48,7 @@ const Tickets = () => {
     return (
         <>
             <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} isGivingRelation={isGivingRelation} />
-            <TicketsBottomNav currentRelation={currentRelation} isGivingRelation={isGivingRelation} />
+            <BottomNav />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>
