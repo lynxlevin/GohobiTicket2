@@ -3,6 +3,7 @@ import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrow
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Switch, Typography } from '@mui/material';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
+import BottomNav from '../../BottomNav';
 import { TicketContext } from '../../contexts/ticket-context';
 import { UserContext } from '../../contexts/user-context';
 import { UserRelationContext } from '../../contexts/user-relation-context';
@@ -11,7 +12,6 @@ import useUserAPI from '../../hooks/useUserAPI';
 import Ticket from './Ticket';
 import TicketForm from './TicketForm';
 import TicketsAppBar from './TicketsAppBar';
-import TicketsBottomNav from './TicketsBottomNav';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = () => {
@@ -47,8 +47,8 @@ const Tickets = () => {
     if (!currentRelation) return <></>;
     return (
         <>
-            <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
-            <TicketsBottomNav currentRelation={currentRelation} showOnlyUsed={showOnlyUsed} lastAvailableTicketRef={lastAvailableTicketRef} isGivingRelation={isGivingRelation} />
+            <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} isGivingRelation={isGivingRelation} />
+            <BottomNav />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>
@@ -86,11 +86,33 @@ const Tickets = () => {
                         })}
                     </Grid>
                 </Container>
+                {!showOnlyUsed && !showOnlySpecial && (
+                    <ToLastAvailableTicketButton
+                        onClick={() => {
+                            if (lastAvailableTicketRef.current !== null) window.scrollTo({ top: lastAvailableTicketRef.current.offsetTop, behavior: 'smooth' });
+                        }}
+                    >
+                        <KeyboardDoubleArrowDownIcon />
+                    </ToLastAvailableTicketButton>
+                )}
                 <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={imageSrc} alt='mini-ticket' />
             </main>
         </>
     );
 };
+
+const ToLastAvailableTicketButton = styled(IconButton)`
+    font-size: 30px;
+    background: white !important;
+    border-radius: 999px;
+    position: fixed;
+    left: 16px;
+    bottom: 66px;
+    border: 2px solid #ddd;
+    width: 40px;
+    height: 40px;
+    z-index: 100;
+`;
 
 const MiniTicket = styled.img`
     height: 50px;

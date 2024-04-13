@@ -1,9 +1,12 @@
 import { useContext, useState } from 'react';
 import { UserAPI } from '../apis/UserAPI';
+import { UserRelationAPI } from '../apis/UserRelationAPI';
 import { UserContext } from '../contexts/user-context';
+import { UserRelationContext } from '../contexts/user-relation-context';
 
 const useLoginPage = () => {
     const userContext = useContext(UserContext);
+    const userRelationContext = useContext(UserRelationContext);
 
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
@@ -18,19 +21,15 @@ const useLoginPage = () => {
     };
 
     const handleLogin = async () => {
-        if (inputIsValid()) {
-            setErrorMessage(null);
-            try {
-                await UserAPI.login({ email, password });
-                const session_res = await UserAPI.session();
-                userContext.setIsLoggedIn(session_res.data.is_authenticated);
-                const defaultPage = session_res.data.default_page;
-                // MYMEMO: list user_relations して、最初のものをとってもいいかも
-                userContext.setDefaultRelationId(defaultPage ? defaultPage.split('/')[2] : null);
-            } catch (err: any) {
-                setErrorMessage(err.response.data.detail);
-            }
-        }
+        if (!inputIsValid()) return;
+
+        setErrorMessage(null);
+        UserAPI.login({ email, password })
+            .then(() => {
+                userContext.setIsLoggedIn(true);
+                UserRelationAPI.list().then(res => userRelationContext.setUserRelations(res.data.user_relations));
+            })
+            .catch(err => setErrorMessage(err.response.data.detail));
     };
 
     const inputIsValid = () => {

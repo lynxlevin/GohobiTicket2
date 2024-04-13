@@ -61,9 +61,7 @@ const DiaryTags = () => {
     };
 
     useEffect(() => {
-        if (userContext.isLoggedIn !== true && userRelationId < 1) return;
-        // MYMEMO: diaryTagContext にuserRelationIdを持たせて検証する必要あり
-        if (diaryTagContext.diaryTags !== null) return;
+        if (userContext.isLoggedIn !== true || userRelationId < 1) return;
         DiaryTagAPI.list(userRelationId).then(({ data: { diary_tags } }) => {
             diaryTagContext.setDiaryTags(diary_tags);
             setTags(JSON.parse(JSON.stringify(diary_tags)));

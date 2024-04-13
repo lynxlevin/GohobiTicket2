@@ -31,14 +31,13 @@ const theme = createTheme({
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-    const [defaultRelationId, setDefaultRelationId] = useState<string | null>(null);
     const [userRelations, setUserRelations] = useState<IUserRelation[]>([]);
     const [tickets, setTickets] = useState<ITicket[]>([]);
     const [diaryTags, setDiaryTags] = useState<IDiaryTag[] | null>(null);
 
     return (
         <div className='App'>
-            <UserContext.Provider value={{ isLoggedIn, setIsLoggedIn, defaultRelationId, setDefaultRelationId }}>
+            <UserContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
                 <UserRelationContext.Provider value={{ userRelations, setUserRelations }}>
                     <TicketContext.Provider value={{ tickets, setTickets }}>
                         <DiaryTagContext.Provider value={{ diaryTags, setDiaryTags }}>

@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { Box, Container, Grid, Typography } from '@mui/material';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
+import BottomNav from '../../BottomNav';
 import { DiaryAPI, IDiary } from '../../apis/DiaryAPI';
 import { DiaryTagAPI } from '../../apis/DiaryTagAPI';
 import { DiaryTagContext } from '../../contexts/diary-tag-context';
@@ -9,7 +10,6 @@ import { UserContext } from '../../contexts/user-context';
 import { UserRelationContext } from '../../contexts/user-relation-context';
 import useUserAPI from '../../hooks/useUserAPI';
 import DiariesAppBar from './DiariesAppBar';
-import DiariesBottomNav from './DiariesBottomNav';
 import Diary from './Diary';
 import DiaryForm from './DiaryForm';
 
@@ -33,11 +33,8 @@ const Diaries = () => {
     }, [userRelationId]);
 
     useEffect(() => {
-        if (userContext.isLoggedIn !== true && userRelationId < 1) return;
-        // MYMEMO: userRelationId が変わったら再度取得する必要あり
+        if (userContext.isLoggedIn !== true || userRelationId < 1) return;
         getDiaries();
-        // MYMEMO: diaryTagContext にuserRelationIdを持たせて検証する必要あり
-        if (diaryTagContext.diaryTags !== null) return;
         DiaryTagAPI.list(userRelationId).then(({ data: { diary_tags } }) => {
             diaryTagContext.setDiaryTags(diary_tags);
         });
@@ -50,8 +47,8 @@ const Diaries = () => {
     if (!currentRelation) return <></>;
     return (
         <>
-            <DiariesAppBar handleLogout={handleLogout} userRelationId={userRelationId} />
-            <DiariesBottomNav userRelationId={userRelationId} refreshDiaries={getDiaries} />
+            <DiariesAppBar handleLogout={handleLogout} userRelationId={userRelationId} refreshDiaries={getDiaries} />
+            <BottomNav />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>
