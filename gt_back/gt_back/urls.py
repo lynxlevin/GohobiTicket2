@@ -1,3 +1,5 @@
+import os
+
 from diaries import views as diary_views
 from django.urls import include, path
 from rest_framework import routers
@@ -15,3 +17,10 @@ urlpatterns = [
     path("api/", include(router.urls)),
     path("user/", include("users.urls")),
 ]
+
+env = os.getenv("DJANGO_ENV")
+if env == "local":
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
+    urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
+    urlpatterns += staticfiles_urlpatterns()
