@@ -15,6 +15,9 @@ class DiaryQuerySet(models.QuerySet):
     def filter_eq_user_relation_id(self, user_relation_id: str) -> "DiaryQuerySet":
         return self.filter(user_relation__id=user_relation_id)
 
+    def prefetch_tags(self) -> "DiaryQuerySet":
+        return self.prefetch_related("tags")
+
     def order_by_date(self, desc: bool = False) -> "DiaryQuerySet":
         key = "-date" if desc else "date"
         return self.order_by(key)
