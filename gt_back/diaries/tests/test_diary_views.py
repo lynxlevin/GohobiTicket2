@@ -29,7 +29,9 @@ class TestDiaryViews(TestCase):
         ]
         _another_relation_entry = DiaryFactory()
 
-        status_code, body = self._make_get_request(self.user, f"{self.base_path}?user_relation_id={self.relation.id}")
+        client = self._get_client(self.user)
+        response = client.get(f"{self.base_path}?user_relation_id={self.relation.id}")
+        (status_code, body) = (response.status_code, response.json())
 
         self.assertEqual(status.HTTP_200_OK, status_code)
 
@@ -56,7 +58,9 @@ class TestDiaryViews(TestCase):
             "tag_ids": [str(tag.id) for tag in tags],
         }
 
-        status_code, body = self._make_post_request(self.user, self.base_path, params)
+        client = self._get_client(self.user)
+        response = client.post(self.base_path, params, content_type="application/json")
+        (status_code, body) = (response.status_code, response.json())
 
         self.assertEqual(status.HTTP_201_CREATED, status_code)
 
@@ -81,9 +85,10 @@ class TestDiaryViews(TestCase):
             "tag_ids": [],
         }
 
-        status_code, body = self._make_post_request(self.user, self.base_path, params)
+        client = self._get_client(self.user)
+        response = client.post(self.base_path, params, content_type="application/json")
 
-        self.assertEqual(status.HTTP_404_NOT_FOUND, status_code)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
     def test_update(self):
         """
@@ -103,7 +108,9 @@ class TestDiaryViews(TestCase):
             "tag_ids": [str(tags[0].id), str(tags[2].id)],
         }
 
-        status_code, body = self._make_put_request(self.user, f"{self.base_path}{diary.id}/", params)
+        client = self._get_client(self.user)
+        response = client.put(f"{self.base_path}{diary.id}/", params, content_type="application/json")
+        (status_code, body) = (response.status_code, response.json())
 
         self.assertEqual(status.HTTP_200_OK, status_code)
 
@@ -122,20 +129,7 @@ class TestDiaryViews(TestCase):
     Utility Functions
     """
 
-    def _make_get_request(self, user, path):
+    def _get_client(self, user) -> Client:
         client = Client()
         client.force_login(user)
-        response = client.get(path)
-        return (response.status_code, response.json())
-
-    def _make_post_request(self, user, path, params):
-        client = Client()
-        client.force_login(user)
-        response = client.post(path, params, content_type="application/json")
-        return (response.status_code, response.json())
-
-    def _make_put_request(self, user, path, params):
-        client = Client()
-        client.force_login(user)
-        response = client.put(path, params, content_type="application/json")
-        return (response.status_code, response.json())
+        return client
