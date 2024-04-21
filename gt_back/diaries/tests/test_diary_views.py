@@ -24,10 +24,10 @@ class TestDiaryViews(TestCase):
         """
         diary_entries = [
             DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=2))),
-            DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=1))),
             DiaryFactory(user_relation=self.relation, date=date.today()),
+            DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=1))),
         ]
-        _another_relation_entry = DiaryFactory()
+        _wrong_relation_entry = DiaryFactory()
 
         client = self._get_client(self.user)
         response = client.get(f"{self.base_path}?user_relation_id={self.relation.id}")
@@ -36,12 +36,34 @@ class TestDiaryViews(TestCase):
         self.assertEqual(status.HTTP_200_OK, status_code)
 
         expected = [
-            {"id": str(entry.id), "entry": entry.entry, "date": entry.date.isoformat(), "tags": []}
-            for entry in sorted(diary_entries, key=lambda entry: entry.date, reverse=True)
+            {
+                "id": str(diary_entries[1].id),
+                "entry": diary_entries[1].entry,
+                "date": diary_entries[1].date.isoformat(),
+                "tags": [],
+            },
+            {
+                "id": str(diary_entries[2].id),
+                "entry": diary_entries[2].entry,
+                "date": diary_entries[2].date.isoformat(),
+                "tags": [],
+            },
+            {
+                "id": str(diary_entries[0].id),
+                "entry": diary_entries[0].entry,
+                "date": diary_entries[0].date.isoformat(),
+                "tags": [],
+            },
         ]
         self.assertListEqual(expected, body["diaries"])
 
-    # def test_list__404_on_wrong_user_relation_id(self):
+    def test_list__404_on_wrong_user_relation_id(self):
+        wrong_relation = UserRelationFactory()
+
+        client = self._get_client(self.user)
+        response = client.get(f"{self.base_path}?user_relation_id={wrong_relation.id}")
+
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
     def test_create(self):
         """
@@ -78,9 +100,9 @@ class TestDiaryViews(TestCase):
         Post /api/diaries/
         Wrong user_relation
         """
-        other_relation = UserRelationFactory()
+        wrong_relation = UserRelationFactory()
         params = {
-            "user_relation_id": str(other_relation.id),
+            "user_relation_id": str(wrong_relation.id),
             "entry": "Newly created entry.",
             "date": date.today().isoformat(),
             "tag_ids": [],
@@ -147,16 +169,16 @@ class TestDiaryViews(TestCase):
         self.assertFalse(initial_tag in associated_tags)
 
     def test_update__404_on_wrong_user_relations_diary(self):
-        other_relation_diary = DiaryFactory(date=(date.today() - timedelta(days=1)))
+        wrong_relation_diary = DiaryFactory(date=(date.today() - timedelta(days=1)))
 
         params = {
-            "entry": other_relation_diary.entry,
-            "date": other_relation_diary.date.isoformat(),
+            "entry": wrong_relation_diary.entry,
+            "date": wrong_relation_diary.date.isoformat(),
             "tag_ids": [],
         }
 
         client = self._get_client(self.user)
-        response = client.put(f"{self.base_path}{other_relation_diary.id}/", params, content_type="application/json")
+        response = client.put(f"{self.base_path}{wrong_relation_diary.id}/", params, content_type="application/json")
 
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
