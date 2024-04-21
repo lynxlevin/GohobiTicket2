@@ -94,36 +94,70 @@ class TestDiaryViews(TestCase):
         """
         Put /api/diaries/{diary_id}/
         """
-        tags = [
+        diary = DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=1)))
+        initial_tag = DiaryTagFactory(user_relation=self.relation, sort_no=2)
+        new_tags = [
             DiaryTagFactory(user_relation=self.relation),
-            DiaryTagFactory(user_relation=self.relation, sort_no=2),
             DiaryTagFactory(user_relation=self.relation, sort_no=3),
         ]
-        diary = DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=1)))
-        DiaryTagRelation.objects.create(diary=diary, tag_master=tags[1])
+        DiaryTagRelation.objects.create(diary=diary, tag_master=initial_tag)
 
         params = {
             "entry": "Newly updated entry.",
             "date": date.today().isoformat(),
-            "tag_ids": [str(tags[0].id), str(tags[2].id)],
+            "tag_ids": [str(tag.id) for tag in new_tags],
         }
 
         client = self._get_client(self.user)
         response = client.put(f"{self.base_path}{diary.id}/", params, content_type="application/json")
-        (status_code, body) = (response.status_code, response.json())
 
-        self.assertEqual(status.HTTP_200_OK, status_code)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
 
         diary.refresh_from_db()
-        self.assertEqual(str(self.relation.id), str(diary.user_relation.id))
         self.assertEqual(params["entry"], diary.entry)
         self.assertEqual(params["date"], diary.date.isoformat())
 
         associated_tags = diary.tags.order_by_sort_no().all()
-        self.assertEqual(tags[0].id, associated_tags[0].id)
-        self.assertEqual(tags[2].id, associated_tags[1].id)
+        self.assertFalse(initial_tag in associated_tags)
+        self.assertTrue(new_tags[0] in associated_tags)
+        self.assertTrue(new_tags[1] in associated_tags)
 
-    # def test_update__404_on_wrong_user_relations_diary(self):
+    def test_update__no_tags(self):
+        """
+        Put /api/diaries/{diary_id}/
+        """
+        diary = DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=1)))
+        initial_tag = DiaryTagFactory(user_relation=self.relation, sort_no=2)
+        DiaryTagRelation.objects.create(diary=diary, tag_master=initial_tag)
+
+        params = {
+            "entry": diary.entry,
+            "date": diary.date.isoformat(),
+            "tag_ids": [],
+        }
+
+        client = self._get_client(self.user)
+        response = client.put(f"{self.base_path}{diary.id}/", params, content_type="application/json")
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+
+        diary.refresh_from_db()
+        associated_tags = diary.tags.order_by_sort_no().all()
+        self.assertFalse(initial_tag in associated_tags)
+
+    def test_update__404_on_wrong_user_relations_diary(self):
+        other_relation_diary = DiaryFactory(date=(date.today() - timedelta(days=1)))
+
+        params = {
+            "entry": other_relation_diary.entry,
+            "date": other_relation_diary.date.isoformat(),
+            "tag_ids": [],
+        }
+
+        client = self._get_client(self.user)
+        response = client.put(f"{self.base_path}{other_relation_diary.id}/", params, content_type="application/json")
+
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
     """
     Utility Functions

@@ -2,6 +2,7 @@ import uuid
 from typing import Optional
 
 from django.db import models
+from django.db.models import Q
 from user_relations.models import UserRelation
 
 
@@ -14,6 +15,9 @@ class DiaryQuerySet(models.QuerySet):
 
     def filter_eq_user_relation_id(self, user_relation_id: str) -> "DiaryQuerySet":
         return self.filter(user_relation__id=user_relation_id)
+
+    def filter_eq_user_id(self, user_id: str) -> "DiaryQuerySet":
+        return self.filter(Q(user_relation__user_1_id=user_id) | Q(user_relation__user_2_id=user_id))
 
     def prefetch_tags(self) -> "DiaryQuerySet":
         return self.prefetch_related("tags")
