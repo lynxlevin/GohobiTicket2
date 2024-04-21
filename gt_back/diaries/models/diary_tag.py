@@ -12,7 +12,7 @@ class DiaryTagQuerySet(models.QuerySet["DiaryTag"]):
         except DiaryTag.DoesNotExist:
             return None
 
-    def filter_eq_user_relation_id(self, user_relation_id: str) -> "DiaryTagQuerySet":
+    def filter_eq_user_relation_id(self, user_relation_id: int) -> "DiaryTagQuerySet":
         return self.filter(user_relation__id=user_relation_id)
 
     def filter_in_tag_ids(self, tag_ids: list[uuid.UUID]) -> "DiaryTagQuerySet":

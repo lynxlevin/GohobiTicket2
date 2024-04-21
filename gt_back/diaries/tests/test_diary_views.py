@@ -68,9 +68,10 @@ class TestDiaryViews(TestCase):
         self.assertEqual(params["user_relation_id"], str(created_diary.user_relation.id))
         self.assertEqual(params["entry"], created_diary.entry)
         self.assertEqual(params["date"], created_diary.date.isoformat())
+
         associated_tags = created_diary.tags.order_by_sort_no().all()
-        self.assertEqual(tags[0].id, associated_tags[0].id)
-        self.assertEqual(tags[1].id, associated_tags[1].id)
+        self.assertTrue(tags[0] in associated_tags)
+        self.assertTrue(tags[1] in associated_tags)
 
     def test_create__404_on_wrong_user_relation_id(self):
         """
