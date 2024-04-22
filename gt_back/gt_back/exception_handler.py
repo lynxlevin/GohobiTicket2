@@ -8,6 +8,6 @@ def exception_handler_with_logging(exc, context=None):
 
     response = exception_handler(exc, context)
 
-    logger.warn(exc)
+    logger.warn(exc, exc_info=True)
 
     return response

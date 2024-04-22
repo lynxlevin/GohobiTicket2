@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 from rest_framework import exceptions
 from user_relations.models import UserRelation
@@ -7,7 +7,17 @@ from user_relations.models import UserRelation
 from ..models import Diary, DiaryTag
 
 if TYPE_CHECKING:
+    from datetime import datetime
+    from uuid import UUID
+
     from users.models import User
+
+    class CreateDiaryData(TypedDict):
+        entry: str
+        date: "datetime"
+        user_relation_id: int
+        tag_ids: list["UUID"]
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +26,7 @@ class CreateDiary:
     def __init__(self):
         self.exception_log_title = f"{__class__.__name__}_exception"
 
-    def execute(self, user: "User", data: dict) -> Diary:
+    def execute(self, user: "User", data: "CreateDiaryData") -> Diary:
         logger.info(self.__class__.__name__, extra={"user": user, "data": data})
 
         entry = data["entry"]
