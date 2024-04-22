@@ -27,11 +27,11 @@ class TestDiaryViews(TestCase):
             DiaryFactory(user_relation=self.relation, date=date.today()),
             DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=1))),
         ]
-        _wrong_relation_entry = DiaryFactory()
+        wrong_relation_entry = DiaryFactory()
 
         client = self._get_client(self.user)
-        response = client.get(f"{self.base_path}?user_relation_id={self.relation.id}")
-        (status_code, body) = (response.status_code, response.json())
+        res = client.get(f"{self.base_path}?user_relation_id={self.relation.id}")
+        (status_code, body) = (res.status_code, res.json())
 
         self.assertEqual(status.HTTP_200_OK, status_code)
 
@@ -56,14 +56,15 @@ class TestDiaryViews(TestCase):
             },
         ]
         self.assertListEqual(expected, body["diaries"])
+        self.assertNotIn(str(wrong_relation_entry.id), [diary["id"] for diary in body["diaries"]])
 
     def test_list__404_on_wrong_user_relation_id(self):
         wrong_relation = UserRelationFactory()
 
         client = self._get_client(self.user)
-        response = client.get(f"{self.base_path}?user_relation_id={wrong_relation.id}")
+        res = client.get(f"{self.base_path}?user_relation_id={wrong_relation.id}")
 
-        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, res.status_code)
 
     def test_create(self):
         """
@@ -81,8 +82,8 @@ class TestDiaryViews(TestCase):
         }
 
         client = self._get_client(self.user)
-        response = client.post(self.base_path, params, content_type="application/json")
-        (status_code, body) = (response.status_code, response.json())
+        res = client.post(self.base_path, params, content_type="application/json")
+        (status_code, body) = (res.status_code, res.json())
 
         self.assertEqual(status.HTTP_201_CREATED, status_code)
 
@@ -92,8 +93,8 @@ class TestDiaryViews(TestCase):
         self.assertEqual(params["date"], created_diary.date.isoformat())
 
         associated_tags = created_diary.tags.order_by_sort_no().all()
-        self.assertTrue(tags[0] in associated_tags)
-        self.assertTrue(tags[1] in associated_tags)
+        self.assertIn(tags[0], associated_tags)
+        self.assertIn(tags[1], associated_tags)
 
     def test_create__404_on_wrong_user_relation_id(self):
         """
@@ -109,9 +110,9 @@ class TestDiaryViews(TestCase):
         }
 
         client = self._get_client(self.user)
-        response = client.post(self.base_path, params, content_type="application/json")
+        res = client.post(self.base_path, params, content_type="application/json")
 
-        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, res.status_code)
 
     def test_update(self):
         """
@@ -132,18 +133,18 @@ class TestDiaryViews(TestCase):
         }
 
         client = self._get_client(self.user)
-        response = client.put(f"{self.base_path}{diary.id}/", params, content_type="application/json")
+        res = client.put(f"{self.base_path}{diary.id}/", params, content_type="application/json")
 
-        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(status.HTTP_200_OK, res.status_code)
 
         diary.refresh_from_db()
         self.assertEqual(params["entry"], diary.entry)
         self.assertEqual(params["date"], diary.date.isoformat())
 
         associated_tags = diary.tags.order_by_sort_no().all()
-        self.assertFalse(initial_tag in associated_tags)
-        self.assertTrue(new_tags[0] in associated_tags)
-        self.assertTrue(new_tags[1] in associated_tags)
+        self.assertIn(new_tags[0], associated_tags)
+        self.assertIn(new_tags[1], associated_tags)
+        self.assertNotIn(initial_tag, associated_tags)
 
     def test_update__no_tags(self):
         """
@@ -160,13 +161,13 @@ class TestDiaryViews(TestCase):
         }
 
         client = self._get_client(self.user)
-        response = client.put(f"{self.base_path}{diary.id}/", params, content_type="application/json")
+        res = client.put(f"{self.base_path}{diary.id}/", params, content_type="application/json")
 
-        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(status.HTTP_200_OK, res.status_code)
 
         diary.refresh_from_db()
         associated_tags = diary.tags.order_by_sort_no().all()
-        self.assertFalse(initial_tag in associated_tags)
+        self.assertNotIn(initial_tag, associated_tags)
 
     def test_update__404_on_wrong_user_relations_diary(self):
         wrong_relation_diary = DiaryFactory(date=(date.today() - timedelta(days=1)))
@@ -178,9 +179,9 @@ class TestDiaryViews(TestCase):
         }
 
         client = self._get_client(self.user)
-        response = client.put(f"{self.base_path}{wrong_relation_diary.id}/", params, content_type="application/json")
+        res = client.put(f"{self.base_path}{wrong_relation_diary.id}/", params, content_type="application/json")
 
-        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, res.status_code)
 
     """
     Utility Functions
