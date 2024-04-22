@@ -13,10 +13,10 @@ class DiaryQuerySet(models.QuerySet):
         except Diary.DoesNotExist:
             return None
 
-    def filter_eq_user_relation_id(self, user_relation_id: str) -> "DiaryQuerySet":
+    def filter_eq_user_relation_id(self, user_relation_id: int) -> "DiaryQuerySet":
         return self.filter(user_relation__id=user_relation_id)
 
-    def filter_eq_user_id(self, user_id: str) -> "DiaryQuerySet":
+    def filter_eq_user_id(self, user_id: int) -> "DiaryQuerySet":
         return self.filter(Q(user_relation__user_1_id=user_id) | Q(user_relation__user_2_id=user_id))
 
     def prefetch_tags(self) -> "DiaryQuerySet":
