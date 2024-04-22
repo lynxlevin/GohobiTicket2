@@ -80,7 +80,6 @@ class TestDiaryTagViews(TestCase):
     def test_bulk_update(self):
         """
         Post /api/diary_tags/bulk_update/
-        全部送るタイプにする。追加も削除も。最初にバリデーションをかける。sort_no 1~len && 重複なし。DBと付き合わせて変更分だけ反映。全部返す。
         """
         existing_tags = [
             DiaryTagFactory(user_relation=self.relation, sort_no=1, text="tag_1"),
@@ -107,17 +106,60 @@ class TestDiaryTagViews(TestCase):
 
         tags = body["diary_tags"]
         expected = [
-            *params["diary_tags"],
+            *sorted(params["diary_tags"], key=lambda t: t["sort_no"]),
             {"id": str(existing_tags[3].id), "text": existing_tags[3].text, "sort_no": 5},
         ]
         self.assertEqual(len(expected), len(tags))
-        for param_tag, tag in zip(sorted(expected, key=lambda t: t["sort_no"]), tags):
+        for param_tag, tag in zip(expected, tags):
             if param_tag["id"]:
                 self.assertEqual(param_tag["id"], tag["id"])
             self.assertEqual(param_tag["text"], tag["text"])
             self.assertEqual(param_tag["sort_no"], tag["sort_no"])
 
-    # def test_bulk_update__404_on_wrong_user_relations_diary(self):
+        tags_in_db = DiaryTag.objects.filter(id__in=(t["id"] for t in tags)).order_by_sort_no()
+        self.assertEqual(len(expected), len(tags_in_db))
+        for param_tag, tag_in_db in zip(expected, tags_in_db):
+            if param_tag["id"]:
+                self.assertEqual(param_tag["id"], str(tag_in_db.id))
+            self.assertEqual(param_tag["text"], tag_in_db.text)
+            self.assertEqual(param_tag["sort_no"], tag_in_db.sort_no)
+
+    def test_bulk_update__create_new_if_other_relation_tag(self):
+        """
+        Post /api/diary_tags/bulk_update/
+        In case when one of the ids in the body references a tag for wrong relation.
+        Just ignore the id and treat the same way as when id=None.
+        """
+        existing_tag = DiaryTagFactory(user_relation=self.relation, sort_no=1, text="tag_1")
+        other_relation_tag = DiaryTagFactory(sort_no=2, text="other_relation_tag")
+
+        params = {
+            "diary_tags": [
+                {"id": str(existing_tag.id), "text": existing_tag.text, "sort_no": existing_tag.sort_no},
+                {
+                    "id": str(other_relation_tag.id),
+                    "text": "originally other relation",
+                    "sort_no": other_relation_tag.sort_no,
+                },
+            ],
+            "user_relation_id": str(self.relation.id),
+        }
+
+        client = self._get_client(self.user)
+        res = client.post(f"{self.base_path}bulk_update/", params, content_type="application/json")
+        status_code, body = (res.status_code, res.json())
+
+        self.assertEqual(status.HTTP_200_OK, status_code)
+
+        # "originally other relation" tag is newly created.
+        tags = body["diary_tags"]
+        self.assertNotEqual(params["diary_tags"][1]["id"], tags[1]["id"])
+        self.assertEqual("originally other relation", tags[1]["text"])
+
+        # Other_relation_tag should not change at all.
+        other_relation_tag.refresh_from_db()
+        self.assertEqual(params["diary_tags"][1]["id"], str(other_relation_tag.id))
+        self.assertEqual("other_relation_tag", other_relation_tag.text)
 
     def test_bulk_update__validation_error_on_duplicate_sort_nos(self):
         """
