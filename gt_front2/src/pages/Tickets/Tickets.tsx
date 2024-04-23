@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { keyframes } from '@emotion/react';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Switch, Typography } from '@mui/material';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -37,6 +38,9 @@ const Tickets = () => {
         return `ticket_images/${ticketImg}`;
     }, [currentRelation, isGivingRelation]);
 
+    const ticketCount = ticketContext.tickets.length;
+    const isSpecialNumber = isGivingRelation && ticketCount > 0 && (ticketCount % 100 === 0 || ticketCount % 111 === 0 || ticketCount % 1111 === 0);
+
     useEffect(() => {
         if (userContext.isLoggedIn === true && userRelationId > 0) getTickets(userRelationId, isGivingRelation);
     }, [getTickets, isGivingRelation, userContext.isLoggedIn, userRelationId]);
@@ -58,9 +62,15 @@ const Tickets = () => {
                         <Typography variant='h4' align='center' color='text.primary' sx={{ fontWeight: 600 }} gutterBottom>
                             ごほうびチケット
                         </Typography>
-                        <Typography variant='h5' align='center' color='text.primary' gutterBottom>
-                            計{ticketContext.tickets.length}枚
-                        </Typography>
+                        {isSpecialNumber ? (
+                            <Typography variant='h5' align='center' color='text.primary' gutterBottom>
+                                計<GoldNumber>{ticketCount}</GoldNumber>枚
+                            </Typography>
+                        ) : (
+                            <Typography variant='h5' align='center' color='text.primary' gutterBottom>
+                                計{ticketCount}枚
+                            </Typography>
+                        )}
                         <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={imageSrc} />
                         {isGivingRelation && <TicketForm userRelationId={userRelationId} />}
                         <FormGroup>
@@ -126,6 +136,16 @@ const MiniTicket = styled.img`
         opacity: 0.95;
         filter: brightness(105%);
     }
+`;
+
+const GoldNumber = styled.span`
+    font-size: 2.5rem;
+    padding: 8px;
+    background: linear-gradient(to bottom, #cfc09f 27%, #ffecb3 40%, #3a2c0f 78%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #fff;
+	font-weight: bold;
 `;
 
 export default Tickets;
