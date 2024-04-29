@@ -2,7 +2,7 @@ import uuid
 from typing import Optional
 
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, Q
 from user_relations.models import UserRelation
 
 from ..enums import DiaryStatus
@@ -23,6 +23,12 @@ class DiaryQuerySet(models.QuerySet):
 
     def prefetch_tags(self) -> "DiaryQuerySet":
         return self.prefetch_related("tags")
+
+    def annotate_status(self, user_relation: UserRelation, user_id: int) -> "DiaryQuerySet":
+        if user_relation.user_1_id == user_id:
+            return self.annotate(status=F("user_1_status"))
+        if user_relation.user_2_id == user_id:
+            return self.annotate(status=F("user_2_status"))
 
     def order_by_date(self, desc: bool = False) -> "DiaryQuerySet":
         key = "-date" if desc else "date"
