@@ -24,6 +24,9 @@ class DiaryQuerySet(models.QuerySet):
     def prefetch_tags(self) -> "DiaryQuerySet":
         return self.prefetch_related("tags")
 
+    def select_user_relation(self) -> "DiaryQuerySet":
+        return self.select_related("user_relation")
+
     def annotate_status(self, user_relation: UserRelation, user_id: int) -> "DiaryQuerySet":
         if user_relation.user_1_id == user_id:
             return self.annotate(status=F("user_1_status"))
