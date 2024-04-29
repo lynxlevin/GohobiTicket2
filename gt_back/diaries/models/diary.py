@@ -5,6 +5,8 @@ from django.db import models
 from django.db.models import Q
 from user_relations.models import UserRelation
 
+from ..enums import DiaryStatus
+
 
 class DiaryQuerySet(models.QuerySet):
     def get_by_id(self, id) -> Optional["Diary"]:
@@ -37,6 +39,12 @@ class Diary(models.Model):
     entry = models.TextField(default="", blank=True)
     date = models.DateField()
     tags = models.ManyToManyField("DiaryTag", through="DiaryTagRelation")
+    user_1_status = models.CharField(
+        max_length=8, choices=DiaryStatus.choices_for_model(), default=DiaryStatus.STATUS_UNREAD.value
+    )
+    user_2_status = models.CharField(
+        max_length=8, choices=DiaryStatus.choices_for_model(), default=DiaryStatus.STATUS_UNREAD.value
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
