@@ -5,6 +5,7 @@ from rest_framework import status
 from user_relations.tests.user_relation_factory import UserRelationFactory
 from users.tests.user_factory import UserFactory
 
+from ..enums import DiaryStatus
 from ..models import Diary, DiaryTagRelation
 from .diary_factory import DiaryFactory, DiaryTagFactory
 
@@ -23,7 +24,11 @@ class TestDiaryViews(TestCase):
         Get /api/diaries/?user_relation_id={relation_id}
         """
         diary_entries = [
-            DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=2))),
+            DiaryFactory(
+                user_relation=self.relation,
+                date=(date.today() - timedelta(days=2)),
+                user_1_status=DiaryStatus.STATUS_READ.value,
+            ),
             DiaryFactory(user_relation=self.relation, date=date.today()),
             DiaryFactory(user_relation=self.relation, date=(date.today() - timedelta(days=1))),
         ]
@@ -41,18 +46,21 @@ class TestDiaryViews(TestCase):
                 "entry": diary_entries[1].entry,
                 "date": diary_entries[1].date.isoformat(),
                 "tags": [],
+                "status": diary_entries[1].user_1_status,
             },
             {
                 "id": str(diary_entries[2].id),
                 "entry": diary_entries[2].entry,
                 "date": diary_entries[2].date.isoformat(),
                 "tags": [],
+                "status": diary_entries[2].user_1_status,
             },
             {
                 "id": str(diary_entries[0].id),
                 "entry": diary_entries[0].entry,
                 "date": diary_entries[0].date.isoformat(),
                 "tags": [],
+                "status": diary_entries[0].user_1_status,
             },
         ]
         self.assertListEqual(expected, body["diaries"])
@@ -91,6 +99,8 @@ class TestDiaryViews(TestCase):
         self.assertEqual(params["user_relation_id"], str(created_diary.user_relation.id))
         self.assertEqual(params["entry"], created_diary.entry)
         self.assertEqual(params["date"], created_diary.date.isoformat())
+        self.assertEqual(DiaryStatus.STATUS_READ.value, created_diary.user_1_status)
+        self.assertEqual(DiaryStatus.STATUS_UNREAD.value, created_diary.user_2_status)
 
         associated_tags = created_diary.tags.order_by_sort_no().all()
         self.assertIn(tags[0], associated_tags)

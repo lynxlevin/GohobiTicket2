@@ -31,7 +31,11 @@ class ListDiary:
         if user_relation is None:
             raise exceptions.NotFound()
 
-        qs = Diary.objects.prefetch_tags().filter_eq_user_relation_id(user_relation_id)
+        qs = (
+            Diary.objects.prefetch_tags()
+            .filter_eq_user_relation_id(user_relation_id)
+            .annotate_status(user_relation, user.id)
+        )
 
         diaries = qs.order_by_created_at(desc=True).order_by_date(desc=True).all()
 

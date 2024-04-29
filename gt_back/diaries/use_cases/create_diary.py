@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, TypedDict
 from rest_framework import exceptions
 from user_relations.models import UserRelation
 
+from ..enums import DiaryStatus
 from ..models import Diary, DiaryTag
 
 if TYPE_CHECKING:
@@ -43,6 +44,12 @@ class CreateDiary:
             date=date,
             user_relation_id=user_relation_id,
         )
+
+        if user == user_relation.user_1:
+            diary.user_1_status = DiaryStatus.STATUS_READ.value
+        else:
+            diary.user_2_status = DiaryStatus.STATUS_READ.value
+
         diary.save()
 
         tags = DiaryTag.objects.filter_eq_user_relation_id(user_relation_id).filter_in_tag_ids(tag_ids)
