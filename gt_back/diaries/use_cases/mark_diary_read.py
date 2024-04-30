@@ -1,0 +1,32 @@
+import logging
+from typing import TYPE_CHECKING
+
+from ..enums import DiaryStatus
+from ..models import Diary
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from users.models import User
+
+
+logger = logging.getLogger(__name__)
+
+
+class MarkDiaryRead:
+    def __init__(self):
+        self.exception_log_title = f"{__class__.__name__}_exception"
+
+    def execute(self, user: "User", id: "UUID") -> None:
+        logger.info(self.__class__.__name__, extra={"user": user, "id": id})
+
+        diary = Diary.objects.filter_eq_user_id(user.id).select_user_relation().get_by_id(id)
+
+        if user == diary.user_relation.user_1:
+            diary.user_1_status = DiaryStatus.STATUS_READ.value
+        else:
+            diary.user_2_status = DiaryStatus.STATUS_READ.value
+
+        diary.save()
+
+        return

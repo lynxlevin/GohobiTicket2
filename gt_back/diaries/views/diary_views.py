@@ -2,6 +2,7 @@ import logging
 
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -15,7 +16,7 @@ from ..serializers import (
     ListDiaryQuerySerializer,
     UpdateDiaryRequestSerializer,
 )
-from ..use_cases import CreateDiary, ListDiary, UpdateDiary
+from ..use_cases import CreateDiary, ListDiary, MarkDiaryRead, UpdateDiary
 
 logger = logging.getLogger(__name__)
 
@@ -65,5 +66,13 @@ class DiaryViewSet(viewsets.GenericViewSet):
             serializer = self.get_serializer(diary)
             return Response(serializer.data)
 
+        except Exception as exc:
+            return exception_handler_with_logging(exc)
+
+    @action(detail=True, methods=["put"])
+    def mark_read(self, request, use_case=MarkDiaryRead(), format=None, pk=None):
+        try:
+            use_case.execute(user=request.user, id=pk)
+            return Response({})
         except Exception as exc:
             return exception_handler_with_logging(exc)

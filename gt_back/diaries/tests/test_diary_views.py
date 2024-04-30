@@ -234,6 +234,21 @@ class TestDiaryViews(TestCase):
 
         self.assertEqual(status.HTTP_404_NOT_FOUND, res.status_code)
 
+    def test_mark_read(self):
+        """
+        Put /api/diaries/{diary_id}/mark_read/
+        """
+        diary = DiaryFactory(user_relation=self.relation)
+
+        client = self._get_client(self.user)
+        res = client.put(f"{self.base_path}{diary.id}/mark_read/", {}, content_type="application/json")
+
+        self.assertEqual(status.HTTP_200_OK, res.status_code)
+
+        diary.refresh_from_db()
+        self.assertEqual(DiaryStatus.STATUS_READ.value, diary.user_1_status)
+        self.assertEqual(DiaryStatus.STATUS_UNREAD.value, diary.user_2_status)
+
     """
     Utility Functions
     """
