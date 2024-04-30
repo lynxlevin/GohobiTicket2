@@ -3,7 +3,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Badge, Box, Card, CardContent, Chip, Grid, IconButton, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { IDiary } from '../../apis/DiaryAPI';
+import { DiaryAPI, IDiary } from '../../apis/DiaryAPI';
 import EditDiaryDialog from './EditDiaryDialog';
 import MoonPhase from './MoonPhase';
 import useOnScreen from '../../hooks/useOnScreen';
@@ -31,7 +31,7 @@ const Diary = (props: DiaryProps) => {
             setTimer(
                 setTimeout(async () => {
                     setPrevStatus(diary.status);
-                    // await readTicket(diary.id);
+                    await DiaryAPI.markRead(diary.id);
                 }, 3000),
             );
         }
