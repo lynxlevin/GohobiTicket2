@@ -11,10 +11,12 @@ import useOnScreen from '../../hooks/useOnScreen';
 interface DiaryProps {
     diary: IDiary;
     setDiaries: React.Dispatch<React.SetStateAction<IDiary[]>>;
+    updateStatusToRead: (id: string) => void;
+    firstUnreadDiaryRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 const Diary = (props: DiaryProps) => {
-    const { diary, setDiaries } = props;
+    const { diary, setDiaries, updateStatusToRead, firstUnreadDiaryRef } = props;
 
     const [isEditDiaryDialogOpen, setIsEditDiaryDialogOpen] = useState(false);
 
@@ -32,6 +34,7 @@ const Diary = (props: DiaryProps) => {
                 setTimeout(async () => {
                     setPrevStatus(diary.status);
                     await DiaryAPI.markRead(diary.id);
+                    updateStatusToRead(diary.id);
                 }, 3000),
             );
         }
@@ -56,7 +59,7 @@ const Diary = (props: DiaryProps) => {
     }, [prevStatus, diary.status]);
 
     return (
-        <StyledGrid item xs={12} sm={6} md={4}>
+        <StyledGrid item xs={12} sm={6} md={4} ref={firstUnreadDiaryRef}>
             {diary.status !== 'read' && getStatusBadge}
             <Card className='card'>
                 <CardContent>
