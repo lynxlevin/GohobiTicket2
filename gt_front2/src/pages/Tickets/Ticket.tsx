@@ -4,7 +4,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Badge, Button, Card, CardActions, CardContent, Grid, IconButton, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { ITicket } from '../../contexts/ticket-context';
+import { ITicket, TicketStatus } from '../../contexts/ticket-context';
 import useOnScreen from '../../hooks/useOnScreen';
 import useTicketContext from '../../hooks/useTicketContext';
 import EditDialog from './EditDialog';
@@ -29,7 +29,7 @@ const Ticket = (props: TicketProps) => {
     const observeVisibility = !isGivingRelation && ticket.status !== 'read';
     const { isVisible } = useOnScreen(ref, observeVisibility);
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
-    const [prevStatus, setPrevStatus] = useState<string | null>(null);
+    const [prevStatus, setPrevStatus] = useState<TicketStatus | null>(null);
 
     useEffect(() => {
         if (isVisible) {
@@ -47,18 +47,16 @@ const Ticket = (props: TicketProps) => {
     }, [isVisible]);
 
     const getStatusBadge = useMemo(() => {
-        let text;
         const status = prevStatus ? prevStatus : ticket.status;
-        switch (status) {
-            case 'unread':
-                text = 'NEW!!';
-                break;
-            case 'edited':
-                text = 'EDITED!!';
-                break;
-            case 'draft':
-                text = 'DRAFT';
-                break;
+        if (status === 'read') return <></>;
+
+        let text;
+        if (status === 'unread') {
+            text = 'NEW!!';
+        } else if (status === 'edited') {
+            text = 'EDITED!!';
+        } else if (status === 'draft') {
+            text = 'DRAFT';
         }
         return <Badge className='badge' color='primary' sx={prevStatus ? { opacity: 0.45, transition: '0.5s', zIndex: 100 } : {}} badgeContent={text} />;
     }, [prevStatus, ticket.status]);

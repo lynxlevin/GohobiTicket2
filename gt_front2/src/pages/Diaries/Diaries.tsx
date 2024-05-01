@@ -80,7 +80,9 @@ const Diaries = () => {
                 {unreadDiaries.length > 0 && (
                     <ToUnreadDiaryButton
                         onClick={() => {
-                            window.scrollTo({ top: firstUnreadDiaryRef.current!.offsetTop + firstUnreadDiaryRef.current!.offsetHeight - window.innerHeight + 100, behavior: 'smooth' });
+                            const current = firstUnreadDiaryRef.current!;
+                            const moveTo = current.offsetTop + current.offsetHeight - window.innerHeight + 100;
+                            window.scrollTo({ top: moveTo, behavior: 'smooth' });
                         }}
                     >
                         <FiberNewOutlinedIcon sx={{fontSize: '40px'}} color='primary' />

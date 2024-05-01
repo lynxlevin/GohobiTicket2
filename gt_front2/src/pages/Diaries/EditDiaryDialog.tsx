@@ -97,7 +97,7 @@ const EditDiaryDialog = (props: EditDiaryDialogProps) => {
                         </Select>
                     </FormControl>
                 )}
-                <TextField value={entry} onChange={event => setEntry(event.target.value)} label='内容' multiline fullWidth rows={10} />
+                <TextField value={entry} onChange={event => setEntry(event.target.value)} label='内容' multiline fullWidth minRows={5} />
             </DialogContent>
             <DialogActions sx={{ justifyContent: 'center', py: 2 }}>
                 <Button variant='contained' onClick={handleSubmit}>

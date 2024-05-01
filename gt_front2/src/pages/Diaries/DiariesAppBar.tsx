@@ -68,7 +68,7 @@ const DiariesAppBar = (props: DiariesAppBarProps) => {
                                     <ListItemIcon>
                                         <SecurityUpdateGoodIcon />
                                     </ListItemIcon>
-                                    <ListItemText>アプリバージョンアップ</ListItemText>
+                                    <ListItemText>バージョンアップ</ListItemText>
                                 </ListItemButton>
                             </ListItem>
                             <ListItem>

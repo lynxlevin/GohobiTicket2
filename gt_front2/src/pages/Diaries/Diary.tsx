@@ -3,7 +3,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Badge, Box, Card, CardContent, Chip, Grid, IconButton, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { DiaryAPI, IDiary } from '../../apis/DiaryAPI';
+import { DiaryAPI, IDiary, DiaryStatus } from '../../apis/DiaryAPI';
 import EditDiaryDialog from './EditDiaryDialog';
 import MoonPhase from './MoonPhase';
 import useOnScreen from '../../hooks/useOnScreen';
@@ -22,7 +22,7 @@ const Diary = (props: DiaryProps) => {
     const ref = useRef(null);
     const observeVisibility = diary.status !== 'read';
     const { isVisible } = useOnScreen(ref, observeVisibility);
-    const [prevStatus, setPrevStatus] = useState<string | null>(null);
+    const [prevStatus, setPrevStatus] = useState<DiaryStatus | null>(null);
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 
     const date = new Date(diary.date);
@@ -52,15 +52,14 @@ const Diary = (props: DiaryProps) => {
     }, [isVisible]);
 
     const getStatusBadge = useMemo(() => {
-        let text;
         const status = prevStatus ? prevStatus : diary.status;
-        switch (status) {
-            case 'unread':
-                text = 'NEW!!';
-                break;
-            case 'edited':
-                text = 'EDITED!!';
-                break;
+        if (status === 'read') return <></>;
+
+        let text;
+        if (status === 'unread') {
+            text = 'NEW!!';
+        } else if (status === 'edited') {
+            text = 'EDITED!!';
         }
         return <Badge className='badge' color='primary' sx={prevStatus ? { opacity: 0.45, transition: '0.5s', zIndex: 100 } : {}} badgeContent={text} />;
     }, [prevStatus, diary.status]);

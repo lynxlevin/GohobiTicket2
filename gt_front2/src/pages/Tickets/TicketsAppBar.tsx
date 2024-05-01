@@ -97,7 +97,7 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
                                     <ListItemIcon>
                                         <SecurityUpdateGoodIcon />
                                     </ListItemIcon>
-                                    <ListItemText>アプリバージョンアップ</ListItemText>
+                                    <ListItemText>バージョンアップ</ListItemText>
                                 </ListItemButton>
                             </ListItem>
                             <ListItem>
