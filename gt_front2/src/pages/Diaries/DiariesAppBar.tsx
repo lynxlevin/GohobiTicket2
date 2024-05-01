@@ -40,24 +40,14 @@ const DiariesAppBar = (props: DiariesAppBarProps) => {
             <AppBar position='fixed' sx={{ bgcolor: 'primary.light' }}>
                 <Toolbar>
                     <div style={{ flexGrow: 1 }} />
+                    <IconButton onClick={() => {refreshDiaries(); setTopBarDrawerOpen(false);}}>
+                        <RefreshIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
+                    </IconButton>
                     <IconButton onClick={() => setTopBarDrawerOpen(true)}>
                         <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
                     </IconButton>
                     <Drawer anchor='right' open={topBarDrawerOpen} onClose={() => setTopBarDrawerOpen(false)}>
                         <List>
-                            <ListItem disableGutters>
-                                <ListItemButton
-                                    onClick={() => {
-                                        refreshDiaries();
-                                        setTopBarDrawerOpen(false);
-                                    }}
-                                >
-                                    <ListItemIcon>
-                                        <RefreshIcon />
-                                    </ListItemIcon>
-                                    <ListItemText>更新</ListItemText>
-                                </ListItemButton>
-                            </ListItem>
                             <ListItem>
                                 <ListItemButton
                                     disableGutters
