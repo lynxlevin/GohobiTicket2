@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
+import FiberNewOutlinedIcon from '@mui/icons-material/FiberNewOutlined';
 import { Box, Container, Grid, IconButton, Typography } from '@mui/material';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
@@ -83,7 +83,7 @@ const Diaries = () => {
                             window.scrollTo({ top: firstUnreadDiaryRef.current!.offsetTop + firstUnreadDiaryRef.current!.offsetHeight - window.innerHeight + 100, behavior: 'smooth' });
                         }}
                     >
-                        <KeyboardDoubleArrowDownIcon />
+                        <FiberNewOutlinedIcon sx={{fontSize: '40px'}} color='primary' />
                     </ToUnreadDiaryButton>
                 )}
                 <MiniLogo onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src='/apple-touch-icon.png' alt='mini-ticket' />
@@ -93,7 +93,6 @@ const Diaries = () => {
 };
 
 const ToUnreadDiaryButton = styled(IconButton)`
-    font-size: 30px;
     background: white !important;
     border-radius: 999px;
     position: fixed;
