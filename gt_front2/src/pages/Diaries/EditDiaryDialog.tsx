@@ -61,7 +61,7 @@ const EditDiaryDialog = (props: EditDiaryDialogProps) => {
             <DialogContent>
                 <MobileDatePicker label='日付' value={date} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{ mb: 1 }} />
                 {diaryTagContext.diaryTags !== null && (
-                    <FormControl sx={{ width: '99%', mb: 1 }}>
+                    <FormControl sx={{ width: '100%', mb: 1 }}>
                         <InputLabel id='tags-select-label'>タグ</InputLabel>
                         <Select
                             labelId='tags-select-label'
@@ -97,8 +97,7 @@ const EditDiaryDialog = (props: EditDiaryDialogProps) => {
                         </Select>
                     </FormControl>
                 )}
-                {/* Width 99% on TextField is to suppress too_many_re_renders error. */}
-                <TextField value={entry} onChange={event => setEntry(event.target.value)} label='内容' multiline minRows={5} maxRows={14} sx={{width: '99%'}} />
+                <TextField value={entry} onChange={event => setEntry(event.target.value)} label='内容' multiline fullWidth rows={10} />
             </DialogContent>
             <DialogActions sx={{ justifyContent: 'center', py: 2 }}>
                 <Button variant='contained' onClick={handleSubmit}>
