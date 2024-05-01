@@ -2,6 +2,7 @@ import logging
 
 from django.test import TestCase
 from rest_framework.exceptions import NotFound, PermissionDenied
+from tickets.enums import TicketStatus
 from tickets.models import Ticket
 from tickets.tests.ticket_factory import TicketFactory
 from tickets.use_cases import PartialUpdateTicket
@@ -20,31 +21,35 @@ class TestPartialUpdateTicket(TestCase):
         cls.relation = UserRelationFactory(user_1=cls.user, user_2=cls.partner)
 
     def test_update_status_from_draft_to_unread(self):
-        draft_ticket = TicketFactory(status=Ticket.STATUS_DRAFT, user_relation=self.relation, giving_user=self.user)
-        cm = self._execute_use_case(self.user, draft_ticket, {"status": Ticket.STATUS_UNREAD})
+        draft_ticket = TicketFactory(
+            status=TicketStatus.STATUS_DRAFT.value, user_relation=self.relation, giving_user=self.user
+        )
+        cm = self._execute_use_case(self.user, draft_ticket, {"status": TicketStatus.STATUS_UNREAD.value})
 
-        self._then_ticket_should_be(draft_ticket, Ticket.STATUS_UNREAD)
+        self._then_ticket_should_be(draft_ticket, TicketStatus.STATUS_UNREAD.value)
         self._then_info_log_is_output(cm.output)
 
     def test_update_description(self):
         with self.subTest(case="unread_ticket"):
             unread_ticket = TicketFactory(
-                status=Ticket.STATUS_UNREAD, user_relation=self.relation, giving_user=self.user
+                status=TicketStatus.STATUS_UNREAD.value, user_relation=self.relation, giving_user=self.user
             )
             cm = self._execute_use_case(self.user, unread_ticket, {"description": "edited_description"})
             self._then_ticket_should_be(
                 unread_ticket,
-                status=Ticket.STATUS_UNREAD,
+                status=TicketStatus.STATUS_UNREAD.value,
                 description="edited_description",
             )
             self._then_info_log_is_output(cm.output)
 
         with self.subTest(case="read_ticket"):
-            read_ticket = TicketFactory(status=Ticket.STATUS_READ, user_relation=self.relation, giving_user=self.user)
+            read_ticket = TicketFactory(
+                status=TicketStatus.STATUS_READ.value, user_relation=self.relation, giving_user=self.user
+            )
             cm = self._execute_use_case(self.user, read_ticket, {"description": "edited_description"})
             self._then_ticket_should_be(
                 read_ticket,
-                status=Ticket.STATUS_EDITED,
+                status=TicketStatus.STATUS_EDITED.value,
                 description="edited_description",
             )
             self._then_info_log_is_output(cm.output)
@@ -90,13 +95,13 @@ class TestPartialUpdateTicket(TestCase):
     def test_update_status_error(self):
         with self.subTest(case="to_draft"):
             unread_ticket = TicketFactory(
-                status=Ticket.STATUS_UNREAD, user_relation=self.relation, giving_user=self.user
+                status=TicketStatus.STATUS_UNREAD.value, user_relation=self.relation, giving_user=self.user
             )
 
             self._execute_use_case_raise_exception(
                 self.user,
                 unread_ticket,
-                data={"status": Ticket.STATUS_DRAFT},
+                data={"status": TicketStatus.STATUS_DRAFT.value},
                 exception=PermissionDenied,
                 exception_message="Tickets cannot be updated to draft.",
             )

@@ -2,6 +2,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SellIcon from '@mui/icons-material/Sell';
+import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -40,24 +41,14 @@ const DiariesAppBar = (props: DiariesAppBarProps) => {
             <AppBar position='fixed' sx={{ bgcolor: 'primary.light' }}>
                 <Toolbar>
                     <div style={{ flexGrow: 1 }} />
+                    <IconButton onClick={() => {refreshDiaries(); setTopBarDrawerOpen(false);}}>
+                        <RefreshIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
+                    </IconButton>
                     <IconButton onClick={() => setTopBarDrawerOpen(true)}>
                         <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
                     </IconButton>
                     <Drawer anchor='right' open={topBarDrawerOpen} onClose={() => setTopBarDrawerOpen(false)}>
                         <List>
-                            <ListItem disableGutters>
-                                <ListItemButton
-                                    onClick={() => {
-                                        refreshDiaries();
-                                        setTopBarDrawerOpen(false);
-                                    }}
-                                >
-                                    <ListItemIcon>
-                                        <RefreshIcon />
-                                    </ListItemIcon>
-                                    <ListItemText>更新</ListItemText>
-                                </ListItemButton>
-                            </ListItem>
                             <ListItem>
                                 <ListItemButton
                                     disableGutters
@@ -70,6 +61,14 @@ const DiariesAppBar = (props: DiariesAppBarProps) => {
                                         <SellIcon />
                                     </ListItemIcon>
                                     <ListItemText>タグ編集</ListItemText>
+                                </ListItemButton>
+                            </ListItem>
+                            <ListItem>
+                                <ListItemButton disableGutters onClick={() => {window.location.reload();}}>
+                                    <ListItemIcon>
+                                        <SecurityUpdateGoodIcon />
+                                    </ListItemIcon>
+                                    <ListItemText>バージョンアップ</ListItemText>
                                 </ListItemButton>
                             </ListItem>
                             <ListItem>

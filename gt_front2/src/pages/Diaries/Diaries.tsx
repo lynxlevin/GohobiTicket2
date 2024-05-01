@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
-import { Box, Container, Grid, Typography } from '@mui/material';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import FiberNewOutlinedIcon from '@mui/icons-material/FiberNewOutlined';
+import { Box, Container, Grid, IconButton, Typography } from '@mui/material';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import BottomNav from '../../BottomNav';
 import { DiaryAPI, IDiary } from '../../apis/DiaryAPI';
@@ -18,6 +19,7 @@ const Diaries = () => {
     const userContext = useContext(UserContext);
     const userRelationContext = useContext(UserRelationContext);
     const diaryTagContext = useContext(DiaryTagContext);
+    const firstUnreadDiaryRef = useRef<HTMLDivElement | null>(null);
 
     const [diaries, setDiaries] = useState<IDiary[]>([]);
     const { handleLogout } = useUserAPI();
@@ -31,6 +33,13 @@ const Diaries = () => {
             setDiaries(diaries);
         });
     }, [userRelationId]);
+
+    const unreadDiaries = useMemo(() => {
+        if (diaries.length === 0) return [];
+        return diaries
+            .filter(diary => diary.status !== 'read')
+            .sort((a: IDiary, b: IDiary) => { return a.date > b.date ? -1 : 1; });
+    }, [diaries])
 
     useEffect(() => {
         if (userContext.isLoggedIn !== true || userRelationId < 1) return;
@@ -60,16 +69,42 @@ const Diaries = () => {
                 </Box>
                 <Container sx={{ pt: 2, pb: 4 }} maxWidth='md'>
                     <Grid container spacing={4}>
-                        {diaries.map(diary => (
-                            <Diary key={diary.id} diary={diary} setDiaries={setDiaries} />
-                        ))}
+                        {diaries.map(diary => {
+                            if (unreadDiaries.length > 0 && diary.id === unreadDiaries[0].id) {
+                                return <Diary key={diary.id} diary={diary} setDiaries={setDiaries} firstUnreadDiaryRef={firstUnreadDiaryRef} />
+                            }
+                            return <Diary key={diary.id} diary={diary} setDiaries={setDiaries} />
+                        })}
                     </Grid>
                 </Container>
+                {unreadDiaries.length > 0 && (
+                    <ToUnreadDiaryButton
+                        onClick={() => {
+                            const current = firstUnreadDiaryRef.current!;
+                            const moveTo = current.offsetTop + current.offsetHeight - window.innerHeight + 100;
+                            window.scrollTo({ top: moveTo, behavior: 'smooth' });
+                        }}
+                    >
+                        <FiberNewOutlinedIcon sx={{fontSize: '40px'}} color='primary' />
+                    </ToUnreadDiaryButton>
+                )}
                 <MiniLogo onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src='/apple-touch-icon.png' alt='mini-ticket' />
             </main>
         </>
     );
 };
+
+const ToUnreadDiaryButton = styled(IconButton)`
+    background: white !important;
+    border-radius: 999px;
+    position: fixed;
+    left: 16px;
+    bottom: 66px;
+    border: 2px solid #ddd;
+    width: 40px;
+    height: 40px;
+    z-index: 100;
+`;
 
 const MiniLogo = styled.img`
     height: 50px;

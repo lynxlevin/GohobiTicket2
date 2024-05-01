@@ -2,11 +2,14 @@ import { AxiosResponse } from 'axios';
 import { IDiaryTag } from '../contexts/diary-tag-context';
 import client from './axios';
 
+export type DiaryStatus = "unread" | "edited" | "read"
+
 export interface IDiary {
     id: string;
     entry: string;
     date: string;
     tags: IDiaryTag[];
+    status: DiaryStatus;
 }
 
 interface ListDiaryResponse {
@@ -40,4 +43,8 @@ export const DiaryAPI = {
         const url = `${DiaryAPI.BASE_URL}${diaryId}/`;
         return await client.put(url, props, { headers: { 'content-type': 'application/json' } });
     },
+    markRead: async (diaryId: string): Promise<AxiosResponse<{}>> => {
+        const url = `${DiaryAPI.BASE_URL}${diaryId}/mark_read/`;
+        return await client.put(url, {}, { headers: { 'content-type': 'application/json' } });
+    }
 };

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from ..enums import DiaryStatus
 from .diary_tag_serializers import DiaryTagSerializer
 
 
@@ -8,6 +9,7 @@ class DiarySerializer(serializers.Serializer):
     entry = serializers.CharField()
     date = serializers.DateField()
     tags = DiaryTagSerializer(many=True, required=False)
+    status = serializers.ChoiceField(choices=DiaryStatus.choices_for_serializer(), required=False)
 
 
 class DiariesSerializer(serializers.Serializer):

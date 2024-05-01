@@ -1,5 +1,7 @@
 import { createContext } from 'react';
 
+export type TicketStatus = "unread" | "edited" | "read" | 'draft';
+
 export interface ITicket {
     id: number;
     user_relation_id: number;
@@ -7,7 +9,7 @@ export interface ITicket {
     gift_date: string;
     use_description: string;
     use_date: string;
-    status: string;
+    status: TicketStatus;
     is_special: boolean;
 }
 

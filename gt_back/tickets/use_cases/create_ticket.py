@@ -1,6 +1,7 @@
 import logging
 
 from rest_framework import exceptions
+from tickets.enums import TicketStatus
 from tickets.models import Ticket
 from user_relations.models import UserRelation
 from users.models import User
@@ -40,7 +41,7 @@ class CreateTicket:
             gift_date=data["gift_date"],
             description=data["description"],
             user_relation_id=data["user_relation_id"],
-            status=data.get("status", Ticket.STATUS_UNREAD),
+            status=data.get("status", TicketStatus.STATUS_UNREAD.value),
             is_special=is_special,
         )
         ticket.save()

@@ -3,6 +3,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -91,6 +92,14 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
                                     </ListItem>
                                 ))}
                             </List>
+                            <ListItem>
+                                <ListItemButton disableGutters onClick={() => {window.location.reload();}}>
+                                    <ListItemIcon>
+                                        <SecurityUpdateGoodIcon />
+                                    </ListItemIcon>
+                                    <ListItemText>バージョンアップ</ListItemText>
+                                </ListItemButton>
+                            </ListItem>
                             <ListItem>
                                 <ListItemButton disableGutters onClick={handleLogout}>
                                     <ListItemIcon>

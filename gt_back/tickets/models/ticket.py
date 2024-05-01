@@ -6,6 +6,8 @@ from django.db import models
 from user_relations.models import UserRelation
 from users.models import User
 
+from ..enums import TicketStatus
+
 
 class TicketQuerySet(models.QuerySet):
     def get_by_id(self, ticket_id) -> Optional["Ticket"]:
@@ -43,26 +45,15 @@ class TicketQuerySet(models.QuerySet):
 
 
 class Ticket(models.Model):
-    # MYMEMO: move to enums
-    STATUS_UNREAD = "unread"
-    STATUS_READ = "read"
-    STATUS_EDITED = "edited"
-    STATUS_DRAFT = "draft"
-
-    STATUS_CHOICES = (
-        (STATUS_UNREAD, STATUS_UNREAD),
-        (STATUS_READ, STATUS_READ),
-        (STATUS_EDITED, STATUS_EDITED),
-        (STATUS_DRAFT, STATUS_DRAFT),
-    )
-
     user_relation = models.ForeignKey(UserRelation, on_delete=models.CASCADE)
     giving_user = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.TextField(default="", blank=True)
     gift_date = models.DateField()
     use_description = models.TextField(default="", blank=True)
     use_date = models.DateField(null=True)
-    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=STATUS_UNREAD)
+    status = models.CharField(
+        max_length=8, choices=TicketStatus.choices_for_model(), default=TicketStatus.STATUS_UNREAD.value
+    )
     is_special = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

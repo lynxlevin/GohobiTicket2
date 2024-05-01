@@ -2,6 +2,7 @@ from django.test import TestCase
 from user_relations.tests.user_relation_factory import UserRelationFactory
 from users.tests.user_factory import UserFactory
 
+from ..enums import DiaryStatus
 from ..models import Diary
 from .diary_factory import DiaryFactory
 
@@ -46,3 +47,12 @@ class TestUserRelationModel(TestCase):
 
         result_none = Diary.objects.filter_eq_user_id(non_related_user.id).all()
         self.assertEqual(0, len(result_none))
+
+    def test_annotate_status(self):
+        diary = DiaryFactory(user_1_status=DiaryStatus.STATUS_READ.value, user_2_status=DiaryStatus.STATUS_EDITED.value)
+
+        result_1 = Diary.objects.annotate_status(diary.user_relation, diary.user_relation.user_1_id).get_by_id(diary.id)
+        self.assertEqual(diary.user_1_status, result_1.status)
+
+        result_2 = Diary.objects.annotate_status(diary.user_relation, diary.user_relation.user_2_id).get_by_id(diary.id)
+        self.assertEqual(diary.user_2_status, result_2.status)

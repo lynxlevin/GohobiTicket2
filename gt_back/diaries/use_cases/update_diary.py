@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, TypedDict
 
 from rest_framework import exceptions
 
+from ..enums import DiaryStatus
 from ..models import Diary, DiaryTag
 
 if TYPE_CHECKING:
@@ -31,10 +32,15 @@ class UpdateDiary:
         date = data["date"]
         tag_ids = data["tag_ids"]
 
-        diary = Diary.objects.filter_eq_user_id(user.id).get_by_id(id)
+        diary = Diary.objects.filter_eq_user_id(user.id).select_user_relation().get_by_id(id)
 
         if diary is None:
             raise exceptions.NotFound()
+
+        if diary.entry != entry:
+            other_user = "user_2" if user == diary.user_relation.user_1 else "user_1"
+            if getattr(diary, f"{other_user}_status") == DiaryStatus.STATUS_READ.value:
+                setattr(diary, f"{other_user}_status", DiaryStatus.STATUS_EDITED.value)
 
         diary.entry = entry
         diary.date = date

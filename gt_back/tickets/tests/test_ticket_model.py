@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.test import TestCase
+from tickets.enums import TicketStatus
 from tickets.models import Ticket
 from tickets.tests.ticket_factory import TicketFactory, UsedTicketFactory
 from user_relations.tests.user_relation_factory import UserRelationFactory
@@ -57,12 +58,12 @@ class TestTicketModel(TestCase):
         self.assertEqual(expected_tickets, list(result.all()))
 
     def test_exclude_eq_status(self):
-        exclude_target = Ticket.STATUS_DRAFT
+        exclude_target = TicketStatus.STATUS_DRAFT.value
         _excluded_tickets = TicketFactory.create_batch(5, status=exclude_target)
         expected_tickets = [
-            TicketFactory(status=Ticket.STATUS_READ),
-            TicketFactory(status=Ticket.STATUS_UNREAD),
-            TicketFactory(status=Ticket.STATUS_EDITED),
+            TicketFactory(status=TicketStatus.STATUS_READ.value),
+            TicketFactory(status=TicketStatus.STATUS_UNREAD.value),
+            TicketFactory(status=TicketStatus.STATUS_EDITED.value),
         ]
 
         result = Ticket.objects.exclude_eq_status(exclude_target).all()
