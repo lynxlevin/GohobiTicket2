@@ -1,6 +1,7 @@
 import logging
 
 from rest_framework import exceptions
+from tickets.enums import TicketStatus
 from tickets.models import Ticket
 from users.models import User
 
@@ -29,10 +30,10 @@ class ReadTicket:
                 detail=f"{self.exception_log_title}: Only receiving user can perform this action."
             )
 
-        if ticket.status == Ticket.STATUS_DRAFT:
+        if ticket.status == TicketStatus.STATUS_DRAFT.value:
             raise exceptions.PermissionDenied(detail=f"{self.exception_log_title}: Draft tickets cannot be read.")
 
-        ticket.status = Ticket.STATUS_READ
+        ticket.status = TicketStatus.STATUS_READ.value
         ticket.save(update_fields=["status", "updated_at"])
 
         return ticket

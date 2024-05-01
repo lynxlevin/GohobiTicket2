@@ -1,6 +1,7 @@
 import logging
 
 from rest_framework import exceptions
+from tickets.enums import TicketStatus
 from tickets.models import Ticket
 from user_relations.models import UserRelation
 from users.models import User
@@ -43,7 +44,7 @@ class ListTicket:
 
         if is_receiving:
             # MYMEMO: givingもreceivingもTrueの時、なにも帰らないので変な感じ
-            qs = qs.exclude_eq_giving_user_id(user_id).exclude_eq_status(Ticket.STATUS_DRAFT)
+            qs = qs.exclude_eq_giving_user_id(user_id).exclude_eq_status(TicketStatus.STATUS_DRAFT.value)
 
         all_tickets = list(qs.order_by("-gift_date", "-id").all())
         return all_tickets

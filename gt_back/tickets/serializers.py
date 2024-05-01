@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from tickets.enums import TicketStatus
 from tickets.models.ticket import Ticket
 
 
@@ -46,7 +47,7 @@ class TicketCreateSerializer(serializers.Serializer):
         description = serializers.CharField()
         user_relation_id = serializers.CharField()
         is_special = serializers.BooleanField(required=False)
-        status = serializers.ChoiceField(choices=Ticket.STATUS_CHOICES, required=False)
+        status = serializers.ChoiceField(choices=TicketStatus.choices_for_serializer(), required=False)
 
     id = serializers.CharField(read_only=True)
     ticket = TicketCreateRequestSerializer(write_only=True)
@@ -55,7 +56,7 @@ class TicketCreateSerializer(serializers.Serializer):
 class TicketPartialUpdateSerializer(serializers.Serializer):
     class TicketPartialUpdateRequestSerializer(serializers.Serializer):
         description = serializers.CharField(required=False)
-        status = serializers.ChoiceField(choices=Ticket.STATUS_CHOICES, required=False)
+        status = serializers.ChoiceField(choices=TicketStatus.choices_for_serializer(), required=False)
 
     id = serializers.CharField(read_only=True)
     ticket = TicketPartialUpdateRequestSerializer(write_only=True)

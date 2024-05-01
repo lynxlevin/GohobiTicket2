@@ -1,6 +1,6 @@
 from django.test import TestCase
 from rest_framework.exceptions import NotFound, PermissionDenied
-from tickets.models import Ticket
+from tickets.enums import TicketStatus
 from tickets.tests.ticket_factory import TicketFactory
 from tickets.use_cases import ReadTicket
 from user_relations.tests.user_relation_factory import UserRelationFactory
@@ -18,15 +18,17 @@ class TestReadTicket(TestCase):
 
     def test_read(self):
         unread_ticket = TicketFactory(
-            status=Ticket.STATUS_UNREAD, user_relation=self.relation, giving_user=self.partner
+            status=TicketStatus.STATUS_UNREAD.value, user_relation=self.relation, giving_user=self.partner
         )
 
         ReadTicket().execute(self.user, unread_ticket.id)
 
-        self._assert_ticket_status(Ticket.STATUS_READ, unread_ticket)
+        self._assert_ticket_status(TicketStatus.STATUS_READ.value, unread_ticket)
 
     def test_read__giving_user(self):
-        unread_ticket = TicketFactory(status=Ticket.STATUS_UNREAD, user_relation=self.relation, giving_user=self.user)
+        unread_ticket = TicketFactory(
+            status=TicketStatus.STATUS_UNREAD.value, user_relation=self.relation, giving_user=self.user
+        )
 
         self._when_executed_should_raise_exception(
             unread_ticket,
@@ -34,10 +36,12 @@ class TestReadTicket(TestCase):
             exception_message="Only receiving user can perform this action.",
         )
 
-        self._assert_ticket_status(Ticket.STATUS_UNREAD, unread_ticket)
+        self._assert_ticket_status(TicketStatus.STATUS_UNREAD.value, unread_ticket)
 
     def test_read__draft_ticket(self):
-        draft_ticket = TicketFactory(status=Ticket.STATUS_DRAFT, user_relation=self.relation, giving_user=self.partner)
+        draft_ticket = TicketFactory(
+            status=TicketStatus.STATUS_DRAFT.value, user_relation=self.relation, giving_user=self.partner
+        )
 
         self._when_executed_should_raise_exception(
             draft_ticket,
@@ -45,10 +49,10 @@ class TestReadTicket(TestCase):
             exception_message="Draft tickets cannot be read.",
         )
 
-        self._assert_ticket_status(Ticket.STATUS_DRAFT, draft_ticket)
+        self._assert_ticket_status(TicketStatus.STATUS_DRAFT.value, draft_ticket)
 
     def test_read__unrelated_ticket(self):
-        unrelated_ticket = TicketFactory(status=Ticket.STATUS_UNREAD)
+        unrelated_ticket = TicketFactory(status=TicketStatus.STATUS_UNREAD.value)
 
         self._when_executed_should_raise_exception(
             unrelated_ticket,
@@ -56,7 +60,7 @@ class TestReadTicket(TestCase):
             exception_message="Ticket not found.",
         )
 
-        self._assert_ticket_status(Ticket.STATUS_UNREAD, unrelated_ticket)
+        self._assert_ticket_status(TicketStatus.STATUS_UNREAD.value, unrelated_ticket)
 
     """
     Util Functions

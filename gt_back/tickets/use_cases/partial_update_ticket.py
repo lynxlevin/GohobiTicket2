@@ -2,6 +2,7 @@ import logging
 from typing import Set
 
 from rest_framework import exceptions
+from tickets.enums import TicketStatus
 from tickets.models import Ticket
 from users.models import User
 
@@ -56,7 +57,7 @@ class PartialUpdateTicket:
     """
 
     def _check_legitimacy_of_status(self, status_to_be: str):
-        if status_to_be == Ticket.STATUS_DRAFT:
+        if status_to_be == TicketStatus.STATUS_DRAFT.value:
             raise exceptions.PermissionDenied(detail=f"{self.exception_log_title}: Tickets cannot be updated to draft.")
 
     def _update_status(self, status_to_be: str):
@@ -68,6 +69,6 @@ class PartialUpdateTicket:
         self.update_fields.add("description")
 
     def _change_to_edited_if_read(self):
-        if self.ticket.status == Ticket.STATUS_READ:
-            self.ticket.status = Ticket.STATUS_EDITED
+        if self.ticket.status == TicketStatus.STATUS_READ.value:
+            self.ticket.status = TicketStatus.STATUS_EDITED.value
             self.update_fields.add("status")

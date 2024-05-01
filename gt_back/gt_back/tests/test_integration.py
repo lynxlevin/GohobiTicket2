@@ -19,6 +19,7 @@ from unittest import mock
 
 from django.test import Client, TestCase
 from rest_framework import status
+from tickets.enums import TicketStatus
 from tickets.models import Ticket
 from tickets.tests.use_cases import TestUseTicket
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
@@ -67,7 +68,7 @@ class TestTicketViews(TestCase):
         self.assertIsNotNone(ticket["id"])
         self.assertEqual(params["ticket"]["description"], ticket["description"])
         self.assertEqual(params["ticket"]["gift_date"], ticket["gift_date"])
-        self.assertEqual(Ticket.STATUS_UNREAD, ticket["status"])
+        self.assertEqual(TicketStatus.STATUS_UNREAD.value, ticket["status"])
         self.assertFalse(ticket["is_special"])
         self.assertIsNone(ticket.get("use_date"))
 
@@ -76,7 +77,7 @@ class TestTicketViews(TestCase):
     def _make_ticket_read(self, client: Client, ticket: Ticket):
         params = {
             "ticket": {
-                "status": Ticket.STATUS_READ,
+                "status": TicketStatus.STATUS_READ.value,
             }
         }
 
@@ -85,7 +86,7 @@ class TestTicketViews(TestCase):
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
 
         ticket.refresh_from_db()
-        self.assertEqual(Ticket.STATUS_READ, ticket.status)
+        self.assertEqual(TicketStatus.STATUS_READ.value, ticket.status)
 
     @mock.patch.object(SlackMessengerForUseTicket, "__new__")
     def _use_ticket(self, client: Client, ticket: Ticket, slack_mock):

@@ -7,7 +7,7 @@ export interface ITicket {
     gift_date: string;
     use_description: string;
     use_date: string;
-    status: string;
+    status: 'unread' | 'edited' | 'read' | 'draft';
     is_special: boolean;
 }
 
