@@ -45,10 +45,8 @@ class CreateDiary:
             user_relation_id=user_relation_id,
         )
 
-        if user == user_relation.user_1:
-            diary.user_1_status = DiaryStatus.STATUS_READ.value
-        else:
-            diary.user_2_status = DiaryStatus.STATUS_READ.value
+        this_user = "user_1" if user == user_relation.user_1 else "user_2"
+        setattr(diary, f"{this_user}_status", DiaryStatus.STATUS_READ.value)
 
         diary.save()
 
