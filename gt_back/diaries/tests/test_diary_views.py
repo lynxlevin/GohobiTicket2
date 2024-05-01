@@ -192,7 +192,6 @@ class TestDiaryViews(TestCase):
         diary = DiaryFactory(user_relation=self.relation, user_1_status=DiaryStatus.STATUS_READ.value)
 
         params = {
-            "entry": diary.entry,
             "date": date.today().isoformat(),
             "tag_ids": [],
         }
@@ -212,6 +211,7 @@ class TestDiaryViews(TestCase):
                 diary.user_2_status = case["original"]
                 diary.save()
 
+                params["entry"] = diary.entry + "a"  # Status is changed only when the entry is changed.
                 res = client.put(f"{self.base_path}{diary.id}/", params, content_type="application/json")
 
                 self.assertEqual(status.HTTP_200_OK, res.status_code)

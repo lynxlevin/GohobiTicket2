@@ -37,16 +37,13 @@ class UpdateDiary:
         if diary is None:
             raise exceptions.NotFound()
 
+        if diary.entry != entry:
+            other_user = "user_2" if user == diary.user_relation.user_1 else "user_1"
+            if getattr(diary, f"{other_user}_status") == DiaryStatus.STATUS_READ.value:
+                setattr(diary, f"{other_user}_status", DiaryStatus.STATUS_EDITED.value)
+
         diary.entry = entry
         diary.date = date
-
-        if user == diary.user_relation.user_1:
-            if diary.user_2_status == DiaryStatus.STATUS_READ.value:
-                diary.user_2_status = DiaryStatus.STATUS_EDITED.value
-        else:
-            if diary.user_1_status == DiaryStatus.STATUS_READ.value:
-                diary.user_1_status = DiaryStatus.STATUS_EDITED.value
-
         diary.save()
 
         tags = DiaryTag.objects.filter_eq_user_relation_id(diary.user_relation_id).filter_in_tag_ids(tag_ids)
