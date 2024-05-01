@@ -34,24 +34,11 @@ const Diaries = () => {
         });
     }, [userRelationId]);
 
-    const updateStatusToRead = (id: string) => {
-        setDiaries(prev => {
-            const diaries = [...prev];
-            diaries[diaries.findIndex(p => p.id === id)].status = 'read';
-            return diaries;
-        })
-    };
-
-    const sortCondition = (a: IDiary, b: IDiary) => {
-        const aIsNewer = a.date > b.date;
-        return aIsNewer ? -1 : 1;
-    };
-
     const unreadDiaries = useMemo(() => {
         if (diaries.length === 0) return [];
         return diaries
             .filter(diary => diary.status !== 'read')
-            .sort(sortCondition);
+            .sort((a: IDiary, b: IDiary) => { return a.date > b.date ? -1 : 1; });
     }, [diaries])
 
     useEffect(() => {
@@ -84,9 +71,9 @@ const Diaries = () => {
                     <Grid container spacing={4}>
                         {diaries.map(diary => {
                             if (unreadDiaries.length > 0 && diary.id === unreadDiaries[0].id) {
-                                return <Diary key={diary.id} diary={diary} setDiaries={setDiaries} updateStatusToRead={updateStatusToRead} firstUnreadDiaryRef={firstUnreadDiaryRef} />
+                                return <Diary key={diary.id} diary={diary} setDiaries={setDiaries} firstUnreadDiaryRef={firstUnreadDiaryRef} />
                             }
-                            return <Diary key={diary.id} diary={diary} setDiaries={setDiaries} updateStatusToRead={updateStatusToRead}/>
+                            return <Diary key={diary.id} diary={diary} setDiaries={setDiaries} />
                         })}
                     </Grid>
                 </Container>

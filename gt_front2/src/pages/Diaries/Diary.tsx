@@ -11,12 +11,11 @@ import useOnScreen from '../../hooks/useOnScreen';
 interface DiaryProps {
     diary: IDiary;
     setDiaries: React.Dispatch<React.SetStateAction<IDiary[]>>;
-    updateStatusToRead: (id: string) => void;
     firstUnreadDiaryRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 const Diary = (props: DiaryProps) => {
-    const { diary, setDiaries, updateStatusToRead, firstUnreadDiaryRef } = props;
+    const { diary, setDiaries, firstUnreadDiaryRef } = props;
 
     const [isEditDiaryDialogOpen, setIsEditDiaryDialogOpen] = useState(false);
 
@@ -27,6 +26,14 @@ const Diary = (props: DiaryProps) => {
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 
     const date = new Date(diary.date);
+
+    const updateStatusToRead = (id: string) => {
+        setDiaries(prev => {
+            const diaries = [...prev];
+            diaries[diaries.findIndex(p => p.id === id)].status = 'read';
+            return diaries;
+        })
+    };
 
     useEffect(() => {
         if (isVisible) {
