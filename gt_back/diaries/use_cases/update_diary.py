@@ -49,4 +49,7 @@ class UpdateDiary:
         tags = DiaryTag.objects.filter_eq_user_relation_id(diary.user_relation_id).filter_in_tag_ids(tag_ids)
         diary.tags.set(tags)
 
+        this_user = "user_1" if user == diary.user_relation.user_1 else "user_2"
+        diary.status = getattr(diary, f"{this_user}_status")
+
         return diary

@@ -43,7 +43,7 @@ const EditDiaryDialog = (props: EditDiaryDialogProps) => {
         DiaryAPI.update(diary.id, data).then(({ data: diary }) => {
             setDiaries(prev => {
                 const diaries = [...prev];
-                diaries[diaries.findIndex(p => p.id === diary.id)] = {...diary, status: "read"};
+                diaries[diaries.findIndex(p => p.id === diary.id)] = diary;
                 return diaries;
             });
             onClose();

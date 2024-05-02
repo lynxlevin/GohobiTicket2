@@ -53,4 +53,6 @@ class CreateDiary:
         tags = DiaryTag.objects.filter_eq_user_relation_id(user_relation_id).filter_in_tag_ids(tag_ids)
         diary.tags.set(tags)
 
+        diary.status = getattr(diary, f"{this_user}_status")
+
         return diary
