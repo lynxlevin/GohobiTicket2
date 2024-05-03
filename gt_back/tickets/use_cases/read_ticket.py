@@ -16,14 +16,8 @@ class ReadTicket:
     def execute(self, user: User, ticket_id: str):
         logger.info("ReadTicket", extra={"user_id": user.id, "ticket_id": ticket_id})
 
-        ticket = Ticket.objects.get_by_id(ticket_id)
-
+        ticket = Ticket.objects.filter_eq_user_id(user.id).get_by_id(ticket_id)
         if ticket is None:
-            raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
-
-        user_relation = ticket.user_relation
-
-        if user.id not in (user_relation.user_1_id, user_relation.user_2_id):
             raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
 
         if ticket.giving_user_id == user.id:

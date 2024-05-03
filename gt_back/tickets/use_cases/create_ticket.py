@@ -21,14 +21,14 @@ class CreateTicket:
     ):
         logger.info(self.__class__.__name__, extra={"data": data, "user": user})
 
-        user_relation = UserRelation.objects.filter_eq_user_id(user.id).get_by_id(data["user_relation_id"])
+        user_relation_id = data["user_relation_id"]
 
-        if user_relation is None:
+        if UserRelation.objects.filter_eq_user_id(user.id).get_by_id(user_relation_id) is None:
             raise exceptions.NotFound(detail=f"{self.exception_log_title}: UserRelation not found.")
 
         if is_special := data.get("is_special", False):
             has_other_special_tickets_in_month = (
-                Ticket.objects.filter_eq_user_relation_id(user_relation.id)
+                Ticket.objects.filter_eq_user_relation_id(user_relation_id)
                 .filter_eq_giving_user_id(user.id)
                 .filter_special_tickets(data["gift_date"])
                 .count()
@@ -41,7 +41,7 @@ class CreateTicket:
             giving_user=user,
             gift_date=data["gift_date"],
             description=data["description"],
-            user_relation_id=data["user_relation_id"],
+            user_relation_id=user_relation_id,
             status=data.get("status", TicketStatus.STATUS_UNREAD.value),
             is_special=is_special,
         )

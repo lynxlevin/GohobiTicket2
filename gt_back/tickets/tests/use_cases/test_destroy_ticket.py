@@ -2,10 +2,11 @@ import logging
 
 from django.test import TestCase
 from rest_framework.exceptions import NotFound, PermissionDenied
-from tickets.models import Ticket
-from tickets.use_cases import DestroyTicket
 from user_relations.tests.user_relation_factory import UserRelationFactory
 from users.tests.user_factory import UserFactory
+
+from tickets.models import Ticket
+from tickets.use_cases import DestroyTicket
 
 from ..ticket_factory import TicketFactory, UsedTicketFactory
 
@@ -28,18 +29,6 @@ class TestDestroyTicket(TestCase):
         expected_log = [f"INFO:{self.use_case_name}:DestroyTicket"]
         self.assertEqual(expected_log, cm.output)
 
-    def test_destroy_unrelated_ticket(self):
-        unrelated_ticket = TicketFactory()
-
-        cm = self._when_user_deletes_ticket(unrelated_ticket)
-
-        self._then_ticket_is_not_deleted(unrelated_ticket.id)
-        expected_log = [
-            f"INFO:{self.use_case_name}:DestroyTicket",
-            f"INFO:{self.use_case_name}:DestroyTicket:delete_request_on_unrelated_ticket.",
-        ]
-        self.assertEqual(expected_log, cm.output)
-
     def test_delete_error__bad_ticket(self):
         with self.subTest(case="receiving_ticket"):
             receiving_ticket = TicketFactory(user_relation=self.relation, giving_user=self.partner)
@@ -51,6 +40,15 @@ class TestDestroyTicket(TestCase):
             )
 
             self._then_ticket_is_not_deleted(receiving_ticket.id)
+
+        with self.subTest(case="un_related_ticket"):
+            un_related_ticket = TicketFactory()
+
+            self._when_deleted_should_raise_exception(
+                un_related_ticket,
+                exception=NotFound,
+                exception_message="Ticket not found.",
+            )
 
         with self.subTest(case="non_existent_ticket"):
             non_existent_ticket = Ticket(id="-1", description="not_saved")

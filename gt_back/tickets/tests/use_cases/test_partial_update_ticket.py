@@ -2,13 +2,14 @@ import logging
 
 from django.test import TestCase
 from rest_framework.exceptions import NotFound, PermissionDenied
+from user_relations.tests.user_relation_factory import UserRelationFactory
+from users.models import User
+from users.tests.user_factory import UserFactory
+
 from tickets.enums import TicketStatus
 from tickets.models import Ticket
 from tickets.tests.ticket_factory import TicketFactory
 from tickets.use_cases import PartialUpdateTicket
-from user_relations.tests.user_relation_factory import UserRelationFactory
-from users.models import User
-from users.tests.user_factory import UserFactory
 
 
 class TestPartialUpdateTicket(TestCase):

@@ -27,8 +27,7 @@ class ListDiaryTag:
 
         user_relation_id = queries["user_relation_id"]
 
-        user_relation = UserRelation.objects.filter_eq_user_id(user.id).get_by_id(user_relation_id)
-        if user_relation is None:
+        if UserRelation.objects.filter_eq_user_id(user.id).get_by_id(user_relation_id) is None:
             raise exceptions.NotFound()
 
         qs = DiaryTag.objects.filter_eq_user_relation_id(user_relation_id)

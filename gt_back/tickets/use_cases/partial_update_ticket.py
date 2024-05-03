@@ -24,14 +24,8 @@ class PartialUpdateTicket:
             extra={"data": data, "user": user, "ticket_id": ticket_id},
         )
 
-        self.ticket = Ticket.objects.get_by_id(ticket_id)
-
+        self.ticket = Ticket.objects.filter_eq_user_id(user.id).get_by_id(ticket_id)
         if self.ticket is None:
-            raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
-
-        user_relation = self.ticket.user_relation
-
-        if user.id not in (user_relation.user_1_id, user_relation.user_2_id):
             raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
 
         if self.ticket.giving_user_id != user.id:

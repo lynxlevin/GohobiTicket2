@@ -33,7 +33,6 @@ class UpdateDiary:
         tag_ids = data["tag_ids"]
 
         diary = Diary.objects.filter_eq_user_id(user.id).select_user_relation().get_by_id(id)
-
         if diary is None:
             raise exceptions.NotFound()
 
