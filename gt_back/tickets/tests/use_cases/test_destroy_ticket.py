@@ -36,7 +36,7 @@ class TestDestroyTicket(TestCase):
             self._when_deleted_should_raise_exception(
                 receiving_ticket,
                 exception=PermissionDenied,
-                exception_message="Only the giving user may delete ticket.",
+                exception_message="Not giving user.",
             )
 
             self._then_ticket_is_not_deleted(receiving_ticket.id)
@@ -65,7 +65,7 @@ class TestDestroyTicket(TestCase):
             self._when_deleted_should_raise_exception(
                 used_ticket,
                 exception=PermissionDenied,
-                exception_message="Used ticket cannot be deleted.",
+                exception_message="Not unused ticket.",
             )
 
             self._then_ticket_is_not_deleted(used_ticket.id)
@@ -83,7 +83,7 @@ class TestDestroyTicket(TestCase):
         return cm
 
     def _when_deleted_should_raise_exception(self, ticket: Ticket, exception: Exception, exception_message: str):
-        expected_exc_detail = f"DestroyTicket_exception: {exception_message}"
+        expected_exc_detail = exception_message
         with self.assertRaisesRegex(exception, expected_exc_detail):
             DestroyTicket().execute(ticket_id=ticket.id, user=self.user)
 

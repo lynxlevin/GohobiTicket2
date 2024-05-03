@@ -1,9 +1,9 @@
 import logging
 from datetime import date
 
-from rest_framework import exceptions
 from users.models import User
 
+from tickets import permissions_util
 from tickets.models import Ticket
 from tickets.utils import SlackMessengerForUseTicket
 
@@ -21,16 +21,9 @@ class UseTicket:
         )
 
         ticket = Ticket.objects.filter_eq_user_id(user.id).get_by_id(ticket_id)
-        if ticket is None:
-            raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
-
-        if ticket.giving_user_id == user.id:
-            raise exceptions.PermissionDenied(
-                detail=f"{self.exception_log_title}: Only the receiving user may use ticket."
-            )
-
-        if ticket.use_date is not None:
-            raise exceptions.PermissionDenied(detail=f"{self.exception_log_title}: This ticket is already used.")
+        permissions_util.raise_ticket_not_found_exc(ticket)
+        permissions_util.raise_not_receiving_user_exc(ticket, user.id)
+        permissions_util.raise_not_unused_ticket_exc(ticket)
 
         ticket.use_description = data["use_description"]
         ticket.use_date = date.today()

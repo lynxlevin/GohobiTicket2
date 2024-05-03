@@ -4,12 +4,13 @@ from unittest import mock
 
 from django.test import TestCase
 from rest_framework.exceptions import NotFound, PermissionDenied
+from user_relations.tests.user_relation_factory import UserRelationFactory
+from users.tests.user_factory import UserFactory
+
 from tickets.models import Ticket
 from tickets.tests.ticket_factory import TicketFactory, UsedTicketFactory
 from tickets.use_cases import UseTicket
 from tickets.utils import SlackMessengerForUseTicket
-from user_relations.tests.user_relation_factory import UserRelationFactory
-from users.tests.user_factory import UserFactory
 
 
 class TestUseTicket(TestCase):
@@ -50,7 +51,7 @@ class TestUseTicket(TestCase):
             self._when_used_should_raise_exception(
                 giving_ticket,
                 exception=PermissionDenied,
-                exception_message="Only the receiving user may use ticket.",
+                exception_message="Not receiving user.",
             )
 
             self._then_ticket_is_not_used(giving_ticket)
@@ -81,7 +82,7 @@ class TestUseTicket(TestCase):
             self._when_used_should_raise_exception(
                 used_ticket,
                 exception=PermissionDenied,
-                exception_message="This ticket is already used.",
+                exception_message="Not unused ticket.",
             )
 
     """
@@ -108,8 +109,7 @@ class TestUseTicket(TestCase):
     def _when_used_should_raise_exception(self, ticket: Ticket, exception: Exception, exception_message: str):
         data = {"use_description": "test_use_case_error"}
 
-        expected_exc_detail = f"UseTicket_exception: {exception_message}"
-        with self.assertRaisesRegex(exception, expected_exc_detail):
+        with self.assertRaisesRegex(exception, exception_message):
             UseTicket().execute(user=self.user, data=data, ticket_id=str(ticket.id))
 
     def _then_ticket_should_be(self, ticket: Ticket):

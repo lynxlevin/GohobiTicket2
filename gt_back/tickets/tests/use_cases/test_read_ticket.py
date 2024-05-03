@@ -1,10 +1,11 @@
 from django.test import TestCase
 from rest_framework.exceptions import NotFound, PermissionDenied
+from user_relations.tests.user_relation_factory import UserRelationFactory
+from users.tests.user_factory import UserFactory
+
 from tickets.enums import TicketStatus
 from tickets.tests.ticket_factory import TicketFactory
 from tickets.use_cases import ReadTicket
-from user_relations.tests.user_relation_factory import UserRelationFactory
-from users.tests.user_factory import UserFactory
 
 
 class TestReadTicket(TestCase):
@@ -33,7 +34,7 @@ class TestReadTicket(TestCase):
         self._when_executed_should_raise_exception(
             unread_ticket,
             exception=PermissionDenied,
-            exception_message="Only receiving user can perform this action.",
+            exception_message="Not receiving user.",
         )
 
         self._assert_ticket_status(TicketStatus.STATUS_UNREAD.value, unread_ticket)
@@ -67,8 +68,7 @@ class TestReadTicket(TestCase):
     """
 
     def _when_executed_should_raise_exception(self, ticket, exception, exception_message):
-        expected_exc_detail = f"ReadTicket_exception: {exception_message}"
-        with self.assertRaisesRegex(exception, expected_exc_detail):
+        with self.assertRaisesRegex(exception, exception_message):
             ReadTicket().execute(self.user, ticket.id)
 
     def _assert_ticket_status(self, expected_status, ticket):

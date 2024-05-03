@@ -64,7 +64,7 @@ class TestPartialUpdateTicket(TestCase):
                 receiving_ticket,
                 data={"description": "updated description"},
                 exception=PermissionDenied,
-                exception_message="Only the giving user may update ticket.",
+                exception_message="Not giving user.",
             )
 
             self._then_ticket_is_not_updated(receiving_ticket)
@@ -104,7 +104,7 @@ class TestPartialUpdateTicket(TestCase):
                 unread_ticket,
                 data={"status": TicketStatus.STATUS_DRAFT.value},
                 exception=PermissionDenied,
-                exception_message="Tickets cannot be updated to draft.",
+                exception_message="Tickets cannot be changed back to draft.",
             )
             self._then_ticket_is_not_updated(unread_ticket)
 
@@ -132,8 +132,7 @@ class TestPartialUpdateTicket(TestCase):
         exception: Exception,
         exception_message: str,
     ):
-        exc_detail = f"PartialUpdateTicket_exception: {exception_message}"
-        with self.assertRaisesRegex(exception, exc_detail):
+        with self.assertRaisesRegex(exception, exception_message):
             PartialUpdateTicket().execute(user=user, data=data, ticket_id=ticket.id)
 
     def _then_ticket_should_be(self, ticket: Ticket, status: str, description: str = ""):

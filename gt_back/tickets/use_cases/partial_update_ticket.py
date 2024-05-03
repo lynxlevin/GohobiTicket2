@@ -1,9 +1,9 @@
 import logging
 from typing import Set
 
-from rest_framework import exceptions
 from users.models import User
 
+from tickets import permissions_util
 from tickets.enums import TicketStatus
 from tickets.models import Ticket
 
@@ -25,17 +25,12 @@ class PartialUpdateTicket:
         )
 
         self.ticket = Ticket.objects.filter_eq_user_id(user.id).get_by_id(ticket_id)
-        if self.ticket is None:
-            raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
-
-        if self.ticket.giving_user_id != user.id:
-            raise exceptions.PermissionDenied(
-                detail=f"{self.exception_log_title}: Only the giving user may update ticket."
-            )
+        permissions_util.raise_ticket_not_found_exc(self.ticket)
+        permissions_util.raise_not_giving_user_exc(self.ticket, user.id)
 
         status_to_be = data.get("status")
         if status_to_be:
-            self._check_legitimacy_of_status(status_to_be)
+            permissions_util.raise_cannot_change_back_to_draft_exc(self.ticket, status_to_be)
             self._update_status(status_to_be)
 
         description_to_be = data.get("description")
@@ -50,10 +45,6 @@ class PartialUpdateTicket:
     """
     Util Functions
     """
-
-    def _check_legitimacy_of_status(self, status_to_be: str):
-        if status_to_be == TicketStatus.STATUS_DRAFT.value:
-            raise exceptions.PermissionDenied(detail=f"{self.exception_log_title}: Tickets cannot be updated to draft.")
 
     def _update_status(self, status_to_be: str):
         self.ticket.status = status_to_be
