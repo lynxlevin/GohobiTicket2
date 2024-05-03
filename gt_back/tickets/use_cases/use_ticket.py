@@ -2,9 +2,10 @@ import logging
 from datetime import date
 
 from rest_framework import exceptions
+from users.models import User
+
 from tickets.models import Ticket
 from tickets.utils import SlackMessengerForUseTicket
-from users.models import User
 
 logger = logging.getLogger(__name__)
 

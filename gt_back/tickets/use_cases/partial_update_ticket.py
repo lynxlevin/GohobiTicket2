@@ -2,9 +2,10 @@ import logging
 from typing import Set
 
 from rest_framework import exceptions
+from users.models import User
+
 from tickets.enums import TicketStatus
 from tickets.models import Ticket
-from users.models import User
 
 logger = logging.getLogger(__name__)
 

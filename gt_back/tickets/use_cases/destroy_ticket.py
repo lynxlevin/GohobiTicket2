@@ -1,8 +1,9 @@
 import logging
 
 from rest_framework import exceptions
-from tickets.models import Ticket
 from users.models import User
+
+from tickets.models import Ticket
 
 logger = logging.getLogger(__name__)
 

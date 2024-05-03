@@ -1,10 +1,11 @@
 import logging
 
 from rest_framework import exceptions
-from tickets.enums import TicketStatus
-from tickets.models import Ticket
 from user_relations.models import UserRelation
 from users.models import User
+
+from tickets.enums import TicketStatus
+from tickets.models import Ticket
 
 logger = logging.getLogger(__name__)
 
