@@ -8,7 +8,6 @@ from rest_framework.response import Response
 
 from gt_back.exception_handler import exception_handler_with_logging
 
-from ..models import Diary
 from ..serializers import (
     CreateDiaryRequestSerializer,
     DiariesSerializer,
@@ -22,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 class DiaryViewSet(viewsets.GenericViewSet):
-    queryset = Diary.objects.all()
     serializer_class = DiarySerializer
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]

@@ -6,7 +6,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_202_ACCEPTED, HTTP_204_NO_CONTENT
-from tickets.models.ticket import Ticket
 from tickets.serializers import (
     ListTicketQuerySerializer,
     ListTicketSerializer,
@@ -24,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 
 class TicketViewSet(viewsets.GenericViewSet):
-    queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
