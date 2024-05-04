@@ -1,5 +1,3 @@
-from unittest import mock
-
 from django.test import Client, TestCase
 from rest_framework import status
 from user_relations.tests.user_relation_factory import UserRelationFactory
@@ -7,7 +5,6 @@ from users.tests.user_factory import UserFactory
 
 from tickets.enums import TicketStatus
 from tickets.tests.ticket_factory import TicketFactory
-from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
 
 
 class TestTicketViews(TestCase):
@@ -16,27 +13,6 @@ class TestTicketViews(TestCase):
         cls.user = UserFactory()
         cls.partner = UserFactory()
         cls.relation = UserRelationFactory(user_1=cls.user, user_2=cls.partner)
-
-    @mock.patch.object(SlackMessengerForUseTicket, "__new__")
-    def test_use(self, slack_mock):
-        """
-        Put /api/tickets/{ticket_id}/use/
-        """
-        slack_instance_mock = mock.Mock()
-        slack_mock.return_value = slack_instance_mock
-
-        ticket = TicketFactory(user_relation=self.relation, giving_user=self.partner)
-
-        params = {
-            "ticket": {
-                "use_description": "test_use_ticket",
-            }
-        }
-        uri = f"/api/tickets/{ticket.id}/use/"
-        response = self._send_put_request(self.user, uri, params)
-
-        self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
-        self.assertEqual(ticket.id, response.data["id"])
 
     def test_read_ticket(self):
         """

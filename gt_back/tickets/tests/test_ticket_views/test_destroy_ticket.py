@@ -6,7 +6,7 @@ from users.tests.user_factory import UserFactory
 from tickets.tests.ticket_factory import TicketFactory, UsedTicketFactory
 
 
-class TestTicketViews(TestCase):
+class TestDestroyTicket(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory()
