@@ -24,7 +24,7 @@ class PartialUpdateTicket:
             extra={"data": data, "user": user, "ticket_id": ticket_id},
         )
 
-        self.ticket = Ticket.objects.filter_eq_user_id(user.id).get_by_id(ticket_id)
+        self.ticket = Ticket.objects.filter_by_permitted_user_id(user.id).get_by_id(ticket_id)
         permissions_util.raise_ticket_not_found_exc(self.ticket)
         permissions_util.raise_not_giving_user_exc(self.ticket, user.id)
 

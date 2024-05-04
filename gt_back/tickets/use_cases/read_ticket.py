@@ -16,7 +16,7 @@ class ReadTicket:
     def execute(self, user: User, ticket_id: str):
         logger.info("ReadTicket", extra={"user_id": user.id, "ticket_id": ticket_id})
 
-        ticket = Ticket.objects.filter_eq_user_id(user.id).get_by_id(ticket_id)
+        ticket = Ticket.objects.filter_by_permitted_user_id(user.id).get_by_id(ticket_id)
         permissions_util.raise_ticket_not_found_exc(ticket)
         permissions_util.raise_not_receiving_user_exc(ticket, user.id)
         permissions_util.raise_cannot_read_draft_ticket_exc(ticket)

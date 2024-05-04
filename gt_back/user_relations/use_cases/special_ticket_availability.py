@@ -2,8 +2,8 @@ import logging
 from datetime import datetime
 
 from rest_framework import exceptions
-
 from tickets.models import Ticket
+
 from user_relations.models import UserRelation
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ class SpecialTicketAvailability:
         year = int(query_params.get("year"))
         month = int(query_params.get("month"))
 
+        # MYMEMO: add serializers for query
         if not 2020 <= year <= 2200 or not 1 <= month <= 12:
             raise exceptions.ValidationError()
 

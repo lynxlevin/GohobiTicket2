@@ -20,7 +20,7 @@ class TicketQuerySet(models.QuerySet):
     def filter_eq_user_relation_id(self, user_relation_id: str) -> "TicketQuerySet":
         return self.filter(user_relation__id=user_relation_id)
 
-    def filter_eq_user_id(self, user_id: int) -> "TicketQuerySet":
+    def filter_by_permitted_user_id(self, user_id: int) -> "TicketQuerySet":
         return self.filter(Q(user_relation__user_1_id=user_id) | Q(user_relation__user_2_id=user_id))
 
     def filter_eq_giving_user_id(self, user_id: str) -> "TicketQuerySet":

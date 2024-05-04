@@ -1,7 +1,5 @@
 import logging
 
-from rest_framework import exceptions
-from user_relations.models import UserRelation
 from users.models import User
 
 from tickets.enums import TicketStatus
@@ -27,10 +25,7 @@ class ListTicket:
         if not any([is_giving, is_receiving]):
             is_giving = True
 
-        if UserRelation.objects.filter_eq_user_id(user.id).get_by_id(user_relation_id) is None:
-            raise exceptions.NotFound(detail=f"{self.exception_log_title}: UserRelation not found.")
-
-        qs = Ticket.objects.filter_eq_user_relation_id(user_relation_id)
+        qs = Ticket.objects.filter_by_permitted_user_id(user.id).filter_eq_user_relation_id(user_relation_id)
 
         if is_giving:
             qs = qs.filter_eq_giving_user_id(user.id)
