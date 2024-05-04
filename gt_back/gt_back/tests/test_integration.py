@@ -15,13 +15,13 @@ use ticket
 user_relations.retrieve
     use_date が入っていること
 """
+from datetime import date
 from unittest import mock
 
 from django.test import Client, TestCase
 from rest_framework import status
 from tickets.enums import TicketStatus
 from tickets.models import Ticket
-from tickets.tests.use_cases import TestUseTicket
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
 from user_relations.models import UserRelation
 from user_relations.tests.user_relation_factory import UserRelationFactory
@@ -104,6 +104,23 @@ class TestTicketViews(TestCase):
         self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
         self.assertEqual(ticket.id, response.data["id"])
 
-        TestUseTicket()._then_ticket_should_be(ticket)
-        TestUseTicket()._then_slack_message_is_sent(ticket, slack_instance_mock)
-        TestUseTicket()._then_slack_message_is_sent(ticket, slack_instance_mock)
+        self._then_ticket_should_be(ticket)
+        self._then_slack_message_is_sent(ticket, slack_instance_mock)
+        self._then_slack_message_is_sent(ticket, slack_instance_mock)
+
+    """
+    Util methods
+    """
+
+    def _then_ticket_should_be(self, ticket: Ticket):
+        original_updated_at = ticket.updated_at
+
+        ticket.refresh_from_db()
+
+        self.assertEqual(date.today(), ticket.use_date)
+        self.assertEqual("test_use_ticket", ticket.use_description)
+        self.assertNotEqual(original_updated_at, ticket.updated_at)
+
+    def _then_slack_message_is_sent(self, ticket: Ticket, slack_instance_mock: mock.Mock):
+        slack_instance_mock.generate_message.assert_called_once_with(ticket)
+        slack_instance_mock.send_message.assert_called_once()
