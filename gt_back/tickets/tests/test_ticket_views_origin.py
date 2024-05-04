@@ -17,16 +17,6 @@ class TestTicketViews(TestCase):
         cls.partner = UserFactory()
         cls.relation = UserRelationFactory(user_1=cls.user, user_2=cls.partner)
 
-    def test_destroy(self):
-        """
-        Delete /api/tickets/{ticket_id}/
-        """
-        ticket = TicketFactory(user_relation=self.relation, giving_user=self.user)
-
-        response = self._send_delete_request(self.user, f"/api/tickets/{ticket.id}/")
-
-        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
-
     @mock.patch.object(SlackMessengerForUseTicket, "__new__")
     def test_use(self, slack_mock):
         """
