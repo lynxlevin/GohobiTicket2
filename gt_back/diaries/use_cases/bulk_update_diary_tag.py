@@ -1,9 +1,6 @@
 import logging
 from typing import TYPE_CHECKING, Optional, TypedDict
 
-from rest_framework import exceptions
-from user_relations.models import UserRelation
-
 from ..models import DiaryTag
 
 if TYPE_CHECKING:
@@ -32,10 +29,11 @@ class BulkUpdateDiaryTag:
         user_relation_id = data["user_relation_id"]
         req_tags = data["diary_tags"]
 
-        if UserRelation.objects.filter_eq_user_id(user.id).get_by_id(user_relation_id) is None:
-            raise exceptions.NotFound()
-
-        existing_tags = list(DiaryTag.objects.filter_eq_user_relation_id(user_relation_id).order_by_sort_no())
+        existing_tags = list(
+            DiaryTag.objects.filter_by_permitted_user_id(user.id)
+            .filter_eq_user_relation_id(user_relation_id)
+            .order_by_sort_no()
+        )
 
         new_tags = []
         updated_tags = []
