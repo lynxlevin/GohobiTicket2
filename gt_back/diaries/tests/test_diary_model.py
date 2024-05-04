@@ -37,15 +37,15 @@ class TestUserRelationModel(TestCase):
         ]
         non_related_user = UserFactory()
 
-        result_1 = Diary.objects.filter_eq_user_id(relation.user_1_id).all()
+        result_1 = Diary.objects.filter_by_permitted_user_id(relation.user_1_id).all()
         self.assertTrue(expected[0] in result_1)
         self.assertTrue(expected[1] in result_1)
 
-        result_2 = Diary.objects.filter_eq_user_id(relation.user_2_id).all()
+        result_2 = Diary.objects.filter_by_permitted_user_id(relation.user_2_id).all()
         self.assertTrue(expected[0] in result_2)
         self.assertTrue(expected[1] in result_2)
 
-        result_none = Diary.objects.filter_eq_user_id(non_related_user.id).all()
+        result_none = Diary.objects.filter_by_permitted_user_id(non_related_user.id).all()
         self.assertEqual(0, len(result_none))
 
     def test_annotate_status(self):

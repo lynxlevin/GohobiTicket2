@@ -22,7 +22,7 @@ class MarkDiaryRead:
     def execute(self, user: "User", id: "UUID") -> None:
         logger.info(self.__class__.__name__, extra={"user": user, "id": id})
 
-        diary = Diary.objects.filter_eq_user_id(user.id).select_user_relation().get_by_id(id)
+        diary = Diary.objects.filter_by_permitted_user_id(user.id).select_user_relation().get_by_id(id)
         if diary is None:
             raise exceptions.NotFound()
 
