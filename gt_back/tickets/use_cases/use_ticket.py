@@ -25,8 +25,9 @@ class UseTicket:
         ticket.use_date = date.today()
         ticket.save(update_fields=["use_date", "use_description", "updated_at"])
 
-        slack_message = SlackMessengerForUseTicket()
-        slack_message.generate_message(ticket)
-        slack_message.send_message()
+        if ticket.user_relation.use_slack:
+            slack_message = SlackMessengerForUseTicket()
+            slack_message.generate_message(ticket)
+            slack_message.send_message()
 
         return ticket

@@ -39,6 +39,27 @@ class TestUseTicket(TestCase):
         self.assertEqual(date.today(), ticket.use_date)
         self.assertEqual("test_use_ticket", ticket.use_description)
 
+        slack_instance_mock.generate_message.assert_not_called()
+        slack_instance_mock.send_message.assert_not_called()
+
+    @mock.patch.object(SlackMessengerForUseTicket, "__new__")
+    def test_use__use_slack_is_true(self, slack_mock):
+        """
+        Put /api/tickets/{ticket_id}/use/
+        """
+        slack_instance_mock = mock.Mock()
+        slack_mock.return_value = slack_instance_mock
+
+        use_slack_relation = UserRelationFactory(user_1=self.user, use_slack=True)
+        ticket = TicketFactory(user_relation=use_slack_relation, giving_user=self.partner)
+
+        params = {"ticket": {"use_description": "test_use_ticket"}}
+
+        response = self._send_put_request(self.user, ticket.id, params)
+
+        self.assertEqual(status.HTTP_202_ACCEPTED, response.status_code)
+
+        ticket.refresh_from_db()
         slack_instance_mock.generate_message.assert_called_once_with(ticket)
         slack_instance_mock.send_message.assert_called_once()
 

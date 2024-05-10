@@ -28,6 +28,7 @@ class UserRelation(models.Model):
     user_2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="relations_2")
     user_1_giving_ticket_img = models.CharField(max_length=13, null=True)
     user_2_giving_ticket_img = models.CharField(max_length=13, null=True)
+    use_slack = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

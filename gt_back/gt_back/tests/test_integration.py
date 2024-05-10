@@ -33,7 +33,7 @@ class TestTicketViews(TestCase):
     def setUpTestData(cls):
         cls.giving_user = UserFactory()
         cls.receiving_user = UserFactory()
-        cls.relation = UserRelationFactory(user_1=cls.giving_user, user_2=cls.receiving_user)
+        cls.relation = UserRelationFactory(user_1=cls.giving_user, user_2=cls.receiving_user, use_slack=True)
 
     def test_integration(self):
         giving_client = Client()
