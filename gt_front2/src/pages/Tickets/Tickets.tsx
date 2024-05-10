@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
-import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Switch, Typography } from '@mui/material';
+import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import BottomNav from '../../BottomNav';
@@ -31,12 +31,27 @@ const Tickets = () => {
 
     const isGivingRelation = searchParams.get('is_giving') !== null ? true : false;
 
-    const imageSrc = useMemo(() => {
+    const ticketImage = useMemo(() => {
         if (!currentRelation) return '';
-        const ticketImg = isGivingRelation ? currentRelation.giving_ticket_img : currentRelation.receiving_ticket_img;
-        // MYMEMO: change return if ticketImg is null.
-        return `ticket_images/${ticketImg}`;
-    }, [currentRelation, isGivingRelation]);
+        const imageFile = isGivingRelation ? currentRelation.giving_ticket_img : currentRelation.receiving_ticket_img;
+
+        if (imageFile === null) return (
+            <Paper sx={{ py: '5%', my: '10px', color: '#565656', background: '#ffeaea', border: 'dashed 4px #ffc3c3', boxShadow: '0 0 0 10px #ffeaea' }}>
+                <Typography variant='h2'>Thank you<br />very much!!</Typography>
+            </Paper>
+        )
+
+        return (<CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={`ticket_images/${imageFile}`} />);
+    }, [currentRelation, isGivingRelation])
+
+    const miniTicket = useMemo(() => {
+        if (!currentRelation) return '';
+        const imageFile = isGivingRelation ? currentRelation.giving_ticket_img : currentRelation.receiving_ticket_img;
+
+        if (imageFile === null) return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src='/apple-touch-icon.png' alt='mini-ticket' />;
+
+        return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={`ticket_images/${imageFile}`} alt='mini-ticket' />;
+    }, [currentRelation, isGivingRelation])
 
     const ticketCount = ticketContext.tickets.length;
     const isSpecialNumber = isGivingRelation && ticketCount > 0 && (ticketCount % 100 === 0 || ticketCount % 111 === 0 || ticketCount % 1111 === 0);
@@ -71,7 +86,7 @@ const Tickets = () => {
                                 計{ticketCount}枚
                             </Typography>
                         )}
-                        <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={imageSrc} />
+                        {ticketImage}
                         {isGivingRelation && <TicketForm userRelationId={userRelationId} />}
                         <FormGroup>
                             <FormControlLabel label='特別チケットのみ表示' control={<Switch onChange={event => setShowOnlySpecial(event.target.checked)} />} />
@@ -105,7 +120,7 @@ const Tickets = () => {
                         <KeyboardDoubleArrowDownIcon />
                     </ToLastAvailableTicketButton>
                 )}
-                <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={imageSrc} alt='mini-ticket' />
+                {miniTicket}
             </main>
         </>
     );
