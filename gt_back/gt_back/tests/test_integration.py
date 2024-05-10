@@ -1,5 +1,5 @@
 """
-MYMEMO: integration の流れ
+NOTE: integration の流れ
 login
 create ticket
 user_relations.retrieve
@@ -37,11 +37,9 @@ class TestTicketViews(TestCase):
 
     def test_integration(self):
         giving_client = Client()
-        # MYMEMO: test login
         giving_client.force_login(self.giving_user)
 
         receiving_client = Client()
-        # MYMEMO: test login
         receiving_client.force_login(self.receiving_user)
 
         ticket_id = self._create_ticket_and_return_id(giving_client, self.relation)
