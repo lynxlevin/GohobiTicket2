@@ -42,7 +42,11 @@ class TestUseTicket(TestCase):
         slack_instance_mock.generate_message.assert_called_once_with(ticket)
         slack_instance_mock.send_message.assert_called_once()
 
-    def test_user__bad_ticket(self):
+    @mock.patch.object(SlackMessengerForUseTicket, "__new__")
+    def test_use__bad_ticket(self, slack_mock):
+        slack_instance_mock = mock.Mock()
+        slack_mock.return_value = slack_instance_mock
+
         giving_ticket = TicketFactory(user_relation=self.relation, giving_user=self.user)
         unrelated_ticket = TicketFactory()
         used_ticket = UsedTicketFactory(user_relation=self.relation, giving_user=self.partner)

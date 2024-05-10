@@ -1,32 +1,32 @@
 import logging
-from typing import Set
+from typing import TYPE_CHECKING, Set
 
 from users.models import User
 
 from tickets import permissions_util
 from tickets.enums import TicketStatus
-from tickets.models import Ticket
+
+if TYPE_CHECKING:
+    from tickets.models import Ticket
 
 logger = logging.getLogger(__name__)
 
 
 class PartialUpdateTicket:
-    ticket: Ticket
+    ticket: "Ticket"
     update_fields: Set
 
     def __init__(self):
         self.exception_log_title = f"{__class__.__name__}_exception"
         self.update_fields = set(["updated_at"])
 
-    def execute(self, user: User, data: dict, ticket_id: str):
+    def execute(self, user: User, data: dict, ticket: "Ticket"):
         logger.info(
             self.__class__.__name__,
-            extra={"data": data, "user": user, "ticket_id": ticket_id},
+            extra={"data": data, "user": user, "ticket_id": ticket.id},
         )
 
-        self.ticket = Ticket.objects.filter_by_permitted_user_id(user.id).get_by_id(ticket_id)
-        permissions_util.raise_ticket_not_found_exc(self.ticket)
-        permissions_util.raise_not_giving_user_exc(self.ticket, user.id)
+        self.ticket = ticket
 
         status_to_be = data.get("status")
         if status_to_be:
