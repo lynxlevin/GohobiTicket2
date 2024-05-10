@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "tickets.apps.TicketsConfig",
     "user_relations.apps.UserRelationsConfig",
-    "user_settings.apps.UserSettingsConfig",
     "users.apps.UsersConfig",
     "diaries.apps.DiariesConfig",
 ]

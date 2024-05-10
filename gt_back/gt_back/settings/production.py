@@ -65,10 +65,6 @@ LOGGING = {
             "handlers": ["file"],
             "level": "INFO",
         },
-        "user_settings": {
-            "handlers": ["file"],
-            "level": "INFO",
-        },
         "users": {
             "handlers": ["file"],
             "level": "INFO",

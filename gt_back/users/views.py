@@ -19,9 +19,7 @@ def login_view(request):
     password = data.get("password")
 
     if email is None or password is None:
-        return JsonResponse(
-            {"detail": "Please provide email and password."}, status=400
-        )
+        return JsonResponse({"detail": "Please provide email and password."}, status=400)
 
     user = authenticate(email=email, password=password)
 
@@ -30,8 +28,7 @@ def login_view(request):
 
     login(request, user)
 
-    default_page = user.usersetting.default_page
-    return JsonResponse({"default_page": default_page})
+    return JsonResponse({})
 
 
 def logout_view(request):
@@ -46,5 +43,4 @@ def session_view(request):
     if not request.user.is_authenticated:
         return JsonResponse({"is_authenticated": False})
 
-    default_page = request.user.usersetting.default_page
-    return JsonResponse({"is_authenticated": True, "default_page": default_page})
+    return JsonResponse({"is_authenticated": True})
