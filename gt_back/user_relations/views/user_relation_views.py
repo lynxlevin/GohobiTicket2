@@ -5,7 +5,6 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from user_relations.models import UserRelation
 from user_relations.serializers import ListUserRelationSerializer
 from user_relations.use_cases import ListUserRelation, SpecialTicketAvailability
 
@@ -15,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 class UserRelationViewSet(viewsets.GenericViewSet):
-    queryset = UserRelation.objects.all()
     serializer_class = ListUserRelationSerializer
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]

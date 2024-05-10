@@ -8,7 +8,6 @@ from rest_framework.response import Response
 
 from gt_back.exception_handler import exception_handler_with_logging
 
-from ..models import DiaryTag
 from ..serializers import DiaryTagSerializer, DiaryTagsSerializer, ListDiaryTagQuerySerializer
 from ..use_cases import BulkUpdateDiaryTag, DeleteDiaryTag, GetDiaryTag, ListDiaryTag
 
@@ -16,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 
 class DiaryTagViewSet(viewsets.GenericViewSet):
-    queryset = DiaryTag.objects.all()
     serializer_class = DiaryTagSerializer
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]

@@ -1,11 +1,13 @@
 import logging
 from datetime import date
+from typing import TYPE_CHECKING
 
-from rest_framework import exceptions
-from tickets.models import Ticket
-from tickets.utils import SlackMessengerForUseTicket
 from users.models import User
 
+from tickets.utils import SlackMessengerForUseTicket
+
+if TYPE_CHECKING:
+    from tickets.models import Ticket
 logger = logging.getLogger(__name__)
 
 
@@ -13,29 +15,11 @@ class UseTicket:
     def __init__(self):
         self.exception_log_title = f"{__class__.__name__}_exception"
 
-    def execute(self, user: User, data: dict, ticket_id: str):
+    def execute(self, user: User, data: dict, ticket: "Ticket"):
         logger.info(
             self.__class__.__name__,
-            extra={"data": data, "user": user, "ticket_id": ticket_id},
+            extra={"data": data, "user": user, "ticket_id": ticket.id},
         )
-
-        ticket = Ticket.objects.get_by_id(ticket_id)
-
-        if ticket is None:
-            raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
-
-        user_relation = ticket.user_relation
-
-        if user.id not in (user_relation.user_1_id, user_relation.user_2_id):
-            raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
-
-        if ticket.giving_user_id == user.id:
-            raise exceptions.PermissionDenied(
-                detail=f"{self.exception_log_title}: Only the receiving user may use ticket."
-            )
-
-        if ticket.use_date is not None:
-            raise exceptions.PermissionDenied(detail=f"{self.exception_log_title}: This ticket is already used.")
 
         ticket.use_description = data["use_description"]
         ticket.use_date = date.today()

@@ -41,16 +41,24 @@ class TestDiaryTagViews(TestCase):
         self.assertListEqual(expected, body["diary_tags"])
         self.assertNotIn(str(wrong_relation_entry.id), [tag["id"] for tag in body["diary_tags"]])
 
-    def test_list__404_on_wrong_user_relation_id(self):
+    def test_list__empty_on_wrong_user_relation_id(self):
         """
         Get /api/diary_tags/?user_relation_id={relation_id}
         """
         wrong_relation = UserRelationFactory()
+        _wrong_relation_tags = [
+            DiaryTagFactory(user_relation=wrong_relation, sort_no=3),
+            DiaryTagFactory(user_relation=wrong_relation, sort_no=1),
+            DiaryTagFactory(user_relation=wrong_relation, sort_no=2),
+        ]
 
         client = self._get_client(self.user)
         res = client.get(f"{self.base_path}?user_relation_id={wrong_relation.id}")
+        (status_code, body) = (res.status_code, res.json())
 
-        self.assertEqual(status.HTTP_404_NOT_FOUND, res.status_code)
+        self.assertEqual(status.HTTP_200_OK, status_code)
+
+        self.assertEqual(0, len(body["diary_tags"]))
 
     def test_get(self):
         """

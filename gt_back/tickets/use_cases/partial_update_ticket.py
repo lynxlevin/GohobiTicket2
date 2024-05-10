@@ -1,46 +1,37 @@
 import logging
-from typing import Set
+from typing import TYPE_CHECKING, Set
 
-from rest_framework import exceptions
-from tickets.enums import TicketStatus
-from tickets.models import Ticket
+from rest_framework.exceptions import PermissionDenied
 from users.models import User
+
+from tickets.enums import TicketStatus
+
+if TYPE_CHECKING:
+    from tickets.models import Ticket
 
 logger = logging.getLogger(__name__)
 
 
 class PartialUpdateTicket:
-    ticket: Ticket
+    ticket: "Ticket"
     update_fields: Set
 
     def __init__(self):
         self.exception_log_title = f"{__class__.__name__}_exception"
         self.update_fields = set(["updated_at"])
 
-    def execute(self, user: User, data: dict, ticket_id: str):
+    def execute(self, user: User, data: dict, ticket: "Ticket"):
         logger.info(
             self.__class__.__name__,
-            extra={"data": data, "user": user, "ticket_id": ticket_id},
+            extra={"data": data, "user": user, "ticket_id": ticket.id},
         )
 
-        self.ticket = Ticket.objects.get_by_id(ticket_id)
-
-        if self.ticket is None:
-            raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
-
-        user_relation = self.ticket.user_relation
-
-        if user.id not in (user_relation.user_1_id, user_relation.user_2_id):
-            raise exceptions.NotFound(detail=f"{self.exception_log_title}: Ticket not found.")
-
-        if self.ticket.giving_user_id != user.id:
-            raise exceptions.PermissionDenied(
-                detail=f"{self.exception_log_title}: Only the giving user may update ticket."
-            )
+        self.ticket = ticket
 
         status_to_be = data.get("status")
         if status_to_be:
-            self._check_legitimacy_of_status(status_to_be)
+            if status_to_be == TicketStatus.STATUS_DRAFT.value and ticket.status != TicketStatus.STATUS_DRAFT.value:
+                raise PermissionDenied(detail="Tickets cannot be changed back to draft.")
             self._update_status(status_to_be)
 
         description_to_be = data.get("description")
@@ -55,10 +46,6 @@ class PartialUpdateTicket:
     """
     Util Functions
     """
-
-    def _check_legitimacy_of_status(self, status_to_be: str):
-        if status_to_be == TicketStatus.STATUS_DRAFT.value:
-            raise exceptions.PermissionDenied(detail=f"{self.exception_log_title}: Tickets cannot be updated to draft.")
 
     def _update_status(self, status_to_be: str):
         self.ticket.status = status_to_be
