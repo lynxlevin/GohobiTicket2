@@ -34,6 +34,7 @@ const Tickets = () => {
     const imageSrc = useMemo(() => {
         if (!currentRelation) return '';
         const ticketImg = isGivingRelation ? currentRelation.giving_ticket_img : currentRelation.receiving_ticket_img;
+        // MYMEMO: change return if ticketImg is null.
         return `ticket_images/${ticketImg}`;
     }, [currentRelation, isGivingRelation]);
 
