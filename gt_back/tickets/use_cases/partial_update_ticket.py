@@ -1,9 +1,9 @@
 import logging
 from typing import TYPE_CHECKING, Set
 
+from rest_framework.exceptions import PermissionDenied
 from users.models import User
 
-from tickets import permissions_util
 from tickets.enums import TicketStatus
 
 if TYPE_CHECKING:
@@ -30,7 +30,8 @@ class PartialUpdateTicket:
 
         status_to_be = data.get("status")
         if status_to_be:
-            permissions_util.raise_cannot_change_back_to_draft_exc(self.ticket, status_to_be)
+            if status_to_be == TicketStatus.STATUS_DRAFT.value and ticket.status != TicketStatus.STATUS_DRAFT.value:
+                raise PermissionDenied(detail="Tickets cannot be changed back to draft.")
             self._update_status(status_to_be)
 
         description_to_be = data.get("description")

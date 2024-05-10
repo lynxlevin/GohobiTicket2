@@ -1,9 +1,9 @@
 import logging
 from typing import TYPE_CHECKING
 
+from rest_framework.exceptions import PermissionDenied
 from users.models import User
 
-from tickets import permissions_util
 from tickets.enums import TicketStatus
 
 if TYPE_CHECKING:
@@ -19,7 +19,8 @@ class ReadTicket:
     def execute(self, user: User, ticket: "Ticket"):
         logger.info("ReadTicket", extra={"user_id": user.id, "ticket_id": ticket.id})
 
-        permissions_util.raise_cannot_read_draft_ticket_exc(ticket)
+        if ticket.status == TicketStatus.STATUS_DRAFT.value:
+            raise PermissionDenied(detail="Draft tickets cannot be read.")
 
         ticket.status = TicketStatus.STATUS_READ.value
         ticket.save(update_fields=["status", "updated_at"])
