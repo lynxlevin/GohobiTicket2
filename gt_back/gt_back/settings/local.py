@@ -87,10 +87,6 @@ LOGGING = {
             "handlers": ["file"],
             "level": "DEBUG",
         },
-        "user_settings": {
-            "handlers": ["file"],
-            "level": "DEBUG",
-        },
         "users": {
             "handlers": ["file"],
             "level": "DEBUG",

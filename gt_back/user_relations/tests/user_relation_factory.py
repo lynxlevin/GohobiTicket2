@@ -10,5 +10,5 @@ class UserRelationFactory(factory.django.DjangoModelFactory):
 
     user_1 = factory.SubFactory(UserFactory, email=factory.Sequence(lambda n: f"giving{n}@example.com"))
     user_2 = factory.SubFactory(UserFactory, email=factory.Sequence(lambda n: f"receiving{n}@example.com"))
-    user_1_giving_ticket_img = "IMG_5777.jpeg"
-    user_2_giving_ticket_img = "IMG_5928.jpeg"
+    user_1_giving_ticket_img = "IMG_1234.jpeg"
+    user_2_giving_ticket_img = "IMG_5678.jpeg"

@@ -6,6 +6,7 @@ class UserRelationSerializer(serializers.Serializer):
     related_username = serializers.CharField()
     giving_ticket_img = serializers.CharField()
     receiving_ticket_img = serializers.CharField()
+    use_slack = serializers.BooleanField()
 
 
 class ListUserRelationSerializer(serializers.Serializer):

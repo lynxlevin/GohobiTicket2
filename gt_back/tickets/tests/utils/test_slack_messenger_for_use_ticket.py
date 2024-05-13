@@ -4,6 +4,7 @@ from unittest import mock
 
 import requests
 from django.test import TestCase
+
 from tickets.tests.ticket_factory import TicketFactory
 from tickets.utils.slack_messenger_for_use_ticket import SlackMessengerForUseTicket
 
@@ -100,7 +101,6 @@ class TestSlackMessengerForUseTicket(TestCase):
     def test_send_message(self, slack_messenger_mock):
         logger = logging.getLogger("tickets.utils.slack_messenger_for_use_ticket")
 
-        # MYMEMO: url はtestようにしたい
         url = os.getenv("SLACK_API_URL")
         message_dict = {"message": "test_message"}
 

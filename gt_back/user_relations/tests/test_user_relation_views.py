@@ -2,10 +2,10 @@ from datetime import date
 
 from django.test import Client, TestCase
 from rest_framework import status
-
 from tickets.tests.ticket_factory import TicketFactory
-from user_relations.tests.user_relation_factory import UserRelationFactory
 from users.tests.user_factory import UserFactory
+
+from user_relations.tests.user_relation_factory import UserRelationFactory
 
 
 class TestUserRelationViews(TestCase):
@@ -33,12 +33,39 @@ class TestUserRelationViews(TestCase):
                     "related_username": relation_1.get_related_user(self.user.id).username,
                     "giving_ticket_img": relation_1.user_1_giving_ticket_img,
                     "receiving_ticket_img": relation_1.user_2_giving_ticket_img,
+                    "use_slack": relation_1.use_slack,
                 },
                 {
                     "id": str(relation_2.id),
                     "related_username": relation_2.get_related_user(self.user.id).username,
                     "giving_ticket_img": relation_2.user_2_giving_ticket_img,
                     "receiving_ticket_img": relation_2.user_1_giving_ticket_img,
+                    "use_slack": relation_2.use_slack,
+                },
+            ]
+        }
+        self.assertDictEqual(expected, response.data)
+
+    def test_list__null_ticket_img(self):
+        """
+        Get /api/user_relations/
+        """
+        relation = UserRelationFactory(user_1=self.user, user_1_giving_ticket_img=None, user_2_giving_ticket_img=None)
+
+        client = Client()
+        client.force_login(self.user)
+        response = client.get("/api/user_relations/")
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+
+        expected = {
+            "user_relations": [
+                {
+                    "id": str(relation.id),
+                    "related_username": relation.get_related_user(self.user.id).username,
+                    "giving_ticket_img": None,
+                    "receiving_ticket_img": None,
+                    "use_slack": relation.use_slack,
                 },
             ]
         }

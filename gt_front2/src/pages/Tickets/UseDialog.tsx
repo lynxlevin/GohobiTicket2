@@ -1,8 +1,10 @@
 import { Button, Dialog, DialogActions, DialogContent, TextField, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { ITicket } from '../../contexts/ticket-context';
 import useTicketContext from '../../hooks/useTicketContext';
+import { UserRelationContext } from '../../contexts/user-relation-context';
+import { useSearchParams } from 'react-router-dom';
 
 interface UseDialogProps {
     onClose: () => void;
@@ -11,12 +13,26 @@ interface UseDialogProps {
 
 const UseDialog = (props: UseDialogProps) => {
     const { onClose, ticket } = props;
+    const userRelationContext = useContext(UserRelationContext);
     const [useDescription, setUseDescription] = useState('');
     const { consumeTicket } = useTicketContext();
+    const [searchParams] = useSearchParams();
 
     const handleSubmit = async () => {
-        await consumeTicket(ticket.id, useDescription);
-        onClose();
+        const userRelationId = Number(searchParams.get('user_relation_id'));
+        const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId)!;
+        if (currentRelation.use_slack) {
+            await consumeTicket(ticket.id, useDescription);
+            onClose();
+        } else {
+            const text = ticket.is_special ? `〜★〜★〜★〜★〜★〜★〜★〜★\n${useDescription}\n★〜★〜★〜★〜★〜★〜★〜★〜` : `〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜\n${useDescription}\n〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜`;
+            await navigator.share({text}).then(async () => {
+                await consumeTicket(ticket.id, useDescription);
+                onClose();
+            }).catch(() => {
+                // Suppress AbortError
+            });
+        }
     };
 
     return (

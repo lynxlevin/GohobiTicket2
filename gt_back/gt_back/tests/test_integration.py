@@ -1,5 +1,5 @@
 """
-MYMEMO: integration の流れ
+NOTE: integration の流れ
 login
 create ticket
 user_relations.retrieve
@@ -33,15 +33,13 @@ class TestTicketViews(TestCase):
     def setUpTestData(cls):
         cls.giving_user = UserFactory()
         cls.receiving_user = UserFactory()
-        cls.relation = UserRelationFactory(user_1=cls.giving_user, user_2=cls.receiving_user)
+        cls.relation = UserRelationFactory(user_1=cls.giving_user, user_2=cls.receiving_user, use_slack=True)
 
     def test_integration(self):
         giving_client = Client()
-        # MYMEMO: test login
         giving_client.force_login(self.giving_user)
 
         receiving_client = Client()
-        # MYMEMO: test login
         receiving_client.force_login(self.receiving_user)
 
         ticket_id = self._create_ticket_and_return_id(giving_client, self.relation)

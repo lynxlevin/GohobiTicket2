@@ -1,6 +1,7 @@
 import logging
 
 from rest_framework import exceptions
+
 from user_relations.models import UserRelation
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class ListUserRelation:
                 "receiving_ticket_img": relation.user_2_giving_ticket_img
                 if relation.user_1_id == user_id
                 else relation.user_1_giving_ticket_img,
+                "use_slack": relation.use_slack,
             }
             for relation in user_relations
         ]

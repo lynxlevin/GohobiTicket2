@@ -32,7 +32,6 @@ class ListTicket:
             queryset = queryset.filter_eq_giving_user_id(user.id)
 
         if is_receiving:
-            # MYMEMO: givingもreceivingもTrueの時、なにも帰らないので変な感じ
             queryset = queryset.exclude_eq_giving_user_id(user.id).exclude_eq_status(TicketStatus.STATUS_DRAFT.value)
 
         tickets = list(queryset.order_by("-gift_date", "-id").all())
