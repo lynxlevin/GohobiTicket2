@@ -3,16 +3,19 @@
 1. install poetry
 2. `poetry install`
 3. build postgres database
-4. set db information in .env (and others like slack_api_url too)
-5. generate SECRET_KEY and set into .env
-```
+4. set db information in .env (and others like slack_api_url)
+5. generate DJANGO_SECRET_KEY and set into .env
+```shell
 poetry shell
 python manage.py shell
-from django.core.management.utils import get_random_secret_key as gr
-print(gr())
+from django.core.management.utils import get_random_secret_key
+get_random_secret_key()
 ```
 6. build fixture data
-<!-- MYMEMO: details on fixtures -->
+```shell
+poetry shell
+python manage.py create_seed_data
+```
 
 ## How to run locally
 
