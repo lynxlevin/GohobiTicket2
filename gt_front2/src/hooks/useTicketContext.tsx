@@ -36,11 +36,11 @@ const useTicketContext = () => {
     );
 
     const lastAvailableTicketId = useMemo(() => {
-        if (ticketContext.tickets.length === 0) return 0;
-        return ticketContext.tickets
+        const availableTickets = ticketContext.tickets
             .filter(ticket => ticket.use_date === null)
             .sort(sortConditions)
-            .slice(-1)[0].id;
+        if (availableTickets.length === 0) return 0;
+        return availableTickets.slice(-1)[0].id;
     }, [ticketContext.tickets]);
 
     const createTicket = useCallback(async (data: CreateTicketRequest) => {
