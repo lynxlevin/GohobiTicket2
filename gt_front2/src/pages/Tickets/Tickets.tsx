@@ -27,7 +27,7 @@ const Tickets = () => {
 
     const [searchParams] = useSearchParams();
     const userRelationId = Number(searchParams.get('user_relation_id'));
-    const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId)!;
+    const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId);
 
     const isGivingRelation = searchParams.get('is_giving') !== null ? true : false;
 
@@ -60,10 +60,7 @@ const Tickets = () => {
         if (userContext.isLoggedIn === true && userRelationId > 0) getTickets(userRelationId, isGivingRelation);
     }, [getTickets, isGivingRelation, userContext.isLoggedIn, userRelationId]);
 
-    if (userContext.isLoggedIn === false) {
-        return <Navigate to='/login' />;
-    }
-    if (!currentRelation) return <></>;
+    if (userContext.isLoggedIn === false || !currentRelation) return <Navigate to='/login' />;
     return (
         <>
             <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} isGivingRelation={isGivingRelation} />
