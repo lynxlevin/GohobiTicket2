@@ -35,26 +35,32 @@ const Tickets = () => {
         if (!currentRelation) return '';
         const imageFile = isGivingRelation ? currentRelation.giving_ticket_img : currentRelation.receiving_ticket_img;
 
-        if (imageFile === null) return (
-            <Paper sx={{ py: '5%', my: '10px', color: '#565656', background: '#ffeaea', border: 'dashed 4px #ffc3c3', boxShadow: '0 0 0 10px #ffeaea' }}>
-                <Typography variant='h2'>Thank you<br />very much!!</Typography>
-            </Paper>
-        )
+        if (imageFile === null)
+            return (
+                <Paper sx={{ py: '5%', my: '10px', color: '#565656', background: '#ffeaea', border: 'dashed 4px #ffc3c3', boxShadow: '0 0 0 10px #ffeaea' }}>
+                    <Typography variant='h2'>
+                        Thank you
+                        <br />
+                        very much!!
+                    </Typography>
+                </Paper>
+            );
 
-        return (<CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={`ticket_images/${imageFile}`} />);
-    }, [currentRelation, isGivingRelation])
+        return <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={`ticket_images/${imageFile}`} />;
+    }, [currentRelation, isGivingRelation]);
 
     const miniTicket = useMemo(() => {
         if (!currentRelation) return '';
         const imageFile = isGivingRelation ? currentRelation.giving_ticket_img : currentRelation.receiving_ticket_img;
 
-        if (imageFile === null) return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src='/apple-touch-icon.png' alt='mini-ticket' />;
+        if (imageFile === null)
+            return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src='/apple-touch-icon.png' alt='mini-ticket' />;
 
         return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={`ticket_images/${imageFile}`} alt='mini-ticket' />;
-    }, [currentRelation, isGivingRelation])
+    }, [currentRelation, isGivingRelation]);
 
     const ticketCount = ticketContext.tickets.length;
-    const isSpecialNumber = isGivingRelation && ticketCount > 0 && (ticketCount % 100 === 0 || ticketCount % 111 === 0 || ticketCount % 1111 === 0);
+    const isSpecialNumber = ticketCount > 0 && (ticketCount % 100 === 0 || ticketCount % 111 === 0 || ticketCount % 1111 === 0);
 
     useEffect(() => {
         if (userContext.isLoggedIn === true && userRelationId > 0) getTickets(userRelationId, isGivingRelation);
