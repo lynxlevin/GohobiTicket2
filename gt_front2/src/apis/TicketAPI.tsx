@@ -27,7 +27,7 @@ export const TicketAPI = {
     },
     update: async (ticketId: number, props: { description: string }): Promise<AxiosResponse<ITicket>> => {
         const url = `${TicketAPI.BASE_URL}${ticketId}/`;
-        return await client.patch(url, { ticket: props }, { headers: { 'content-type': 'application/json' } });
+        return await client.put(url, { ticket: props }, { headers: { 'content-type': 'application/json' } });
     },
     delete: async (ticketId: number) => {
         const url = `${TicketAPI.BASE_URL}${ticketId}/`;
