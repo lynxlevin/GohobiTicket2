@@ -16,17 +16,19 @@ const useUserAPI = () => {
 
     useEffect(() => {
         const checkSession = async () => {
-            const session_res = await UserAPI.session();
-            const isAuthenticated = session_res.data.is_authenticated;
-            userContext.setIsLoggedIn(isAuthenticated);
-            if (isAuthenticated) {
+            UserAPI.session().then(_ => {
+                userContext.setIsLoggedIn(true);
                 if (userRelationContext.userRelations.length === 0) {
-                    const res = await UserRelationAPI.list();
-                    userRelationContext.setUserRelations(res.data.user_relations);
+                    UserRelationAPI.list().then(res => {
+                        userRelationContext.setUserRelations(res.data.user_relations);
+                    });
                 }
-            } else {
-                userRelationContext.setUserRelations([]);
-            }
+            }).catch(e => {
+                if (e.response.status_code === 401) {
+                    userContext.setIsLoggedIn(false);
+                    userRelationContext.setUserRelations([]);
+                }
+            });
         };
         void checkSession();
         // eslint-disable-next-line react-hooks/exhaustive-deps
