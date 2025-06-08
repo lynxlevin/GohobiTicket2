@@ -57,7 +57,7 @@ const useTicketContext = () => {
             description,
         };
         if (willFinalize) payload.status = 'unread';
-        TicketAPI.update(ticketId, payload).then(({ data: ticket }) => {
+        TicketAPI.update(ticketId, payload).then(({ data: {ticket} }) => {
             ticketContext.setTickets(prev => {
                 const tickets = [...prev];
                 tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;

@@ -6,6 +6,10 @@ interface ListTicketResponse {
     tickets: ITicket[];
 }
 
+interface UpsertTicketResponse {
+    ticket: ITicket;
+}
+
 export interface CreateTicketRequest {
     gift_date: string;
     description: string;
@@ -22,10 +26,10 @@ export const TicketAPI = {
         const url = `${TicketAPI.BASE_URL}?${query}`;
         return await client.get(url);
     },
-    create: async (props: CreateTicketRequest) => {
+    create: async (props: CreateTicketRequest): Promise<AxiosResponse<UpsertTicketResponse>> => {
         return await client.post(TicketAPI.BASE_URL, { ticket: props }, { headers: { 'content-type': 'application/json' } });
     },
-    update: async (ticketId: number, props: { description: string }): Promise<AxiosResponse<ITicket>> => {
+    update: async (ticketId: number, props: { description: string }): Promise<AxiosResponse<UpsertTicketResponse>> => {
         const url = `${TicketAPI.BASE_URL}${ticketId}/`;
         return await client.put(url, { ticket: props }, { headers: { 'content-type': 'application/json' } });
     },
