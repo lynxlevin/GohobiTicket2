@@ -52,9 +52,10 @@ const useTicketContext = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const updateTicket = useCallback(async (ticketId: number, description: string, willFinalize?: boolean) => {
-        const payload: { description: string; status?: string } = {
+    const updateTicket = useCallback(async (ticketId: number, description: string, isSpecial: boolean, willFinalize?: boolean) => {
+        const payload: { description: string; is_special: boolean; status?: string } = {
             description,
+            is_special: isSpecial,
         };
         if (willFinalize) payload.status = 'unread';
         TicketAPI.update(ticketId, payload).then(({ data: {ticket} }) => {
@@ -78,7 +79,7 @@ const useTicketContext = () => {
         const payload = {
             use_description: useDescription,
         };
-        TicketAPI.use(ticketId, payload).then(({ data: ticket }) => {
+        TicketAPI.use(ticketId, payload).then(({ data: {ticket} }) => {
             ticketContext.setTickets(prev => {
                 const tickets = [...prev];
                 tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;

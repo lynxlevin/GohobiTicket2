@@ -13,7 +13,7 @@ interface EditDialogProps {
 const EditDialog = (props: EditDialogProps) => {
     const { onClose, ticket } = props;
     const [description, setDescription] = useState(ticket.description);
-    const [isSpecial, setIsSpecial] = useState(false);
+    const [isSpecial, setIsSpecial] = useState(ticket.is_special);
     const [isSpecialTicketAvailable, setIsSpecialTicketAvailable] = useState(false);
     const [willFinalize, setWillFinalize] = useState(false);
     const [willDelete, setWillDelete] = useState(false);
@@ -34,7 +34,7 @@ const EditDialog = (props: EditDialogProps) => {
     }, [ticket.gift_date, ticket.user_relation_id]);
 
     const handleSubmit = async () => {
-        await updateTicket(ticket.id, description, willFinalize);
+        await updateTicket(ticket.id, description, isSpecial, willFinalize);
         onClose();
     };
 
