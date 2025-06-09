@@ -1,22 +1,13 @@
 # ごほうびチケット アプリケーション概要
 
-## 動作確認方法
+## About
+This repository used to provide Django backend.
+For Django backend with React frontend, checkout `django_version` tag.
 
-### 環境構築
-1. リポジトリをクローンする
-2. cp .env.example .env
-3. PostgresのDBを作成し、.envに記載
-4. DJANGO_SECRET_KEYの生成
-5. バックエンド起動
-```shell
-cd /gt_back
-poetry install
-poetry shell
-python3 manage.py migrate
-python3 manage.py create_seed_data  # テストユーザーアカウントの作成
-python3 manage.py runserver
-```
-6. フロントエンド起動
+For the newest version, use the React frontend in this repository alongside Actix-Web backend provided in the following repository.
+https://github.com/lynxlevin/gohobi_ticket_actix_backend
+
+## Running frontend
 ```shell
 cd /gt_front2
 npm install
