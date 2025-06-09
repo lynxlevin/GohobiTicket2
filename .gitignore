@@ -1,5 +1,1 @@
 __pycache__/
-.env
-fixtures/
-django.log
-gt_back/static/
