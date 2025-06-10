@@ -12,10 +12,6 @@ export interface IDiary {
     status: DiaryStatus;
 }
 
-interface ListDiaryResponse {
-    diaries: IDiary[];
-}
-
 interface CreateDiaryRequest {
     entry: string;
     date: string;
@@ -32,7 +28,7 @@ interface UpdateDiaryRequest {
 export const DiaryAPI = {
     BASE_URL: '/api/diaries/',
 
-    list: async (userRelationId: number): Promise<AxiosResponse<ListDiaryResponse>> => {
+    list: async (userRelationId: number): Promise<AxiosResponse<IDiary[]>> => {
         const url = `${DiaryAPI.BASE_URL}?user_relation_id=${userRelationId}`;
         return await client.get(url);
     },

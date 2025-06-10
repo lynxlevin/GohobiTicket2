@@ -29,7 +29,7 @@ const Diaries = () => {
     const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId)!;
 
     const getDiaries = useCallback(() => {
-        DiaryAPI.list(userRelationId).then(({ data: { diaries } }) => {
+        DiaryAPI.list(userRelationId).then(({ data: diaries }) => {
             setDiaries(diaries);
         });
     }, [userRelationId]);

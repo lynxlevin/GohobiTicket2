@@ -6,6 +6,10 @@ interface ListTicketResponse {
     tickets: ITicket[];
 }
 
+interface UpsertTicketResponse {
+    ticket: ITicket;
+}
+
 export interface CreateTicketRequest {
     gift_date: string;
     description: string;
@@ -22,18 +26,18 @@ export const TicketAPI = {
         const url = `${TicketAPI.BASE_URL}?${query}`;
         return await client.get(url);
     },
-    create: async (props: CreateTicketRequest) => {
+    create: async (props: CreateTicketRequest): Promise<AxiosResponse<UpsertTicketResponse>> => {
         return await client.post(TicketAPI.BASE_URL, { ticket: props }, { headers: { 'content-type': 'application/json' } });
     },
-    update: async (ticketId: number, props: { description: string }): Promise<AxiosResponse<ITicket>> => {
+    update: async (ticketId: number, props: { description: string; is_special: boolean; status?: string }): Promise<AxiosResponse<UpsertTicketResponse>> => {
         const url = `${TicketAPI.BASE_URL}${ticketId}/`;
-        return await client.patch(url, { ticket: props }, { headers: { 'content-type': 'application/json' } });
+        return await client.put(url, { ticket: props }, { headers: { 'content-type': 'application/json' } });
     },
     delete: async (ticketId: number) => {
         const url = `${TicketAPI.BASE_URL}${ticketId}/`;
         return await client.delete(url);
     },
-    use: async (ticketId: number, props: { use_description: string }): Promise<AxiosResponse<ITicket>> => {
+    use: async (ticketId: number, props: { use_description: string }): Promise<AxiosResponse<UpsertTicketResponse>> => {
         const url = `${TicketAPI.BASE_URL}${ticketId}/use/`;
         return await client.put(url, { ticket: props }, { headers: { 'content-type': 'application/json' } });
     },
