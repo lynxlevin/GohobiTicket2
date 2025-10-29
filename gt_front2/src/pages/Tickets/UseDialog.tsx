@@ -50,7 +50,7 @@ const UseDialog = (props: UseDialogProps) => {
                 <TextField value={useDescription} onChange={event => setUseDescription(event.target.value)} multiline fullWidth minRows={5} />
             </DialogContent>
             <DialogActions sx={{ justifyContent: 'center', py: 2 }}>
-                <Button variant='contained' onClick={handleSubmit}>
+                <Button variant='contained' onClick={handleSubmit} disabled={useDescription.trim().length < 1}>
                     チケットを使う
                 </Button>
                 <Button variant='outlined' onClick={onClose} sx={{ color: 'primary.dark' }}>
