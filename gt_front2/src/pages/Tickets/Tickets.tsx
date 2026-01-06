@@ -26,9 +26,11 @@ const Tickets = () => {
     const { getTickets, getSortedTickets, lastAvailableTicketId } = useTicketContext();
 
     const [searchParams] = useSearchParams();
+    // MYMEMO: Change this to not rely on the query.
     const userRelationId = Number(searchParams.get('user_relation_id'));
     const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId);
 
+    // MYMEMO: Change this to not rely on the query.
     const isGivingRelation = searchParams.get('is_giving') !== null ? true : false;
 
     const ticketImage = useMemo(() => {
@@ -59,6 +61,7 @@ const Tickets = () => {
         return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={`ticket_images/${imageFile}`} alt='mini-ticket' />;
     }, [currentRelation, isGivingRelation]);
 
+    // MYMEMO: put ticketContext.tickets into useTicketContext like for LifeTracker.
     const ticketCount = ticketContext.tickets.length;
     const isSpecialNumber = ticketCount > 0 && (ticketCount % 100 === 0 || ticketCount % 111 === 0 || ticketCount % 1111 === 0);
 
@@ -66,9 +69,11 @@ const Tickets = () => {
         if (userContext.isLoggedIn === true && userRelationId > 0) getTickets(userRelationId, isGivingRelation);
     }, [getTickets, isGivingRelation, userContext.isLoggedIn, userRelationId]);
 
+    // MYMEMO: Change this like for LifeTracker
     if (userContext.isLoggedIn === false || !currentRelation) return <Navigate to='/login' />;
     return (
         <>
+            {/* MYMEMO: AppBar should be same as diaries */}
             <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} isGivingRelation={isGivingRelation} />
             <BottomNav />
             <main>
