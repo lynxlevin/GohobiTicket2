@@ -2,15 +2,16 @@ import BookIcon from '@mui/icons-material/Book';
 import SwitchAccessShortcutIcon from '@mui/icons-material/SwitchAccessShortcut';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import useTicketContext from './hooks/useTicketContext';
 
 const BottomNav = () => {
+    const pathParams = useParams();
     const [searchParams] = useSearchParams();
     const location = useLocation();
-    const userRelationId = Number(searchParams.get('user_relation_id'));
+    const userRelationId = Number(pathParams.userRelationId);
     const getCurrentPage = () => {
-        const type = location.pathname.split('/')[1];
+        const type = location.pathname.split('/')[3];
         if (type === 'diaries') return 'diaries';
 
         const is_giving = searchParams.get('is_giving');
@@ -36,7 +37,7 @@ const BottomNav = () => {
                     onClick={() => {
                         clearTickets();
                         // MYMEMO: useUserAPI in Tickets does not re-run.
-                        navigate(`/tickets?user_relation_id=${userRelationId}&is_giving`);
+                        navigate(`/user_relations/${userRelationId}/tickets?is_giving`);
                         window.scroll({ top: 0 });
                     }}
                 />
@@ -47,7 +48,7 @@ const BottomNav = () => {
                     onClick={() => {
                         clearTickets();
                         // MYMEMO: useUserAPI in Tickets does not re-run.
-                        navigate(`/tickets?user_relation_id=${userRelationId}&is_receiving`);
+                        navigate(`/user_relations/${userRelationId}/tickets?is_receiving`);
                         window.scroll({ top: 0 });
                     }}
                 />
@@ -57,7 +58,7 @@ const BottomNav = () => {
                     icon={<BookIcon />}
                     onClick={() => {
                         clearTickets();
-                        navigate(`/diaries?user_relation_id=${userRelationId}`);
+                        navigate(`/user_relations/${userRelationId}/diaries`);
                     }}
                 />
             </BottomNavigation>

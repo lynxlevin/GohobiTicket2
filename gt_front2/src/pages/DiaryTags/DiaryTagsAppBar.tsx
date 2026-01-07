@@ -17,7 +17,7 @@ const DiaryTagsAppBar = (props: DiaryTagsAppBarProps) => {
                 <IconButton
                     onClick={() => {
                         window.scroll({ top: 0 });
-                        navigate(`/diaries?user_relation_id=${userRelationId}`);
+                        navigate(`/user_relations/${userRelationId}/diaries`);
                     }}
                     sx={{ color: 'rgba(0,0,0,0.67)' }}
                 >

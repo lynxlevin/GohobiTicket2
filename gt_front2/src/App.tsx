@@ -50,9 +50,9 @@ function App() {
                                     <Routes>
                                         <Route path='/' element={<Login />} />
                                         <Route path='/login' element={<Login />} />
-                                        <Route path='/tickets' element={<Tickets />} />
-                                        <Route path='/diaries' element={<Diaries />} />
-                                        <Route path='/diary_tags' element={<DiaryTags />} />
+                                        <Route path='/user_relations/:userRelationId/tickets' element={<Tickets />} />
+                                        <Route path='/user_relations/:userRelationId/diaries' element={<Diaries />} />
+                                        <Route path='/user_relations/:userRelationId/diary_tags' element={<DiaryTags />} />
                                     </Routes>
                                 </LocalizationProvider>
                             </ThemeProvider>

@@ -63,7 +63,7 @@ const DiariesAppBar = (props: DiariesAppBarProps) => {
                                     disableGutters
                                     onClick={() => {
                                         window.scroll({ top: 0 });
-                                        navigate(`/diary_tags?user_relation_id=${userRelationId}`);
+                                        navigate(`/user_relations/${userRelationId}/diary_tags`);
                                     }}
                                 >
                                     <ListItemIcon>

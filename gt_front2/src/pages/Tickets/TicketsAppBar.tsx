@@ -82,7 +82,7 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
                                         <ListItemButton
                                             onClick={() => {
                                                 clearTickets();
-                                                navigate(`/tickets?user_relation_id=${relation.id}&is_receiving`);
+                                                navigate(`/user_relations/${relation.id}/tickets?is_receiving`);
                                                 setTopBarDrawerOpen(false);
                                                 window.scroll({ top: 0 });
                                             }}

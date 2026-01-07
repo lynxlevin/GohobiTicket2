@@ -13,8 +13,8 @@ const Login = () => {
     const { errorMessage, handleLogin, handleEmailInput, handlePasswordInput } = useLoginPage();
 
     if (userContext.isLoggedIn === true && userRelationContext.userRelations.length > 0) {
-        const firstRelation = userRelationContext.userRelations[0].id;
-        return <Navigate to={`/tickets?user_relation_id=${firstRelation}&is_receiving`} />;
+        const firstRelationId = userRelationContext.userRelations[0].id;
+        return <Navigate to={`/user_relations/${firstRelationId}/tickets?is_receiving`} />;
     }
     return (
         <Container component='main' maxWidth='xs'>

@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import BottomNav from '../../BottomNav';
 import { TicketContext } from '../../contexts/ticket-context';
 import { UserContext } from '../../contexts/user-context';
@@ -25,9 +25,10 @@ const Tickets = () => {
     const { handleLogout } = useUserAPI();
     const { getTickets, getSortedTickets, lastAvailableTicketId } = useTicketContext();
 
+    const pathParams = useParams();
     const [searchParams] = useSearchParams();
     // MYMEMO: Change this to not rely on the query.
-    const userRelationId = Number(searchParams.get('user_relation_id'));
+    const userRelationId = Number(pathParams.userRelationId);
     const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId);
 
     // MYMEMO: Change this to not rely on the query.
