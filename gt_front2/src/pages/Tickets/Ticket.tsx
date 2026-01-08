@@ -11,22 +11,22 @@ import EditDialog from './EditDialog';
 import SpecialStamp from './SpecialStamp';
 import UseDetailDialog from './UseDetailDialog';
 import UseDialog from './UseDialog';
+import { RelationKind } from '../../contexts/user-relation-context';
 
 interface TicketProps {
     ticket: ITicket;
-    isGivingRelation: boolean;
+    relationKind: RelationKind;
     lastAvailableTicketRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
-const Ticket = (props: TicketProps) => {
-    const { ticket, isGivingRelation, lastAvailableTicketRef } = props;
+const Ticket = ({ ticket, relationKind, lastAvailableTicketRef }: TicketProps) => {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isUseDialogOpen, setIsUseDialogOpen] = useState(false);
     const [isUseDetailDialogOpen, setIsUseDetailDialogOpen] = useState(false);
     const { readTicket } = useTicketContext();
 
     const ref = useRef(null);
-    const observeVisibility = !isGivingRelation && ticket.status !== 'read';
+    const observeVisibility = relationKind === 'Receiving' && ticket.status !== 'read';
     const { isVisible } = useOnScreen(ref, observeVisibility);
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
     const [prevStatus, setPrevStatus] = useState<TicketStatus | null>(null);
@@ -63,13 +63,13 @@ const Ticket = (props: TicketProps) => {
 
     return (
         <StyledGrid item xs={12} sm={6} md={4} status={ticket.status} ref={lastAvailableTicketRef}>
-            {isGivingRelation && ticket.status === 'draft' && getStatusBadge}
-            {!isGivingRelation && ticket.status !== 'read' && getStatusBadge}
+            {relationKind === 'Giving' && ticket.status === 'draft' && getStatusBadge}
+            {relationKind === 'Receiving' && ticket.status !== 'read' && getStatusBadge}
             <Card className='card'>
                 <CardContent>
                     <div className='relative-div'>
                         <Typography className='ticket-date'>{format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}</Typography>
-                        {isGivingRelation && ticket.use_date === null && (
+                        {relationKind === 'Giving' && ticket.use_date === null && (
                             <IconButton className='edit-button' onClick={() => setIsEditDialogOpen(true)}>
                                 <EditIcon />
                             </IconButton>
@@ -77,7 +77,7 @@ const Ticket = (props: TicketProps) => {
                     </div>
                     <Typography className='ticket-description'>{ticket.description}</Typography>
                 </CardContent>
-                {!isGivingRelation && ticket.use_date === null && (
+                {relationKind === 'Receiving' && ticket.use_date === null && (
                     <CardActions ref={ref} className='use-button'>
                         <Button variant='contained' onClick={() => setIsUseDialogOpen(true)}>
                             このチケットを使う

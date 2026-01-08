@@ -13,6 +13,8 @@ export interface UserRelationContextType {
     setUserRelations: React.Dispatch<React.SetStateAction<IUserRelation[]>>;
 }
 
+export type RelationKind = 'Receiving' | 'Giving';
+
 export const UserRelationContext = createContext({
     userRelations: [],
     setUserRelations: () => {},

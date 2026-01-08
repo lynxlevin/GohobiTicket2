@@ -14,7 +14,7 @@ const Login = () => {
 
     if (userContext.isLoggedIn === true && userRelationContext.userRelations.length > 0) {
         const firstRelationId = userRelationContext.userRelations[0].id;
-        return <Navigate to={`/user_relations/${firstRelationId}/tickets?is_receiving`} />;
+        return <Navigate to={`/user_relations/${firstRelationId}/receiving_tickets`} />;
     }
     return (
         <Container component='main' maxWidth='xs'>

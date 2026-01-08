@@ -50,7 +50,8 @@ function App() {
                                     <Routes>
                                         <Route path='/' element={<Login />} />
                                         <Route path='/login' element={<Login />} />
-                                        <Route path='/user_relations/:userRelationId/tickets' element={<Tickets />} />
+                                        <Route path='/user_relations/:userRelationId/receiving_tickets' element={<Tickets relationKind='Receiving' />} />
+                                        <Route path='/user_relations/:userRelationId/giving_tickets' element={<Tickets relationKind='Giving' />} />
                                         <Route path='/user_relations/:userRelationId/diaries' element={<Diaries />} />
                                         <Route path='/user_relations/:userRelationId/diary_tags' element={<DiaryTags />} />
                                     </Routes>
