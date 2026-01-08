@@ -4,7 +4,6 @@ import { useContext, useState } from 'react';
 import { ITicket } from '../../contexts/ticket-context';
 import useTicketContext from '../../hooks/useTicketContext';
 import { UserRelationContext } from '../../contexts/user-relation-context';
-import { useSearchParams } from 'react-router-dom';
 
 interface UseDialogProps {
     onClose: () => void;
@@ -16,11 +15,9 @@ const UseDialog = (props: UseDialogProps) => {
     const userRelationContext = useContext(UserRelationContext);
     const [useDescription, setUseDescription] = useState('');
     const { consumeTicket } = useTicketContext();
-    const [searchParams] = useSearchParams();
 
     const handleSubmit = async () => {
-        const userRelationId = Number(searchParams.get('user_relation_id'));
-        const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId)!;
+        const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === ticket.user_relation_id)!;
         if (currentRelation.use_slack) {
             await consumeTicket(ticket.id, useDescription);
             onClose();
