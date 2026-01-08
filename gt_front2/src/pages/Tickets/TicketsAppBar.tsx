@@ -7,7 +7,7 @@ import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IUserRelation, UserRelationContext } from '../../contexts/user-relation-context';
+import { IUserRelation, RelationKind, UserRelationContext } from '../../contexts/user-relation-context';
 import useTicketContext from '../../hooks/useTicketContext';
 
 interface HideOnScrollProps {
@@ -30,12 +30,10 @@ const HideOnScroll = (props: HideOnScrollProps) => {
 interface TicketsAppBarProps {
     handleLogout: () => Promise<void>;
     currentRelation: IUserRelation;
-    isGivingRelation: boolean;
+    relationKind: RelationKind;
 }
 
-const TicketsAppBar = (props: TicketsAppBarProps) => {
-    const { handleLogout, currentRelation, isGivingRelation } = props;
-
+const TicketsAppBar = ({ handleLogout, currentRelation, relationKind }: TicketsAppBarProps) => {
     const userRelationContext = useContext(UserRelationContext);
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
@@ -58,7 +56,7 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
                             <ListItem disableGutters>
                                 <ListItemButton
                                     onClick={() => {
-                                        getTickets(currentRelation.id, isGivingRelation).then(() => setTopBarDrawerOpen(false));
+                                        getTickets(currentRelation.id, relationKind).then(() => setTopBarDrawerOpen(false));
                                     }}
                                 >
                                     <ListItemIcon>
@@ -82,7 +80,7 @@ const TicketsAppBar = (props: TicketsAppBarProps) => {
                                         <ListItemButton
                                             onClick={() => {
                                                 clearTickets();
-                                                navigate(`/tickets?user_relation_id=${relation.id}&is_receiving`);
+                                                navigate(`/user_relations/${relation.id}/receiving_tickets`);
                                                 setTopBarDrawerOpen(false);
                                                 window.scroll({ top: 0 });
                                             }}

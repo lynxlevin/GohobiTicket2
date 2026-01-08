@@ -1,12 +1,14 @@
 import { useCallback, useContext, useMemo } from 'react';
 import { CreateTicketRequest, TicketAPI } from '../apis/TicketAPI';
 import { ITicket, TicketContext } from '../contexts/ticket-context';
+import { RelationKind } from '../contexts/user-relation-context';
 
 const useTicketContext = () => {
     const ticketContext = useContext(TicketContext);
 
     const getTickets = useCallback(
-        async (userRelationId: number | string, isGivingRelation: boolean) => {
+        async (userRelationId: number | string, relationKind: RelationKind) => {
+            const isGivingRelation = relationKind === 'Giving';
             TicketAPI.list(Number(userRelationId), isGivingRelation).then(({ data: { tickets } }) => {
                 ticketContext.setTickets(tickets);
             });

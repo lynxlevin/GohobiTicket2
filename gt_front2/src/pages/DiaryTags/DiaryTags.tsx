@@ -2,7 +2,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Dialog, DialogContent, IconButton, List, ListItem, TextField } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { DiaryTagAPI } from '../../apis/DiaryTagAPI';
 import { DiaryTagContext, IDiaryTag } from '../../contexts/diary-tag-context';
 import { UserContext } from '../../contexts/user-context';
@@ -21,8 +21,8 @@ const DiaryTags = () => {
     const [diaryCountForTagToDelete, setDiaryCountForTagToDelete] = useState(0);
     useUserAPI();
 
-    const [searchParams] = useSearchParams();
-    const userRelationId = Number(searchParams.get('user_relation_id'));
+    const pathParams = useParams();
+    const userRelationId = Number(pathParams.userRelationId);
 
     const handleAdd = () => {
         setTags(prev => [...prev, { id: crypto.randomUUID(), text: '', sort_no: prev.length + 1, isNew: true }]);

@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import FiberNewOutlinedIcon from '@mui/icons-material/FiberNewOutlined';
 import { Box, Container, Grid, IconButton, Typography } from '@mui/material';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import BottomNav from '../../BottomNav';
 import { DiaryAPI, IDiary } from '../../apis/DiaryAPI';
 import { DiaryTagAPI } from '../../apis/DiaryTagAPI';
@@ -24,8 +24,8 @@ const Diaries = () => {
     const [diaries, setDiaries] = useState<IDiary[]>([]);
     const { handleLogout } = useUserAPI();
 
-    const [searchParams] = useSearchParams();
-    const userRelationId = Number(searchParams.get('user_relation_id'));
+    const pathParams = useParams();
+    const userRelationId = Number(pathParams.userRelationId);
     const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId)!;
 
     const getDiaries = useCallback(() => {
@@ -38,8 +38,10 @@ const Diaries = () => {
         if (diaries.length === 0) return [];
         return diaries
             .filter(diary => diary.status !== 'read')
-            .sort((a: IDiary, b: IDiary) => { return a.date > b.date ? -1 : 1; });
-    }, [diaries])
+            .sort((a: IDiary, b: IDiary) => {
+                return a.date > b.date ? -1 : 1;
+            });
+    }, [diaries]);
 
     useEffect(() => {
         if (userContext.isLoggedIn !== true || userRelationId < 1) return;
@@ -51,7 +53,7 @@ const Diaries = () => {
     }, [getDiaries, userContext.isLoggedIn, userRelationId]);
 
     if (userContext.isLoggedIn === false) {
-        return <Navigate to='/login' />;
+        return <Navigate to="/login" />;
     }
     if (!currentRelation) return <></>;
     return (
@@ -60,20 +62,20 @@ const Diaries = () => {
             <BottomNav />
             <main>
                 <Box sx={{ pt: 8 }}>
-                    <Container maxWidth='sm'>
-                        <Typography variant='h4' align='center' color='text.primary' sx={{ mt: 3, fontWeight: 600 }} gutterBottom>
+                    <Container maxWidth="sm">
+                        <Typography variant="h4" align="center" color="text.primary" sx={{ mt: 3, fontWeight: 600 }} gutterBottom>
                             {currentRelation.related_username}との日記
                         </Typography>
                         <DiaryForm userRelationId={userRelationId} setDiaries={setDiaries} />
                     </Container>
                 </Box>
-                <Container sx={{ pt: 2, pb: 4 }} maxWidth='md'>
+                <Container sx={{ pt: 2, pb: 4 }} maxWidth="md">
                     <Grid container spacing={4}>
                         {diaries.map(diary => {
                             if (unreadDiaries.length > 0 && diary.id === unreadDiaries[0].id) {
-                                return <Diary key={diary.id} diary={diary} setDiaries={setDiaries} firstUnreadDiaryRef={firstUnreadDiaryRef} />
+                                return <Diary key={diary.id} diary={diary} setDiaries={setDiaries} firstUnreadDiaryRef={firstUnreadDiaryRef} />;
                             }
-                            return <Diary key={diary.id} diary={diary} setDiaries={setDiaries} />
+                            return <Diary key={diary.id} diary={diary} setDiaries={setDiaries} />;
                         })}
                     </Grid>
                 </Container>
@@ -85,10 +87,10 @@ const Diaries = () => {
                             window.scrollTo({ top: moveTo, behavior: 'smooth' });
                         }}
                     >
-                        <FiberNewOutlinedIcon sx={{fontSize: '40px'}} color='primary' />
+                        <FiberNewOutlinedIcon sx={{ fontSize: '40px' }} color="primary" />
                     </ToUnreadDiaryButton>
                 )}
-                <MiniLogo onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src='/apple-touch-icon.png' alt='mini-ticket' />
+                <MiniLogo onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src="/apple-touch-icon.png" alt="mini-ticket" />
             </main>
         </>
     );
@@ -111,7 +113,11 @@ const MiniLogo = styled.img`
     position: fixed;
     bottom: 64px;
     right: 13px;
-    box-shadow: 2px 2px 7px rgba(18, 47, 61, 0.5), -5px -5px 15px rgba(248, 253, 255, 0.9), inset 5px 5px 15px transparent, inset -5px -5px 15px transparent;
+    box-shadow:
+        2px 2px 7px rgba(18, 47, 61, 0.5),
+        -5px -5px 15px rgba(248, 253, 255, 0.9),
+        inset 5px 5px 15px transparent,
+        inset -5px -5px 15px transparent;
     z-index: 100;
     border-radius: 50%;
 

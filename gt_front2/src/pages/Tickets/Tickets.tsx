@@ -2,19 +2,23 @@ import styled from '@emotion/styled';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import BottomNav from '../../BottomNav';
 import { TicketContext } from '../../contexts/ticket-context';
 import { UserContext } from '../../contexts/user-context';
-import { UserRelationContext } from '../../contexts/user-relation-context';
+import { RelationKind, UserRelationContext } from '../../contexts/user-relation-context';
 import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
 import Ticket from './Ticket';
 import TicketForm from './TicketForm';
 import TicketsAppBar from './TicketsAppBar';
 
+interface TicketsProps {
+    relationKind: RelationKind;
+}
+
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
-const Tickets = () => {
+const Tickets = ({relationKind}: TicketsProps) => {
     const userContext = useContext(UserContext);
     const userRelationContext = useContext(UserRelationContext);
     const ticketContext = useContext(TicketContext);
@@ -25,15 +29,13 @@ const Tickets = () => {
     const { handleLogout } = useUserAPI();
     const { getTickets, getSortedTickets, lastAvailableTicketId } = useTicketContext();
 
-    const [searchParams] = useSearchParams();
-    const userRelationId = Number(searchParams.get('user_relation_id'));
+    const pathParams = useParams();
+    const userRelationId = Number(pathParams.userRelationId);
     const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId);
-
-    const isGivingRelation = searchParams.get('is_giving') !== null ? true : false;
+    const imageFile = relationKind === 'Receiving' ? currentRelation?.receiving_ticket_img : currentRelation?.giving_ticket_img;
 
     const ticketImage = useMemo(() => {
-        if (!currentRelation) return '';
-        const imageFile = isGivingRelation ? currentRelation.giving_ticket_img : currentRelation.receiving_ticket_img;
+        if (currentRelation === undefined) return '';
 
         if (imageFile === null)
             return (
@@ -47,35 +49,37 @@ const Tickets = () => {
             );
 
         return <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={`ticket_images/${imageFile}`} />;
-    }, [currentRelation, isGivingRelation]);
+    }, [currentRelation, imageFile]);
 
     const miniTicket = useMemo(() => {
-        if (!currentRelation) return '';
-        const imageFile = isGivingRelation ? currentRelation.giving_ticket_img : currentRelation.receiving_ticket_img;
+        if (currentRelation === undefined) return '';
 
         if (imageFile === null)
             return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src='/apple-touch-icon.png' alt='mini-ticket' />;
 
         return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={`ticket_images/${imageFile}`} alt='mini-ticket' />;
-    }, [currentRelation, isGivingRelation]);
+    }, [currentRelation, imageFile]);
 
+    // MYMEMO: put ticketContext.tickets into useTicketContext like for LifeTracker.
     const ticketCount = ticketContext.tickets.length;
     const isSpecialNumber = ticketCount > 0 && (ticketCount % 100 === 0 || ticketCount % 111 === 0 || ticketCount % 1111 === 0);
 
     useEffect(() => {
-        if (userContext.isLoggedIn === true && userRelationId > 0) getTickets(userRelationId, isGivingRelation);
-    }, [getTickets, isGivingRelation, userContext.isLoggedIn, userRelationId]);
+        if (userContext.isLoggedIn === true && userRelationId > 0) getTickets(userRelationId, relationKind);
+    }, [getTickets, relationKind, userContext.isLoggedIn, userRelationId]);
 
+    // MYMEMO: Change this like for LifeTracker
     if (userContext.isLoggedIn === false || !currentRelation) return <Navigate to='/login' />;
     return (
         <>
-            <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} isGivingRelation={isGivingRelation} />
+            {/* MYMEMO: AppBar should be same as diaries */}
+            <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} relationKind={relationKind} />
             <BottomNav />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth='sm'>
                         <Typography variant='h5' align='center' color='text.primary' sx={{ mt: 3 }} gutterBottom>
-                            {currentRelation.related_username}に{isGivingRelation ? 'あげる' : 'もらった'}
+                            {currentRelation.related_username}に{relationKind === 'Receiving' ? 'もらった' : 'あげる'}
                         </Typography>
                         <Typography variant='h4' align='center' color='text.primary' sx={{ fontWeight: 600 }} gutterBottom>
                             ごほうびチケット
@@ -90,7 +94,7 @@ const Tickets = () => {
                             </Typography>
                         )}
                         {ticketImage}
-                        {isGivingRelation && <TicketForm userRelationId={userRelationId} />}
+                        {relationKind === 'Giving' && <TicketForm userRelationId={userRelationId} />}
                         <FormGroup>
                             <FormControlLabel label='特別チケットのみ表示' control={<Switch onChange={event => setShowOnlySpecial(event.target.checked)} />} />
                             <FormControlLabel label='使用済みチケットのみ表示' control={<Switch onChange={event => setShowOnlyUsed(event.target.checked)} />} />
@@ -106,11 +110,11 @@ const Tickets = () => {
                                         key={ticket.id}
                                         lastAvailableTicketRef={lastAvailableTicketRef}
                                         ticket={ticket}
-                                        isGivingRelation={isGivingRelation}
+                                        relationKind={relationKind}
                                     />
                                 );
                             }
-                            return <Ticket key={ticket.id} ticket={ticket} isGivingRelation={isGivingRelation} />;
+                            return <Ticket key={ticket.id} ticket={ticket} relationKind={relationKind} />;
                         })}
                     </Grid>
                 </Container>
