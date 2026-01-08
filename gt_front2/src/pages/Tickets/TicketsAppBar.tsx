@@ -5,7 +5,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
-import React, { useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IUserRelation, RelationKind, UserRelationContext } from '../../contexts/user-relation-context';
 import useTicketContext from '../../hooks/useTicketContext';

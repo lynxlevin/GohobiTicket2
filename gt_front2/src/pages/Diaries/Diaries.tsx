@@ -58,7 +58,7 @@ const Diaries = () => {
     if (!currentRelation) return <></>;
     return (
         <>
-            <DiariesAppBar handleLogout={handleLogout} userRelationId={userRelationId} refreshDiaries={getDiaries} />
+            <DiariesAppBar handleLogout={handleLogout} currentRelation={currentRelation} refreshDiaries={getDiaries} />
             <BottomNav />
             <main>
                 <Box sx={{ pt: 8 }}>
