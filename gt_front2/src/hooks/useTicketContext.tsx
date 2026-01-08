@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext } from 'react';
 import { CreateTicketRequest, TicketAPI } from '../apis/TicketAPI';
 import { ITicket, TicketContext } from '../contexts/ticket-context';
 import { RelationKind } from '../contexts/user-relation-context';
@@ -6,15 +6,27 @@ import { RelationKind } from '../contexts/user-relation-context';
 const useTicketContext = () => {
     const ticketContext = useContext(TicketContext);
 
-    const getTickets = useCallback(
-        async (userRelationId: number | string, relationKind: RelationKind) => {
-            const isGivingRelation = relationKind === 'Giving';
-            TicketAPI.list(Number(userRelationId), isGivingRelation).then(({ data: { tickets } }) => {
-                ticketContext.setTickets(tickets);
+    const receivingTickets = ticketContext.receivingTickets;
+    const givingTickets = ticketContext.givingTickets;
+
+    const getReceivingTickets = useCallback(
+        async (userRelationId: number | string) => {
+            TicketAPI.list(Number(userRelationId), false).then(({ data: { tickets } }) => {
+                ticketContext.setReceivingTickets(tickets);
             });
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [ticketContext.setTickets],
+        [ticketContext.setReceivingTickets],
+    );
+
+    const getGivingTickets = useCallback(
+        async (userRelationId: number | string) => {
+            TicketAPI.list(Number(userRelationId), true).then(({ data: { tickets } }) => {
+                ticketContext.setGivingTickets(tickets);
+            });
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [ticketContext.setGivingTickets],
     );
 
     const sortConditions = (a: ITicket, b: ITicket) => {
@@ -28,26 +40,29 @@ const useTicketContext = () => {
     };
 
     const getSortedTickets = useCallback(
-        ({ showOnlySpecial, showOnlyUsed }: { showOnlySpecial: boolean; showOnlyUsed: boolean }) => {
-            return ticketContext.tickets
+        ({ showOnlySpecial, showOnlyUsed, relationKind }: { showOnlySpecial: boolean; showOnlyUsed: boolean; relationKind: RelationKind }) => {
+            const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
+            if (tickets === undefined) return [];
+            return tickets
                 .filter(ticket => !showOnlySpecial || ticket.is_special)
                 .filter(ticket => !showOnlyUsed || ticket.use_date !== null)
                 .sort(sortConditions);
         },
-        [ticketContext],
+        [ticketContext.givingTickets, ticketContext.receivingTickets],
     );
 
-    const lastAvailableTicketId = useMemo(() => {
-        const availableTickets = ticketContext.tickets
-            .filter(ticket => ticket.use_date === null)
-            .sort(sortConditions)
-        if (availableTickets.length === 0) return 0;
+    const getLastAvailableTicketId = useCallback((relationKind: RelationKind) => {
+        const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
+        if (tickets === undefined) return undefined;
+        const availableTickets = tickets.filter(ticket => ticket.use_date === null).sort(sortConditions);
+        if (availableTickets.length === 0) return undefined;
         return availableTickets.slice(-1)[0].id;
-    }, [ticketContext.tickets]);
+    }, [ticketContext.givingTickets, ticketContext.receivingTickets]);
 
     const createTicket = useCallback(async (data: CreateTicketRequest) => {
         TicketAPI.create(data).then(({ data: { ticket } }) => {
-            ticketContext.setTickets(prev => {
+            ticketContext.setGivingTickets(prev => {
+                if (prev === undefined) return [ticket];
                 return [ticket, ...prev].sort(sortConditions);
             });
         });
@@ -60,9 +75,9 @@ const useTicketContext = () => {
             is_special: isSpecial,
         };
         if (willFinalize) payload.status = 'unread';
-        TicketAPI.update(ticketId, payload).then(({ data: {ticket} }) => {
-            ticketContext.setTickets(prev => {
-                const tickets = [...prev];
+        TicketAPI.update(ticketId, payload).then(({ data: { ticket } }) => {
+            ticketContext.setGivingTickets(prev => {
+                const tickets = [...prev!];
                 tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;
                 return tickets;
             });
@@ -72,7 +87,7 @@ const useTicketContext = () => {
 
     const deleteTicket = useCallback(async (ticketId: number) => {
         TicketAPI.delete(ticketId).then(_ => {
-            ticketContext.setTickets(prev => prev.filter(ticket => ticket.id !== ticketId));
+            ticketContext.setGivingTickets(prev => prev!.filter(ticket => ticket.id !== ticketId));
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -81,9 +96,9 @@ const useTicketContext = () => {
         const payload = {
             use_description: useDescription,
         };
-        TicketAPI.use(ticketId, payload).then(({ data: {ticket} }) => {
-            ticketContext.setTickets(prev => {
-                const tickets = [...prev];
+        TicketAPI.use(ticketId, payload).then(({ data: { ticket } }) => {
+            ticketContext.setReceivingTickets(prev => {
+                const tickets = [...prev!];
                 tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;
                 return tickets;
             });
@@ -93,30 +108,34 @@ const useTicketContext = () => {
 
     const readTicket = useCallback(async (ticketId: number) => {
         TicketAPI.read(ticketId).then(() => {
-            ticketContext.setTickets(prev => {
+            ticketContext.setReceivingTickets(prev => {
                 // Intentionally not triggering re-render.
-                prev[prev.findIndex(p => p.id === ticketId)].status = 'read';
+                prev![prev!.findIndex(p => p.id === ticketId)].status = 'read';
                 return prev;
             });
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const clearTickets = useCallback(() => {
-        ticketContext.setTickets([]);
+    const clearTicketCache = useCallback(() => {
+        ticketContext.setReceivingTickets(undefined);
+        ticketContext.setGivingTickets(undefined);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return {
-        getTickets,
+        receivingTickets,
+        givingTickets,
+        getReceivingTickets,
+        getGivingTickets,
         getSortedTickets,
-        lastAvailableTicketId,
+        getLastAvailableTicketId,
         createTicket,
         updateTicket,
         deleteTicket,
         consumeTicket,
         readTicket,
-        clearTickets,
+        clearTicketCache,
     };
 };
 

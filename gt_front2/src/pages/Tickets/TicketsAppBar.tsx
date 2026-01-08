@@ -5,10 +5,13 @@ import PersonIcon from '@mui/icons-material/Person';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IUserRelation, RelationKind, UserRelationContext } from '../../contexts/user-relation-context';
+import { IUserRelation, RelationKind } from '../../contexts/user-relation-context';
 import useTicketContext from '../../hooks/useTicketContext';
+import useUserRelationContext from '../../hooks/useUserRelationContext';
+import useDiaryContext from '../../hooks/useDiaryContext';
+import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 
 interface HideOnScrollProps {
     children: React.ReactElement;
@@ -34,12 +37,15 @@ interface TicketsAppBarProps {
 }
 
 const TicketsAppBar = ({ handleLogout, currentRelation, relationKind }: TicketsAppBarProps) => {
-    const userRelationContext = useContext(UserRelationContext);
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
-    const { getTickets, clearTickets } = useTicketContext();
 
-    const otherRelations = userRelationContext.userRelations.filter(
+    const {userRelations} = useUserRelationContext();
+    const { clearTicketCache } = useTicketContext();
+    const { clearDiaryCache } = useDiaryContext();
+    const { clearDiaryTagCache } = useDiaryTagContext();
+
+    const otherRelations = userRelations?.filter(
         (relation, _index, _self) => relation.related_username !== currentRelation.related_username,
     );
 
@@ -56,7 +62,7 @@ const TicketsAppBar = ({ handleLogout, currentRelation, relationKind }: TicketsA
                             <ListItem disableGutters>
                                 <ListItemButton
                                     onClick={() => {
-                                        getTickets(currentRelation.id, relationKind).then(() => setTopBarDrawerOpen(false));
+                                        clearTicketCache();
                                     }}
                                 >
                                     <ListItemIcon>
@@ -75,11 +81,13 @@ const TicketsAppBar = ({ handleLogout, currentRelation, relationKind }: TicketsA
                                 <ExpandMore />
                             </ListItem>
                             <List component='div' disablePadding>
-                                {otherRelations.map(relation => (
+                                {otherRelations !== undefined && otherRelations.map(relation => (
                                     <ListItem key={relation.id}>
                                         <ListItemButton
                                             onClick={() => {
-                                                clearTickets();
+                                                clearTicketCache();
+                                                clearDiaryCache();
+                                                clearDiaryTagCache();
                                                 navigate(`/user_relations/${relation.id}/receiving_tickets`);
                                                 setTopBarDrawerOpen(false);
                                                 window.scroll({ top: 0 });

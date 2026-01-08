@@ -3,21 +3,21 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Badge, Box, Card, CardContent, Chip, Grid, IconButton, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { DiaryAPI, IDiary, DiaryStatus } from '../../apis/DiaryAPI';
 import EditDiaryDialog from './EditDiaryDialog';
 import MoonPhase from './MoonPhase';
 import useOnScreen from '../../hooks/useOnScreen';
+import { DiaryStatus, IDiary } from '../../contexts/diary-context';
+import useDiaryContext from '../../hooks/useDiaryContext';
 
 interface DiaryProps {
     diary: IDiary;
-    setDiaries: React.Dispatch<React.SetStateAction<IDiary[]>>;
     firstUnreadDiaryRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
-const Diary = (props: DiaryProps) => {
-    const { diary, setDiaries, firstUnreadDiaryRef } = props;
-
+const Diary = ({ diary, firstUnreadDiaryRef }: DiaryProps) => {
     const [isEditDiaryDialogOpen, setIsEditDiaryDialogOpen] = useState(false);
+
+    const {readDiary} = useDiaryContext();
 
     const ref = useRef(null);
     const observeVisibility = diary.status !== 'read';
@@ -27,21 +27,12 @@ const Diary = (props: DiaryProps) => {
 
     const date = new Date(diary.date);
 
-    const updateStatusToRead = (id: string) => {
-        setDiaries(prev => {
-            const diaries = [...prev];
-            diaries[diaries.findIndex(p => p.id === id)].status = 'read';
-            return diaries;
-        })
-    };
-
     useEffect(() => {
         if (isVisible) {
             setTimer(
                 setTimeout(async () => {
                     setPrevStatus(diary.status);
-                    await DiaryAPI.markRead(diary.id);
-                    updateStatusToRead(diary.id);
+                    readDiary(diary.id);
                 }, 3000),
             );
         }
@@ -91,7 +82,6 @@ const Diary = (props: DiaryProps) => {
                         setIsEditDiaryDialogOpen(false);
                     }}
                     diary={diary}
-                    setDiaries={setDiaries}
                 />
             )}
         </StyledGrid>

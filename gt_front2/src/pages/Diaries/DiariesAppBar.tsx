@@ -6,9 +6,13 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import SellIcon from '@mui/icons-material/Sell';
 import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IUserRelation, RelationKind, UserRelationContext } from '../../contexts/user-relation-context';
+import { IUserRelation, RelationKind } from '../../contexts/user-relation-context';
+import useUserRelationContext from '../../hooks/useUserRelationContext';
+import useDiaryContext from '../../hooks/useDiaryContext';
+import useDiaryTagContext from '../../hooks/useDiaryTagContext';
+import useTicketContext from '../../hooks/useTicketContext';
 
 interface HideOnScrollProps {
     children: React.ReactElement;
@@ -21,7 +25,7 @@ const HideOnScroll = (props: HideOnScrollProps) => {
     });
 
     return (
-        <Slide appear={false} direction='down' in={!trigger}>
+        <Slide appear={false} direction="down" in={!trigger}>
             {children}
         </Slide>
     );
@@ -30,33 +34,36 @@ const HideOnScroll = (props: HideOnScrollProps) => {
 interface DiariesAppBarProps {
     handleLogout: () => Promise<void>;
     currentRelation: IUserRelation;
-    refreshDiaries: () => void;
     relationKind?: RelationKind;
 }
 
-const DiariesAppBar = ({ handleLogout, currentRelation, refreshDiaries }: DiariesAppBarProps) => {
-    const userRelationContext = useContext(UserRelationContext);
+const DiariesAppBar = ({ handleLogout, currentRelation }: DiariesAppBarProps) => {
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
 
-    const otherRelations = userRelationContext.userRelations.filter(
-        (relation, _index, _self) => relation.related_username !== currentRelation.related_username,
-    );
+    const { userRelations } = useUserRelationContext();
+    const { clearTicketCache } = useTicketContext();
+    const { clearDiaryCache } = useDiaryContext();
+    const { clearDiaryTagCache } = useDiaryTagContext();
+
+    const otherRelations = userRelations?.filter((relation, _index, _self) => relation.related_username !== currentRelation.related_username);
 
     return (
         <HideOnScroll>
-            <AppBar position='fixed' sx={{ bgcolor: 'primary.light' }}>
+            <AppBar position="fixed" sx={{ bgcolor: 'primary.light' }}>
                 <Toolbar>
                     <div style={{ flexGrow: 1 }} />
                     <IconButton onClick={() => setTopBarDrawerOpen(true)}>
                         <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
                     </IconButton>
-                    <Drawer anchor='right' open={topBarDrawerOpen} onClose={() => setTopBarDrawerOpen(false)}>
+                    <Drawer anchor="right" open={topBarDrawerOpen} onClose={() => setTopBarDrawerOpen(false)}>
                         <List>
                             <ListItem disableGutters>
                                 <ListItemButton
                                     onClick={() => {
-                                        refreshDiaries(); setTopBarDrawerOpen(false);
+                                        clearDiaryCache();
+                                        clearDiaryTagCache();
+                                        setTopBarDrawerOpen(false);
                                     }}
                                 >
                                     <ListItemIcon>
@@ -88,25 +95,32 @@ const DiariesAppBar = ({ handleLogout, currentRelation, refreshDiaries }: Diarie
                                 </ListItemButton>
                                 <ExpandMore />
                             </ListItem>
-                            <List component='div' disablePadding>
-                                {otherRelations.map(relation => (
-                                    <ListItem key={relation.id}>
-                                        <ListItemButton
-                                            onClick={() => {
-                                                // MYMEMO: This should be clearDiaries
-                                                refreshDiaries();
-                                                navigate(`/user_relations/${relation.id}/diaries`);
-                                                setTopBarDrawerOpen(false);
-                                                window.scroll({ top: 0 });
-                                            }}
-                                        >
-                                            <ListItemText inset>{relation.related_username}</ListItemText>
-                                        </ListItemButton>
-                                    </ListItem>
-                                ))}
+                            <List component="div" disablePadding>
+                                {otherRelations !== undefined &&
+                                    otherRelations.map(relation => (
+                                        <ListItem key={relation.id}>
+                                            <ListItemButton
+                                                onClick={() => {
+                                                    clearTicketCache();
+                                                    clearDiaryCache();
+                                                    clearDiaryTagCache();
+                                                    navigate(`/user_relations/${relation.id}/diaries`);
+                                                    setTopBarDrawerOpen(false);
+                                                    window.scroll({ top: 0 });
+                                                }}
+                                            >
+                                                <ListItemText inset>{relation.related_username}</ListItemText>
+                                            </ListItemButton>
+                                        </ListItem>
+                                    ))}
                             </List>
                             <ListItem>
-                                <ListItemButton disableGutters onClick={() => {window.location.reload();}}>
+                                <ListItemButton
+                                    disableGutters
+                                    onClick={() => {
+                                        window.location.reload();
+                                    }}
+                                >
                                     <ListItemIcon>
                                         <SecurityUpdateGoodIcon />
                                     </ListItemIcon>

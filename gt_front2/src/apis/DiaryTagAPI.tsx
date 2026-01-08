@@ -16,7 +16,7 @@ interface RequestDiaryTag {
     sort_no: number;
 }
 
-interface BulkUpdateDiaryTagRequest {
+export interface BulkUpdateDiaryTagRequest {
     diary_tags: RequestDiaryTag[];
     user_relation_id: number;
 }

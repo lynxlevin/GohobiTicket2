@@ -4,10 +4,11 @@ import { Box, Button, Dialog, DialogContent, IconButton, List, ListItem, TextFie
 import { useContext, useEffect, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { DiaryTagAPI } from '../../apis/DiaryTagAPI';
-import { DiaryTagContext, IDiaryTag } from '../../contexts/diary-tag-context';
+import { IDiaryTag } from '../../contexts/diary-tag-context';
 import { UserContext } from '../../contexts/user-context';
 import useUserAPI from '../../hooks/useUserAPI';
 import DiaryTagsAppBar from './DiaryTagsAppBar';
+import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 
 interface InnerTag extends IDiaryTag {
     isNew?: boolean;
@@ -15,9 +16,9 @@ interface InnerTag extends IDiaryTag {
 
 const DiaryTags = () => {
     const userContext = useContext(UserContext);
-    const diaryTagContext = useContext(DiaryTagContext);
+    const { diaryTags: tagsMaster, getDiaryTags, bulkUpdateDiaryTags, deleteDiaryTag } = useDiaryTagContext();
 
-    const [tags, setTags] = useState<InnerTag[]>(JSON.parse(JSON.stringify(diaryTagContext.diaryTags)));
+    const [tags, setTags] = useState<InnerTag[]>(tagsMaster ?? []);
     const [diaryCountForTagToDelete, setDiaryCountForTagToDelete] = useState(0);
     useUserAPI();
 
@@ -35,12 +36,8 @@ const DiaryTags = () => {
             setDiaryCountForTagToDelete(diaryCount);
             return;
         }
-
-        await DiaryTagAPI.delete(tag.id);
-        DiaryTagAPI.list(userRelationId).then(({ data: { diary_tags } }) => {
-            diaryTagContext.setDiaryTags(diary_tags);
-            setTags(JSON.parse(JSON.stringify(diary_tags)));
-        });
+        await deleteDiaryTag(tag.id);
+        setTags(prev => prev.filter(diaryTag => diaryTag.id !== tag.id));
     };
 
     const handleSubmit = () => {
@@ -50,27 +47,27 @@ const DiaryTags = () => {
                 if (tag.isNew) return { id: null, text: tag.text, sort_no: tag.sort_no };
                 return tag;
             });
-        DiaryTagAPI.bulkUpdate({ diary_tags: payload, user_relation_id: userRelationId }).then(res => {
-            diaryTagContext.setDiaryTags(res.data.diary_tags);
-            setTags(res.data.diary_tags);
+        bulkUpdateDiaryTags({ diary_tags: payload, user_relation_id: userRelationId }).then(diaryTags => {
+            setTags(diaryTags);
         });
     };
 
     const handleReset = () => {
-        setTags(JSON.parse(JSON.stringify(diaryTagContext.diaryTags)));
+        setTags(tagsMaster ?? []);
     };
 
     useEffect(() => {
         if (userContext.isLoggedIn !== true || userRelationId < 1) return;
-        DiaryTagAPI.list(userRelationId).then(({ data: { diary_tags } }) => {
-            diaryTagContext.setDiaryTags(diary_tags);
-            setTags(JSON.parse(JSON.stringify(diary_tags)));
-        });
+        const getTags = async () => {
+            const diaryTags = await getDiaryTags(userRelationId);
+            setTags(diaryTags);
+        }
+        getTags();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userContext.isLoggedIn, userRelationId]);
 
-    if (userContext.isLoggedIn === false) {
-        return <Navigate to='/login' />;
+    if (userContext.isLoggedIn !== true) {
+        return <Navigate to="/login" />;
     }
     return (
         <>
@@ -121,10 +118,10 @@ const DiaryTags = () => {
                     </List>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-                    <Button variant='contained' onClick={handleSubmit}>
+                    <Button variant="contained" onClick={handleSubmit}>
                         保存する
                     </Button>
-                    <Button variant='outlined' onClick={handleReset} sx={{ color: 'primary.dark', ml: 1 }}>
+                    <Button variant="outlined" onClick={handleReset} sx={{ color: 'primary.dark', ml: 1 }}>
                         リセット
                     </Button>
                 </Box>

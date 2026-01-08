@@ -2,20 +2,17 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import ja from 'date-fns/locale/ja';
-import { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
-import { IDiaryTag } from './contexts/diary-tag-context';
-import { DiaryTagContext } from './contexts/diary-tag-context';
-import { ITicket } from './contexts/ticket-context';
-import { TicketContext } from './contexts/ticket-context';
-import { UserContext } from './contexts/user-context';
-import { UserRelationContext } from './contexts/user-relation-context';
-import { IUserRelation } from './contexts/user-relation-context';
+import { DiaryTagProvider } from './contexts/diary-tag-context';
+import { TicketProvider } from './contexts/ticket-context';
+import { UserProvider } from './contexts/user-context';
+import { UserRelationProvider } from './contexts/user-relation-context';
 import Diaries from './pages/Diaries';
 import DiaryTags from './pages/DiaryTags';
 import Login from './pages/Login';
 import Tickets from './pages/Tickets';
+import { DiaryProvider } from './contexts/diary-context';
 
 const theme = createTheme({
     palette: {
@@ -30,37 +27,34 @@ const theme = createTheme({
 });
 
 function App() {
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-    const [userRelations, setUserRelations] = useState<IUserRelation[]>([]);
-    const [tickets, setTickets] = useState<ITicket[]>([]);
-    const [diaryTags, setDiaryTags] = useState<IDiaryTag[] | null>(null);
-
     return (
-        <div className='App'>
-            <UserContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
-                <UserRelationContext.Provider value={{ userRelations, setUserRelations }}>
-                    <TicketContext.Provider value={{ tickets, setTickets }}>
-                        <DiaryTagContext.Provider value={{ diaryTags, setDiaryTags }}>
-                            <ThemeProvider theme={theme}>
-                                <LocalizationProvider
-                                    dateAdapter={AdapterDateFns}
-                                    adapterLocale={ja}
-                                    dateFormats={{ keyboardDate: 'yyyy/MM/dd (E)', normalDate: 'yyyy/MM/dd (E)' }}
-                                >
-                                    <Routes>
-                                        <Route path='/' element={<Login />} />
-                                        <Route path='/login' element={<Login />} />
-                                        <Route path='/user_relations/:userRelationId/receiving_tickets' element={<Tickets relationKind='Receiving' />} />
-                                        <Route path='/user_relations/:userRelationId/giving_tickets' element={<Tickets relationKind='Giving' />} />
-                                        <Route path='/user_relations/:userRelationId/diaries' element={<Diaries />} />
-                                        <Route path='/user_relations/:userRelationId/diary_tags' element={<DiaryTags />} />
-                                    </Routes>
-                                </LocalizationProvider>
-                            </ThemeProvider>
-                        </DiaryTagContext.Provider>
-                    </TicketContext.Provider>
-                </UserRelationContext.Provider>
-            </UserContext.Provider>
+        <div className="App">
+            <UserProvider>
+                <UserRelationProvider>
+                    <TicketProvider>
+                        <DiaryTagProvider>
+                            <DiaryProvider>
+                                <ThemeProvider theme={theme}>
+                                    <LocalizationProvider
+                                        dateAdapter={AdapterDateFns}
+                                        adapterLocale={ja}
+                                        dateFormats={{ keyboardDate: 'yyyy/MM/dd (E)', normalDate: 'yyyy/MM/dd (E)' }}
+                                    >
+                                        <Routes>
+                                            <Route path="/" element={<Login />} />
+                                            <Route path="/login" element={<Login />} />
+                                            <Route path="/user_relations/:userRelationId/receiving_tickets" element={<Tickets relationKind="Receiving" />} />
+                                            <Route path="/user_relations/:userRelationId/giving_tickets" element={<Tickets relationKind="Giving" />} />
+                                            <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
+                                            <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />
+                                        </Routes>
+                                    </LocalizationProvider>
+                                </ThemeProvider>
+                            </DiaryProvider>
+                        </DiaryTagProvider>
+                    </TicketProvider>
+                </UserRelationProvider>
+            </UserProvider>
         </div>
     );
 }

@@ -1,25 +1,15 @@
 import { AxiosResponse } from 'axios';
-import { IDiaryTag } from '../contexts/diary-tag-context';
 import client from './axios';
+import { IDiary } from '../contexts/diary-context';
 
-export type DiaryStatus = "unread" | "edited" | "read"
-
-export interface IDiary {
-    id: string;
-    entry: string;
-    date: string;
-    tags: IDiaryTag[];
-    status: DiaryStatus;
-}
-
-interface CreateDiaryRequest {
+export interface CreateDiaryRequest {
     entry: string;
     date: string;
     tag_ids: string[];
     user_relation_id: number;
 }
 
-interface UpdateDiaryRequest {
+export interface UpdateDiaryRequest {
     entry: string;
     date: string;
     tag_ids: string[];

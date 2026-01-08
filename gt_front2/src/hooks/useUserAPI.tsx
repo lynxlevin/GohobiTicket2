@@ -15,20 +15,23 @@ const useUserAPI = () => {
     };
 
     useEffect(() => {
+        // FIXME: This does not execute when moving between receiving_tickets ⇄ giving_tickets
         const checkSession = async () => {
-            UserAPI.session().then(_ => {
-                userContext.setIsLoggedIn(true);
-                if (userRelationContext.userRelations.length === 0) {
-                    UserRelationAPI.list().then(res => {
-                        userRelationContext.setUserRelations(res.data.user_relations);
-                    });
-                }
-            }).catch(e => {
-                if (e.response.status_code === 401) {
-                    userContext.setIsLoggedIn(false);
-                    userRelationContext.setUserRelations([]);
-                }
-            });
+            UserAPI.session()
+                .then(_ => {
+                    userContext.setIsLoggedIn(true);
+                    if (userRelationContext.userRelations === undefined) {
+                        UserRelationAPI.list().then(res => {
+                            userRelationContext.setUserRelations(res.data.user_relations);
+                        });
+                    }
+                })
+                .catch(e => {
+                    if (e.response.status_code === 401) {
+                        userContext.setIsLoggedIn(false);
+                        userRelationContext.setUserRelations([]);
+                    }
+                });
         };
         void checkSession();
         // eslint-disable-next-line react-hooks/exhaustive-deps

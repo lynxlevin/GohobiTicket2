@@ -5,20 +5,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { CreateTicketRequest } from '../../apis/TicketAPI';
 import { UserRelationAPI } from '../../apis/UserRelationAPI';
 import useTicketContext from '../../hooks/useTicketContext';
+import { useParams } from 'react-router-dom';
 
-interface TicketFormProps {
-    userRelationId: number;
-}
-
-const TicketForm = (props: TicketFormProps) => {
-    const { userRelationId } = props;
-
+const TicketForm = () => {
     const [giftDate, setGiftDate] = useState<Date>(new Date());
     const [description, setDescription] = useState('');
     const [isSpecial, setIsSpecial] = useState(false);
     const [isSpecialTicketAvailable, setIsSpecialTicketAvailable] = useState(false);
     const [isDraft, setIsDraft] = useState(false);
     const { createTicket } = useTicketContext();
+    const pathParams = useParams();
+    const userRelationId = Number(pathParams.userRelationId);
 
     const handleSubmit = async () => {
         const data: CreateTicketRequest = {

@@ -4,7 +4,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Badge, Button, Card, CardActions, CardContent, Grid, IconButton, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { ITicket, TicketStatus } from '../../contexts/ticket-context';
 import useOnScreen from '../../hooks/useOnScreen';
 import useTicketContext from '../../hooks/useTicketContext';
 import EditDialog from './EditDialog';
@@ -12,6 +11,7 @@ import SpecialStamp from './SpecialStamp';
 import UseDetailDialog from './UseDetailDialog';
 import UseDialog from './UseDialog';
 import { RelationKind } from '../../contexts/user-relation-context';
+import { ITicket, TicketStatus } from '../../contexts/ticket-context';
 
 interface TicketProps {
     ticket: ITicket;
@@ -32,6 +32,7 @@ const Ticket = ({ ticket, relationKind, lastAvailableTicketRef }: TicketProps) =
     const [prevStatus, setPrevStatus] = useState<TicketStatus | null>(null);
 
     useEffect(() => {
+        if (relationKind === 'Giving') return;
         if (isVisible) {
             setTimer(
                 setTimeout(async () => {
@@ -44,7 +45,7 @@ const Ticket = ({ ticket, relationKind, lastAvailableTicketRef }: TicketProps) =
             clearTimeout(timer);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isVisible]);
+    }, [isVisible, relationKind]);
 
     const getStatusBadge = useMemo(() => {
         const status = prevStatus ? prevStatus : ticket.status;
