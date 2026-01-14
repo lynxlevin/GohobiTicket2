@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import BottomNav from '../../BottomNav';
 import { UserContext } from '../../contexts/user-context';
 import { RelationKind } from '../../contexts/user-relation-context';
@@ -12,6 +12,7 @@ import Ticket from './Ticket';
 import TicketForm from './TicketForm';
 import TicketsAppBar from './TicketsAppBar';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
+import usePagePath from '../../hooks/usePagePath';
 
 interface TicketsProps {
     relationKind: RelationKind;
@@ -27,9 +28,8 @@ const Tickets = ({ relationKind }: TicketsProps) => {
     const { handleLogout } = useUserAPI();
     const { userRelations } = useUserRelationContext();
     const { givingTickets, receivingTickets, getReceivingTickets, getGivingTickets, getSortedTickets, getLastAvailableTicketId } = useTicketContext();
+    const { userRelationId } = usePagePath();
 
-    const pathParams = useParams();
-    const userRelationId = Number(pathParams.userRelationId);
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
     const imageFile = relationKind === 'Receiving' ? currentRelation?.receiving_ticket_img : currentRelation?.giving_ticket_img;
 
@@ -77,7 +77,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
         }
     }, [getGivingTickets, getReceivingTickets, givingTickets, receivingTickets, relationKind, userContext.isLoggedIn, userRelationId]);
 
-    // MYMEMO: Change this like for LifeTracker
+    // MYMEMO: Change this like for LifeTracker. In LT, it only jumps to login page when an API call fails
     if (userContext.isLoggedIn !== true || !currentRelation) return <Navigate to="/login" />;
     return (
         <>

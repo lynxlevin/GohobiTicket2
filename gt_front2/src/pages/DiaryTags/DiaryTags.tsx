@@ -2,13 +2,14 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Dialog, DialogContent, IconButton, List, ListItem, TextField } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { DiaryTagAPI } from '../../apis/DiaryTagAPI';
 import { IDiaryTag } from '../../contexts/diary-tag-context';
 import { UserContext } from '../../contexts/user-context';
 import useUserAPI from '../../hooks/useUserAPI';
 import DiaryTagsAppBar from './DiaryTagsAppBar';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
+import usePagePath from '../../hooks/usePagePath';
 
 interface InnerTag extends IDiaryTag {
     isNew?: boolean;
@@ -17,13 +18,11 @@ interface InnerTag extends IDiaryTag {
 const DiaryTags = () => {
     const userContext = useContext(UserContext);
     const { diaryTags: tagsMaster, getDiaryTags, bulkUpdateDiaryTags, deleteDiaryTag } = useDiaryTagContext();
+    const { userRelationId } = usePagePath();
+    useUserAPI();
 
     const [tags, setTags] = useState<InnerTag[]>(tagsMaster ?? []);
     const [diaryCountForTagToDelete, setDiaryCountForTagToDelete] = useState(0);
-    useUserAPI();
-
-    const pathParams = useParams();
-    const userRelationId = Number(pathParams.userRelationId);
 
     const handleAdd = () => {
         setTags(prev => [...prev, { id: crypto.randomUUID(), text: '', sort_no: prev.length + 1, isNew: true }]);
@@ -61,7 +60,7 @@ const DiaryTags = () => {
         const getTags = async () => {
             const diaryTags = await getDiaryTags(userRelationId);
             setTags(diaryTags);
-        }
+        };
         getTags();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userContext.isLoggedIn, userRelationId]);

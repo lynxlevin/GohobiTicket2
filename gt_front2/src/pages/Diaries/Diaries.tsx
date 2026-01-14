@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import FiberNewOutlinedIcon from '@mui/icons-material/FiberNewOutlined';
 import { Box, Container, Grid, IconButton, Typography } from '@mui/material';
 import { useContext, useEffect, useRef } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import BottomNav from '../../BottomNav';
 import useUserAPI from '../../hooks/useUserAPI';
 import DiariesAppBar from './DiariesAppBar';
@@ -12,6 +12,7 @@ import useDiaryContext from '../../hooks/useDiaryContext';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import { UserContext } from '../../contexts/user-context';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
+import usePagePath from '../../hooks/usePagePath';
 
 const Diaries = () => {
     const firstUnreadDiaryRef = useRef<HTMLDivElement | null>(null);
@@ -21,13 +22,13 @@ const Diaries = () => {
     const { diaries, unreadDiaries, getDiaries } = useDiaryContext();
     const { diaryTags, getDiaryTags } = useDiaryTagContext();
     const { handleLogout } = useUserAPI();
+    const { userRelationId } = usePagePath();
 
-    const pathParams = useParams();
-    const userRelationId = Number(pathParams.userRelationId);
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
 
     useEffect(() => {
         if (userContext.isLoggedIn !== true || userRelationId < 1) return;
+        // MYMEMO: Is access on wrong userRelationId validated on server?
         if (diaries === undefined) getDiaries(userRelationId);
         if (diaryTags === undefined) getDiaryTags(userRelationId);
     }, [diaries, diaryTags, getDiaries, getDiaryTags, userContext.isLoggedIn, userRelationId]);

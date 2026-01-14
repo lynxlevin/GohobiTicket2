@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { CreateTicketRequest } from '../../apis/TicketAPI';
 import { UserRelationAPI } from '../../apis/UserRelationAPI';
 import useTicketContext from '../../hooks/useTicketContext';
-import { useParams } from 'react-router-dom';
+import usePagePath from '../../hooks/usePagePath';
 
 const TicketForm = () => {
     const [giftDate, setGiftDate] = useState<Date>(new Date());
@@ -13,9 +13,9 @@ const TicketForm = () => {
     const [isSpecial, setIsSpecial] = useState(false);
     const [isSpecialTicketAvailable, setIsSpecialTicketAvailable] = useState(false);
     const [isDraft, setIsDraft] = useState(false);
+
     const { createTicket } = useTicketContext();
-    const pathParams = useParams();
-    const userRelationId = Number(pathParams.userRelationId);
+    const { userRelationId } = usePagePath();
 
     const handleSubmit = async () => {
         const data: CreateTicketRequest = {
@@ -61,16 +61,16 @@ const TicketForm = () => {
     return (
         <>
             <FormGroup sx={{ mt: 3 }}>
-                <MobileDatePicker label='あげる日' value={giftDate} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{ mb: 1 }} />
-                <TextField value={description} onChange={event => setDescription(event.target.value)} label='内容' multiline minRows={5} />
+                <MobileDatePicker label="あげる日" value={giftDate} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{ mb: 1 }} />
+                <TextField value={description} onChange={event => setDescription(event.target.value)} label="内容" multiline minRows={5} />
                 <FormControlLabel
                     disabled={!isSpecialTicketAvailable}
-                    label='特別チケットにする'
+                    label="特別チケットにする"
                     control={<Checkbox checked={isSpecial} onChange={event => setIsSpecial(event.target.checked)} />}
                     sx={{ mr: 'auto' }}
                 />
                 <FormControlLabel
-                    label='下書きにする'
+                    label="下書きにする"
                     control={<Checkbox checked={isDraft} onChange={event => setIsDraft(event.target.checked)} />}
                     sx={{ mr: 'auto' }}
                 />
