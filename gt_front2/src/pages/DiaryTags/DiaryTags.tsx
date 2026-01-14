@@ -1,13 +1,13 @@
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, Dialog, DialogContent, IconButton, List, ListItem, TextField } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { AppBar, Box, Button, Dialog, DialogContent, IconButton, List, ListItem, TextField, Toolbar } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { DiaryTagAPI } from '../../apis/DiaryTagAPI';
 import { IDiaryTag } from '../../contexts/diary-tag-context';
 import { UserContext } from '../../contexts/user-context';
 import useUserAPI from '../../hooks/useUserAPI';
-import DiaryTagsAppBar from './DiaryTagsAppBar';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 import usePagePath from '../../hooks/usePagePath';
 
@@ -20,6 +20,7 @@ const DiaryTags = () => {
     const { diaryTags: tagsMaster, getDiaryTags, bulkUpdateDiaryTags, deleteDiaryTag } = useDiaryTagContext();
     const { userRelationId } = usePagePath();
     useUserAPI();
+    const navigate = useNavigate();
 
     const [tags, setTags] = useState<InnerTag[]>(tagsMaster ?? []);
     const [diaryCountForTagToDelete, setDiaryCountForTagToDelete] = useState(0);
@@ -70,7 +71,19 @@ const DiaryTags = () => {
     }
     return (
         <>
-            <DiaryTagsAppBar userRelationId={userRelationId} />
+            <AppBar position="fixed" sx={{ bgcolor: 'primary.light' }}>
+                <Toolbar>
+                    <IconButton
+                        onClick={() => {
+                            window.scroll({ top: 0 });
+                            navigate(`/user_relations/${userRelationId}/diaries`);
+                        }}
+                        sx={{ color: 'rgba(0,0,0,0.67)' }}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+                </Toolbar>
+            </AppBar>
             <main>
                 <Box
                     sx={{
