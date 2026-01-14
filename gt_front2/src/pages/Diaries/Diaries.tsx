@@ -5,7 +5,6 @@ import { useContext, useEffect, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import BottomNav from '../../BottomNav';
 import useUserAPI from '../../hooks/useUserAPI';
-import DiariesAppBar from './DiariesAppBar';
 import Diary from './Diary';
 import DiaryForm from './DiaryForm';
 import useDiaryContext from '../../hooks/useDiaryContext';
@@ -13,6 +12,7 @@ import useUserRelationContext from '../../hooks/useUserRelationContext';
 import { UserContext } from '../../contexts/user-context';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 import usePagePath from '../../hooks/usePagePath';
+import CommonAppBar from '../../components/CommonAppBar';
 
 const Diaries = () => {
     const firstUnreadDiaryRef = useRef<HTMLDivElement | null>(null);
@@ -39,7 +39,7 @@ const Diaries = () => {
     if (!currentRelation) return <></>;
     return (
         <>
-            <DiariesAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
+            <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
             <BottomNav />
             <main>
                 <Box sx={{ pt: 8 }}>

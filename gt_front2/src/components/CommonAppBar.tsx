@@ -8,11 +8,12 @@ import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IUserRelation, RelationKind } from '../../contexts/user-relation-context';
-import useUserRelationContext from '../../hooks/useUserRelationContext';
-import useDiaryContext from '../../hooks/useDiaryContext';
-import useDiaryTagContext from '../../hooks/useDiaryTagContext';
-import useTicketContext from '../../hooks/useTicketContext';
+import { IUserRelation, RelationKind } from '../contexts/user-relation-context';
+import useTicketContext from '../hooks/useTicketContext';
+import useUserRelationContext from '../hooks/useUserRelationContext';
+import useDiaryContext from '../hooks/useDiaryContext';
+import useDiaryTagContext from '../hooks/useDiaryTagContext';
+import usePagePath from '../hooks/usePagePath';
 
 interface HideOnScrollProps {
     children: React.ReactElement;
@@ -31,13 +32,13 @@ const HideOnScroll = (props: HideOnScrollProps) => {
     );
 };
 
-interface DiariesAppBarProps {
+interface CommonAppBarProps {
     handleLogout: () => Promise<void>;
     currentRelation: IUserRelation;
     relationKind?: RelationKind;
 }
 
-const DiariesAppBar = ({ handleLogout, currentRelation }: DiariesAppBarProps) => {
+const CommonAppBar = ({ handleLogout, currentRelation, relationKind = 'Receiving' }: CommonAppBarProps) => {
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -45,8 +46,15 @@ const DiariesAppBar = ({ handleLogout, currentRelation }: DiariesAppBarProps) =>
     const { clearTicketCache } = useTicketContext();
     const { clearDiaryCache } = useDiaryContext();
     const { clearDiaryTagCache } = useDiaryTagContext();
+    const { pagePath } = usePagePath();
 
     const otherRelations = userRelations?.filter((relation, _index, _self) => relation.related_username !== currentRelation.related_username);
+
+    const clearCache = () => {
+        clearTicketCache();
+        clearDiaryCache();
+        clearDiaryTagCache();
+    };
 
     return (
         <HideOnScroll>
@@ -61,8 +69,7 @@ const DiariesAppBar = ({ handleLogout, currentRelation }: DiariesAppBarProps) =>
                             <ListItem disableGutters>
                                 <ListItemButton
                                     onClick={() => {
-                                        clearDiaryCache();
-                                        clearDiaryTagCache();
+                                        clearCache();
                                         setTopBarDrawerOpen(false);
                                     }}
                                 >
@@ -72,20 +79,22 @@ const DiariesAppBar = ({ handleLogout, currentRelation }: DiariesAppBarProps) =>
                                     <ListItemText>更新</ListItemText>
                                 </ListItemButton>
                             </ListItem>
-                            <ListItem>
-                                <ListItemButton
-                                    disableGutters
-                                    onClick={() => {
-                                        window.scroll({ top: 0 });
-                                        navigate(`/user_relations/${currentRelation.id}/diary_tags`);
-                                    }}
-                                >
-                                    <ListItemIcon>
-                                        <SellIcon />
-                                    </ListItemIcon>
-                                    <ListItemText>タグ編集</ListItemText>
-                                </ListItemButton>
-                            </ListItem>
+                            {pagePath === 'diaries' && (
+                                <ListItem>
+                                    <ListItemButton
+                                        disableGutters
+                                        onClick={() => {
+                                            window.scroll({ top: 0 });
+                                            navigate(`/user_relations/${currentRelation.id}/diary_tags`);
+                                        }}
+                                    >
+                                        <ListItemIcon>
+                                            <SellIcon />
+                                        </ListItemIcon>
+                                        <ListItemText>タグ編集</ListItemText>
+                                    </ListItemButton>
+                                </ListItem>
+                            )}
                             <ListItem>
                                 <ListItemButton disableGutters>
                                     <ListItemIcon>
@@ -101,10 +110,8 @@ const DiariesAppBar = ({ handleLogout, currentRelation }: DiariesAppBarProps) =>
                                         <ListItem key={relation.id}>
                                             <ListItemButton
                                                 onClick={() => {
-                                                    clearTicketCache();
-                                                    clearDiaryCache();
-                                                    clearDiaryTagCache();
-                                                    navigate(`/user_relations/${relation.id}/diaries`);
+                                                    clearCache();
+                                                    navigate(`/user_relations/${relation.id}/receiving_tickets`);
                                                     setTopBarDrawerOpen(false);
                                                     window.scroll({ top: 0 });
                                                 }}
@@ -142,4 +149,4 @@ const DiariesAppBar = ({ handleLogout, currentRelation }: DiariesAppBarProps) =>
         </HideOnScroll>
     );
 };
-export default DiariesAppBar;
+export default CommonAppBar;

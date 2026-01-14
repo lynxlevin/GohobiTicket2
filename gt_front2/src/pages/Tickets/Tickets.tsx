@@ -10,9 +10,9 @@ import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
 import Ticket from './Ticket';
 import TicketForm from './TicketForm';
-import TicketsAppBar from './TicketsAppBar';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
+import CommonAppBar from '../../components/CommonAppBar';
 
 interface TicketsProps {
     relationKind: RelationKind;
@@ -81,8 +81,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
     if (userContext.isLoggedIn !== true || !currentRelation) return <Navigate to="/login" />;
     return (
         <>
-            {/* MYMEMO: AppBar should be same as diaries */}
-            <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} relationKind={relationKind} />
+            <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} relationKind={relationKind} />
             <BottomNav />
             <main>
                 <Box sx={{ pt: 8 }}>
