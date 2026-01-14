@@ -22,16 +22,16 @@ export const TicketAPI = {
     BASE_URL: '/api/tickets/',
 
     list: async (userRelationId: number, isGiving: boolean): Promise<AxiosResponse<ListTicketResponse>> => {
-        const query = isGiving ? `user_relation_id=${userRelationId}&is_giving` : `user_relation_id=${userRelationId}&is_receiving`
+        const query = isGiving ? `user_relation_id=${userRelationId}&is_giving` : `user_relation_id=${userRelationId}&is_receiving`;
         const url = `${TicketAPI.BASE_URL}?${query}`;
         return await client.get(url);
     },
     create: async (props: CreateTicketRequest): Promise<AxiosResponse<UpsertTicketResponse>> => {
-        return await client.post(TicketAPI.BASE_URL, { ticket: props }, { headers: { 'content-type': 'application/json' } });
+        return await client.post(TicketAPI.BASE_URL, { ticket: props });
     },
     update: async (ticketId: number, props: { description: string; is_special: boolean; status?: string }): Promise<AxiosResponse<UpsertTicketResponse>> => {
         const url = `${TicketAPI.BASE_URL}${ticketId}/`;
-        return await client.put(url, { ticket: props }, { headers: { 'content-type': 'application/json' } });
+        return await client.put(url, { ticket: props });
     },
     delete: async (ticketId: number) => {
         const url = `${TicketAPI.BASE_URL}${ticketId}/`;
@@ -39,10 +39,10 @@ export const TicketAPI = {
     },
     use: async (ticketId: number, props: { use_description: string }): Promise<AxiosResponse<UpsertTicketResponse>> => {
         const url = `${TicketAPI.BASE_URL}${ticketId}/use/`;
-        return await client.put(url, { ticket: props }, { headers: { 'content-type': 'application/json' } });
+        return await client.put(url, { ticket: props });
     },
     read: async (ticketId: number) => {
         const url = `${TicketAPI.BASE_URL}${ticketId}/read/`;
-        return await client.put(url, {}, { headers: { 'content-type': 'application/json' } });
+        return await client.put(url, {});
     },
 };

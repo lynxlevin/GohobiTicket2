@@ -38,7 +38,7 @@ export const DiaryTagAPI = {
     },
     bulkUpdate: async (props: BulkUpdateDiaryTagRequest): Promise<AxiosResponse<BulkUpdateDiaryTagResponse>> => {
         const url = `${DiaryTagAPI.BASE_URL}bulk_update/`;
-        return await client.post(url, props, { headers: { 'content-type': 'application/json' } });
+        return await client.post(url, props);
     },
     delete: async (tagId: string) => {
         const url = `${DiaryTagAPI.BASE_URL}${tagId}/`;
