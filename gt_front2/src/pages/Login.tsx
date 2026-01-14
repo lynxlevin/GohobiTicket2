@@ -1,19 +1,31 @@
 import { Alert, Box, Button, Container, CssBaseline, TextField, Typography } from '@mui/material';
-import { useContext } from 'react';
+import { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { UserContext } from '../contexts/user-context';
 import useLoginPage from '../hooks/useLoginPage';
 import useUserAPI from '../hooks/useUserAPI';
 import useUserRelationContext from '../hooks/useUserRelationContext';
+import { UserAPI } from '../apis/UserAPI';
 
 const Login = () => {
     useUserAPI();
-    const userContext = useContext(UserContext);
-    const { errorMessage, handleLogin, handleEmailInput, handlePasswordInput } = useLoginPage();
+    const { errorMessage, handleLogin, handleEmailInput, handlePasswordInput, isLoggedIn, setIsLoggedIn } = useLoginPage();
+    const { userRelations, getUserRelations } = useUserRelationContext();
+    const { clearAllCache } = useUserAPI();
 
-    const { userRelations } = useUserRelationContext();
+    useEffect(() => {
+        if (isLoggedIn !== undefined) return;
+        UserAPI.session()
+            .then(_ => {
+                setIsLoggedIn(true);
+                clearAllCache();
+                getUserRelations();
+            })
+            .catch(_ => {
+                setIsLoggedIn(false);
+            });
+    }, [clearAllCache, getUserRelations, isLoggedIn, setIsLoggedIn, userRelations]);
 
-    if (userContext.isLoggedIn === true && userRelations !== undefined) {
+    if (isLoggedIn === true && userRelations !== undefined) {
         const firstRelationId = userRelations[0].id;
         return <Navigate to={`/user_relations/${firstRelationId}/receiving_tickets`} />;
     }

@@ -2,11 +2,10 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { AppBar, Box, Button, Dialog, DialogContent, IconButton, List, ListItem, TextField, Toolbar } from '@mui/material';
-import { useContext, useEffect, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DiaryTagAPI } from '../../apis/DiaryTagAPI';
 import { IDiaryTag } from '../../contexts/diary-tag-context';
-import { UserContext } from '../../contexts/user-context';
 import useUserAPI from '../../hooks/useUserAPI';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 import usePagePath from '../../hooks/usePagePath';
@@ -16,7 +15,6 @@ interface InnerTag extends IDiaryTag {
 }
 
 const DiaryTags = () => {
-    const userContext = useContext(UserContext);
     const { diaryTags: tagsMaster, getDiaryTags, bulkUpdateDiaryTags, deleteDiaryTag } = useDiaryTagContext();
     const { userRelationId } = usePagePath();
     useUserAPI();
@@ -57,18 +55,14 @@ const DiaryTags = () => {
     };
 
     useEffect(() => {
-        if (userContext.isLoggedIn !== true || userRelationId < 1) return;
+        if (userRelationId < 1) return;
         const getTags = async () => {
             const diaryTags = await getDiaryTags(userRelationId);
             setTags(diaryTags);
         };
         getTags();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [userContext.isLoggedIn, userRelationId]);
-
-    if (userContext.isLoggedIn !== true) {
-        return <Navigate to="/login" />;
-    }
+    }, [userRelationId]);
     return (
         <>
             <AppBar position="fixed" sx={{ bgcolor: 'primary.light' }}>

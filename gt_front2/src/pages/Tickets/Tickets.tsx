@@ -1,10 +1,8 @@
 import styled from '@emotion/styled';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import BottomNav from '../../BottomNav';
-import { UserContext } from '../../contexts/user-context';
 import { RelationKind } from '../../contexts/user-relation-context';
 import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
@@ -13,6 +11,7 @@ import TicketForm from './TicketForm';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
+import { Navigate } from 'react-router-dom';
 
 interface TicketsProps {
     relationKind: RelationKind;
@@ -20,13 +19,12 @@ interface TicketsProps {
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = ({ relationKind }: TicketsProps) => {
-    const userContext = useContext(UserContext);
     const lastAvailableTicketRef = useRef<HTMLDivElement | null>(null);
 
     const [showOnlySpecial, setShowOnlySpecial] = useState(false);
     const [showOnlyUsed, setShowOnlyUsed] = useState(false);
     const { handleLogout } = useUserAPI();
-    const { userRelations } = useUserRelationContext();
+    const { getUserRelations, userRelations } = useUserRelationContext();
     const { givingTickets, receivingTickets, getReceivingTickets, getGivingTickets, getSortedTickets, getLastAvailableTicketId } = useTicketContext();
     const { userRelationId } = usePagePath();
 
@@ -64,7 +62,11 @@ const Tickets = ({ relationKind }: TicketsProps) => {
     const isSpecialNumber = ticketCount > 0 && (ticketCount % 100 === 0 || ticketCount % 111 === 0 || ticketCount % 1111 === 0);
 
     useEffect(() => {
-        if (userContext.isLoggedIn !== true || isNaN(userRelationId)) return;
+        if (userRelations === undefined) getUserRelations();
+    }, [getUserRelations, userRelations]);
+
+    useEffect(() => {
+        if (isNaN(userRelationId) || !currentRelation) return;
         switch (relationKind) {
             case 'Receiving':
                 if (receivingTickets !== undefined) return;
@@ -75,10 +77,9 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                 getGivingTickets(userRelationId);
                 return;
         }
-    }, [getGivingTickets, getReceivingTickets, givingTickets, receivingTickets, relationKind, userContext.isLoggedIn, userRelationId]);
+    }, [currentRelation, getGivingTickets, getReceivingTickets, givingTickets, receivingTickets, relationKind, userRelationId]);
 
-    // MYMEMO: Change this like for LifeTracker. In LT, it only jumps to login page when an API call fails
-    if (userContext.isLoggedIn !== true || !currentRelation) return <Navigate to="/login" />;
+    if (!currentRelation) return <Navigate to="/login" />;
     return (
         <>
             <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} relationKind={relationKind} />

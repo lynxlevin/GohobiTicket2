@@ -6,7 +6,6 @@ import { Route, Routes } from 'react-router-dom';
 import './App.css';
 import { DiaryTagProvider } from './contexts/diary-tag-context';
 import { TicketProvider } from './contexts/ticket-context';
-import { UserProvider } from './contexts/user-context';
 import { UserRelationProvider } from './contexts/user-relation-context';
 import Diaries from './pages/Diaries';
 import DiaryTags from './pages/DiaryTags';
@@ -29,32 +28,30 @@ const theme = createTheme({
 function App() {
     return (
         <div className="App">
-            <UserProvider>
-                <UserRelationProvider>
-                    <TicketProvider>
-                        <DiaryTagProvider>
-                            <DiaryProvider>
-                                <ThemeProvider theme={theme}>
-                                    <LocalizationProvider
-                                        dateAdapter={AdapterDateFns}
-                                        adapterLocale={ja}
-                                        dateFormats={{ keyboardDate: 'yyyy/MM/dd (E)', normalDate: 'yyyy/MM/dd (E)' }}
-                                    >
-                                        <Routes>
-                                            <Route path="/" element={<Login />} />
-                                            <Route path="/login" element={<Login />} />
-                                            <Route path="/user_relations/:userRelationId/receiving_tickets" element={<Tickets relationKind="Receiving" />} />
-                                            <Route path="/user_relations/:userRelationId/giving_tickets" element={<Tickets relationKind="Giving" />} />
-                                            <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
-                                            <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />
-                                        </Routes>
-                                    </LocalizationProvider>
-                                </ThemeProvider>
-                            </DiaryProvider>
-                        </DiaryTagProvider>
-                    </TicketProvider>
-                </UserRelationProvider>
-            </UserProvider>
+            <UserRelationProvider>
+                <TicketProvider>
+                    <DiaryTagProvider>
+                        <DiaryProvider>
+                            <ThemeProvider theme={theme}>
+                                <LocalizationProvider
+                                    dateAdapter={AdapterDateFns}
+                                    adapterLocale={ja}
+                                    dateFormats={{ keyboardDate: 'yyyy/MM/dd (E)', normalDate: 'yyyy/MM/dd (E)' }}
+                                >
+                                    <Routes>
+                                        <Route path="/" element={<Login />} />
+                                        <Route path="/login" element={<Login />} />
+                                        <Route path="/user_relations/:userRelationId/receiving_tickets" element={<Tickets relationKind="Receiving" />} />
+                                        <Route path="/user_relations/:userRelationId/giving_tickets" element={<Tickets relationKind="Giving" />} />
+                                        <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
+                                        <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />
+                                    </Routes>
+                                </LocalizationProvider>
+                            </ThemeProvider>
+                        </DiaryProvider>
+                    </DiaryTagProvider>
+                </TicketProvider>
+            </UserRelationProvider>
         </div>
     );
 }

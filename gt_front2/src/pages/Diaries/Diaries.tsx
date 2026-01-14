@@ -1,24 +1,22 @@
 import styled from '@emotion/styled';
 import FiberNewOutlinedIcon from '@mui/icons-material/FiberNewOutlined';
 import { Box, Container, Grid, IconButton, Typography } from '@mui/material';
-import { useContext, useEffect, useRef } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 import BottomNav from '../../BottomNav';
 import useUserAPI from '../../hooks/useUserAPI';
 import Diary from './Diary';
 import DiaryForm from './DiaryForm';
 import useDiaryContext from '../../hooks/useDiaryContext';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
-import { UserContext } from '../../contexts/user-context';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
+import { Navigate } from 'react-router-dom';
 
 const Diaries = () => {
     const firstUnreadDiaryRef = useRef<HTMLDivElement | null>(null);
-    const userContext = useContext(UserContext);
 
-    const { userRelations } = useUserRelationContext();
+    const { getUserRelations, userRelations } = useUserRelationContext();
     const { diaries, unreadDiaries, getDiaries } = useDiaryContext();
     const { diaryTags, getDiaryTags } = useDiaryTagContext();
     const { handleLogout } = useUserAPI();
@@ -27,16 +25,22 @@ const Diaries = () => {
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
 
     useEffect(() => {
-        if (userContext.isLoggedIn !== true || userRelationId < 1) return;
+        if (userRelations === undefined) getUserRelations();
+    }, [getUserRelations, userRelations]);
+
+    useEffect(() => {
+        if (isNaN(userRelationId) || !currentRelation) return;
         // MYMEMO: Is access on wrong userRelationId validated on server?
         if (diaries === undefined) getDiaries(userRelationId);
-        if (diaryTags === undefined) getDiaryTags(userRelationId);
-    }, [diaries, diaryTags, getDiaries, getDiaryTags, userContext.isLoggedIn, userRelationId]);
+    }, [currentRelation, diaries, getDiaries, userRelationId]);
 
-    if (userContext.isLoggedIn !== true) {
-        return <Navigate to="/login" />;
-    }
-    if (!currentRelation) return <></>;
+    useEffect(() => {
+        if (isNaN(userRelationId) || !currentRelation) return;
+        // MYMEMO: Is access on wrong userRelationId validated on server?
+        if (diaryTags === undefined) getDiaryTags(userRelationId);
+    }, [currentRelation, diaryTags, getDiaryTags, userRelationId]);
+
+    if (!currentRelation) return <Navigate to="/login" />;
     return (
         <>
             <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
