@@ -94,12 +94,12 @@ const MoonPhase = (props: MoonPhaseProps) => {
 
     const moonPhase = getMoonPhase(date);
     // Use this image: https://www.ac-illust.com/main/detail.php?id=2556717&word=月%E3%80%80満ち欠け&data_type=&from_order_history=&downloader_register=success#goog_rewarded
-    const moonPhaseImage = 'free_images/moon_phase.png';
+    const moonPhaseImage = '/free_images/moon_phase.png';
 
     return (
         <MoonPhaseDiv roundedMoonPhase={Math.round(moonPhase) as MoonImagePositionsKey}>
-            <div className='moon-scaler'>
-                <CardMedia className='moon' component='div' image={moonPhaseImage} />
+            <div className="moon-scaler">
+                <CardMedia className="moon" component="div" image={moonPhaseImage} />
             </div>
         </MoonPhaseDiv>
     );

@@ -45,7 +45,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                 </Paper>
             );
 
-        return <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component="div" image={`ticket_images/${imageFile}`} />;
+        return <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component="div" image={`/ticket_images/${imageFile}`} />;
     }, [currentRelation, imageFile]);
 
     const miniTicket = useMemo(() => {
@@ -54,7 +54,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
         if (imageFile === null)
             return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src="/apple-touch-icon.png" alt="mini-ticket" />;
 
-        return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={`ticket_images/${imageFile}`} alt="mini-ticket" />;
+        return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={`/ticket_images/${imageFile}`} alt="mini-ticket" />;
     }, [currentRelation, imageFile]);
 
     const tickets = relationKind === 'Receiving' ? receivingTickets : givingTickets;
