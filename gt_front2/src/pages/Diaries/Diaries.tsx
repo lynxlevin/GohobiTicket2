@@ -30,13 +30,11 @@ const Diaries = () => {
 
     useEffect(() => {
         if (isNaN(userRelationId) || !currentRelation) return;
-        // MYMEMO: Is access on wrong userRelationId validated on server?
         if (diaries === undefined) getDiaries(userRelationId);
     }, [currentRelation, diaries, getDiaries, userRelationId]);
 
     useEffect(() => {
         if (isNaN(userRelationId) || !currentRelation) return;
-        // MYMEMO: Is access on wrong userRelationId validated on server?
         if (diaryTags === undefined) getDiaryTags(userRelationId);
     }, [currentRelation, diaryTags, getDiaryTags, userRelationId]);
 
