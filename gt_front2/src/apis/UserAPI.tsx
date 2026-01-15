@@ -15,7 +15,7 @@ export const UserAPI = {
 
     login: async (data: LoginProps) => {
         const url = `${UserAPI.BASE_URL}/login`;
-        return await client.post(url, data, { headers: { 'content-type': 'application/json' } });
+        return await client.post(url, data);
     },
     session: async (): Promise<AxiosResponse<SessionResponse>> => {
         const url = `${UserAPI.BASE_URL}/me`;
@@ -23,6 +23,6 @@ export const UserAPI = {
     },
     logout: async () => {
         const url = `${UserAPI.BASE_URL}/logout`;
-        return await client.post(url, {}, { headers: { 'content-type': 'application/json' } });
+        return await client.post(url, {});
     },
 };

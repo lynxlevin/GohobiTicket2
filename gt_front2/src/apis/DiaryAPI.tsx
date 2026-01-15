@@ -1,25 +1,15 @@
 import { AxiosResponse } from 'axios';
-import { IDiaryTag } from '../contexts/diary-tag-context';
 import client from './axios';
+import { IDiary } from '../contexts/diary-context';
 
-export type DiaryStatus = "unread" | "edited" | "read"
-
-export interface IDiary {
-    id: string;
-    entry: string;
-    date: string;
-    tags: IDiaryTag[];
-    status: DiaryStatus;
-}
-
-interface CreateDiaryRequest {
+export interface CreateDiaryRequest {
     entry: string;
     date: string;
     tag_ids: string[];
     user_relation_id: number;
 }
 
-interface UpdateDiaryRequest {
+export interface UpdateDiaryRequest {
     entry: string;
     date: string;
     tag_ids: string[];
@@ -33,14 +23,14 @@ export const DiaryAPI = {
         return await client.get(url);
     },
     create: async (props: CreateDiaryRequest): Promise<AxiosResponse<IDiary>> => {
-        return await client.post(DiaryAPI.BASE_URL, props, { headers: { 'content-type': 'application/json' } });
+        return await client.post(DiaryAPI.BASE_URL, props);
     },
     update: async (diaryId: string, props: UpdateDiaryRequest): Promise<AxiosResponse<IDiary>> => {
         const url = `${DiaryAPI.BASE_URL}${diaryId}/`;
-        return await client.put(url, props, { headers: { 'content-type': 'application/json' } });
+        return await client.put(url, props);
     },
     markRead: async (diaryId: string): Promise<AxiosResponse<{}>> => {
         const url = `${DiaryAPI.BASE_URL}${diaryId}/mark_read/`;
-        return await client.put(url, {}, { headers: { 'content-type': 'application/json' } });
-    }
+        return await client.put(url, {});
+    },
 };

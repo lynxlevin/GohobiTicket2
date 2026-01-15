@@ -1,24 +1,23 @@
 import BookIcon from '@mui/icons-material/Book';
 import SwitchAccessShortcutIcon from '@mui/icons-material/SwitchAccessShortcut';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
-import { useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import useTicketContext from './hooks/useTicketContext';
-
-type PagePath = 'giving_tickets' | 'receiving_tickets' | 'diaries';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import usePagePath, { PagePath } from './hooks/usePagePath';
 
 const BottomNav = () => {
-    const pathParams = useParams();
-    const location = useLocation();
-    const userRelationId = Number(pathParams.userRelationId);
+    const { userRelationId, pagePath } = usePagePath();
 
-    const [selected, setSelected] = useState<PagePath>(location.pathname.split('/').at(-1) as PagePath);
+    const [selected, setSelected] = useState<PagePath>();
     const handleSelect = (_: React.SyntheticEvent, newValue: PagePath) => {
         setSelected(newValue);
     };
 
     const navigate = useNavigate();
-    const { clearTickets } = useTicketContext();
+
+    useEffect(() => {
+        setSelected(pagePath);
+    }, [pagePath]);
     return (
         <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100 }} elevation={3}>
             <BottomNavigation showLabels value={selected} onChange={handleSelect}>
@@ -27,8 +26,6 @@ const BottomNav = () => {
                     label="あげる"
                     icon={<SwitchAccessShortcutIcon />}
                     onClick={() => {
-                        clearTickets();
-                        // MYMEMO: useUserAPI in Tickets does not re-run.
                         navigate(`/user_relations/${userRelationId}/giving_tickets`);
                         window.scroll({ top: 0 });
                     }}
@@ -38,8 +35,6 @@ const BottomNav = () => {
                     label="もらう"
                     icon={<SwitchAccessShortcutIcon style={{ rotate: '180deg' }} />}
                     onClick={() => {
-                        clearTickets();
-                        // MYMEMO: useUserAPI in Tickets does not re-run.
                         navigate(`/user_relations/${userRelationId}/receiving_tickets`);
                         window.scroll({ top: 0 });
                     }}
@@ -49,7 +44,6 @@ const BottomNav = () => {
                     label="日記"
                     icon={<BookIcon />}
                     onClick={() => {
-                        clearTickets();
                         navigate(`/user_relations/${userRelationId}/diaries`);
                     }}
                 />

@@ -1,9 +1,9 @@
 import { Button, Dialog, DialogActions, DialogContent, TextField, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import { useContext, useState } from 'react';
-import { ITicket } from '../../contexts/ticket-context';
+import { useState } from 'react';
 import useTicketContext from '../../hooks/useTicketContext';
-import { UserRelationContext } from '../../contexts/user-relation-context';
+import { ITicket } from '../../contexts/ticket-context';
+import useUserRelationContext from '../../hooks/useUserRelationContext';
 
 interface UseDialogProps {
     onClose: () => void;
@@ -12,33 +12,39 @@ interface UseDialogProps {
 
 const UseDialog = (props: UseDialogProps) => {
     const { onClose, ticket } = props;
-    const userRelationContext = useContext(UserRelationContext);
     const [useDescription, setUseDescription] = useState('');
+
+    const { userRelations } = useUserRelationContext();
     const { consumeTicket } = useTicketContext();
 
     const handleSubmit = async () => {
-        const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === ticket.user_relation_id)!;
+        const currentRelation = userRelations?.find(relation => Number(relation.id) === ticket.user_relation_id);
+        if (currentRelation === undefined) return;
         if (currentRelation.use_slack) {
             await consumeTicket(ticket.id, useDescription);
             onClose();
         } else {
-            const text = ticket.is_special ? `〜★〜★〜★〜★〜★〜★〜★〜★\n${useDescription}\n★〜★〜★〜★〜★〜★〜★〜★〜` : `〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜\n${useDescription}\n〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜`;
-            await navigator.share({text}).then(async () => {
-                await consumeTicket(ticket.id, useDescription);
-                onClose();
-            }).catch(() => {
-                // Suppress AbortError
-            });
+            const text = ticket.is_special
+                ? `〜★〜★〜★〜★〜★〜★〜★〜★\n${useDescription}\n★〜★〜★〜★〜★〜★〜★〜★〜`
+                : `〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜\n${useDescription}\n〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜`;
+            await navigator
+                .share({ text })
+                .then(async () => {
+                    await consumeTicket(ticket.id, useDescription);
+                    onClose();
+                })
+                .catch(() => {
+                    // Suppress AbortError
+                });
         }
     };
-
     return (
         <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>
-                <Typography gutterBottom variant='subtitle1'>
+                <Typography gutterBottom variant="subtitle1">
                     {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
                 </Typography>
-                <Typography gutterBottom whiteSpace='pre-wrap'>
+                <Typography gutterBottom whiteSpace="pre-wrap">
                     {ticket.description}
                 </Typography>
                 <Typography fontWeight={600} mt={2} gutterBottom>
@@ -47,10 +53,10 @@ const UseDialog = (props: UseDialogProps) => {
                 <TextField value={useDescription} onChange={event => setUseDescription(event.target.value)} multiline fullWidth minRows={5} />
             </DialogContent>
             <DialogActions sx={{ justifyContent: 'center', py: 2 }}>
-                <Button variant='contained' onClick={handleSubmit} disabled={useDescription.trim().length < 1}>
+                <Button variant="contained" onClick={handleSubmit} disabled={useDescription.trim().length < 1}>
                     チケットを使う
                 </Button>
-                <Button variant='outlined' onClick={onClose} sx={{ color: 'primary.dark' }}>
+                <Button variant="outlined" onClick={onClose} sx={{ color: 'primary.dark' }}>
                     キャンセル
                 </Button>
             </DialogActions>

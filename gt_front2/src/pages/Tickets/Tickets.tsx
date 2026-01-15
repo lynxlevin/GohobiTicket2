@@ -1,37 +1,34 @@
 import styled from '@emotion/styled';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import BottomNav from '../../BottomNav';
-import { TicketContext } from '../../contexts/ticket-context';
-import { UserContext } from '../../contexts/user-context';
-import { RelationKind, UserRelationContext } from '../../contexts/user-relation-context';
+import { RelationKind } from '../../contexts/user-relation-context';
 import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
 import Ticket from './Ticket';
 import TicketForm from './TicketForm';
-import TicketsAppBar from './TicketsAppBar';
+import useUserRelationContext from '../../hooks/useUserRelationContext';
+import usePagePath from '../../hooks/usePagePath';
+import CommonAppBar from '../../components/CommonAppBar';
+import { Navigate } from 'react-router-dom';
 
 interface TicketsProps {
     relationKind: RelationKind;
 }
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
-const Tickets = ({relationKind}: TicketsProps) => {
-    const userContext = useContext(UserContext);
-    const userRelationContext = useContext(UserRelationContext);
-    const ticketContext = useContext(TicketContext);
+const Tickets = ({ relationKind }: TicketsProps) => {
     const lastAvailableTicketRef = useRef<HTMLDivElement | null>(null);
 
     const [showOnlySpecial, setShowOnlySpecial] = useState(false);
     const [showOnlyUsed, setShowOnlyUsed] = useState(false);
     const { handleLogout } = useUserAPI();
-    const { getTickets, getSortedTickets, lastAvailableTicketId } = useTicketContext();
+    const { getUserRelations, userRelations } = useUserRelationContext();
+    const { givingTickets, receivingTickets, getReceivingTickets, getGivingTickets, getSortedTickets, getLastAvailableTicketId } = useTicketContext();
+    const { userRelationId } = usePagePath();
 
-    const pathParams = useParams();
-    const userRelationId = Number(pathParams.userRelationId);
-    const currentRelation = userRelationContext.userRelations.find(relation => Number(relation.id) === userRelationId);
+    const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
     const imageFile = relationKind === 'Receiving' ? currentRelation?.receiving_ticket_img : currentRelation?.giving_ticket_img;
 
     const ticketImage = useMemo(() => {
@@ -40,7 +37,7 @@ const Tickets = ({relationKind}: TicketsProps) => {
         if (imageFile === null)
             return (
                 <Paper sx={{ py: '5%', my: '10px', color: '#565656', background: '#ffeaea', border: 'dashed 4px #ffc3c3', boxShadow: '0 0 0 10px #ffeaea' }}>
-                    <Typography variant='h2'>
+                    <Typography variant="h2">
                         Thank you
                         <br />
                         very much!!
@@ -48,71 +45,76 @@ const Tickets = ({relationKind}: TicketsProps) => {
                 </Paper>
             );
 
-        return <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component='div' image={`ticket_images/${imageFile}`} />;
+        return <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component="div" image={`ticket_images/${imageFile}`} />;
     }, [currentRelation, imageFile]);
 
     const miniTicket = useMemo(() => {
         if (currentRelation === undefined) return '';
 
         if (imageFile === null)
-            return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src='/apple-touch-icon.png' alt='mini-ticket' />;
+            return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src="/apple-touch-icon.png" alt="mini-ticket" />;
 
-        return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={`ticket_images/${imageFile}`} alt='mini-ticket' />;
+        return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={`ticket_images/${imageFile}`} alt="mini-ticket" />;
     }, [currentRelation, imageFile]);
 
-    // MYMEMO: put ticketContext.tickets into useTicketContext like for LifeTracker.
-    const ticketCount = ticketContext.tickets.length;
+    const tickets = relationKind === 'Receiving' ? receivingTickets : givingTickets;
+    const ticketCount = tickets !== undefined ? tickets.length : 0;
     const isSpecialNumber = ticketCount > 0 && (ticketCount % 100 === 0 || ticketCount % 111 === 0 || ticketCount % 1111 === 0);
 
     useEffect(() => {
-        if (userContext.isLoggedIn === true && userRelationId > 0) getTickets(userRelationId, relationKind);
-    }, [getTickets, relationKind, userContext.isLoggedIn, userRelationId]);
+        if (userRelations === undefined) getUserRelations();
+    }, [getUserRelations, userRelations]);
 
-    // MYMEMO: Change this like for LifeTracker
-    if (userContext.isLoggedIn === false || !currentRelation) return <Navigate to='/login' />;
+    useEffect(() => {
+        if (isNaN(userRelationId) || !currentRelation) return;
+        switch (relationKind) {
+            case 'Receiving':
+                if (receivingTickets !== undefined) return;
+                getReceivingTickets(userRelationId);
+                return;
+            case 'Giving':
+                if (givingTickets !== undefined) return;
+                getGivingTickets(userRelationId);
+                return;
+        }
+    }, [currentRelation, getGivingTickets, getReceivingTickets, givingTickets, receivingTickets, relationKind, userRelationId]);
+
+    if (!currentRelation) return <Navigate to="/login" />;
     return (
         <>
-            {/* MYMEMO: AppBar should be same as diaries */}
-            <TicketsAppBar handleLogout={handleLogout} currentRelation={currentRelation} relationKind={relationKind} />
+            <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} relationKind={relationKind} />
             <BottomNav />
             <main>
                 <Box sx={{ pt: 8 }}>
-                    <Container maxWidth='sm'>
-                        <Typography variant='h5' align='center' color='text.primary' sx={{ mt: 3 }} gutterBottom>
+                    <Container maxWidth="sm">
+                        <Typography variant="h5" align="center" color="text.primary" sx={{ mt: 3 }} gutterBottom>
                             {currentRelation.related_username}に{relationKind === 'Receiving' ? 'もらった' : 'あげる'}
                         </Typography>
-                        <Typography variant='h4' align='center' color='text.primary' sx={{ fontWeight: 600 }} gutterBottom>
+                        <Typography variant="h4" align="center" color="text.primary" sx={{ fontWeight: 600 }} gutterBottom>
                             ごほうびチケット
                         </Typography>
                         {isSpecialNumber ? (
-                            <Typography variant='h5' align='center' color='text.primary' gutterBottom>
+                            <Typography variant="h5" align="center" color="text.primary" gutterBottom>
                                 計<GoldNumber>{ticketCount}</GoldNumber>枚
                             </Typography>
                         ) : (
-                            <Typography variant='h5' align='center' color='text.primary' gutterBottom>
+                            <Typography variant="h5" align="center" color="text.primary" gutterBottom>
                                 計{ticketCount}枚
                             </Typography>
                         )}
                         {ticketImage}
-                        {relationKind === 'Giving' && <TicketForm userRelationId={userRelationId} />}
+                        {relationKind === 'Giving' && <TicketForm />}
                         <FormGroup>
-                            <FormControlLabel label='特別チケットのみ表示' control={<Switch onChange={event => setShowOnlySpecial(event.target.checked)} />} />
-                            <FormControlLabel label='使用済みチケットのみ表示' control={<Switch onChange={event => setShowOnlyUsed(event.target.checked)} />} />
+                            <FormControlLabel label="特別チケットのみ表示" control={<Switch onChange={event => setShowOnlySpecial(event.target.checked)} />} />
+                            <FormControlLabel label="使用済みチケットのみ表示" control={<Switch onChange={event => setShowOnlyUsed(event.target.checked)} />} />
                         </FormGroup>
                     </Container>
                 </Box>
-                <Container sx={{ pt: 4, pb: 4 }} maxWidth='md'>
+                <Container sx={{ pt: 4, pb: 4 }} maxWidth="md">
                     <Grid container spacing={4}>
-                        {getSortedTickets({ showOnlySpecial, showOnlyUsed }).map(ticket => {
-                            if (ticket.id === lastAvailableTicketId) {
-                                return (
-                                    <Ticket
-                                        key={ticket.id}
-                                        lastAvailableTicketRef={lastAvailableTicketRef}
-                                        ticket={ticket}
-                                        relationKind={relationKind}
-                                    />
-                                );
+                        {getSortedTickets({ showOnlySpecial, showOnlyUsed, relationKind }).map(ticket => {
+                            if (ticket.id === getLastAvailableTicketId(relationKind)) {
+                                return <Ticket key={ticket.id} lastAvailableTicketRef={lastAvailableTicketRef} ticket={ticket} relationKind={relationKind} />;
                             }
                             return <Ticket key={ticket.id} ticket={ticket} relationKind={relationKind} />;
                         })}
@@ -151,7 +153,11 @@ const MiniTicket = styled.img`
     position: fixed;
     bottom: 64px;
     right: 13px;
-    box-shadow: 2px 2px 7px rgba(18, 47, 61, 0.5), -5px -5px 15px rgba(248, 253, 255, 0.9), inset 5px 5px 15px transparent, inset -5px -5px 15px transparent;
+    box-shadow:
+        2px 2px 7px rgba(18, 47, 61, 0.5),
+        -5px -5px 15px rgba(248, 253, 255, 0.9),
+        inset 5px 5px 15px transparent,
+        inset -5px -5px 15px transparent;
     z-index: 100;
 
     &:hover {
@@ -167,7 +173,7 @@ const GoldNumber = styled.span`
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     color: #fff;
-	font-weight: bold;
+    font-weight: bold;
 `;
 
 export default Tickets;
