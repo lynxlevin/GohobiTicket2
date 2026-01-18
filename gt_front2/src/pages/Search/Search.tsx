@@ -1,40 +1,53 @@
-import { AppBar, Box, Container, Grid, IconButton, Input, InputAdornment, Toolbar, Typography } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
-import useUserAPI from '../../hooks/useUserAPI';
-import useDiaryContext from '../../hooks/useDiaryContext';
+import { AppBar, Box, Container, Grid, IconButton, Input, InputAdornment, Toolbar } from '@mui/material';
+import { useEffect, useState } from 'react';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 import usePagePath from '../../hooks/usePagePath';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import Diary from '../Diaries/Diary';
 import SearchBottomNav from '../../components/SearchBottomNav';
 import { NavItem } from '../../components/BaseBottomNav';
+import { ITicket } from '../../contexts/ticket-context';
+import { IDiary } from '../../contexts/diary-context';
+import Ticket from '../Tickets/Ticket';
+import Diary from '../Diaries/Diary';
 
 const Search = () => {
-    const firstUnreadDiaryRef = useRef<HTMLDivElement | null>(null);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const { userRelationId } = usePagePath();
+    const { getUserRelations, userRelations } = useUserRelationContext();
+    const { diaryTags, getDiaryTags } = useDiaryTagContext();
 
     const [pageQuery, setPageQuery] = useState<NavItem>();
-
-    const { getUserRelations, userRelations } = useUserRelationContext();
-    const { diaries, unreadDiaries, getDiaries } = useDiaryContext();
-    const { diaryTags, getDiaryTags } = useDiaryTagContext();
-    const { handleLogout } = useUserAPI();
-    const { userRelationId } = usePagePath();
+    const [searchText, setSearchText] = useState('');
+    const [givingTickets, setGivingTickets] = useState<ITicket[]>();
+    const [receivingTickets, setReceivingTickets] = useState<ITicket[]>();
+    const [diaries, setDiaries] = useState<IDiary[]>();
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
+
+    const getContent = () => {
+        switch (pageQuery) {
+            case 'giving_tickets':
+                return givingTickets?.map(ticket => {
+                    return <Ticket key={ticket.id} ticket={ticket} relationKind="Giving" />;
+                });
+            case 'receiving_tickets':
+                return receivingTickets?.map(ticket => {
+                    return <Ticket key={ticket.id} ticket={ticket} relationKind="Receiving" />;
+                });
+            case 'diaries':
+                return diaries?.map(diary => {
+                    return <Diary key={diary.id} diary={diary} />;
+                });
+        }
+    };
 
     useEffect(() => {
         if (userRelations === undefined) getUserRelations();
     }, [getUserRelations, userRelations]);
-
-    useEffect(() => {
-        if (isNaN(userRelationId) || !currentRelation) return;
-        if (diaries === undefined) getDiaries(userRelationId);
-    }, [currentRelation, diaries, getDiaries, userRelationId]);
 
     useEffect(() => {
         if (isNaN(userRelationId) || !currentRelation) return;
@@ -49,7 +62,6 @@ const Search = () => {
     if (!currentRelation) return <Navigate to="/login" />;
     return (
         <>
-            {/* <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} /> */}
             <AppBar position="fixed" sx={{ bgcolor: 'primary.light' }}>
                 <Toolbar>
                     <IconButton
@@ -64,6 +76,10 @@ const Search = () => {
                     <div style={{ flexGrow: 1 }} />
                     <Input
                         type="text"
+                        value={searchText}
+                        onChange={event => {
+                            setSearchText(event.target.value);
+                        }}
                         endAdornment={
                             <InputAdornment position="end">
                                 <IconButton
@@ -84,18 +100,11 @@ const Search = () => {
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth="sm"></Container>
                 </Box>
-                {/* {diaries !== undefined && (
-                    <Container sx={{ pt: 2, pb: 4 }} maxWidth="md">
-                        <Grid container spacing={4}>
-                            {diaries.map(diary => {
-                                if (unreadDiaries.length > 0 && diary.id === unreadDiaries[0].id) {
-                                    return <Diary key={diary.id} diary={diary} firstUnreadDiaryRef={firstUnreadDiaryRef} />;
-                                }
-                                return <Diary key={diary.id} diary={diary} />;
-                            })}
-                        </Grid>
-                    </Container>
-                )} */}
+                <Container sx={{ pt: 2, pb: 4 }} maxWidth="md">
+                    <Grid container spacing={4}>
+                        {getContent()}
+                    </Grid>
+                </Container>
             </main>
         </>
     );
