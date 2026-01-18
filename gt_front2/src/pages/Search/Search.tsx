@@ -12,6 +12,7 @@ import { ITicket } from '../../contexts/ticket-context';
 import { IDiary } from '../../contexts/diary-context';
 import Ticket from '../Tickets/Ticket';
 import Diary from '../Diaries/Diary';
+import { UserRelationAPI } from '../../apis/UserRelationAPI';
 
 const Search = () => {
     const navigate = useNavigate();
@@ -43,6 +44,16 @@ const Search = () => {
                     return <Diary key={diary.id} diary={diary} />;
                 });
         }
+    };
+
+    const submit = () => {
+        const text = searchText.trim();
+        if (text.length === 0) return;
+        UserRelationAPI.search({ userRelationId, text }).then(res => {
+            setGivingTickets(res.data.giving_tickets);
+            setReceivingTickets(res.data.receiving_tickets);
+            setDiaries(res.data.diaries);
+        });
     };
 
     useEffect(() => {
@@ -82,11 +93,7 @@ const Search = () => {
                         }}
                         endAdornment={
                             <InputAdornment position="end">
-                                <IconButton
-                                    onClick={() => {
-                                        console.log('hi');
-                                    }}
-                                >
+                                <IconButton onClick={submit}>
                                     <SearchIcon />
                                 </IconButton>
                             </InputAdornment>
@@ -95,7 +102,11 @@ const Search = () => {
                     <div style={{ flexGrow: 1 }} />
                 </Toolbar>
             </AppBar>
-            <SearchBottomNav selected={pageQuery} setSelected={setPageQuery} />
+            <SearchBottomNav
+                selected={pageQuery}
+                setSelected={setPageQuery}
+                badges={{ givingTickets: givingTickets?.length, receivingTickets: receivingTickets?.length, diaries: diaries?.length }}
+            />
             <main>
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth="sm"></Container>
