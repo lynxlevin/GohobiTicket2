@@ -1,14 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import usePagePath from '../hooks/usePagePath';
-import BaseBottomNav, { type NavItem } from './BaseBottomNav';
+import BaseBottomNav, { BottomNavBadges, type NavItem } from './BaseBottomNav';
 
 interface SearchBottomNavParams {
     selected?: NavItem;
     setSelected: React.Dispatch<React.SetStateAction<NavItem | undefined>>;
+    badges: BottomNavBadges;
 }
 
-const SearchBottomNav = ({ selected, setSelected }: SearchBottomNavParams) => {
+const SearchBottomNav = ({ selected, setSelected, badges }: SearchBottomNavParams) => {
     const { userRelationId } = usePagePath();
 
     const handleSelect = (_: React.SyntheticEvent, newValue: NavItem) => {
@@ -31,6 +32,6 @@ const SearchBottomNav = ({ selected, setSelected }: SearchBottomNavParams) => {
             window.scroll({ top: 0 });
         },
     };
-    return <BaseBottomNav selectedNavItem={selected} handleSelect={handleSelect} navActions={navActions} />;
+    return <BaseBottomNav selectedNavItem={selected} handleSelect={handleSelect} navActions={navActions} badges={badges} />;
 };
 export default SearchBottomNav;
