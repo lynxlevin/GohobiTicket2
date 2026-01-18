@@ -4,6 +4,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SellIcon from '@mui/icons-material/Sell';
+import SearchIcon from '@mui/icons-material/Search';
 import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
 import { useState } from 'react';
@@ -61,6 +62,14 @@ const CommonAppBar = ({ handleLogout, currentRelation, relationKind = 'Receiving
             <AppBar position="fixed" sx={{ bgcolor: 'primary.light' }}>
                 <Toolbar>
                     <div style={{ flexGrow: 1 }} />
+                    <IconButton
+                        onClick={() => {
+                            window.scroll({ top: 0 });
+                            navigate(`/user_relations/${currentRelation.id}/search`);
+                        }}
+                    >
+                        <SearchIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
+                    </IconButton>
                     <IconButton onClick={() => setTopBarDrawerOpen(true)}>
                         <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
                     </IconButton>

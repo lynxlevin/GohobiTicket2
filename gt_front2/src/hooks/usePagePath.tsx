@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
-export type PagePath = 'giving_tickets' | 'receiving_tickets' | 'diaries';
+export type PagePath = 'giving_tickets' | 'receiving_tickets' | 'diaries' | 'search';
 const usePagePath = () => {
     const pathParams = useParams();
     const location = useLocation();
