@@ -3,7 +3,7 @@ import SwitchAccessShortcutIcon from '@mui/icons-material/SwitchAccessShortcut';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import usePagePath, { PagePath } from './hooks/usePagePath';
+import usePagePath, { PagePath } from '../hooks/usePagePath';
 
 const BottomNav = () => {
     const { userRelationId, pagePath } = usePagePath();

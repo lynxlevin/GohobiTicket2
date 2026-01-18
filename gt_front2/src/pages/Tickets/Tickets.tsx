@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import BottomNav from '../../BottomNav';
+import BottomNav from '../../components/BottomNav';
 import { RelationKind } from '../../contexts/user-relation-context';
 import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
