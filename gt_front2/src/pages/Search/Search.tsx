@@ -16,7 +16,7 @@ import { UserRelationAPI } from '../../apis/UserRelationAPI';
 
 const Search = () => {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { userRelationId } = usePagePath();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { diaryTags, getDiaryTags } = useDiaryTagContext();
@@ -50,9 +50,41 @@ const Search = () => {
         const text = searchText.trim();
         if (text.length === 0) return;
         UserRelationAPI.search({ userRelationId, text }).then(res => {
-            setGivingTickets(res.data.giving_tickets);
-            setReceivingTickets(res.data.receiving_tickets);
-            setDiaries(res.data.diaries);
+            const givingTicketsRes = res.data.giving_tickets;
+            const receivingTicketsRes = res.data.receiving_tickets;
+            const diariesRes = res.data.diaries;
+            setGivingTickets(givingTicketsRes);
+            setReceivingTickets(receivingTicketsRes);
+            setDiaries(diariesRes);
+            switch (pageQuery) {
+                case 'giving_tickets':
+                    if (givingTicketsRes.length === 0) {
+                        if (receivingTicketsRes.length > 0) {
+                            setSearchParams({ tab: 'receiving_tickets' });
+                        } else if (diariesRes.length > 0) {
+                            setSearchParams({ tab: 'diaries' });
+                        }
+                    }
+                    break;
+                case 'receiving_tickets':
+                    if (receivingTicketsRes.length === 0) {
+                        if (givingTicketsRes.length > 0) {
+                            setSearchParams({ tab: 'giving_tickets' });
+                        } else if (diariesRes.length > 0) {
+                            setSearchParams({ tab: 'diaries' });
+                        }
+                    }
+                    break;
+                case 'diaries':
+                    if (diariesRes.length === 0) {
+                        if (givingTicketsRes.length > 0) {
+                            setSearchParams({ tab: 'giving_tickets' });
+                        } else if (receivingTicketsRes.length > 0) {
+                            setSearchParams({ tab: 'receiving_tickets' });
+                        }
+                    }
+                    break;
+            }
         });
     };
 
