@@ -27,7 +27,7 @@ const BaseBottomNav = ({ selectedNavItem, handleSelect, navActions, badges }: Ba
                     value="giving_tickets"
                     label="あげる"
                     icon={
-                        <Badge badgeContent={badges?.givingTickets} color="primary">
+                        <Badge badgeContent={badges?.givingTickets} color="primary" showZero>
                             <SwitchAccessShortcutIcon />
                         </Badge>
                     }
@@ -37,7 +37,7 @@ const BaseBottomNav = ({ selectedNavItem, handleSelect, navActions, badges }: Ba
                     value="receiving_tickets"
                     label="もらう"
                     icon={
-                        <Badge badgeContent={badges?.receivingTickets} color="primary">
+                        <Badge badgeContent={badges?.receivingTickets} color="primary" showZero>
                             <SwitchAccessShortcutIcon style={{ rotate: '180deg' }} />
                         </Badge>
                     }
@@ -47,7 +47,7 @@ const BaseBottomNav = ({ selectedNavItem, handleSelect, navActions, badges }: Ba
                     value="diaries"
                     label="日記"
                     icon={
-                        <Badge badgeContent={badges?.diaries} color="primary">
+                        <Badge badgeContent={badges?.diaries} color="primary" showZero>
                             <BookIcon />
                         </Badge>
                     }
