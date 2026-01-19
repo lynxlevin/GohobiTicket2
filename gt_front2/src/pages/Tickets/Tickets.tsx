@@ -110,7 +110,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                         </FormGroup>
                     </Container>
                 </Box>
-                <Container sx={{ pt: 4, pb: 4 }} maxWidth="md">
+                <Container sx={{ pt: 4, pb: 8 }} maxWidth="md">
                     <Grid container spacing={4}>
                         {getSortedTickets({ showOnlySpecial, showOnlyUsed, relationKind }).map(ticket => {
                             if (ticket.id === getLastAvailableTicketId(relationKind)) {

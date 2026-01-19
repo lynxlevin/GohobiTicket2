@@ -111,7 +111,7 @@ const Search = () => {
                 <Box sx={{ pt: 8 }}>
                     <Container maxWidth="sm"></Container>
                 </Box>
-                <Container sx={{ pt: 2, pb: 4 }} maxWidth="md">
+                <Container sx={{ pt: 2, pb: 8 }} maxWidth="md">
                     <Grid container spacing={4}>
                         {getContent()}
                     </Grid>
