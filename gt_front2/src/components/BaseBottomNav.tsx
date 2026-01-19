@@ -27,7 +27,13 @@ const BaseBottomNav = ({ selectedNavItem, handleSelect, navActions, badges }: Ba
                     value="giving_tickets"
                     label="あげる"
                     icon={
-                        <Badge badgeContent={badges?.givingTickets} color="primary" variant={badges?.givingTickets === 0 ? 'dot' : 'standard'} showZero>
+                        <Badge
+                            badgeContent={badges?.givingTickets}
+                            color="primary"
+                            variant={badges?.givingTickets === 0 ? 'dot' : 'standard'}
+                            showZero
+                            max={999}
+                        >
                             <SwitchAccessShortcutIcon />
                         </Badge>
                     }
@@ -37,7 +43,13 @@ const BaseBottomNav = ({ selectedNavItem, handleSelect, navActions, badges }: Ba
                     value="receiving_tickets"
                     label="もらう"
                     icon={
-                        <Badge badgeContent={badges?.receivingTickets} color="primary" variant={badges?.receivingTickets === 0 ? 'dot' : 'standard'} showZero>
+                        <Badge
+                            badgeContent={badges?.receivingTickets}
+                            color="primary"
+                            variant={badges?.receivingTickets === 0 ? 'dot' : 'standard'}
+                            showZero
+                            max={999}
+                        >
                             <SwitchAccessShortcutIcon style={{ rotate: '180deg' }} />
                         </Badge>
                     }
@@ -47,7 +59,7 @@ const BaseBottomNav = ({ selectedNavItem, handleSelect, navActions, badges }: Ba
                     value="diaries"
                     label="日記"
                     icon={
-                        <Badge badgeContent={badges?.diaries} color="primary" variant={badges?.diaries === 0 ? 'dot' : 'standard'} showZero>
+                        <Badge badgeContent={badges?.diaries} color="primary" variant={badges?.diaries === 0 ? 'dot' : 'standard'} showZero max={999}>
                             <BookIcon />
                         </Badge>
                     }
