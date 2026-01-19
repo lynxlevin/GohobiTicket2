@@ -1,4 +1,4 @@
-import { AppBar, Box, Container, Grid, IconButton, Input, InputAdornment, Toolbar } from '@mui/material';
+import { AppBar, Box, Container, Grid, IconButton, InputAdornment, OutlinedInput, Toolbar } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
@@ -117,12 +117,14 @@ const Search = () => {
                         <ArrowBackIcon />
                     </IconButton>
                     <div style={{ flexGrow: 1 }} />
-                    <Input
+                    <OutlinedInput
                         type="text"
                         value={searchText}
                         onChange={event => {
                             setSearchText(event.target.value);
                         }}
+                        sx={{ backgroundColor: 'rgb(212, 245, 245)', paddingRight: 0, marginLeft: '-24px' }}
+                        size="small"
                         endAdornment={
                             <InputAdornment position="end">
                                 <IconButton onClick={submit}>
