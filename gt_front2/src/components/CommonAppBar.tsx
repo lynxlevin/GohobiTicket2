@@ -64,7 +64,7 @@ const CommonAppBar = ({ handleLogout, currentRelation }: CommonAppBarProps) => {
                     <IconButton
                         onClick={() => {
                             window.scroll({ top: 0 });
-                            navigate(`/user_relations/${currentRelation.id}/search?tab=giving_tickets`);
+                            navigate(`/user_relations/${currentRelation.id}/search?tab=${pagePath}`);
                         }}
                     >
                         <SearchIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
