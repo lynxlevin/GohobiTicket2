@@ -82,7 +82,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
     if (!currentRelation) return <Navigate to="/login" />;
     return (
         <>
-            <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} relationKind={relationKind} />
+            <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
             <BottomNav />
             <main>
                 <Box sx={{ pt: 8 }}>

@@ -9,7 +9,7 @@ import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IUserRelation, RelationKind } from '../contexts/user-relation-context';
+import { IUserRelation } from '../contexts/user-relation-context';
 import useTicketContext from '../hooks/useTicketContext';
 import useUserRelationContext from '../hooks/useUserRelationContext';
 import useDiaryContext from '../hooks/useDiaryContext';
@@ -36,10 +36,9 @@ const HideOnScroll = (props: HideOnScrollProps) => {
 interface CommonAppBarProps {
     handleLogout: () => Promise<void>;
     currentRelation: IUserRelation;
-    relationKind?: RelationKind;
 }
 
-const CommonAppBar = ({ handleLogout, currentRelation, relationKind = 'Receiving' }: CommonAppBarProps) => {
+const CommonAppBar = ({ handleLogout, currentRelation }: CommonAppBarProps) => {
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
 
