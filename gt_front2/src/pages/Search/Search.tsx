@@ -123,6 +123,9 @@ const Search = () => {
                         onChange={event => {
                             setSearchText(event.target.value);
                         }}
+                        onBlur={event => {
+                            submit();
+                        }}
                         sx={{ backgroundColor: 'rgb(212, 245, 245)', paddingRight: 0, marginLeft: '-24px' }}
                         size="small"
                         endAdornment={
