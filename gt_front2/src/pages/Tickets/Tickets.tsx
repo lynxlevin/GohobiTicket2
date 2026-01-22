@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import BottomNav from '../../BottomNav';
+import BottomNav from '../../components/BottomNav';
 import { RelationKind } from '../../contexts/user-relation-context';
 import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
@@ -82,7 +82,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
     if (!currentRelation) return <Navigate to="/login" />;
     return (
         <>
-            <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} relationKind={relationKind} />
+            <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
             <BottomNav />
             <main>
                 <Box sx={{ pt: 8 }}>
@@ -110,7 +110,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                         </FormGroup>
                     </Container>
                 </Box>
-                <Container sx={{ pt: 4, pb: 4 }} maxWidth="md">
+                <Container sx={{ pt: 4, pb: 8 }} maxWidth="md">
                     <Grid container spacing={4}>
                         {getSortedTickets({ showOnlySpecial, showOnlyUsed, relationKind }).map(ticket => {
                             if (ticket.id === getLastAvailableTicketId(relationKind)) {

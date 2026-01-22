@@ -4,11 +4,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SellIcon from '@mui/icons-material/Sell';
+import SearchIcon from '@mui/icons-material/Search';
 import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IUserRelation, RelationKind } from '../contexts/user-relation-context';
+import { IUserRelation } from '../contexts/user-relation-context';
 import useTicketContext from '../hooks/useTicketContext';
 import useUserRelationContext from '../hooks/useUserRelationContext';
 import useDiaryContext from '../hooks/useDiaryContext';
@@ -35,10 +36,9 @@ const HideOnScroll = (props: HideOnScrollProps) => {
 interface CommonAppBarProps {
     handleLogout: () => Promise<void>;
     currentRelation: IUserRelation;
-    relationKind?: RelationKind;
 }
 
-const CommonAppBar = ({ handleLogout, currentRelation, relationKind = 'Receiving' }: CommonAppBarProps) => {
+const CommonAppBar = ({ handleLogout, currentRelation }: CommonAppBarProps) => {
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -61,6 +61,14 @@ const CommonAppBar = ({ handleLogout, currentRelation, relationKind = 'Receiving
             <AppBar position="fixed" sx={{ bgcolor: 'primary.light' }}>
                 <Toolbar>
                     <div style={{ flexGrow: 1 }} />
+                    <IconButton
+                        onClick={() => {
+                            window.scroll({ top: 0 });
+                            navigate(`/user_relations/${currentRelation.id}/search?tab=${pagePath}`);
+                        }}
+                    >
+                        <SearchIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
+                    </IconButton>
                     <IconButton onClick={() => setTopBarDrawerOpen(true)}>
                         <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
                     </IconButton>

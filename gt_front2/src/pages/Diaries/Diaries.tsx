@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import FiberNewOutlinedIcon from '@mui/icons-material/FiberNewOutlined';
 import { Box, Container, Grid, IconButton, Typography } from '@mui/material';
 import { useEffect, useRef } from 'react';
-import BottomNav from '../../BottomNav';
+import BottomNav from '../../components/BottomNav';
 import useUserAPI from '../../hooks/useUserAPI';
 import Diary from './Diary';
 import DiaryForm from './DiaryForm';
@@ -53,7 +53,7 @@ const Diaries = () => {
                     </Container>
                 </Box>
                 {diaries !== undefined && (
-                    <Container sx={{ pt: 2, pb: 4 }} maxWidth="md">
+                    <Container sx={{ pt: 2, pb: 8 }} maxWidth="md">
                         <Grid container spacing={4}>
                             {diaries.map(diary => {
                                 if (unreadDiaries.length > 0 && diary.id === unreadDiaries[0].id) {
