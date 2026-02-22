@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useState } from 'react';
 
 export interface IUserRelation {
-    id: string;
+    id: number;
     related_username: string;
     giving_ticket_img: string | null;
     receiving_ticket_img: string | null;

@@ -1,14 +1,15 @@
 import { createContext, ReactNode, useState } from 'react';
 
-export type TicketStatus = "unread" | "edited" | "read" | 'draft';
+export type TicketStatus = 'unread' | 'edited' | 'read' | 'draft';
 
 export interface ITicket {
     id: number;
     user_relation_id: number;
+    giving_user_id: number;
     description: string;
     gift_date: string;
     use_description: string;
-    use_date: string;
+    use_date: string | null;
     status: TicketStatus;
     is_special: boolean;
 }
@@ -31,9 +32,5 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
     const [receivingTickets, setReceivingTickets] = useState<ITicket[]>();
     const [givingTickets, setGivingTickets] = useState<ITicket[]>();
 
-    return (
-        <TicketContext.Provider value={{ receivingTickets, setReceivingTickets, givingTickets, setGivingTickets }}>
-            {children}
-        </TicketContext.Provider>
-    );
+    return <TicketContext.Provider value={{ receivingTickets, setReceivingTickets, givingTickets, setGivingTickets }}>{children}</TicketContext.Provider>;
 };
