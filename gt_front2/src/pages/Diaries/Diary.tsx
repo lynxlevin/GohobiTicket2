@@ -17,7 +17,7 @@ interface DiaryProps {
 const Diary = ({ diary, firstUnreadDiaryRef }: DiaryProps) => {
     const [isEditDiaryDialogOpen, setIsEditDiaryDialogOpen] = useState(false);
 
-    const {readDiary} = useDiaryContext();
+    const { readDiary } = useDiaryContext();
 
     const ref = useRef(null);
     const observeVisibility = diary.status !== 'read';
@@ -52,27 +52,27 @@ const Diary = ({ diary, firstUnreadDiaryRef }: DiaryProps) => {
         } else if (status === 'edited') {
             text = 'EDITED!!';
         }
-        return <Badge className='badge' color='primary' sx={prevStatus ? { opacity: 0.45, transition: '0.5s', zIndex: 100 } : {}} badgeContent={text} />;
+        return <Badge className="badge" color="primary" sx={prevStatus ? { opacity: 0.45, transition: '0.5s', zIndex: 100 } : {}} badgeContent={text} />;
     }, [prevStatus, diary.status]);
 
     return (
         <StyledGrid item xs={12} sm={6} md={4} ref={firstUnreadDiaryRef}>
             {diary.status !== 'read' && getStatusBadge}
-            <Card className='card'>
+            <Card className="card">
                 <CardContent>
                     <MoonPhase date={date} />
-                    <div className='relative-div'>
-                        <Typography className='diary-date'>{format(date, 'yyyy-MM-dd E')}</Typography>
-                        <IconButton className='edit-button' onClick={() => setIsEditDiaryDialogOpen(true)}>
+                    <div className="relative-div">
+                        <Typography className="diary-date">{format(date, 'yyyy-MM-dd E')}</Typography>
+                        <IconButton className="edit-button" onClick={() => setIsEditDiaryDialogOpen(true)}>
                             <EditIcon />
                         </IconButton>
                     </div>
-                    <Box className='tags-div'>
+                    <Box className="tags-div">
                         {diary.tags.map(tag => (
                             <Chip key={tag.id} label={tag.text} />
                         ))}
                     </Box>
-                    <Typography className='diary-description'>{diary.entry}</Typography>
+                    <Typography className="diary-description">{diary.entry}</Typography>
                     <span ref={ref} />
                 </CardContent>
             </Card>
@@ -125,6 +125,7 @@ const StyledGrid = styled(Grid)`
     .diary-description {
         text-align: start;
         white-space: pre-wrap;
+        overflow-wrap: anywhere;
     }
 `;
 
