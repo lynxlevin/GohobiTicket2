@@ -120,12 +120,12 @@ const UsedTicket = ({ ticket, relatedUserName, hasThreadPosts = true, showAll = 
                     <IconButton size="small" onClick={() => setOpenedDialog('Detail')}>
                         <InfoIcon />
                     </IconButton>
-                    <IconButton size="small">
+                    {/* <IconButton size="small">
                         <EditIcon />
-                    </IconButton>
+                    </IconButton> */}
                 </CardActions>
                 {ticket.is_special && <SpecialStamp randKey={ticket.id} />}
-                {hasThreadPosts && (
+                {/* {hasThreadPosts && (
                     <>
                         <ThreadPost relatedUserName={relatedUserName} showAll={showAll} />
                         {showAll && <ThreadPost relatedUserName={relatedUserName} showAll={showAll} isLast />}
@@ -135,7 +135,7 @@ const UsedTicket = ({ ticket, relatedUserName, hasThreadPosts = true, showAll = 
                     <Button className="open-thread-button" variant="outlined">
                         スレッドを開く
                     </Button>
-                )}
+                )} */}
             </Card>
             {openedDialog && getDialog()}
         </StyledTicket>
