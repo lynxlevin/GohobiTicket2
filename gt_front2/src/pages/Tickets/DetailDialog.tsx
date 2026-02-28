@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { ITicket } from '../../contexts/ticket-context';
+import useUserContext from '../../hooks/useUserContext';
 
 interface DetailDialogProps {
     onClose: () => void;
@@ -10,12 +11,12 @@ interface DetailDialogProps {
 
 const DetailDialog = (props: DetailDialogProps) => {
     const { onClose, ticket, relatedUserName } = props;
+    const { me } = useUserContext();
 
     return (
         <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>
-                {/* MYMEMO: user_id is hardcoded here. */}
-                <Typography textAlign="right">{ticket.giving_user_id === 1 ? '自分' : relatedUserName}からのお礼</Typography>
+                {me !== undefined && <Typography textAlign="right">{ticket.giving_user_id === me.id ? me.username : relatedUserName}からのお礼</Typography>}
                 <Typography textAlign="right">{format(new Date(ticket.gift_date), 'yyyy-MM-dd')}</Typography>
                 <Typography mt={1} whiteSpace="pre-wrap">
                     {ticket.description}

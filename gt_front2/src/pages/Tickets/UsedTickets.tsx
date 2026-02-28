@@ -14,14 +14,20 @@ import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
 import SpecialStamp from './SpecialStamp';
 import DetailDialog from './DetailDialog';
+import useUserContext from '../../hooks/useUserContext';
 
 const UsedTickets = () => {
     const { handleLogout } = useUserAPI();
+    const { me, getMe } = useUserContext();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { givingTickets, getGivingTickets, receivingTickets, getReceivingTickets } = useTicketContext();
     const { userRelationId } = usePagePath();
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
+
+    useEffect(() => {
+        if (me === undefined) getMe();
+    }, [getMe, me]);
 
     useEffect(() => {
         if (userRelations === undefined) getUserRelations();
@@ -94,6 +100,7 @@ interface UsedTicketProps {
 
 const UsedTicket = ({ ticket, relatedUserName, hasThreadPosts = true, showAll = false }: UsedTicketProps) => {
     const [openedDialog, setOpenedDialog] = useState<'Detail'>();
+    const { me } = useUserContext();
 
     const getDialog = () => {
         switch (openedDialog) {
@@ -107,11 +114,12 @@ const UsedTicket = ({ ticket, relatedUserName, hasThreadPosts = true, showAll = 
         <StyledTicket item xs={12} sm={6} md={4}>
             <Card className="card">
                 <CardContent>
-                    {/* MYMEMO: user_id is hardcoded here. */}
                     <Stack direction="row" justifyContent="space-between">
-                        <Typography className={`from-name${ticket.is_special ? ' special-ticket' : ''}`}>
-                            {ticket.giving_user_id === 1 ? relatedUserName : '自分'}より
-                        </Typography>
+                        {me !== undefined && (
+                            <Typography className={`from-name${ticket.is_special ? ' special-ticket' : ''}`}>
+                                {ticket.giving_user_id === me.id ? relatedUserName : me.username}より
+                            </Typography>
+                        )}
                         <Typography className="post-time">{format(new Date(ticket.use_date), 'yyyy-MM-dd HH:mm')}</Typography>
                     </Stack>
                     <Typography className="text">{ticket.use_description}</Typography>
