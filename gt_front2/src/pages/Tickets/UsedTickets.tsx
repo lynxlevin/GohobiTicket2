@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Box, Button, Card, CardActions, CardContent, Container, Divider, Grid, IconButton, Stack, Typography } from '@mui/material';
+import { Box, Button, Card, CardActions, CardContent, Container, Divider, Grid, IconButton, Stack, Switch, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useTicketContext from '../../hooks/useTicketContext';
@@ -22,6 +22,8 @@ const UsedTickets = () => {
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { givingTickets, getGivingTickets, receivingTickets, getReceivingTickets } = useTicketContext();
     const { userRelationId } = usePagePath();
+    const [showThreads, setShowThreads] = useState(false);
+    const [ticketIdToShowAll, setTicketIdToShowAll] = useState<number>(0);
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
 
@@ -52,6 +54,13 @@ const UsedTickets = () => {
             <BottomNav />
             <main>
                 <Container sx={{ py: 8 }} maxWidth="md">
+                    {/* MYMEMO: スレッド機能搭載後条件を外す */}
+                    {me?.id === 1 && (
+                        <>
+                            <Switch checked={showThreads} onChange={e => setShowThreads(e.target.checked)} />
+                            スレッド表示
+                        </>
+                    )}
                     {givingTickets && receivingTickets && (
                         <Grid container spacing={4}>
                             {givingTickets
@@ -61,7 +70,17 @@ const UsedTickets = () => {
                                     return a.use_date! > b.use_date! ? -1 : 1;
                                 })
                                 .map(ticket => {
-                                    return <UsedTicket key={ticket.id} ticket={ticket} relatedUserName={currentRelation.related_username} />;
+                                    return (
+                                        <UsedTicket
+                                            key={ticket.id}
+                                            ticket={ticket}
+                                            relatedUserName={currentRelation.related_username}
+                                            // MYMEMO: スレッド機能搭載後条件を外す
+                                            hasThreadPosts={me?.id === 1 && showThreads}
+                                            showAll={ticketIdToShowAll === ticket.id}
+                                            setShowAll={() => setTicketIdToShowAll(ticket.id)}
+                                        />
+                                    );
                                 })}
                         </Grid>
                     )}
@@ -96,9 +115,10 @@ interface UsedTicketProps {
     relatedUserName: string;
     hasThreadPosts?: boolean;
     showAll?: boolean;
+    setShowAll: () => void;
 }
 
-const UsedTicket = ({ ticket, relatedUserName, hasThreadPosts = true, showAll = false }: UsedTicketProps) => {
+const UsedTicket = ({ ticket, relatedUserName, hasThreadPosts = true, showAll = false, setShowAll }: UsedTicketProps) => {
     const [openedDialog, setOpenedDialog] = useState<'Detail'>();
     const { me } = useUserContext();
 
@@ -133,17 +153,17 @@ const UsedTicket = ({ ticket, relatedUserName, hasThreadPosts = true, showAll = 
                     </IconButton> */}
                 </CardActions>
                 {ticket.is_special && <SpecialStamp randKey={ticket.id} />}
-                {/* {hasThreadPosts && (
+                {hasThreadPosts && (
                     <>
                         <ThreadPost relatedUserName={relatedUserName} showAll={showAll} />
                         {showAll && <ThreadPost relatedUserName={relatedUserName} showAll={showAll} isLast />}
                     </>
                 )}
-                {!showAll && (
-                    <Button className="open-thread-button" variant="outlined">
+                {hasThreadPosts && !showAll && (
+                    <Button className="open-thread-button" variant="outlined" onClick={setShowAll}>
                         スレッドを開く
                     </Button>
-                )} */}
+                )}
             </Card>
             {openedDialog && getDialog()}
         </StyledTicket>
@@ -224,11 +244,7 @@ const ThreadPost = ({ relatedUserName, showAll = false, isLast = false }: Thread
                         <EditIcon />
                     </IconButton>
                 )}
-                {isLast && (
-                    <Button className="message-button" variant="outlined">
-                        メッセージを送る
-                    </Button>
-                )}
+                {isLast && <Button className="message-button">メッセージを送る</Button>}
             </Box>
         </StyledPost>
     );
