@@ -2,7 +2,6 @@ import BookIcon from '@mui/icons-material/Book';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import SwitchAccessShortcutIcon from '@mui/icons-material/SwitchAccessShortcut';
 import { Badge, BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
-import useUserRelationContext from '../hooks/useUserRelationContext';
 
 export type NavItem = 'giving_tickets' | 'receiving_tickets' | 'used_tickets' | 'diaries';
 export interface BottomNavBadges {
@@ -23,7 +22,6 @@ interface BaseBottomNavProps {
 }
 
 const BaseBottomNav = ({ selectedNavItem, handleSelect, navActions, badges }: BaseBottomNavProps) => {
-    const { userRelations } = useUserRelationContext();
     return (
         <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100 }} elevation={3}>
             <BottomNavigation showLabels value={selectedNavItem} onChange={handleSelect}>
@@ -59,7 +57,7 @@ const BaseBottomNav = ({ selectedNavItem, handleSelect, navActions, badges }: Ba
                     }
                     onClick={navActions.receiving_tickets}
                 />
-                {navActions.used_tickets && userRelations?.find(r => r.id === 1)?.giving_ticket_img === 'IMG_5777.jpeg' && (
+                {navActions.used_tickets && (
                     <BottomNavigationAction icon={<RedeemIcon />} value="used_tickets" label="おねがい" onClick={navActions.used_tickets} />
                 )}
                 <BottomNavigationAction
