@@ -6,6 +6,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import SellIcon from '@mui/icons-material/Sell';
 import SearchIcon from '@mui/icons-material/Search';
 import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -140,6 +141,19 @@ const CommonAppBar = ({ handleLogout, currentRelation }: CommonAppBarProps) => {
                                         <SecurityUpdateGoodIcon />
                                     </ListItemIcon>
                                     <ListItemText>バージョンアップ</ListItemText>
+                                </ListItemButton>
+                            </ListItem>
+                            <ListItem>
+                                <ListItemButton
+                                    disableGutters
+                                    onClick={() => {
+                                        navigate('/settings/notifications');
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <SettingsIcon />
+                                    </ListItemIcon>
+                                    <ListItemText>設定</ListItemText>
                                 </ListItemButton>
                             </ListItem>
                             <ListItem>
