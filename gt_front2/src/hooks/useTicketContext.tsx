@@ -51,13 +51,16 @@ const useTicketContext = () => {
         [ticketContext.givingTickets, ticketContext.receivingTickets],
     );
 
-    const getLastAvailableTicketId = useCallback((relationKind: RelationKind) => {
-        const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-        if (tickets === undefined) return undefined;
-        const availableTickets = tickets.filter(ticket => ticket.use_date === null).sort(sortConditions);
-        if (availableTickets.length === 0) return undefined;
-        return availableTickets.slice(-1)[0].id;
-    }, [ticketContext.givingTickets, ticketContext.receivingTickets]);
+    const getLastAvailableTicketId = useCallback(
+        (relationKind: RelationKind) => {
+            const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
+            if (tickets === undefined) return undefined;
+            const availableTickets = tickets.filter(ticket => ticket.use_date === null).sort(sortConditions);
+            if (availableTickets.length === 0) return undefined;
+            return availableTickets.slice(-1)[0].id;
+        },
+        [ticketContext.givingTickets, ticketContext.receivingTickets],
+    );
 
     const createTicket = useCallback(async (data: CreateTicketRequest) => {
         TicketAPI.create(data).then(({ data: { ticket } }) => {
@@ -96,13 +99,15 @@ const useTicketContext = () => {
         const payload = {
             use_description: useDescription,
         };
-        TicketAPI.use(ticketId, payload).then(({ data: { ticket } }) => {
-            ticketContext.setReceivingTickets(prev => {
-                const tickets = [...prev!];
-                tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;
-                return tickets;
-            });
+        const {
+            data: { ticket, web_push_result },
+        } = await TicketAPI.use(ticketId, payload);
+        ticketContext.setReceivingTickets(prev => {
+            const tickets = [...prev!];
+            tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;
+            return tickets;
         });
+        return web_push_result;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
