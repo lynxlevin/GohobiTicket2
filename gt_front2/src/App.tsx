@@ -15,6 +15,7 @@ import { DiaryProvider } from './contexts/diary-context';
 import Search from './pages/Search';
 import UsedTickets from './pages/Tickets/UsedTickets';
 import { UserProvider } from './contexts/user-context';
+import NotificationSettings from './pages/Settings/NotificationSettings';
 
 const theme = createTheme({
     palette: {
@@ -51,6 +52,7 @@ function App() {
                                             <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
                                             <Route path="/user_relations/:userRelationId/search" element={<Search />} />
                                             <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />
+                                            <Route path="/settings/notifications" element={<NotificationSettings />} />
                                         </Routes>
                                     </LocalizationProvider>
                                 </ThemeProvider>
