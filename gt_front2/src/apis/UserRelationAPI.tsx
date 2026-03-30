@@ -1,6 +1,6 @@
-import { IDiary } from '../contexts/diary-context';
-import { ITicket } from '../contexts/ticket-context';
-import { IUserRelation } from '../contexts/user-relation-context';
+import { IDiary } from '../types/diary';
+import { ITicket } from '../types/ticket';
+import { IUserRelation } from '../types/user_relation';
 import client from './axios';
 import { AxiosResponse } from 'axios';
 

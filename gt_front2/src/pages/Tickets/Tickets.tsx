@@ -3,7 +3,6 @@ import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrow
 import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
-import { RelationKind } from '../../contexts/user-relation-context';
 import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
 import Ticket from './Ticket';
@@ -12,6 +11,7 @@ import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
 import { Navigate } from 'react-router-dom';
+import { RelationKind } from '../../types/user_relation';
 
 interface TicketsProps {
     relationKind: RelationKind;

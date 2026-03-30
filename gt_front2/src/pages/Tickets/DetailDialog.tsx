@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import { ITicket } from '../../contexts/ticket-context';
 import useUserContext from '../../hooks/useUserContext';
+import { ITicket } from '../../types/ticket';
 
 interface DetailDialogProps {
     onClose: () => void;

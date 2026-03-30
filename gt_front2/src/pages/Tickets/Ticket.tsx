@@ -10,8 +10,8 @@ import EditDialog from './EditDialog';
 import SpecialStamp from './SpecialStamp';
 import UseDetailDialog from './UseDetailDialog';
 import UseDialog from './UseDialog';
-import { RelationKind } from '../../contexts/user-relation-context';
-import { ITicket, TicketStatus } from '../../contexts/ticket-context';
+import { ITicket, TicketStatus } from '../../types/ticket';
+import { RelationKind } from '../../types/user_relation';
 
 interface TicketProps {
     ticket: ITicket;

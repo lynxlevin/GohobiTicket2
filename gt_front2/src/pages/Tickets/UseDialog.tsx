@@ -2,8 +2,8 @@ import { Button, Dialog, DialogActions, DialogContent, Divider, TextField, Typog
 import { format } from 'date-fns';
 import { useState } from 'react';
 import useTicketContext from '../../hooks/useTicketContext';
-import { ITicket } from '../../contexts/ticket-context';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
+import { ITicket } from '../../types/ticket';
 
 interface UseDialogProps {
     onClose: () => void;

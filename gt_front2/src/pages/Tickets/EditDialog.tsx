@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { UserRelationAPI } from '../../apis/UserRelationAPI';
 import useTicketContext from '../../hooks/useTicketContext';
-import { ITicket } from '../../contexts/ticket-context';
+import { ITicket } from '../../types/ticket';
 
 interface EditDialogProps {
     onClose: () => void;
@@ -41,20 +41,20 @@ const EditDialog = (props: EditDialogProps) => {
     return (
         <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>
-                <FormControlLabel label='削除' control={<Checkbox checked={willDelete} onChange={event => setWillDelete(event.target.checked)} />} />
-                <Typography gutterBottom variant='subtitle1'>
+                <FormControlLabel label="削除" control={<Checkbox checked={willDelete} onChange={event => setWillDelete(event.target.checked)} />} />
+                <Typography gutterBottom variant="subtitle1">
                     {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
                 </Typography>
-                <TextField value={description} onChange={event => setDescription(event.target.value)} label='内容' multiline fullWidth minRows={5} />
+                <TextField value={description} onChange={event => setDescription(event.target.value)} label="内容" multiline fullWidth minRows={5} />
                 {ticket.status === 'draft' && (
                     <>
                         <FormControlLabel
                             disabled={!isSpecialTicketAvailable}
-                            label='特別チケットにする'
+                            label="特別チケットにする"
                             control={<Checkbox checked={isSpecial} onChange={event => setIsSpecial(event.target.checked)} />}
                         />
                         <FormControlLabel
-                            label='下書きを確定する'
+                            label="下書きを確定する"
                             control={<Checkbox checked={willFinalize} onChange={event => setWillFinalize(event.target.checked)} />}
                         />
                     </>
@@ -62,15 +62,15 @@ const EditDialog = (props: EditDialogProps) => {
             </DialogContent>
             <DialogActions sx={{ justifyContent: 'center', py: 2 }}>
                 {willDelete ? (
-                    <Button variant='contained' color='error' onClick={() => deleteTicket(ticket.id)}>
+                    <Button variant="contained" color="error" onClick={() => deleteTicket(ticket.id)}>
                         削除する
                     </Button>
                 ) : (
                     <>
-                        <Button variant='contained' onClick={handleSubmit}>
+                        <Button variant="contained" onClick={handleSubmit}>
                             修正する
                         </Button>
-                        <Button variant='outlined' onClick={onClose} sx={{ color: 'primary.dark' }}>
+                        <Button variant="outlined" onClick={onClose} sx={{ color: 'primary.dark' }}>
                             キャンセル
                         </Button>
                     </>

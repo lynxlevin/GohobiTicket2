@@ -10,12 +10,12 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IUserRelation } from '../contexts/user-relation-context';
 import useTicketContext from '../hooks/useTicketContext';
 import useUserRelationContext from '../hooks/useUserRelationContext';
 import useDiaryContext from '../hooks/useDiaryContext';
 import useDiaryTagContext from '../hooks/useDiaryTagContext';
 import usePagePath from '../hooks/usePagePath';
+import { IUserRelation } from '../types/user_relation';
 
 interface HideOnScrollProps {
     children: React.ReactElement;

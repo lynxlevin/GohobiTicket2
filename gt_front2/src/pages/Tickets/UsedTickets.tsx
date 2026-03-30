@@ -8,13 +8,13 @@ import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
 import { Navigate } from 'react-router-dom';
-import { ITicket } from '../../contexts/ticket-context';
 import { format } from 'date-fns';
 import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
 import SpecialStamp from './SpecialStamp';
 import DetailDialog from './DetailDialog';
 import useUserContext from '../../hooks/useUserContext';
+import { ITicket } from '../../types/ticket';
 
 const UsedTickets = () => {
     const { handleLogout } = useUserAPI();

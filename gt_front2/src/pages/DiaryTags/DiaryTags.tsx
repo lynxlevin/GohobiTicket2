@@ -5,10 +5,10 @@ import { AppBar, Box, Button, Dialog, DialogContent, IconButton, List, ListItem,
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DiaryTagAPI } from '../../apis/DiaryTagAPI';
-import { IDiaryTag } from '../../contexts/diary-tag-context';
 import useUserAPI from '../../hooks/useUserAPI';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 import usePagePath from '../../hooks/usePagePath';
+import { IDiaryTag } from '../../types/diary';
 
 interface InnerTag extends IDiaryTag {
     isNew?: boolean;

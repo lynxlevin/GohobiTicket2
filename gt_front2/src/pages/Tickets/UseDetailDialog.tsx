@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import { ITicket } from '../../contexts/ticket-context';
+import { ITicket } from '../../types/ticket';
 
 interface UseDetailDialogProps {
     onClose: () => void;
@@ -13,10 +13,10 @@ const UseDetailDialog = (props: UseDetailDialogProps) => {
     return (
         <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>
-                <Typography gutterBottom variant='subtitle1' mt={1} mb={1}>
+                <Typography gutterBottom variant="subtitle1" mt={1} mb={1}>
                     {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
                 </Typography>
-                <Typography whiteSpace='pre-wrap'>{ticket.use_description}</Typography>
+                <Typography whiteSpace="pre-wrap">{ticket.use_description}</Typography>
             </DialogContent>
         </Dialog>
     );

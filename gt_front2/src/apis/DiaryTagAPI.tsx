@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
-import { IDiaryTag } from '../contexts/diary-tag-context';
 import client from './axios';
+import { IDiaryTag } from '../types/diary';
 
 interface ListDiaryTagResponse {
     diary_tags: IDiaryTag[];

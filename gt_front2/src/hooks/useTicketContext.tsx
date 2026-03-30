@@ -1,7 +1,8 @@
 import { useCallback, useContext } from 'react';
 import { CreateTicketRequest, TicketAPI } from '../apis/TicketAPI';
-import { ITicket, TicketContext } from '../contexts/ticket-context';
-import { RelationKind } from '../contexts/user-relation-context';
+import { TicketContext } from '../contexts/ticket-context';
+import { ITicket } from '../types/ticket';
+import { RelationKind } from '../types/user_relation';
 
 const useTicketContext = () => {
     const ticketContext = useContext(TicketContext);

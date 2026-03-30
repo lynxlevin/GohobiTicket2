@@ -8,11 +8,11 @@ import SearchIcon from '@mui/icons-material/Search';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import SearchBottomNav from '../../components/SearchBottomNav';
 import { NavItem } from '../../components/BaseBottomNav';
-import { ITicket } from '../../contexts/ticket-context';
-import { IDiary } from '../../contexts/diary-context';
 import Ticket from '../Tickets/Ticket';
 import Diary from '../Diaries/Diary';
 import { UserRelationAPI } from '../../apis/UserRelationAPI';
+import { ITicket } from '../../types/ticket';
+import { IDiary } from '../../types/diary';
 
 const Search = () => {
     const navigate = useNavigate();
