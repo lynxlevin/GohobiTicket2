@@ -1,8 +1,9 @@
 import BookIcon from '@mui/icons-material/Book';
+import RedeemIcon from '@mui/icons-material/Redeem';
 import SwitchAccessShortcutIcon from '@mui/icons-material/SwitchAccessShortcut';
 import { Badge, BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 
-export type NavItem = 'giving_tickets' | 'receiving_tickets' | 'diaries';
+export type NavItem = 'giving_tickets' | 'receiving_tickets' | 'used_tickets' | 'diaries';
 export interface BottomNavBadges {
     givingTickets?: number;
     receivingTickets?: number;
@@ -14,6 +15,7 @@ interface BaseBottomNavProps {
     navActions: {
         giving_tickets: () => void;
         receiving_tickets: () => void;
+        used_tickets?: () => void;
         diaries: () => void;
     };
     badges?: BottomNavBadges;
@@ -55,6 +57,9 @@ const BaseBottomNav = ({ selectedNavItem, handleSelect, navActions, badges }: Ba
                     }
                     onClick={navActions.receiving_tickets}
                 />
+                {navActions.used_tickets && (
+                    <BottomNavigationAction icon={<RedeemIcon />} value="used_tickets" label="おねがい" onClick={navActions.used_tickets} />
+                )}
                 <BottomNavigationAction
                     value="diaries"
                     label="日記"

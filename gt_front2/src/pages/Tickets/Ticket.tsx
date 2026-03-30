@@ -59,35 +59,35 @@ const Ticket = ({ ticket, relationKind, lastAvailableTicketRef }: TicketProps) =
         } else if (status === 'draft') {
             text = 'DRAFT';
         }
-        return <Badge className='badge' color='primary' sx={prevStatus ? { opacity: 0.45, transition: '0.5s', zIndex: 100 } : {}} badgeContent={text} />;
+        return <Badge className="badge" color="primary" sx={prevStatus ? { opacity: 0.45, transition: '0.5s', zIndex: 100 } : {}} badgeContent={text} />;
     }, [prevStatus, ticket.status]);
 
     return (
         <StyledGrid item xs={12} sm={6} md={4} status={ticket.status} ref={lastAvailableTicketRef}>
             {relationKind === 'Giving' && ticket.status === 'draft' && getStatusBadge}
             {relationKind === 'Receiving' && ticket.status !== 'read' && getStatusBadge}
-            <Card className='card'>
+            <Card className="card">
                 <CardContent>
-                    <div className='relative-div'>
-                        <Typography className='ticket-date'>{format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}</Typography>
+                    <div className="relative-div">
+                        <Typography className="ticket-date">{format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}</Typography>
                         {relationKind === 'Giving' && ticket.use_date === null && (
-                            <IconButton className='edit-button' onClick={() => setIsEditDialogOpen(true)}>
+                            <IconButton className="edit-button" onClick={() => setIsEditDialogOpen(true)}>
                                 <EditIcon />
                             </IconButton>
                         )}
                     </div>
-                    <Typography className='ticket-description'>{ticket.description}</Typography>
+                    <Typography className="ticket-description">{ticket.description}</Typography>
                 </CardContent>
                 {relationKind === 'Receiving' && ticket.use_date === null && (
-                    <CardActions ref={ref} className='use-button'>
-                        <Button variant='contained' onClick={() => setIsUseDialogOpen(true)}>
+                    <CardActions ref={ref} className="use-button">
+                        <Button variant="contained" onClick={() => setIsUseDialogOpen(true)}>
                             このチケットを使う
                         </Button>
                     </CardActions>
                 )}
                 {ticket.use_date !== null && (
-                    <CardActions className='use-button'>
-                        <Button variant='outlined' onClick={() => setIsUseDetailDialogOpen(true)}>
+                    <CardActions className="use-button">
+                        <Button variant="outlined" onClick={() => setIsUseDetailDialogOpen(true)}>
                             おねがいの内容を見る
                         </Button>
                     </CardActions>
@@ -126,8 +126,8 @@ const StyledGrid = styled(Grid)((props: { status: string }) => {
     const draftCardBGC =
         props.status === 'draft'
             ? css`
-        background-color: rgb(245, 245, 245);
-    `
+                  background-color: rgb(245, 245, 245);
+              `
             : css``;
     return css`
         .badge {
@@ -160,6 +160,7 @@ const StyledGrid = styled(Grid)((props: { status: string }) => {
         .ticket-description {
             text-align: start;
             white-space: pre-wrap;
+            overflow-wrap: anywhere;
         }
 
         .use-button {

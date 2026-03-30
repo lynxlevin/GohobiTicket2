@@ -22,6 +22,10 @@ const BottomNav = () => {
             navigate(`/user_relations/${userRelationId}/receiving_tickets`);
             window.scroll({ top: 0 });
         },
+        used_tickets: () => {
+            navigate(`/user_relations/${userRelationId}/used_tickets`);
+            window.scroll({ top: 0 });
+        },
         diaries: () => {
             navigate(`/user_relations/${userRelationId}/diaries`);
             window.scroll({ top: 0 });

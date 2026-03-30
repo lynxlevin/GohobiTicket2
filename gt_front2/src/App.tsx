@@ -13,6 +13,8 @@ import Login from './pages/Login';
 import Tickets from './pages/Tickets';
 import { DiaryProvider } from './contexts/diary-context';
 import Search from './pages/Search';
+import UsedTickets from './pages/Tickets/UsedTickets';
+import { UserProvider } from './contexts/user-context';
 import NotificationSettings from './pages/Settings/NotificationSettings';
 
 const theme = createTheme({
@@ -30,32 +32,35 @@ const theme = createTheme({
 function App() {
     return (
         <div className="App">
-            <UserRelationProvider>
-                <TicketProvider>
-                    <DiaryTagProvider>
-                        <DiaryProvider>
-                            <ThemeProvider theme={theme}>
-                                <LocalizationProvider
-                                    dateAdapter={AdapterDateFns}
-                                    adapterLocale={ja}
-                                    dateFormats={{ keyboardDate: 'yyyy/MM/dd (E)', normalDate: 'yyyy/MM/dd (E)' }}
-                                >
-                                    <Routes>
-                                        <Route path="/" element={<Login />} />
-                                        <Route path="/login" element={<Login />} />
-                                        <Route path="/user_relations/:userRelationId/receiving_tickets" element={<Tickets relationKind="Receiving" />} />
-                                        <Route path="/user_relations/:userRelationId/giving_tickets" element={<Tickets relationKind="Giving" />} />
-                                        <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
-                                        <Route path="/user_relations/:userRelationId/search" element={<Search />} />
-                                        <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />
-                                        <Route path="/settings/notifications" element={<NotificationSettings />} />
-                                    </Routes>
-                                </LocalizationProvider>
-                            </ThemeProvider>
-                        </DiaryProvider>
-                    </DiaryTagProvider>
-                </TicketProvider>
-            </UserRelationProvider>
+            <UserProvider>
+                <UserRelationProvider>
+                    <TicketProvider>
+                        <DiaryTagProvider>
+                            <DiaryProvider>
+                                <ThemeProvider theme={theme}>
+                                    <LocalizationProvider
+                                        dateAdapter={AdapterDateFns}
+                                        adapterLocale={ja}
+                                        dateFormats={{ keyboardDate: 'yyyy/MM/dd (E)', normalDate: 'yyyy/MM/dd (E)' }}
+                                    >
+                                        <Routes>
+                                            <Route path="/" element={<Login />} />
+                                            <Route path="/login" element={<Login />} />
+                                            <Route path="/user_relations/:userRelationId/receiving_tickets" element={<Tickets relationKind="Receiving" />} />
+                                            <Route path="/user_relations/:userRelationId/giving_tickets" element={<Tickets relationKind="Giving" />} />
+                                            <Route path="/user_relations/:userRelationId/used_tickets" element={<UsedTickets />} />
+                                            <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
+                                            <Route path="/user_relations/:userRelationId/search" element={<Search />} />
+                                            <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />
+                                            <Route path="/settings/notifications" element={<NotificationSettings />} />
+                                        </Routes>
+                                    </LocalizationProvider>
+                                </ThemeProvider>
+                            </DiaryProvider>
+                        </DiaryTagProvider>
+                    </TicketProvider>
+                </UserRelationProvider>
+            </UserProvider>
         </div>
     );
 }
