@@ -10,6 +10,11 @@ interface UpsertTicketResponse {
     ticket: ITicket;
 }
 
+interface UseTicketResponse {
+    ticket: ITicket;
+    web_push_result: 'Sent' | 'NotSent';
+}
+
 export interface CreateTicketRequest {
     gift_date: string;
     description: string;
@@ -37,7 +42,7 @@ export const TicketAPI = {
         const url = `${TicketAPI.BASE_URL}${ticketId}/`;
         return await client.delete(url);
     },
-    use: async (ticketId: number, props: { use_description: string }): Promise<AxiosResponse<UpsertTicketResponse>> => {
+    use: async (ticketId: number, props: { use_description: string }): Promise<AxiosResponse<UseTicketResponse>> => {
         const url = `${TicketAPI.BASE_URL}${ticketId}/use/`;
         return await client.put(url, { ticket: props });
     },

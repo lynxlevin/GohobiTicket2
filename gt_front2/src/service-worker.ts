@@ -83,7 +83,10 @@ self.addEventListener('push', event => {
     const payload = event.data?.json();
     const title = payload.title ?? '';
     let url = process.env.PUBLIC_URL;
-    if (payload.path) url += `/${payload.path}`;
+    switch (payload.message_type) {
+        case 'UseTicket':
+            url += `/user_relations/${payload.user_relation_id}/used_tickets?ticket_id=${payload.ticket_id}`;
+    }
     const options = {
         body: payload.body ?? '失敗',
         icon: `${process.env.PUBLIC_URL}/apple-touch-icon.png`,
