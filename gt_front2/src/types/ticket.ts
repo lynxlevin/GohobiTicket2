@@ -1,4 +1,5 @@
 export type TicketStatus = 'unread' | 'edited' | 'read' | 'draft';
+export type WishStatus = 'unread' | 'read';
 
 export interface ITicket {
     id: number;
@@ -6,8 +7,15 @@ export interface ITicket {
     giving_user_id: number;
     description: string;
     gift_date: string;
-    use_description: string;
-    use_date: string | null;
     status: TicketStatus;
     is_special: boolean;
+    wish: WishInner | null;
 }
+
+interface WishInner {
+    id: string;
+    description: string;
+    status: WishStatus;
+    created_at: string;
+}
+

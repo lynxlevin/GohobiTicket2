@@ -64,10 +64,10 @@ const UsedTickets = () => {
                     {givingTickets && receivingTickets && (
                         <Grid container spacing={4}>
                             {givingTickets
-                                .filter(ticket => ticket.use_date !== null)
-                                .concat(receivingTickets.filter(ticket => ticket.use_date !== null))
+                                .filter(ticket => ticket.wish !== null)
+                                .concat(receivingTickets.filter(ticket => ticket.wish !== null))
                                 .sort((a, b) => {
-                                    return a.use_date! > b.use_date! ? -1 : 1;
+                                    return a.wish!.created_at > b.wish!.created_at ? -1 : 1;
                                 })
                                 .map(ticket => {
                                     return (
@@ -129,7 +129,7 @@ const UsedTicket = ({ ticket, relatedUserName, hasThreadPosts = true, showAll = 
         }
     };
 
-    if (ticket.use_date === null) return <></>;
+    if (ticket.wish === null) return <></>;
     return (
         <StyledTicket item xs={12} sm={6} md={4}>
             <Card className="card">
@@ -140,9 +140,9 @@ const UsedTicket = ({ ticket, relatedUserName, hasThreadPosts = true, showAll = 
                                 {ticket.giving_user_id === me.id ? relatedUserName : me.username}より
                             </Typography>
                         )}
-                        <Typography className="post-time">{format(new Date(ticket.use_date), 'yyyy-MM-dd HH:mm')}</Typography>
+                        <Typography className="post-time">{format(new Date(ticket.wish.created_at), 'yyyy-MM-dd HH:mm')}</Typography>
                     </Stack>
-                    <Typography className="text">{ticket.use_description}</Typography>
+                    <Typography className="text">{ticket.wish.description}</Typography>
                 </CardContent>
                 <CardActions className="card-actions">
                     <IconButton size="small" onClick={() => setOpenedDialog('Detail')}>

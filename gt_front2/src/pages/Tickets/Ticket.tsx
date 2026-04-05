@@ -70,7 +70,7 @@ const Ticket = ({ ticket, relationKind, lastAvailableTicketRef }: TicketProps) =
                 <CardContent>
                     <div className="relative-div">
                         <Typography className="ticket-date">{format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}</Typography>
-                        {relationKind === 'Giving' && ticket.use_date === null && (
+                        {relationKind === 'Giving' && ticket.wish === null && (
                             <IconButton className="edit-button" onClick={() => setIsEditDialogOpen(true)}>
                                 <EditIcon />
                             </IconButton>
@@ -78,14 +78,14 @@ const Ticket = ({ ticket, relationKind, lastAvailableTicketRef }: TicketProps) =
                     </div>
                     <Typography className="ticket-description">{ticket.description}</Typography>
                 </CardContent>
-                {relationKind === 'Receiving' && ticket.use_date === null && (
+                {relationKind === 'Receiving' && ticket.wish === null && (
                     <CardActions ref={ref} className="use-button">
                         <Button variant="contained" onClick={() => setIsUseDialogOpen(true)}>
                             このチケットを使う
                         </Button>
                     </CardActions>
                 )}
-                {ticket.use_date !== null && (
+                {ticket.wish !== null && (
                     <CardActions className="use-button">
                         <Button variant="outlined" onClick={() => setIsUseDetailDialogOpen(true)}>
                             おねがいの内容を見る
