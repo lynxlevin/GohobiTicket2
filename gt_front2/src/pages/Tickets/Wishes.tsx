@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import { Box, Button, Card, CardActions, CardContent, Container, Divider, Grid, IconButton, Stack, Switch, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
-import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
@@ -14,16 +13,17 @@ import EditIcon from '@mui/icons-material/Edit';
 import SpecialStamp from './SpecialStamp';
 import DetailDialog from './DetailDialog';
 import useUserContext from '../../hooks/useUserContext';
-import { ITicket } from '../../types/ticket';
+import { IWish } from '../../types/ticket';
+import { WishAPI } from '../../apis/WishAPI';
 
-const UsedTickets = () => {
+const Wishes = () => {
     const { handleLogout } = useUserAPI();
     const { me, getMe } = useUserContext();
     const { getUserRelations, userRelations } = useUserRelationContext();
-    const { givingTickets, getGivingTickets, receivingTickets, getReceivingTickets } = useTicketContext();
     const { userRelationId } = usePagePath();
     const [showThreads, setShowThreads] = useState(false);
-    const [ticketIdToShowAll, setTicketIdToShowAll] = useState<number>(0);
+    const [wishIdToShowAll, setWishIdToShowAll] = useState<string>('');
+    const [wishes, setWishes] = useState<IWish[]>();
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
 
@@ -37,15 +37,9 @@ const UsedTickets = () => {
 
     useEffect(() => {
         if (currentRelation === undefined) return;
-        if (givingTickets !== undefined) return;
-        getGivingTickets(currentRelation.id);
-    }, [currentRelation, getGivingTickets, givingTickets]);
-
-    useEffect(() => {
-        if (currentRelation === undefined) return;
-        if (receivingTickets !== undefined) return;
-        getReceivingTickets(currentRelation.id);
-    }, [currentRelation, getReceivingTickets, receivingTickets]);
+        if (wishes !== undefined) return;
+        WishAPI.list(currentRelation.id).then(res => setWishes(res.data));
+    }, [currentRelation, wishes]);
 
     if (!currentRelation) return <Navigate to="/login" />;
     return (
@@ -61,27 +55,21 @@ const UsedTickets = () => {
                             スレッド表示
                         </>
                     )}
-                    {givingTickets && receivingTickets && (
+                    {wishes && (
                         <Grid container spacing={4}>
-                            {givingTickets
-                                .filter(ticket => ticket.wish !== null)
-                                .concat(receivingTickets.filter(ticket => ticket.wish !== null))
-                                .sort((a, b) => {
-                                    return a.wish!.created_at > b.wish!.created_at ? -1 : 1;
-                                })
-                                .map(ticket => {
-                                    return (
-                                        <UsedTicket
-                                            key={ticket.id}
-                                            ticket={ticket}
-                                            relatedUserName={currentRelation.related_username}
-                                            // MYMEMO: スレッド機能搭載後条件を外す
-                                            hasThreadPosts={me?.id === 1 && showThreads}
-                                            showAll={ticketIdToShowAll === ticket.id}
-                                            setShowAll={() => setTicketIdToShowAll(ticket.id)}
-                                        />
-                                    );
-                                })}
+                            {wishes.map(wish => {
+                                return (
+                                    <WishItem
+                                        key={wish.id}
+                                        wish={wish}
+                                        relatedUserName={currentRelation.related_username}
+                                        // MYMEMO: スレッド機能搭載後条件を外す
+                                        hasThreadPosts={me?.id === 1 && showThreads}
+                                        showAll={wishIdToShowAll === wish.id}
+                                        setShowAll={() => setWishIdToShowAll(wish.id)}
+                                    />
+                                );
+                            })}
                         </Grid>
                     )}
                 </Container>
@@ -110,39 +98,38 @@ const MiniLogo = styled.img`
     }
 `;
 
-interface UsedTicketProps {
-    ticket: ITicket;
+interface WishItemProps {
+    wish: IWish;
     relatedUserName: string;
     hasThreadPosts?: boolean;
     showAll?: boolean;
     setShowAll: () => void;
 }
 
-const UsedTicket = ({ ticket, relatedUserName, hasThreadPosts = true, showAll = false, setShowAll }: UsedTicketProps) => {
+const WishItem = ({ wish, relatedUserName, hasThreadPosts = true, showAll = false, setShowAll }: WishItemProps) => {
     const [openedDialog, setOpenedDialog] = useState<'Detail'>();
     const { me } = useUserContext();
 
     const getDialog = () => {
         switch (openedDialog) {
             case 'Detail':
-                return <DetailDialog ticket={ticket} onClose={() => setOpenedDialog(undefined)} relatedUserName={relatedUserName} />;
+                return <DetailDialog ticket={wish.ticket} onClose={() => setOpenedDialog(undefined)} relatedUserName={relatedUserName} />;
         }
     };
 
-    if (ticket.wish === null) return <></>;
     return (
         <StyledTicket item xs={12} sm={6} md={4}>
             <Card className="card">
                 <CardContent>
                     <Stack direction="row" justifyContent="space-between">
                         {me !== undefined && (
-                            <Typography className={`from-name${ticket.is_special ? ' special-ticket' : ''}`}>
-                                {ticket.giving_user_id === me.id ? relatedUserName : me.username}より
+                            <Typography className={`from-name${wish.ticket.is_special ? ' special-ticket' : ''}`}>
+                                {wish.ticket.giving_user_id === me.id ? relatedUserName : me.username}より
                             </Typography>
                         )}
-                        <Typography className="post-time">{format(new Date(ticket.wish.created_at), 'yyyy-MM-dd HH:mm')}</Typography>
+                        <Typography className="post-time">{format(new Date(wish.created_at), 'yyyy-MM-dd HH:mm')}</Typography>
                     </Stack>
-                    <Typography className="text">{ticket.wish.description}</Typography>
+                    <Typography className="text">{wish.description}</Typography>
                 </CardContent>
                 <CardActions className="card-actions">
                     <IconButton size="small" onClick={() => setOpenedDialog('Detail')}>
@@ -152,7 +139,7 @@ const UsedTicket = ({ ticket, relatedUserName, hasThreadPosts = true, showAll = 
                         <EditIcon />
                     </IconButton> */}
                 </CardActions>
-                {ticket.is_special && <SpecialStamp randKey={ticket.id} />}
+                {wish.ticket.is_special && <SpecialStamp randKey={wish.ticket.id} />}
                 {hasThreadPosts && (
                     <>
                         <ThreadPost relatedUserName={relatedUserName} showAll={showAll} />
@@ -276,4 +263,4 @@ const StyledPost = styled(Box)`
     }
 `;
 
-export default UsedTickets;
+export default Wishes;
