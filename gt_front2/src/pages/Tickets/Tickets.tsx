@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
-import { Box, CardMedia, Container, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
+import { Box, CardMedia, CircularProgress, Container, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useTicketContext from '../../hooks/useTicketContext';
@@ -10,7 +10,6 @@ import TicketForm from './TicketForm';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
-import { Navigate } from 'react-router-dom';
 import { RelationKind } from '../../types/user_relation';
 
 interface TicketsProps {
@@ -79,58 +78,70 @@ const Tickets = ({ relationKind }: TicketsProps) => {
         }
     }, [currentRelation, getGivingTickets, getReceivingTickets, givingTickets, receivingTickets, relationKind, userRelationId]);
 
-    if (!currentRelation) return <Navigate to="/login" />;
     return (
         <>
             <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
             <BottomNav />
-            <main>
-                <Box sx={{ pt: 8 }}>
-                    <Container maxWidth="sm">
-                        <Typography variant="h5" align="center" color="text.primary" sx={{ mt: 3 }} gutterBottom>
-                            {currentRelation.related_username}に{relationKind === 'Receiving' ? 'もらった' : 'あげる'}
-                        </Typography>
-                        <Typography variant="h4" align="center" color="text.primary" sx={{ fontWeight: 600 }} gutterBottom>
-                            ごほうびチケット
-                        </Typography>
-                        {isSpecialNumber ? (
-                            <Typography variant="h5" align="center" color="text.primary" gutterBottom>
-                                計<GoldNumber>{ticketCount}</GoldNumber>枚
+            {currentRelation === undefined ? (
+                <CircularProgress />
+            ) : (
+                <main>
+                    <Box sx={{ pt: 8 }}>
+                        <Container maxWidth="sm">
+                            <Typography variant="h5" align="center" color="text.primary" sx={{ mt: 3 }} gutterBottom>
+                                {currentRelation.related_username}に{relationKind === 'Receiving' ? 'もらった' : 'あげる'}
                             </Typography>
-                        ) : (
-                            <Typography variant="h5" align="center" color="text.primary" gutterBottom>
-                                計{ticketCount}枚
+                            <Typography variant="h4" align="center" color="text.primary" sx={{ fontWeight: 600 }} gutterBottom>
+                                ごほうびチケット
                             </Typography>
-                        )}
-                        {ticketImage}
-                        {relationKind === 'Giving' && <TicketForm />}
-                        <FormGroup>
-                            <FormControlLabel label="特別チケットのみ表示" control={<Switch onChange={event => setShowOnlySpecial(event.target.checked)} />} />
-                            <FormControlLabel label="使用済みチケットのみ表示" control={<Switch onChange={event => setShowOnlyUsed(event.target.checked)} />} />
-                        </FormGroup>
+                            {isSpecialNumber ? (
+                                <Typography variant="h5" align="center" color="text.primary" gutterBottom>
+                                    計<GoldNumber>{ticketCount}</GoldNumber>枚
+                                </Typography>
+                            ) : (
+                                <Typography variant="h5" align="center" color="text.primary" gutterBottom>
+                                    計{ticketCount}枚
+                                </Typography>
+                            )}
+                            {ticketImage}
+                            {relationKind === 'Giving' && <TicketForm />}
+                            <FormGroup>
+                                <FormControlLabel
+                                    label="特別チケットのみ表示"
+                                    control={<Switch onChange={event => setShowOnlySpecial(event.target.checked)} />}
+                                />
+                                <FormControlLabel
+                                    label="使用済みチケットのみ表示"
+                                    control={<Switch onChange={event => setShowOnlyUsed(event.target.checked)} />}
+                                />
+                            </FormGroup>
+                        </Container>
+                    </Box>
+                    <Container sx={{ pt: 4, pb: 8 }} maxWidth="md">
+                        <Grid container spacing={4}>
+                            {getSortedTickets({ showOnlySpecial, showOnlyUsed, relationKind }).map(ticket => {
+                                if (ticket.id === getLastAvailableTicketId(relationKind)) {
+                                    return (
+                                        <Ticket key={ticket.id} lastAvailableTicketRef={lastAvailableTicketRef} ticket={ticket} relationKind={relationKind} />
+                                    );
+                                }
+                                return <Ticket key={ticket.id} ticket={ticket} relationKind={relationKind} />;
+                            })}
+                        </Grid>
                     </Container>
-                </Box>
-                <Container sx={{ pt: 4, pb: 8 }} maxWidth="md">
-                    <Grid container spacing={4}>
-                        {getSortedTickets({ showOnlySpecial, showOnlyUsed, relationKind }).map(ticket => {
-                            if (ticket.id === getLastAvailableTicketId(relationKind)) {
-                                return <Ticket key={ticket.id} lastAvailableTicketRef={lastAvailableTicketRef} ticket={ticket} relationKind={relationKind} />;
-                            }
-                            return <Ticket key={ticket.id} ticket={ticket} relationKind={relationKind} />;
-                        })}
-                    </Grid>
-                </Container>
-                {!showOnlyUsed && !showOnlySpecial && (
-                    <ToLastAvailableTicketButton
-                        onClick={() => {
-                            if (lastAvailableTicketRef.current !== null) window.scrollTo({ top: lastAvailableTicketRef.current.offsetTop, behavior: 'smooth' });
-                        }}
-                    >
-                        <KeyboardDoubleArrowDownIcon />
-                    </ToLastAvailableTicketButton>
-                )}
-                {miniTicket}
-            </main>
+                    {!showOnlyUsed && !showOnlySpecial && (
+                        <ToLastAvailableTicketButton
+                            onClick={() => {
+                                if (lastAvailableTicketRef.current !== null)
+                                    window.scrollTo({ top: lastAvailableTicketRef.current.offsetTop, behavior: 'smooth' });
+                            }}
+                        >
+                            <KeyboardDoubleArrowDownIcon />
+                        </ToLastAvailableTicketButton>
+                    )}
+                    {miniTicket}
+                </main>
+            )}
         </>
     );
 };

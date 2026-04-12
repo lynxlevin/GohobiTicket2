@@ -1,12 +1,11 @@
 import styled from '@emotion/styled';
-import { Box, Button, Card, CardActions, CardContent, Container, Divider, Grid, IconButton, Stack, Switch, Typography } from '@mui/material';
+import { Box, Button, Card, CardActions, CardContent, CircularProgress, Container, Divider, Grid, IconButton, Stack, Switch, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useUserAPI from '../../hooks/useUserAPI';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
-import { Navigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
@@ -41,40 +40,43 @@ const Wishes = () => {
         WishAPI.list(currentRelation.id).then(res => setWishes(res.data));
     }, [currentRelation, wishes]);
 
-    if (!currentRelation) return <Navigate to="/login" />;
     return (
         <>
             <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
             <BottomNav />
-            <main>
-                <Container sx={{ py: 8 }} maxWidth="md">
-                    {/* MYMEMO: スレッド機能搭載後条件を外す */}
-                    {me?.id === 1 && (
-                        <>
-                            <Switch checked={showThreads} onChange={e => setShowThreads(e.target.checked)} />
-                            スレッド表示
-                        </>
-                    )}
-                    {wishes && (
-                        <Grid container spacing={4}>
-                            {wishes.map(wish => {
-                                return (
-                                    <WishItem
-                                        key={wish.id}
-                                        wish={wish}
-                                        relatedUserName={currentRelation.related_username}
-                                        // MYMEMO: スレッド機能搭載後条件を外す
-                                        hasThreadPosts={me?.id === 1 && showThreads}
-                                        showAll={wishIdToShowAll === wish.id}
-                                        setShowAll={() => setWishIdToShowAll(wish.id)}
-                                    />
-                                );
-                            })}
-                        </Grid>
-                    )}
-                </Container>
-                <MiniLogo onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src="/apple-touch-icon.png" alt="mini-ticket" />
-            </main>
+            {currentRelation === undefined ? (
+                <CircularProgress />
+            ) : (
+                <main>
+                    <Container sx={{ py: 8 }} maxWidth="md">
+                        {/* MYMEMO: スレッド機能搭載後条件を外す */}
+                        {me?.id === 1 && (
+                            <>
+                                <Switch checked={showThreads} onChange={e => setShowThreads(e.target.checked)} />
+                                スレッド表示
+                            </>
+                        )}
+                        {wishes && (
+                            <Grid container spacing={4}>
+                                {wishes.map(wish => {
+                                    return (
+                                        <WishItem
+                                            key={wish.id}
+                                            wish={wish}
+                                            relatedUserName={currentRelation.related_username}
+                                            // MYMEMO: スレッド機能搭載後条件を外す
+                                            hasThreadPosts={me?.id === 1 && showThreads}
+                                            showAll={wishIdToShowAll === wish.id}
+                                            setShowAll={() => setWishIdToShowAll(wish.id)}
+                                        />
+                                    );
+                                })}
+                            </Grid>
+                        )}
+                    </Container>
+                    <MiniLogo onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src="/apple-touch-icon.png" alt="mini-ticket" />
+                </main>
+            )}
         </>
     );
 };

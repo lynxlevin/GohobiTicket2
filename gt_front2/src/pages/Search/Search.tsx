@@ -5,7 +5,7 @@ import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 import usePagePath from '../../hooks/usePagePath';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import SearchBottomNav from '../../components/SearchBottomNav';
 import { NavItem } from '../../components/BaseBottomNav';
 import Ticket from '../Tickets/Ticket';
@@ -102,7 +102,6 @@ const Search = () => {
         setPageQuery(tab === null ? undefined : (tab as NavItem));
     }, [searchParams]);
 
-    if (!currentRelation) return <Navigate to="/login" />;
     return (
         <>
             <AppBar position="fixed" sx={{ bgcolor: 'primary.light' }}>
