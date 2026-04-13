@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Box, Button, Card, CardActions, CardContent, CircularProgress, Container, Divider, Grid, IconButton, Stack, Switch, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useUserAPI from '../../hooks/useUserAPI';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
@@ -14,8 +14,10 @@ import DetailDialog from './DetailDialog';
 import useUserContext from '../../hooks/useUserContext';
 import { IWish } from '../../types/ticket';
 import { WishAPI } from '../../apis/WishAPI';
+import { useSearchParams } from 'react-router-dom';
 
 const Wishes = () => {
+    const [searchParams] = useSearchParams();
     const { handleLogout } = useUserAPI();
     const { me, getMe } = useUserContext();
     const { getUserRelations, userRelations } = useUserRelationContext();
@@ -23,6 +25,8 @@ const Wishes = () => {
     const [showThreads, setShowThreads] = useState(false);
     const [wishIdToShowAll, setWishIdToShowAll] = useState<string>('');
     const [wishes, setWishes] = useState<IWish[]>();
+    const [selectedWishId] = useState(searchParams.get('wish_id'));
+    const selectedWishRef = useRef<HTMLDivElement | null>(null);
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
 
@@ -39,6 +43,12 @@ const Wishes = () => {
         if (wishes !== undefined) return;
         WishAPI.list(currentRelation.id).then(res => setWishes(res.data));
     }, [currentRelation, wishes]);
+
+    useEffect(() => {
+        if (wishes === undefined) return;
+        if (selectedWishId === null) return;
+        selectedWishRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [selectedWishId, wishes]);
 
     return (
         <>
@@ -68,6 +78,7 @@ const Wishes = () => {
                                             hasThreadPosts={me?.id === 1 && showThreads}
                                             showAll={wishIdToShowAll === wish.id}
                                             setShowAll={() => setWishIdToShowAll(wish.id)}
+                                            selectedRef={selectedWishId === wish.id ? selectedWishRef : undefined}
                                         />
                                     );
                                 })}
@@ -106,9 +117,10 @@ interface WishItemProps {
     hasThreadPosts?: boolean;
     showAll?: boolean;
     setShowAll: () => void;
+    selectedRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
-const WishItem = ({ wish, relatedUserName, hasThreadPosts = true, showAll = false, setShowAll }: WishItemProps) => {
+const WishItem = ({ wish, relatedUserName, hasThreadPosts = true, showAll = false, setShowAll, selectedRef }: WishItemProps) => {
     const [openedDialog, setOpenedDialog] = useState<'Detail'>();
     const { me } = useUserContext();
 
@@ -120,7 +132,7 @@ const WishItem = ({ wish, relatedUserName, hasThreadPosts = true, showAll = fals
     };
 
     return (
-        <StyledTicket item xs={12} sm={6} md={4}>
+        <StyledGrid item xs={12} sm={6} md={4} ref={selectedRef}>
             <Card className="card">
                 <CardContent>
                     <Stack direction="row" justifyContent="space-between">
@@ -155,11 +167,11 @@ const WishItem = ({ wish, relatedUserName, hasThreadPosts = true, showAll = fals
                 )}
             </Card>
             {openedDialog && getDialog()}
-        </StyledTicket>
+        </StyledGrid>
     );
 };
 
-const StyledTicket = styled(Grid)`
+const StyledGrid = styled(Grid)`
     .card {
         height: 100%;
         display: flex;

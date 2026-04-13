@@ -85,8 +85,7 @@ self.addEventListener('push', event => {
     let url = process.env.PUBLIC_URL;
     switch (payload.message_type) {
         case 'UseTicket':
-            // MYMEMO: Change query to wish_id
-            url += `/user_relations/${payload.user_relation_id}/wishes?ticket_id=${payload.ticket_id}`;
+            url += `/user_relations/${payload.user_relation_id}/wishes?wish_id=${payload.wish_id}`;
     }
     const options = {
         body: payload.body ?? '失敗',
