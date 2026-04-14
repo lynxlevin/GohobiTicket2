@@ -65,7 +65,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
     }, [getUserRelations, userRelations]);
 
     useEffect(() => {
-        if (isNaN(userRelationId) || !currentRelation) return;
+        if (userRelationId === null || !currentRelation) return;
         switch (relationKind) {
             case 'Receiving':
                 if (receivingTickets !== undefined) return;

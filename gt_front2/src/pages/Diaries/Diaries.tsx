@@ -28,12 +28,12 @@ const Diaries = () => {
     }, [getUserRelations, userRelations]);
 
     useEffect(() => {
-        if (isNaN(userRelationId) || !currentRelation) return;
+        if (userRelationId === null || !currentRelation) return;
         if (diaries === undefined) getDiaries(userRelationId);
     }, [currentRelation, diaries, getDiaries, userRelationId]);
 
     useEffect(() => {
-        if (isNaN(userRelationId) || !currentRelation) return;
+        if (userRelationId === null || !currentRelation) return;
         if (diaryTags === undefined) getDiaryTags(userRelationId);
     }, [currentRelation, diaryTags, getDiaryTags, userRelationId]);
 
@@ -41,7 +41,7 @@ const Diaries = () => {
         <>
             <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
             <BottomNav />
-            {currentRelation === undefined ? (
+            {currentRelation === undefined || userRelationId === null ? (
                 <CircularProgress />
             ) : (
                 <main>

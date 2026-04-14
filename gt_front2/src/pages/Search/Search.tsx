@@ -1,4 +1,4 @@
-import { AppBar, Box, Container, Grid, IconButton, InputAdornment, OutlinedInput, Toolbar } from '@mui/material';
+import { AppBar, Box, CircularProgress, Container, Grid, IconButton, InputAdornment, OutlinedInput, Toolbar } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
@@ -49,7 +49,7 @@ const Search = () => {
     const submit = () => {
         const text = searchText.trim();
         if (text.length === 0) return;
-        UserRelationAPI.search({ userRelationId, text }).then(res => {
+        UserRelationAPI.search({ userRelationId: userRelationId!, text }).then(res => {
             const givingTicketsRes = res.data.giving_tickets;
             const receivingTicketsRes = res.data.receiving_tickets;
             const diariesRes = res.data.diaries;
@@ -93,7 +93,7 @@ const Search = () => {
     }, [getUserRelations, userRelations]);
 
     useEffect(() => {
-        if (isNaN(userRelationId) || !currentRelation) return;
+        if (userRelationId === null || !currentRelation) return;
         if (diaryTags === undefined) getDiaryTags(userRelationId);
     }, [currentRelation, diaryTags, getDiaryTags, userRelationId]);
 
@@ -143,16 +143,20 @@ const Search = () => {
                 setSelected={setPageQuery}
                 badges={{ givingTickets: givingTickets?.length, receivingTickets: receivingTickets?.length, diaries: diaries?.length }}
             />
-            <main>
-                <Box sx={{ pt: 8 }}>
-                    <Container maxWidth="sm"></Container>
-                </Box>
-                <Container sx={{ pt: 2, pb: 8 }} maxWidth="md">
-                    <Grid container spacing={4}>
-                        {getContent()}
-                    </Grid>
-                </Container>
-            </main>
+            {userRelationId === null ? (
+                <CircularProgress />
+            ) : (
+                <main>
+                    <Box sx={{ pt: 8 }}>
+                        <Container maxWidth="sm"></Container>
+                    </Box>
+                    <Container sx={{ pt: 2, pb: 8 }} maxWidth="md">
+                        <Grid container spacing={4}>
+                            {getContent()}
+                        </Grid>
+                    </Container>
+                </main>
+            )}
         </>
     );
 };
