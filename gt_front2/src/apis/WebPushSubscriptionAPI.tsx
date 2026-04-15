@@ -22,4 +22,7 @@ export const WebPushSubscriptionAPI = {
     delete: async (): Promise<AxiosResponse> => {
         return await client.delete(WebPushSubscriptionAPI.BASE_URL);
     },
+    sendWebPush: async (): Promise<AxiosResponse> => {
+        return await client.post(`${WebPushSubscriptionAPI.BASE_URL}/send/`, { type: 'UseTicket' });
+    },
 };

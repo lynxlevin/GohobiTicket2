@@ -141,6 +141,10 @@ const NotificationSettings = () => {
         }
     };
 
+    const sendWebPush = () => {
+        WebPushSubscriptionAPI.sendWebPush();
+    };
+
     useEffect(() => {
         if (subscriptionStatus !== undefined || subscriptionFromServer !== undefined || webPushSupported !== undefined) return;
         (async () => {
@@ -188,6 +192,11 @@ const NotificationSettings = () => {
             </AppBar>
             <BottomNav />
             <Box pt={12}>{getSubscriptionStatusView()}</Box>
+            {subscriptionStatus !== undefined && ['Subscribed', 'BackOnly'].includes(subscriptionStatus) && (
+                <>
+                    <Button onClick={sendWebPush}>試しに自分に通知</Button>
+                </>
+            )}
         </>
     );
 };
