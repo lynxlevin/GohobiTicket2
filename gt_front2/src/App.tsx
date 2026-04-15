@@ -13,9 +13,9 @@ import Login from './pages/Login';
 import Tickets from './pages/Tickets';
 import { DiaryProvider } from './contexts/diary-context';
 import Search from './pages/Search';
-import UsedTickets from './pages/Tickets/UsedTickets';
 import { UserProvider } from './contexts/user-context';
 import NotificationSettings from './pages/Settings/NotificationSettings';
+import Wishes from './pages/Tickets/Wishes';
 
 const theme = createTheme({
     palette: {
@@ -48,7 +48,7 @@ function App() {
                                             <Route path="/login" element={<Login />} />
                                             <Route path="/user_relations/:userRelationId/receiving_tickets" element={<Tickets relationKind="Receiving" />} />
                                             <Route path="/user_relations/:userRelationId/giving_tickets" element={<Tickets relationKind="Giving" />} />
-                                            <Route path="/user_relations/:userRelationId/used_tickets" element={<UsedTickets />} />
+                                            <Route path="/user_relations/:userRelationId/wishes" element={<Wishes />} />
                                             <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
                                             <Route path="/user_relations/:userRelationId/search" element={<Search />} />
                                             <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />

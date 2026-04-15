@@ -2,9 +2,9 @@ import { Box, Button, Chip, FormControl, FormGroup, InputLabel, MenuItem, Select
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { format } from 'date-fns';
 import { useState } from 'react';
-import { IDiaryTag } from '../../contexts/diary-tag-context';
 import useDiaryContext from '../../hooks/useDiaryContext';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
+import { IDiaryTag } from '../../types/diary';
 
 interface DiaryFormProps {
     userRelationId: number;

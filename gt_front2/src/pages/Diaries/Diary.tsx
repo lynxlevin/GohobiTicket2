@@ -6,8 +6,8 @@ import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import EditDiaryDialog from './EditDiaryDialog';
 import MoonPhase from './MoonPhase';
 import useOnScreen from '../../hooks/useOnScreen';
-import { DiaryStatus, IDiary } from '../../contexts/diary-context';
 import useDiaryContext from '../../hooks/useDiaryContext';
+import { DiaryStatus, IDiary } from '../../types/diary';
 
 interface DiaryProps {
     diary: IDiary;

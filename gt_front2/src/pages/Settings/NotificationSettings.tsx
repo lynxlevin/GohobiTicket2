@@ -1,8 +1,9 @@
 import { AppBar, Box, Button, Stack, TextField, Toolbar, Typography } from '@mui/material';
 import useServiceWorker from '../../hooks/useServiceWorker';
 import { useEffect, useState } from 'react';
-import { WebPushSubscriptionAPI, WebPushSubscriptionFromServer } from '../../apis/WebPushSubscriptionAPI';
+import { WebPushSubscriptionAPI } from '../../apis/WebPushSubscriptionAPI';
 import BottomNav from '../../components/BottomNav';
+import { WebPushSubscriptionFromServer } from '../../types/web_push';
 
 type SubscriptionStatus = 'NoSub' | 'FrontOnly' | 'BackOnly' | 'Subscribed';
 

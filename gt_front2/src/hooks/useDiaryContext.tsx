@@ -1,6 +1,7 @@
 import { useCallback, useContext, useMemo } from 'react';
-import { DiaryContext, IDiary } from '../contexts/diary-context';
+import { DiaryContext } from '../contexts/diary-context';
 import { CreateDiaryRequest, DiaryAPI, UpdateDiaryRequest } from '../apis/DiaryAPI';
+import { IDiary } from '../types/diary';
 
 const useDiaryContext = () => {
     const diaryContext = useContext(DiaryContext);
@@ -27,23 +28,23 @@ const useDiaryContext = () => {
     );
 
     const createDiary = useCallback(async (data: CreateDiaryRequest) => {
-        DiaryAPI.create(data).then(({data: diary}) => {
+        DiaryAPI.create(data).then(({ data: diary }) => {
             diaryContext.setDiaries(prev => {
                 if (prev === undefined) return [diary];
                 return [diary, ...prev];
-            })
-        })
+            });
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const updateDiary = useCallback(async (diaryId: string, data: UpdateDiaryRequest) => {
-        DiaryAPI.update(diaryId, data).then(({data: diary}) => {
+        DiaryAPI.update(diaryId, data).then(({ data: diary }) => {
             diaryContext.setDiaries(prev => {
                 const diaries = [...prev!];
                 diaries[diaries.findIndex(p => p.id === diary.id)] = diary;
                 return diaries;
-            })
-        })
+            });
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -53,8 +54,8 @@ const useDiaryContext = () => {
                 const diaries = [...prev!];
                 diaries[diaries.findIndex(p => p.id === diaryId)].status = 'read';
                 return diaries;
-            })
-        })
+            });
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

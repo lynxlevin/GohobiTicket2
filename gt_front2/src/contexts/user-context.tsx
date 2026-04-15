@@ -1,12 +1,7 @@
 import { createContext, ReactNode, useState } from 'react';
+import { IUser } from '../types/user';
 
-export interface IUser {
-    id: number;
-    username: string;
-    email: string;
-}
-
-export interface UserContextType {
+interface UserContextType {
     me: IUser | undefined;
     setMe: React.Dispatch<React.SetStateAction<IUser | undefined>>;
 }

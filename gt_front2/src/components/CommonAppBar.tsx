@@ -10,12 +10,12 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IUserRelation } from '../contexts/user-relation-context';
 import useTicketContext from '../hooks/useTicketContext';
 import useUserRelationContext from '../hooks/useUserRelationContext';
 import useDiaryContext from '../hooks/useDiaryContext';
 import useDiaryTagContext from '../hooks/useDiaryTagContext';
 import usePagePath from '../hooks/usePagePath';
+import { IUserRelation } from '../types/user_relation';
 
 interface HideOnScrollProps {
     children: React.ReactElement;
@@ -36,7 +36,7 @@ const HideOnScroll = (props: HideOnScrollProps) => {
 
 interface CommonAppBarProps {
     handleLogout: () => Promise<void>;
-    currentRelation: IUserRelation;
+    currentRelation?: IUserRelation;
 }
 
 const CommonAppBar = ({ handleLogout, currentRelation }: CommonAppBarProps) => {
@@ -49,7 +49,7 @@ const CommonAppBar = ({ handleLogout, currentRelation }: CommonAppBarProps) => {
     const { clearDiaryTagCache } = useDiaryTagContext();
     const { pagePath } = usePagePath();
 
-    const otherRelations = userRelations?.filter((relation, _index, _self) => relation.related_username !== currentRelation.related_username);
+    const otherRelations = userRelations?.filter((relation, _index, _self) => relation.related_username !== currentRelation?.related_username);
 
     const clearCache = () => {
         clearTicketCache();
@@ -65,8 +65,9 @@ const CommonAppBar = ({ handleLogout, currentRelation }: CommonAppBarProps) => {
                     <IconButton
                         onClick={() => {
                             window.scroll({ top: 0 });
-                            navigate(`/user_relations/${currentRelation.id}/search?tab=${pagePath}`);
+                            navigate(`/user_relations/${currentRelation?.id}/search?tab=${pagePath}`);
                         }}
+                        disabled={currentRelation === undefined}
                     >
                         <SearchIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
                     </IconButton>
@@ -94,8 +95,9 @@ const CommonAppBar = ({ handleLogout, currentRelation }: CommonAppBarProps) => {
                                         disableGutters
                                         onClick={() => {
                                             window.scroll({ top: 0 });
-                                            navigate(`/user_relations/${currentRelation.id}/diary_tags`);
+                                            navigate(`/user_relations/${currentRelation?.id}/diary_tags`);
                                         }}
+                                        disabled={currentRelation === undefined}
                                     >
                                         <ListItemIcon>
                                             <SellIcon />

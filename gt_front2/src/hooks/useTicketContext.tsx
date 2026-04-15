@@ -1,7 +1,8 @@
 import { useCallback, useContext } from 'react';
 import { CreateTicketRequest, TicketAPI } from '../apis/TicketAPI';
-import { ITicket, TicketContext } from '../contexts/ticket-context';
-import { RelationKind } from '../contexts/user-relation-context';
+import { TicketContext } from '../contexts/ticket-context';
+import { ITicket } from '../types/ticket';
+import { RelationKind } from '../types/user_relation';
 
 const useTicketContext = () => {
     const ticketContext = useContext(TicketContext);
@@ -31,8 +32,8 @@ const useTicketContext = () => {
 
     const sortConditions = (a: ITicket, b: ITicket) => {
         const aIsNewer = a.gift_date > b.gift_date;
-        const onlyAIsUsed = a.use_date !== null && b.use_date === null;
-        const onlyBIsUsed = a.use_date === null && b.use_date !== null;
+        const onlyAIsUsed = a.wish !== null && b.wish === null;
+        const onlyBIsUsed = a.wish === null && b.wish !== null;
 
         if (onlyAIsUsed) return 1;
         if (onlyBIsUsed) return -1;
@@ -45,7 +46,7 @@ const useTicketContext = () => {
             if (tickets === undefined) return [];
             return tickets
                 .filter(ticket => !showOnlySpecial || ticket.is_special)
-                .filter(ticket => !showOnlyUsed || ticket.use_date !== null)
+                .filter(ticket => !showOnlyUsed || ticket.wish !== null)
                 .sort(sortConditions);
         },
         [ticketContext.givingTickets, ticketContext.receivingTickets],
@@ -55,7 +56,7 @@ const useTicketContext = () => {
         (relationKind: RelationKind) => {
             const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
             if (tickets === undefined) return undefined;
-            const availableTickets = tickets.filter(ticket => ticket.use_date === null).sort(sortConditions);
+            const availableTickets = tickets.filter(ticket => ticket.wish === null).sort(sortConditions);
             if (availableTickets.length === 0) return undefined;
             return availableTickets.slice(-1)[0].id;
         },

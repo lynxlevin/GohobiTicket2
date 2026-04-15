@@ -1,10 +1,6 @@
+import { WebPushSubscriptionFromServer } from '../types/web_push';
 import client from './axios';
 import type { AxiosResponse } from 'axios';
-
-export interface WebPushSubscriptionFromServer {
-    device_name: string;
-    expiration_epoch_time: number | null;
-}
 
 interface CreateWebPushSubscriptionProps {
     device_name: string;

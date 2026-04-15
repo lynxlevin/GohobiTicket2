@@ -6,8 +6,9 @@ const usePagePath = () => {
     const pathParams = useParams();
     const location = useLocation();
 
-    const userRelationId = useMemo(() => {
-        return Number(pathParams.userRelationId);
+    const userRelationId = useMemo((): number | null => {
+        const userRelationId = Number(pathParams.userRelationId);
+        return isNaN(userRelationId) ? null : userRelationId;
     }, [pathParams.userRelationId]);
 
     const pagePath = useMemo(() => {

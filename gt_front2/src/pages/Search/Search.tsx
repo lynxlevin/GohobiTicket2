@@ -1,18 +1,18 @@
-import { AppBar, Box, Container, Grid, IconButton, InputAdornment, OutlinedInput, Toolbar } from '@mui/material';
+import { AppBar, Box, CircularProgress, Container, Grid, IconButton, InputAdornment, OutlinedInput, Toolbar } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 import usePagePath from '../../hooks/usePagePath';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import SearchBottomNav from '../../components/SearchBottomNav';
 import { NavItem } from '../../components/BaseBottomNav';
-import { ITicket } from '../../contexts/ticket-context';
-import { IDiary } from '../../contexts/diary-context';
 import Ticket from '../Tickets/Ticket';
 import Diary from '../Diaries/Diary';
 import { UserRelationAPI } from '../../apis/UserRelationAPI';
+import { ITicket } from '../../types/ticket';
+import { IDiary } from '../../types/diary';
 
 const Search = () => {
     const navigate = useNavigate();
@@ -49,7 +49,7 @@ const Search = () => {
     const submit = () => {
         const text = searchText.trim();
         if (text.length === 0) return;
-        UserRelationAPI.search({ userRelationId, text }).then(res => {
+        UserRelationAPI.search({ userRelationId: userRelationId!, text }).then(res => {
             const givingTicketsRes = res.data.giving_tickets;
             const receivingTicketsRes = res.data.receiving_tickets;
             const diariesRes = res.data.diaries;
@@ -93,7 +93,7 @@ const Search = () => {
     }, [getUserRelations, userRelations]);
 
     useEffect(() => {
-        if (isNaN(userRelationId) || !currentRelation) return;
+        if (userRelationId === null || !currentRelation) return;
         if (diaryTags === undefined) getDiaryTags(userRelationId);
     }, [currentRelation, diaryTags, getDiaryTags, userRelationId]);
 
@@ -102,7 +102,6 @@ const Search = () => {
         setPageQuery(tab === null ? undefined : (tab as NavItem));
     }, [searchParams]);
 
-    if (!currentRelation) return <Navigate to="/login" />;
     return (
         <>
             <AppBar position="fixed" sx={{ bgcolor: 'primary.light' }}>
@@ -144,16 +143,20 @@ const Search = () => {
                 setSelected={setPageQuery}
                 badges={{ givingTickets: givingTickets?.length, receivingTickets: receivingTickets?.length, diaries: diaries?.length }}
             />
-            <main>
-                <Box sx={{ pt: 8 }}>
-                    <Container maxWidth="sm"></Container>
-                </Box>
-                <Container sx={{ pt: 2, pb: 8 }} maxWidth="md">
-                    <Grid container spacing={4}>
-                        {getContent()}
-                    </Grid>
-                </Container>
-            </main>
+            {userRelationId === null ? (
+                <CircularProgress />
+            ) : (
+                <main>
+                    <Box sx={{ pt: 8 }}>
+                        <Container maxWidth="sm"></Container>
+                    </Box>
+                    <Container sx={{ pt: 2, pb: 8 }} maxWidth="md">
+                        <Grid container spacing={4}>
+                            {getContent()}
+                        </Grid>
+                    </Container>
+                </main>
+            )}
         </>
     );
 };

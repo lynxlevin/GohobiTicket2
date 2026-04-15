@@ -15,10 +15,9 @@ import {
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { format } from 'date-fns';
 import { useState } from 'react';
-import { IDiaryTag } from '../../contexts/diary-tag-context';
-import { IDiary } from '../../contexts/diary-context';
 import useDiaryContext from '../../hooks/useDiaryContext';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
+import { IDiary, IDiaryTag } from '../../types/diary';
 
 interface EditDiaryDialogProps {
     onClose: () => void;

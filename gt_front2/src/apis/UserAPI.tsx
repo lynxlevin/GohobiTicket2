@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import client from './axios';
-import { IUser } from '../contexts/user-context';
+import { IUser } from '../types/user';
 
 interface LoginProps {
     email: string;

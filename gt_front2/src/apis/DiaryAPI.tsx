@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import client from './axios';
-import { IDiary } from '../contexts/diary-context';
+import { IDiary } from '../types/diary';
 
 export interface CreateDiaryRequest {
     entry: string;

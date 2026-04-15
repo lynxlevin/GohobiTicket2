@@ -1,11 +1,16 @@
 import { Dialog, DialogContent, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import { ITicket } from '../../contexts/ticket-context';
 import useUserContext from '../../hooks/useUserContext';
+
+interface TicketDetail {
+    giving_user_id: number;
+    gift_date: string;
+    description: string;
+}
 
 interface DetailDialogProps {
     onClose: () => void;
-    ticket: ITicket;
+    ticket: TicketDetail;
     relatedUserName: string;
 }
 
