@@ -4,7 +4,6 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import {
-    Box,
     CardMedia,
     CircularProgress,
     Container,
@@ -154,17 +153,15 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                                 </IconButton>
                             </Stack>
                         </Stack>
-                        <Box>
-                            {isSpecialNumber ? (
-                                <Typography variant="h6" align="left" color="text.primary" gutterBottom>
-                                    計<GoldNumber>{ticketCount}</GoldNumber>枚
-                                </Typography>
-                            ) : (
-                                <Typography variant="h6" align="left" color="text.primary" gutterBottom>
-                                    計{ticketCount}枚
-                                </Typography>
-                            )}
-                        </Box>
+                        {isSpecialNumber ? (
+                            <Typography variant="h6" align="left" color="text.primary" gutterBottom>
+                                計<GoldNumber>{ticketCount}</GoldNumber>枚
+                            </Typography>
+                        ) : (
+                            <Typography variant="h6" align="left" color="text.primary" gutterBottom>
+                                計{ticketCount}枚
+                            </Typography>
+                        )}
                         <Grid container spacing={4}>
                             {getSortedTickets({ showOnlySpecial, showOnlyUsed, relationKind }).map(ticket => {
                                 if (ticket.id === getLastAvailableTicketId(relationKind)) {
