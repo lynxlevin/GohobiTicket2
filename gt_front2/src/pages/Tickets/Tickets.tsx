@@ -1,7 +1,24 @@
 import styled from '@emotion/styled';
+import AddIcon from '@mui/icons-material/Add';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
-import { Box, CardMedia, CircularProgress, Container, Dialog, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
+import {
+    Box,
+    CardMedia,
+    CircularProgress,
+    Container,
+    Dialog,
+    DialogContent,
+    FormControlLabel,
+    FormGroup,
+    Grid,
+    IconButton,
+    Paper,
+    Stack,
+    Switch,
+    Typography,
+} from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useTicketContext from '../../hooks/useTicketContext';
@@ -23,7 +40,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
 
     const [showOnlySpecial, setShowOnlySpecial] = useState(false);
     const [showOnlyUsed, setShowOnlyUsed] = useState(false);
-    const [openedDialog, setOpenedDialog] = useState<'TicketImage'>();
+    const [openedDialog, setOpenedDialog] = useState<'TicketImage' | 'GiveTicket' | 'FilterTickets'>();
     const { handleLogout } = useUserAPI();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { givingTickets, receivingTickets, getReceivingTickets, getGivingTickets, getSortedTickets, getLastAvailableTicketId } = useTicketContext();
@@ -66,6 +83,31 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                         <CardMedia sx={{ backgroundSize: 'contain' }} component="img" image={`/ticket_images/${imageFile}`} />
                     </Dialog>
                 );
+            case 'GiveTicket':
+                return (
+                    <Dialog open={true} onClose={() => setOpenedDialog(undefined)} fullWidth>
+                        <DialogContent>
+                            <TicketForm />
+                        </DialogContent>
+                    </Dialog>
+                );
+            case 'FilterTickets':
+                return (
+                    <Dialog open={true} onClose={() => setOpenedDialog(undefined)} fullWidth>
+                        <DialogContent>
+                            <FormGroup>
+                                <FormControlLabel
+                                    label="特別チケットのみ表示"
+                                    control={<Switch checked={showOnlySpecial} onChange={event => setShowOnlySpecial(event.target.checked)} />}
+                                />
+                                <FormControlLabel
+                                    label="使用済みチケットのみ表示"
+                                    control={<Switch checked={showOnlyUsed} onChange={event => setShowOnlyUsed(event.target.checked)} />}
+                                />
+                            </FormGroup>
+                        </DialogContent>
+                    </Dialog>
+                );
         }
     };
 
@@ -95,37 +137,34 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                 <CircularProgress />
             ) : (
                 <main>
-                    <Box sx={{ pt: 8 }}>
-                        <Container maxWidth="sm">
-                            <Typography variant="h5" align="center" color="text.primary" sx={{ mt: 3 }} gutterBottom>
+                    <Container maxWidth="sm" sx={{ py: 8 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" height="40px">
+                            <Typography variant="body1" color="text.primary" textAlign="left" fontWeight="bold">
                                 {currentRelation.related_username}に{relationKind === 'Receiving' ? 'もらった' : 'あげる'}
-                            </Typography>
-                            <Typography variant="h4" align="center" color="text.primary" sx={{ fontWeight: 600 }} gutterBottom>
                                 ごほうびチケット
                             </Typography>
+                            <Stack direction="row">
+                                {relationKind === 'Giving' && (
+                                    <IconButton onClick={() => setOpenedDialog('GiveTicket')}>
+                                        <AddIcon />
+                                    </IconButton>
+                                )}
+                                <IconButton onClick={() => setOpenedDialog('FilterTickets')}>
+                                    <FilterAltIcon />
+                                </IconButton>
+                            </Stack>
+                        </Stack>
+                        <Box>
                             {isSpecialNumber ? (
-                                <Typography variant="h5" align="center" color="text.primary" gutterBottom>
+                                <Typography variant="h6" align="left" color="text.primary" gutterBottom>
                                     計<GoldNumber>{ticketCount}</GoldNumber>枚
                                 </Typography>
                             ) : (
-                                <Typography variant="h5" align="center" color="text.primary" gutterBottom>
+                                <Typography variant="h6" align="left" color="text.primary" gutterBottom>
                                     計{ticketCount}枚
                                 </Typography>
                             )}
-                            {relationKind === 'Giving' && <TicketForm />}
-                            <FormGroup>
-                                <FormControlLabel
-                                    label="特別チケットのみ表示"
-                                    control={<Switch onChange={event => setShowOnlySpecial(event.target.checked)} />}
-                                />
-                                <FormControlLabel
-                                    label="使用済みチケットのみ表示"
-                                    control={<Switch onChange={event => setShowOnlyUsed(event.target.checked)} />}
-                                />
-                            </FormGroup>
-                        </Container>
-                    </Box>
-                    <Container sx={{ pt: 4, pb: 8 }} maxWidth="md">
+                        </Box>
                         <Grid container spacing={4}>
                             {getSortedTickets({ showOnlySpecial, showOnlyUsed, relationKind }).map(ticket => {
                                 if (ticket.id === getLastAvailableTicketId(relationKind)) {
@@ -136,21 +175,21 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                                 return <Ticket key={ticket.id} ticket={ticket} relationKind={relationKind} />;
                             })}
                         </Grid>
+                        {!showOnlyUsed && !showOnlySpecial && (
+                            <ToLastAvailableTicketButton
+                                onClick={() => {
+                                    if (lastAvailableTicketRef.current !== null)
+                                        window.scrollTo({ top: lastAvailableTicketRef.current.offsetTop, behavior: 'smooth' });
+                                }}
+                            >
+                                <KeyboardDoubleArrowDownIcon />
+                            </ToLastAvailableTicketButton>
+                        )}
+                        <ToTopButton onClick={() => window.scroll({ top: 0, behavior: 'smooth' })}>
+                            <KeyboardDoubleArrowUpIcon />
+                        </ToTopButton>
+                        {openedDialog && getDialog()}
                     </Container>
-                    {!showOnlyUsed && !showOnlySpecial && (
-                        <ToLastAvailableTicketButton
-                            onClick={() => {
-                                if (lastAvailableTicketRef.current !== null)
-                                    window.scrollTo({ top: lastAvailableTicketRef.current.offsetTop, behavior: 'smooth' });
-                            }}
-                        >
-                            <KeyboardDoubleArrowDownIcon />
-                        </ToLastAvailableTicketButton>
-                    )}
-                    <ToTopButton onClick={() => window.scroll({ top: 0, behavior: 'smooth' })}>
-                        <KeyboardDoubleArrowUpIcon />
-                    </ToTopButton>
-                    {openedDialog && getDialog()}
                 </main>
             )}
         </>
