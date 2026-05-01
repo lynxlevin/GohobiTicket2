@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
+import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
-import { Box, CardMedia, CircularProgress, Container, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Box, CardMedia, CircularProgress, Container, Dialog, FormControlLabel, FormGroup, Grid, IconButton, Paper, Switch, Typography } from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
@@ -22,6 +23,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
 
     const [showOnlySpecial, setShowOnlySpecial] = useState(false);
     const [showOnlyUsed, setShowOnlyUsed] = useState(false);
+    const [openedDialog, setOpenedDialog] = useState<'TicketImage'>();
     const { handleLogout } = useUserAPI();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { givingTickets, receivingTickets, getReceivingTickets, getGivingTickets, getSortedTickets, getLastAvailableTicketId } = useTicketContext();
@@ -30,13 +32,11 @@ const Tickets = ({ relationKind }: TicketsProps) => {
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
     const imageFile = relationKind === 'Receiving' ? currentRelation?.receiving_ticket_img : currentRelation?.giving_ticket_img;
 
-    const ticketImage = useMemo(() => {
-        if (currentRelation === undefined) return '';
-
-        if (imageFile === null)
+    const ticketImage = () => {
+        if (imageFile === null || currentRelation === undefined)
             return (
-                <Paper sx={{ py: '5%', my: '10px', color: '#565656', background: '#ffeaea', border: 'dashed 4px #ffc3c3', boxShadow: '0 0 0 10px #ffeaea' }}>
-                    <Typography variant="h2">
+                <Paper sx={{ py: '4px', px: '8px', color: '#565656', background: '#ffeaea', border: 'dashed 1px #ffc3c3', boxShadow: '0 0 0 2px #ffeaea' }}>
+                    <Typography fontSize="10px">
                         Thank you
                         <br />
                         very much!!
@@ -44,21 +44,30 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                 </Paper>
             );
 
-        return <CardMedia sx={{ pt: '60%', backgroundSize: 'contain' }} component="div" image={`/ticket_images/${imageFile}`} />;
-    }, [currentRelation, imageFile]);
-
-    const miniTicket = useMemo(() => {
-        if (currentRelation === undefined) return '';
-
-        if (imageFile === null)
-            return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src="/apple-touch-icon.png" alt="mini-ticket" />;
-
-        return <MiniTicket onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src={`/ticket_images/${imageFile}`} alt="mini-ticket" />;
-    }, [currentRelation, imageFile]);
+        return (
+            <CardMedia
+                onClick={() => setOpenedDialog('TicketImage')}
+                sx={{ backgroundSize: 'contain', maxHeight: '50px', maxWidth: '120px', width: 'auto' }}
+                component="img"
+                image={`/ticket_images/${imageFile}`}
+            />
+        );
+    };
 
     const tickets = relationKind === 'Receiving' ? receivingTickets : givingTickets;
     const ticketCount = tickets !== undefined ? tickets.length : 0;
     const isSpecialNumber = ticketCount > 0 && (ticketCount % 100 === 0 || ticketCount % 111 === 0 || ticketCount % 1111 === 0);
+
+    const getDialog = () => {
+        switch (openedDialog) {
+            case 'TicketImage':
+                return (
+                    <Dialog open={true} onClose={() => setOpenedDialog(undefined)} fullWidth>
+                        <CardMedia sx={{ backgroundSize: 'contain' }} component="img" image={`/ticket_images/${imageFile}`} />
+                    </Dialog>
+                );
+        }
+    };
 
     useEffect(() => {
         if (userRelations === undefined) getUserRelations();
@@ -80,7 +89,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
 
     return (
         <>
-            <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
+            <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} leftItem={ticketImage()} />
             <BottomNav />
             {currentRelation === undefined ? (
                 <CircularProgress />
@@ -103,7 +112,6 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                                     計{ticketCount}枚
                                 </Typography>
                             )}
-                            {ticketImage}
                             {relationKind === 'Giving' && <TicketForm />}
                             <FormGroup>
                                 <FormControlLabel
@@ -139,7 +147,10 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                             <KeyboardDoubleArrowDownIcon />
                         </ToLastAvailableTicketButton>
                     )}
-                    {miniTicket}
+                    <ToTopButton onClick={() => window.scroll({ top: 0, behavior: 'smooth' })}>
+                        <KeyboardDoubleArrowUpIcon />
+                    </ToTopButton>
+                    {openedDialog && getDialog()}
                 </main>
             )}
         </>
@@ -158,23 +169,17 @@ const ToLastAvailableTicketButton = styled(IconButton)`
     height: 40px;
     z-index: 100;
 `;
-
-const MiniTicket = styled.img`
-    height: 50px;
+const ToTopButton = styled(IconButton)`
+    font-size: 30px;
+    background: white !important;
+    border-radius: 999px;
     position: fixed;
-    bottom: 64px;
-    right: 13px;
-    box-shadow:
-        2px 2px 7px rgba(18, 47, 61, 0.5),
-        -5px -5px 15px rgba(248, 253, 255, 0.9),
-        inset 5px 5px 15px transparent,
-        inset -5px -5px 15px transparent;
+    right: 16px;
+    bottom: 66px;
+    border: 2px solid #ddd;
+    width: 40px;
+    height: 40px;
     z-index: 100;
-
-    &:hover {
-        opacity: 0.95;
-        filter: brightness(105%);
-    }
 `;
 
 const GoldNumber = styled.span`

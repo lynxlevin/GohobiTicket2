@@ -15,6 +15,7 @@ import useUserContext from '../../hooks/useUserContext';
 import { IWish } from '../../types/ticket';
 import { WishAPI } from '../../apis/WishAPI';
 import { useSearchParams } from 'react-router-dom';
+import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 
 const Wishes = () => {
     const [searchParams] = useSearchParams();
@@ -85,30 +86,27 @@ const Wishes = () => {
                             </Grid>
                         )}
                     </Container>
-                    <MiniLogo onClick={() => window.scroll({ top: 0, behavior: 'smooth' })} src="/apple-touch-icon.png" alt="mini-ticket" />
+
+                    <ToTopButton onClick={() => window.scroll({ top: 0, behavior: 'smooth' })}>
+                        <KeyboardDoubleArrowUpIcon />
+                    </ToTopButton>
                 </main>
             )}
         </>
     );
 };
 
-const MiniLogo = styled.img`
-    height: 50px;
+const ToTopButton = styled(IconButton)`
+    font-size: 30px;
+    background: white !important;
+    border-radius: 999px;
     position: fixed;
-    bottom: 64px;
-    right: 13px;
-    box-shadow:
-        2px 2px 7px rgba(18, 47, 61, 0.5),
-        -5px -5px 15px rgba(248, 253, 255, 0.9),
-        inset 5px 5px 15px transparent,
-        inset -5px -5px 15px transparent;
+    right: 16px;
+    bottom: 66px;
+    border: 2px solid #ddd;
+    width: 40px;
+    height: 40px;
     z-index: 100;
-    border-radius: 50%;
-
-    &:hover {
-        opacity: 0.95;
-        filter: brightness(105%);
-    }
 `;
 
 interface WishItemProps {
