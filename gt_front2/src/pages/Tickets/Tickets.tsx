@@ -5,6 +5,7 @@ import RedeemIcon from '@mui/icons-material/Redeem';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import {
+    Badge,
     CardMedia,
     CircularProgress,
     Container,
@@ -159,9 +160,11 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                                         <RedeemIcon />
                                     </IconButton>
                                 )}
-                                <IconButton onClick={() => setOpenedDialog('FilterTickets')}>
-                                    <FilterAltIcon />
-                                </IconButton>
+                                <Badge badgeContent={Number(showOnlySpecial) + Number(showOnlyUsed)} color="primary" overlap="circular">
+                                    <IconButton onClick={() => setOpenedDialog('FilterTickets')}>
+                                        <FilterAltIcon />
+                                    </IconButton>
+                                </Badge>
                             </Stack>
                         </Stack>
                         {isSpecialNumber ? (
