@@ -68,7 +68,7 @@ const Wishes = () => {
                             </>
                         )}
                         {wishes && (
-                            <Grid container spacing={4}>
+                            <Grid container spacing={2}>
                                 {wishes.map(wish => {
                                     return (
                                         <WishItem

@@ -147,7 +147,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                         <Stack direction="row" justifyContent="space-between" alignItems="center" height="40px">
                             <Typography variant="body1" color="text.primary" textAlign="left" fontWeight="bold">
                                 {currentRelation.related_username}に{relationKind === 'Receiving' ? 'もらった' : 'あげる'}
-                                ごほうびチケット
+                                チケット
                             </Typography>
                             <Stack direction="row">
                                 {relationKind === 'Giving' && (
@@ -176,7 +176,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                                 計{ticketCount}枚
                             </Typography>
                         )}
-                        <Grid container spacing={4}>
+                        <Grid container spacing={2}>
                             {getSortedTickets({ showOnlySpecial, showOnlyUsed, relationKind }).map(ticket => {
                                 if (ticket.id === getLastAvailableTicketId(relationKind)) {
                                     return (

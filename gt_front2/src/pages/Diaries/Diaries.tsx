@@ -78,7 +78,7 @@ const Diaries = () => {
                                 <Typography variant="h6" align="left" color="text.primary" gutterBottom>
                                     計{diaries.length}件
                                 </Typography>
-                                <Grid container spacing={4}>
+                                <Grid container spacing={2}>
                                     {diaries.map(diary => {
                                         if (unreadDiaries.length > 0 && diary.id === unreadDiaries[0].id) {
                                             return <Diary key={diary.id} diary={diary} firstUnreadDiaryRef={firstUnreadDiaryRef} />;
