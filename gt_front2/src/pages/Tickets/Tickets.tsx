@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import AddIcon from '@mui/icons-material/Add';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import RedeemIcon from '@mui/icons-material/Redeem';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import {
@@ -28,10 +29,13 @@ import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
 import { RelationKind } from '../../types/user_relation';
+import UseTicketDialog from './UseTicketDialog';
 
 interface TicketsProps {
     relationKind: RelationKind;
 }
+
+type DialogType = 'TicketImage' | 'GiveTicket' | 'UseTicket' | 'FilterTickets';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = ({ relationKind }: TicketsProps) => {
@@ -39,7 +43,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
 
     const [showOnlySpecial, setShowOnlySpecial] = useState(false);
     const [showOnlyUsed, setShowOnlyUsed] = useState(false);
-    const [openedDialog, setOpenedDialog] = useState<'TicketImage' | 'GiveTicket' | 'FilterTickets'>();
+    const [openedDialog, setOpenedDialog] = useState<DialogType>();
     const { handleLogout } = useUserAPI();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { givingTickets, receivingTickets, getReceivingTickets, getGivingTickets, getSortedTickets, getLastAvailableTicketId } = useTicketContext();
@@ -90,6 +94,8 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                         </DialogContent>
                     </Dialog>
                 );
+            case 'UseTicket':
+                return <UseTicketDialog onClose={() => setOpenedDialog(undefined)} />;
             case 'FilterTickets':
                 return (
                     <Dialog open={true} onClose={() => setOpenedDialog(undefined)} fullWidth>
@@ -146,6 +152,11 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                                 {relationKind === 'Giving' && (
                                     <IconButton onClick={() => setOpenedDialog('GiveTicket')}>
                                         <AddIcon />
+                                    </IconButton>
+                                )}
+                                {relationKind === 'Receiving' && (
+                                    <IconButton onClick={() => setOpenedDialog('UseTicket')}>
+                                        <RedeemIcon />
                                     </IconButton>
                                 )}
                                 <IconButton onClick={() => setOpenedDialog('FilterTickets')}>
