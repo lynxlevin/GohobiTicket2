@@ -63,6 +63,27 @@ const useTicketContext = () => {
         [ticketContext.givingTickets, ticketContext.receivingTickets],
     );
 
+    const getLastAvailableNormalTicket = useCallback(
+        (relationKind: RelationKind) => {
+            const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
+            if (tickets === undefined) return undefined;
+            const availableTickets = tickets.filter(ticket => ticket.wish === null && !ticket.is_special).sort(sortConditions);
+            if (availableTickets.length === 0) return undefined;
+            return availableTickets.slice(-1)[0];
+        },
+        [ticketContext.givingTickets, ticketContext.receivingTickets],
+    );
+    const getLastAvailableSpecialTicket = useCallback(
+        (relationKind: RelationKind) => {
+            const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
+            if (tickets === undefined) return undefined;
+            const availableTickets = tickets.filter(ticket => ticket.wish === null && ticket.is_special).sort(sortConditions);
+            if (availableTickets.length === 0) return undefined;
+            return availableTickets.slice(-1)[0];
+        },
+        [ticketContext.givingTickets, ticketContext.receivingTickets],
+    );
+
     const createTicket = useCallback(async (data: CreateTicketRequest) => {
         TicketAPI.create(data).then(({ data: { ticket } }) => {
             ticketContext.setGivingTickets(prev => {
@@ -136,6 +157,8 @@ const useTicketContext = () => {
         getGivingTickets,
         getSortedTickets,
         getLastAvailableTicketId,
+        getLastAvailableNormalTicket,
+        getLastAvailableSpecialTicket,
         createTicket,
         updateTicket,
         deleteTicket,

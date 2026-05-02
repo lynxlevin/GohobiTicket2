@@ -8,7 +8,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useTicketContext from '../hooks/useTicketContext';
 import useUserRelationContext from '../hooks/useUserRelationContext';
@@ -37,9 +37,10 @@ const HideOnScroll = (props: HideOnScrollProps) => {
 interface CommonAppBarProps {
     handleLogout: () => Promise<void>;
     currentRelation?: IUserRelation;
+    leftItem?: ReactNode;
 }
 
-const CommonAppBar = ({ handleLogout, currentRelation }: CommonAppBarProps) => {
+const CommonAppBar = ({ handleLogout, currentRelation, leftItem }: CommonAppBarProps) => {
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -61,6 +62,7 @@ const CommonAppBar = ({ handleLogout, currentRelation }: CommonAppBarProps) => {
         <HideOnScroll>
             <AppBar position="fixed" sx={{ bgcolor: 'primary.light' }}>
                 <Toolbar>
+                    {leftItem}
                     <div style={{ flexGrow: 1 }} />
                     <IconButton
                         onClick={() => {

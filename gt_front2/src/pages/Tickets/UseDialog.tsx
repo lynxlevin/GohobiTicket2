@@ -39,7 +39,7 @@ const UseDialog = (props: UseDialogProps) => {
                 <TextField value={useDescription} onChange={event => setUseDescription(event.target.value)} multiline fullWidth minRows={5} />
                 <Divider sx={{ my: 2 }} />
                 <Typography fontWeight={600} mt={2} gutterBottom>
-                    使うチケット
+                    使う{ticket.is_special && '特別'}チケット
                 </Typography>
                 <Typography gutterBottom variant="subtitle1">
                     {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
