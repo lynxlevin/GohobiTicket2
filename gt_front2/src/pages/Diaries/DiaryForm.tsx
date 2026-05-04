@@ -8,9 +8,10 @@ import { IDiaryTag } from '../../types/diary';
 
 interface DiaryFormProps {
     userRelationId: number;
+    onClose: () => void;
 }
 
-const DiaryForm = ({ userRelationId }: DiaryFormProps) => {
+const DiaryForm = ({ userRelationId, onClose }: DiaryFormProps) => {
     const { createDiary } = useDiaryContext();
     const { diaryTags } = useDiaryTagContext();
 
@@ -28,6 +29,7 @@ const DiaryForm = ({ userRelationId }: DiaryFormProps) => {
         setDate(new Date());
         setEntry('');
         setTags([]);
+        onClose();
     };
 
     const onChangeDate = (newDate: Date | null) => {

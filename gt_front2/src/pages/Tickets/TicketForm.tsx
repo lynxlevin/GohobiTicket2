@@ -7,7 +7,7 @@ import { UserRelationAPI } from '../../apis/UserRelationAPI';
 import useTicketContext from '../../hooks/useTicketContext';
 import usePagePath from '../../hooks/usePagePath';
 
-const TicketForm = () => {
+const TicketForm = ({ onClose }: { onClose: () => void }) => {
     const [giftDate, setGiftDate] = useState<Date>(new Date());
     const [description, setDescription] = useState('');
     const [isSpecial, setIsSpecial] = useState(false);
@@ -32,6 +32,7 @@ const TicketForm = () => {
         setDescription('');
         setIsSpecial(false);
         setIsDraft(false);
+        onClose();
     };
 
     const checkSpecialTicketAvailability = useCallback(
