@@ -91,7 +91,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                 return (
                     <Dialog open={true} onClose={() => setOpenedDialog(undefined)} fullWidth>
                         <DialogContent>
-                            <TicketForm />
+                            <TicketForm onClose={() => setOpenedDialog(undefined)} />
                         </DialogContent>
                     </Dialog>
                 );

@@ -33,7 +33,7 @@ const Diaries = () => {
                 return (
                     <Dialog open={true} onClose={() => setOpenedDialog(undefined)} fullWidth>
                         <DialogContent>
-                            <DiaryForm userRelationId={userRelationId} />
+                            <DiaryForm userRelationId={userRelationId} onClose={() => setOpenedDialog(undefined)} />
                         </DialogContent>
                     </Dialog>
                 );
