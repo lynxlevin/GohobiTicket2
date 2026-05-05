@@ -8,6 +8,10 @@ export interface IDiary {
     status: DiaryStatus;
 }
 
+export interface IDiariesForMonth {
+    [yearMonth: string]: IDiary[];
+}
+
 export interface IDiaryTag {
     id: string;
     text: string;

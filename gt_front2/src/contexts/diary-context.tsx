@@ -1,18 +1,18 @@
-import { createContext, ReactNode, useState } from 'react';
-import { IDiary } from '../types/diary';
+import { createContext, Dispatch, ReactNode, SetStateAction, useState } from 'react';
+import { IDiariesForMonth } from '../types/diary';
 
 interface DiaryContextType {
-    diaries: IDiary[] | undefined;
-    setDiaries: React.Dispatch<React.SetStateAction<IDiary[] | undefined>>;
+    diariesByMonth: IDiariesForMonth | undefined;
+    setDiariesByMonth: Dispatch<SetStateAction<IDiariesForMonth | undefined>>;
 }
 
 export const DiaryContext = createContext<DiaryContextType>({
-    diaries: undefined,
-    setDiaries: () => {},
+    diariesByMonth: undefined,
+    setDiariesByMonth: () => {},
 });
 
 export const DiaryProvider = ({ children }: { children: ReactNode }) => {
-    const [diaries, setDiaries] = useState<IDiary[]>();
+    const [diariesByMonth, setDiariesByMonth] = useState<IDiariesForMonth>();
 
-    return <DiaryContext.Provider value={{ diaries, setDiaries }}>{children}</DiaryContext.Provider>;
+    return <DiaryContext.Provider value={{ diariesByMonth, setDiariesByMonth }}>{children}</DiaryContext.Provider>;
 };
