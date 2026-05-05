@@ -4,6 +4,7 @@ export interface IUserRelation {
     giving_ticket_img: string | null;
     receiving_ticket_img: string | null;
     use_slack: boolean;
+    first_diary_date: string;
 }
 
 export type RelationKind = 'Receiving' | 'Giving';

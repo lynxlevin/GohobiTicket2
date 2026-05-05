@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import AddIcon from '@mui/icons-material/Add';
 import FiberNewOutlinedIcon from '@mui/icons-material/FiberNewOutlined';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
-import { CircularProgress, Container, Dialog, DialogContent, Grid, IconButton, Stack, Typography } from '@mui/material';
+import { CircularProgress, Container, Dialog, DialogContent, Grid, IconButton, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useUserAPI from '../../hooks/useUserAPI';
@@ -13,18 +13,32 @@ import useUserRelationContext from '../../hooks/useUserRelationContext';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
+import { format, parse, subMonths } from 'date-fns';
 
 const Diaries = () => {
     const firstUnreadDiaryRef = useRef<HTMLDivElement | null>(null);
     const [openedDialog, setOpenedDialog] = useState<'WriteDiary'>();
+    const thisMonth = format(new Date(), 'yyyyMM');
+    const [yearMonth, setYearMonth] = useState(thisMonth);
 
     const { getUserRelations, userRelations } = useUserRelationContext();
-    const { diaries, unreadDiaries, getDiaries } = useDiaryContext();
+    const { unreadDiaries, diariesByMonth, getDiariesByMonth } = useDiaryContext();
     const { diaryTags, getDiaryTags } = useDiaryTagContext();
     const { handleLogout } = useUserAPI();
     const { userRelationId } = usePagePath();
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
+
+    const getTabYearMonths = () => {
+        const today = new Date();
+        const startDay = currentRelation !== undefined ? new Date(currentRelation.first_diary_date) : today;
+        const yearMonths = [format(today, 'yyyyMM')];
+        while (yearMonths[yearMonths.length - 1] !== format(startDay, 'yyyyMM')) {
+            const lastMonth = subMonths(parse(yearMonths[yearMonths.length - 1], 'yyyyMM', new Date()), 1);
+            yearMonths.push(format(lastMonth, 'yyyyMM'));
+        }
+        return yearMonths;
+    };
 
     const getDialog = () => {
         switch (openedDialog) {
@@ -46,8 +60,8 @@ const Diaries = () => {
 
     useEffect(() => {
         if (userRelationId === null || !currentRelation) return;
-        if (diaries === undefined) getDiaries(userRelationId);
-    }, [currentRelation, diaries, getDiaries, userRelationId]);
+        if (diariesByMonth === undefined || diariesByMonth[yearMonth] === undefined) getDiariesByMonth(userRelationId, yearMonth);
+    }, [currentRelation, diariesByMonth, getDiariesByMonth, yearMonth, userRelationId]);
 
     useEffect(() => {
         if (userRelationId === null || !currentRelation) return;
@@ -73,22 +87,32 @@ const Diaries = () => {
                                 </IconButton>
                             </Stack>
                         </Stack>
-                        {diaries !== undefined && (
-                            <>
-                                <Typography variant="h6" align="left" color="text.primary" gutterBottom>
-                                    計{diaries.length}件
-                                </Typography>
-                                <Grid container spacing={2}>
-                                    {diaries.map(diary => {
-                                        if (unreadDiaries.length > 0 && diary.id === unreadDiaries[0].id) {
-                                            return <Diary key={diary.id} diary={diary} firstUnreadDiaryRef={firstUnreadDiaryRef} />;
-                                        }
-                                        return <Diary key={diary.id} diary={diary} />;
-                                    })}
-                                </Grid>
-                            </>
+                        <Tabs
+                            value={yearMonth}
+                            onChange={(_, newValue: string | null) => {
+                                if (newValue !== null) setYearMonth(newValue);
+                            }}
+                            variant="scrollable"
+                            scrollButtons
+                            allowScrollButtonsMobile
+                        >
+                            {getTabYearMonths().map(yearMonth => {
+                                return <Tab key={yearMonth} value={yearMonth} label={`${yearMonth.slice(0, 4)}/${yearMonth.slice(4, 6)}`} />;
+                            })}
+                        </Tabs>
+                        {diariesByMonth === undefined || diariesByMonth[yearMonth] === undefined ? (
+                            <CircularProgress />
+                        ) : (
+                            <Grid container spacing={2}>
+                                {diariesByMonth[yearMonth].map(diary => {
+                                    if (unreadDiaries[yearMonth].length > 0 && diary.id === unreadDiaries[yearMonth][0].id) {
+                                        return <Diary key={diary.id} diary={diary} firstUnreadDiaryRef={firstUnreadDiaryRef} />;
+                                    }
+                                    return <Diary key={diary.id} diary={diary} />;
+                                })}
+                            </Grid>
                         )}
-                        {unreadDiaries.length > 0 && (
+                        {unreadDiaries[yearMonth]?.length > 0 && (
                             <ToUnreadDiaryButton
                                 onClick={() => {
                                     const current = firstUnreadDiaryRef.current!;

@@ -1,6 +1,13 @@
 import { AxiosResponse } from 'axios';
 import client from './axios';
 import { IDiary } from '../types/diary';
+import { format } from 'date-fns';
+
+export interface ListDiariesRequest {
+    userRelationId: number;
+    dateGte?: Date;
+    dateLte?: Date;
+}
 
 export interface CreateDiaryRequest {
     entry: string;
@@ -18,8 +25,18 @@ export interface UpdateDiaryRequest {
 export const DiaryAPI = {
     BASE_URL: '/api/diaries/',
 
-    list: async (userRelationId: number): Promise<AxiosResponse<IDiary[]>> => {
-        const url = `${DiaryAPI.BASE_URL}?user_relation_id=${userRelationId}`;
+    list: async ({ userRelationId, dateGte, dateLte }: ListDiariesRequest): Promise<AxiosResponse<IDiary[]>> => {
+        let url = DiaryAPI.BASE_URL;
+        const queries = [`user_relation_id=${userRelationId}`];
+        if (dateGte) {
+            queries.push(`date_gte=${format(dateGte, 'yyyy-MM-dd')}`);
+        }
+        if (dateLte) {
+            queries.push(`date_lte=${format(dateLte, 'yyyy-MM-dd')}`);
+        }
+        if (queries.length > 0) {
+            url += `?${queries.join('&')}`;
+        }
         return await client.get(url);
     },
     create: async (props: CreateDiaryRequest): Promise<AxiosResponse<IDiary>> => {
