@@ -33,7 +33,7 @@ const EditDiaryDialog = ({ onClose, diary }: EditDiaryDialogProps) => {
     const [entry, setEntry] = useState(diary.entry);
 
     const handleSubmit = async () => {
-        updateDiary(diary.id, {
+        updateDiary(diary, {
             entry,
             date: format(date, 'yyyy-MM-dd'),
             tag_ids: tags.map(tag => tag.id),
