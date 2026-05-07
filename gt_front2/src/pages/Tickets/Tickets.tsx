@@ -25,12 +25,12 @@ import BottomNav from '../../components/BottomNav';
 import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
 import Ticket from './Ticket';
-import TicketForm from './TicketForm';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
 import { RelationKind } from '../../types/user_relation';
 import UseTicketDialog from './UseTicketDialog';
+import CreateTicketDialog from './CreateTicketDialog';
 
 interface TicketsProps {
     relationKind: RelationKind;
@@ -88,13 +88,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                     </Dialog>
                 );
             case 'GiveTicket':
-                return (
-                    <Dialog open={true} onClose={() => setOpenedDialog(undefined)} fullWidth>
-                        <DialogContent>
-                            <TicketForm onClose={() => setOpenedDialog(undefined)} />
-                        </DialogContent>
-                    </Dialog>
-                );
+                return <CreateTicketDialog onClose={() => setOpenedDialog(undefined)} />;
             case 'UseTicket':
                 return <UseTicketDialog onClose={() => setOpenedDialog(undefined)} />;
             case 'FilterTickets':
