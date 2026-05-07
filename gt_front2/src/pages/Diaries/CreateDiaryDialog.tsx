@@ -68,12 +68,12 @@ const CreateDiaryDialog = ({ userRelationId, onClose }: CreateDiaryDialogProps) 
             return diaryTags!.find(tag => tag.text === tagText)!;
         });
         setTags(toBe);
-        setCreateDiaryDraft({ ...createDiaryDraft, tagIds: toBe.map(tag => tag.id) });
+        setCreateDiaryDraft({ ...createDiaryDraft, tagIds: toBe.map(tag => tag.id), date: format(date, 'yyyy-MM-dd') });
     };
     const onChangeEntry = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const value = event.target.value;
         setEntry(value);
-        setCreateDiaryDraft({ ...createDiaryDraft, entry: value });
+        setCreateDiaryDraft({ ...createDiaryDraft, entry: value, date: format(date, 'yyyy-MM-dd') });
     };
 
     useEffect(() => {
