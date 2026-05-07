@@ -1,4 +1,18 @@
-import { Box, Button, Chip, Dialog, DialogContent, FormControl, FormGroup, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from '@mui/material';
+import {
+    Box,
+    Button,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    FormControl,
+    FormGroup,
+    InputLabel,
+    MenuItem,
+    Select,
+    SelectChangeEvent,
+    TextField,
+} from '@mui/material';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { format, parse } from 'date-fns';
 import { ChangeEvent, useEffect, useState } from 'react';
@@ -28,11 +42,15 @@ const CreateDiaryDialog = ({ userRelationId, onClose }: CreateDiaryDialogProps) 
             tag_ids: tags.map(tag => tag.id),
             user_relation_id: userRelationId,
         });
-        setDate(new Date());
-        setEntry('');
-        setTags([]);
-        resetCreateDiaryDraft();
+        resetDraft();
         onClose();
+    };
+
+    const resetDraft = () => {
+        setDate(new Date());
+        setTags([]);
+        setEntry('');
+        resetCreateDiaryDraft();
     };
 
     const onChangeDate = (newDate: Date | null) => {
@@ -75,8 +93,6 @@ const CreateDiaryDialog = ({ userRelationId, onClose }: CreateDiaryDialogProps) 
 
     return (
         <Dialog open={true} onClose={onClose} fullWidth>
-            {/* MYMEMO: 復元しましたとかのメッセージをつける */}
-            {/* MYMEMO: キャッシュを消すボタンをつける */}
             <DialogContent>
                 <FormGroup sx={{ mt: 3 }}>
                     <MobileDatePicker label="日付" value={date} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{ mb: 1 }} />
@@ -107,10 +123,15 @@ const CreateDiaryDialog = ({ userRelationId, onClose }: CreateDiaryDialogProps) 
                     )}
                     <TextField value={entry} onChange={onChangeEntry} label="内容" multiline minRows={5} />
                 </FormGroup>
-                <Button variant="contained" onClick={handleSubmit} sx={{ mt: 2, mb: 2 }}>
+            </DialogContent>
+            <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
+                <Button variant="contained" onClick={handleSubmit}>
                     保存する
                 </Button>
-            </DialogContent>
+                <Button variant="contained" onClick={resetDraft} color="warning" disabled={createDiaryDraft === undefined}>
+                    クリア
+                </Button>
+            </DialogActions>
         </Dialog>
     );
 };
