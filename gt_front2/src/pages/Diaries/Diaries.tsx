@@ -2,18 +2,18 @@ import styled from '@emotion/styled';
 import AddIcon from '@mui/icons-material/Add';
 import FiberNewOutlinedIcon from '@mui/icons-material/FiberNewOutlined';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
-import { CircularProgress, Container, Dialog, DialogContent, Grid, IconButton, Stack, Tab, Tabs, Typography } from '@mui/material';
+import { CircularProgress, Container, Grid, IconButton, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useUserAPI from '../../hooks/useUserAPI';
 import Diary from './Diary';
-import DiaryForm from './DiaryForm';
 import useDiaryContext from '../../hooks/useDiaryContext';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
 import { format, parse, subMonths } from 'date-fns';
+import CreateDiaryDialog from './CreateDiaryDialog';
 
 const Diaries = () => {
     const firstUnreadDiaryRef = useRef<HTMLDivElement | null>(null);
@@ -44,13 +44,7 @@ const Diaries = () => {
         switch (openedDialog) {
             case 'WriteDiary':
                 if (userRelationId === null) return;
-                return (
-                    <Dialog open={true} onClose={() => setOpenedDialog(undefined)} fullWidth>
-                        <DialogContent>
-                            <DiaryForm userRelationId={userRelationId} onClose={() => setOpenedDialog(undefined)} />
-                        </DialogContent>
-                    </Dialog>
-                );
+                return <CreateDiaryDialog userRelationId={userRelationId} onClose={() => setOpenedDialog(undefined)} />;
         }
     };
 
