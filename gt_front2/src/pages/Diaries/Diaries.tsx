@@ -2,7 +2,9 @@ import styled from '@emotion/styled';
 import AddIcon from '@mui/icons-material/Add';
 import FiberNewOutlinedIcon from '@mui/icons-material/FiberNewOutlined';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
-import { CircularProgress, Container, Grid, IconButton, Stack, Tab, Tabs, Typography } from '@mui/material';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import { CircularProgress, Container, Grid, IconButton, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useUserAPI from '../../hooks/useUserAPI';
@@ -12,7 +14,7 @@ import useUserRelationContext from '../../hooks/useUserRelationContext';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
-import { format, parse, subMonths } from 'date-fns';
+import { addMonths, format, parse, subMonths } from 'date-fns';
 import CreateDiaryDialog from './CreateDiaryDialog';
 
 const Diaries = () => {
@@ -81,19 +83,32 @@ const Diaries = () => {
                                 </IconButton>
                             </Stack>
                         </Stack>
-                        <Tabs
-                            value={yearMonth}
-                            onChange={(_, newValue: string | null) => {
-                                if (newValue !== null) setYearMonth(newValue);
-                            }}
-                            variant="scrollable"
-                            scrollButtons
-                            allowScrollButtonsMobile
-                        >
-                            {getTabYearMonths().map(yearMonth => {
-                                return <Tab key={yearMonth} value={yearMonth} label={`${yearMonth.slice(0, 4)}/${yearMonth.slice(4, 6)}`} />;
-                            })}
-                        </Tabs>
+                        <Stack direction="row" justifyContent="center" alignItems="center">
+                            <IconButton
+                                onClick={() => {
+                                    yearMonth !== format(new Date(currentRelation.first_diary_date), 'yyyyMM') &&
+                                        setYearMonth(format(subMonths(parse(yearMonth, 'yyyyMM', new Date()), 1), 'yyyyMM'));
+                                }}
+                                disabled={yearMonth === format(new Date(currentRelation.first_diary_date), 'yyyyMM')}
+                                sx={{ marginRight: 5 }}
+                            >
+                                <KeyboardArrowLeftIcon />
+                            </IconButton>
+                            <Select value={yearMonth} onChange={event => setYearMonth(event.target.value)} variant="standard">
+                                {getTabYearMonths().map(yearMonth => {
+                                    return <MenuItem value={yearMonth}>{`${yearMonth.slice(0, 4)}/${yearMonth.slice(4, 6)}`}</MenuItem>;
+                                })}
+                            </Select>
+                            <IconButton
+                                onClick={() => {
+                                    yearMonth !== thisMonth && setYearMonth(format(addMonths(parse(yearMonth, 'yyyyMM', new Date()), 1), 'yyyyMM'));
+                                }}
+                                disabled={yearMonth === thisMonth}
+                                sx={{ marginLeft: 5 }}
+                            >
+                                <KeyboardArrowRightIcon />
+                            </IconButton>
+                        </Stack>
                         {diariesByMonth === undefined || diariesByMonth[yearMonth] === undefined ? (
                             <CircularProgress />
                         ) : (
