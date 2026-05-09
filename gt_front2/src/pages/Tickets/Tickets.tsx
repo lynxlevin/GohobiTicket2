@@ -2,7 +2,9 @@ import styled from '@emotion/styled';
 import AddIcon from '@mui/icons-material/Add';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
-import { CardMedia, CircularProgress, Container, Dialog, Grid, IconButton, Paper, Stack, Typography } from '@mui/material';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import { CardMedia, CircularProgress, Container, Dialog, Grid, IconButton, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useTicketContext from '../../hooks/useTicketContext';
@@ -14,6 +16,7 @@ import CommonAppBar from '../../components/CommonAppBar';
 import { RelationKind } from '../../types/user_relation';
 import UseTicketDialog from './UseTicketDialog';
 import CreateTicketDialog from './CreateTicketDialog';
+import { addMonths, format, parse, subMonths } from 'date-fns';
 
 interface TicketsProps {
     relationKind: RelationKind;
@@ -24,10 +27,13 @@ type DialogType = 'TicketImage' | 'GiveTicket' | 'UseTicket';
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = ({ relationKind }: TicketsProps) => {
     const [openedDialog, setOpenedDialog] = useState<DialogType>();
+    const thisMonth = format(new Date(), 'yyyyMM');
+    const [yearMonth, setYearMonth] = useState(thisMonth);
 
     const { handleLogout } = useUserAPI();
     const { getUserRelations, userRelations } = useUserRelationContext();
-    const { givingTickets, receivingTickets, getReceivingTickets, getGivingTickets } = useTicketContext();
+    const { givingTicketsByMonth, receivingTicketsByMonth, getGivingTicketsByMonth, getReceivingTicketsByMonth } = useTicketContext();
+
     const { userRelationId } = usePagePath();
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
@@ -55,7 +61,19 @@ const Tickets = ({ relationKind }: TicketsProps) => {
         );
     };
 
-    const tickets = relationKind === 'Receiving' ? receivingTickets : givingTickets;
+    const getTabYearMonths = () => {
+        const today = new Date();
+        // MYMEMO: change to first_giving/receiving_ticket_date
+        const startDay = currentRelation !== undefined ? new Date(currentRelation.first_diary_date) : today;
+        const yearMonths = [format(today, 'yyyyMM')];
+        while (yearMonths[yearMonths.length - 1] !== format(startDay, 'yyyyMM')) {
+            const lastMonth = subMonths(parse(yearMonths[yearMonths.length - 1], 'yyyyMM', new Date()), 1);
+            yearMonths.push(format(lastMonth, 'yyyyMM'));
+        }
+        return yearMonths;
+    };
+
+    const tickets = relationKind === 'Receiving' ? receivingTicketsByMonth : givingTicketsByMonth;
 
     const getDialog = () => {
         switch (openedDialog) {
@@ -80,21 +98,30 @@ const Tickets = ({ relationKind }: TicketsProps) => {
         if (userRelationId === null || !currentRelation) return;
         switch (relationKind) {
             case 'Receiving':
-                if (receivingTickets !== undefined) return;
-                getReceivingTickets(userRelationId);
+                if (receivingTicketsByMonth !== undefined && receivingTicketsByMonth[yearMonth] !== undefined) return;
+                getReceivingTicketsByMonth(userRelationId, yearMonth);
                 return;
             case 'Giving':
-                if (givingTickets !== undefined) return;
-                getGivingTickets(userRelationId);
+                if (givingTicketsByMonth !== undefined && givingTicketsByMonth[yearMonth] !== undefined) return;
+                getGivingTicketsByMonth(userRelationId, yearMonth);
                 return;
         }
-    }, [currentRelation, getGivingTickets, getReceivingTickets, givingTickets, receivingTickets, relationKind, userRelationId]);
+    }, [
+        currentRelation,
+        getGivingTicketsByMonth,
+        getReceivingTicketsByMonth,
+        givingTicketsByMonth,
+        receivingTicketsByMonth,
+        relationKind,
+        userRelationId,
+        yearMonth,
+    ]);
 
     return (
         <>
             <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} leftItem={ticketImage()} />
             <BottomNav />
-            {currentRelation === undefined || tickets === undefined ? (
+            {currentRelation === undefined ? (
                 <CircularProgress />
             ) : (
                 <main>
@@ -117,11 +144,43 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                                 )}
                             </Stack>
                         </Stack>
-                        <Grid container spacing={2}>
-                            {tickets.map(ticket => (
-                                <Ticket key={ticket.id} ticket={ticket} relationKind={relationKind} />
-                            ))}
-                        </Grid>
+                        <Stack direction="row" justifyContent="center" alignItems="center">
+                            <IconButton
+                                onClick={() => {
+                                    // MYMEMO: change to first_giving/receiving_ticket_date
+                                    yearMonth !== format(new Date(currentRelation.first_diary_date), 'yyyyMM') &&
+                                        setYearMonth(format(subMonths(parse(yearMonth, 'yyyyMM', new Date()), 1), 'yyyyMM'));
+                                }}
+                                // MYMEMO: change to first_giving/receiving_ticket_date
+                                disabled={yearMonth === format(new Date(currentRelation.first_diary_date), 'yyyyMM')}
+                                sx={{ marginRight: 5 }}
+                            >
+                                <KeyboardArrowLeftIcon />
+                            </IconButton>
+                            <Select value={yearMonth} onChange={event => setYearMonth(event.target.value)} variant="standard">
+                                {getTabYearMonths().map(yearMonth => {
+                                    return <MenuItem key={yearMonth} value={yearMonth}>{`${yearMonth.slice(0, 4)}/${yearMonth.slice(4, 6)}`}</MenuItem>;
+                                })}
+                            </Select>
+                            <IconButton
+                                onClick={() => {
+                                    yearMonth !== thisMonth && setYearMonth(format(addMonths(parse(yearMonth, 'yyyyMM', new Date()), 1), 'yyyyMM'));
+                                }}
+                                disabled={yearMonth === thisMonth}
+                                sx={{ marginLeft: 5 }}
+                            >
+                                <KeyboardArrowRightIcon />
+                            </IconButton>
+                        </Stack>
+                        {tickets === undefined || tickets[yearMonth] === undefined ? (
+                            <CircularProgress />
+                        ) : (
+                            <Grid container spacing={2}>
+                                {tickets[yearMonth].map(ticket => (
+                                    <Ticket key={ticket.id} ticket={ticket} relationKind={relationKind} />
+                                ))}
+                            </Grid>
+                        )}
                         <ToTopButton onClick={() => window.scroll({ top: 0, behavior: 'smooth' })}>
                             <KeyboardDoubleArrowUpIcon />
                         </ToTopButton>

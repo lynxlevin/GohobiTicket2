@@ -96,7 +96,7 @@ const Diaries = () => {
                             </IconButton>
                             <Select value={yearMonth} onChange={event => setYearMonth(event.target.value)} variant="standard">
                                 {getTabYearMonths().map(yearMonth => {
-                                    return <MenuItem value={yearMonth}>{`${yearMonth.slice(0, 4)}/${yearMonth.slice(4, 6)}`}</MenuItem>;
+                                    return <MenuItem key={yearMonth} value={yearMonth}>{`${yearMonth.slice(0, 4)}/${yearMonth.slice(4, 6)}`}</MenuItem>;
                                 })}
                             </Select>
                             <IconButton
