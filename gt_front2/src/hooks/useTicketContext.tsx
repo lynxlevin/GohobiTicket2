@@ -1,7 +1,6 @@
 import { useCallback, useContext } from 'react';
 import { CreateTicketRequest, TicketAPI } from '../apis/TicketAPI';
 import { TicketContext } from '../contexts/ticket-context';
-import { ITicket } from '../types/ticket';
 import { RelationKind } from '../types/user_relation';
 
 const useTicketContext = () => {
@@ -30,56 +29,27 @@ const useTicketContext = () => {
         [ticketContext.setGivingTickets],
     );
 
-    const sortConditions = (a: ITicket, b: ITicket) => {
-        const aIsNewer = a.gift_date > b.gift_date;
-        const onlyAIsUsed = a.wish !== null && b.wish === null;
-        const onlyBIsUsed = a.wish === null && b.wish !== null;
-
-        if (onlyAIsUsed) return 1;
-        if (onlyBIsUsed) return -1;
-        return aIsNewer ? -1 : 1;
-    };
-
-    const getSortedTickets = useCallback(
-        ({ showOnlySpecial, showOnlyUsed, relationKind }: { showOnlySpecial: boolean; showOnlyUsed: boolean; relationKind: RelationKind }) => {
-            const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-            if (tickets === undefined) return [];
-            return tickets
-                .filter(ticket => !showOnlySpecial || ticket.is_special)
-                .filter(ticket => !showOnlyUsed || ticket.wish !== null)
-                .sort(sortConditions);
-        },
-        [ticketContext.givingTickets, ticketContext.receivingTickets],
-    );
-
-    const getLastAvailableTicketId = useCallback(
-        (relationKind: RelationKind) => {
-            const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-            if (tickets === undefined) return undefined;
-            const availableTickets = tickets.filter(ticket => ticket.wish === null).sort(sortConditions);
-            if (availableTickets.length === 0) return undefined;
-            return availableTickets.slice(-1)[0].id;
-        },
-        [ticketContext.givingTickets, ticketContext.receivingTickets],
-    );
-
+    // MYMEMO: fix
     const getLastAvailableNormalTicket = useCallback(
         (relationKind: RelationKind) => {
-            const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-            if (tickets === undefined) return undefined;
-            const availableTickets = tickets.filter(ticket => ticket.wish === null && !ticket.is_special).sort(sortConditions);
-            if (availableTickets.length === 0) return undefined;
-            return availableTickets.slice(-1)[0];
+            return ticketContext.givingTickets === undefined ? undefined : ticketContext.givingTickets[0];
+            // const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
+            // if (tickets === undefined) return undefined;
+            // const availableTickets = tickets.filter(ticket => ticket.wish === null && !ticket.is_special).sort(sortConditions);
+            // if (availableTickets.length === 0) return undefined;
+            // return availableTickets.slice(-1)[0];
         },
         [ticketContext.givingTickets, ticketContext.receivingTickets],
     );
+    // MYMEMO: fix
     const getLastAvailableSpecialTicket = useCallback(
         (relationKind: RelationKind) => {
-            const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-            if (tickets === undefined) return undefined;
-            const availableTickets = tickets.filter(ticket => ticket.wish === null && ticket.is_special).sort(sortConditions);
-            if (availableTickets.length === 0) return undefined;
-            return availableTickets.slice(-1)[0];
+            return ticketContext.givingTickets === undefined ? undefined : ticketContext.givingTickets[0];
+            // const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
+            // if (tickets === undefined) return undefined;
+            // const availableTickets = tickets.filter(ticket => ticket.wish === null && ticket.is_special).sort(sortConditions);
+            // if (availableTickets.length === 0) return undefined;
+            // return availableTickets.slice(-1)[0];
         },
         [ticketContext.givingTickets, ticketContext.receivingTickets],
     );
@@ -88,7 +58,9 @@ const useTicketContext = () => {
         TicketAPI.create(data).then(({ data: { ticket } }) => {
             ticketContext.setGivingTickets(prev => {
                 if (prev === undefined) return [ticket];
-                return [ticket, ...prev].sort(sortConditions);
+                return [ticket, ...prev].sort((a, b) => {
+                    return a.gift_date > b.gift_date ? -1 : 1;
+                });
             });
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -155,8 +127,6 @@ const useTicketContext = () => {
         givingTickets,
         getReceivingTickets,
         getGivingTickets,
-        getSortedTickets,
-        getLastAvailableTicketId,
         getLastAvailableNormalTicket,
         getLastAvailableSpecialTicket,
         createTicket,

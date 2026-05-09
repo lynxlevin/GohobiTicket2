@@ -1,26 +1,9 @@
 import styled from '@emotion/styled';
 import AddIcon from '@mui/icons-material/Add';
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
-import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
-import {
-    Badge,
-    CardMedia,
-    CircularProgress,
-    Container,
-    Dialog,
-    DialogContent,
-    FormControlLabel,
-    FormGroup,
-    Grid,
-    IconButton,
-    Paper,
-    Stack,
-    Switch,
-    Typography,
-} from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import { CardMedia, CircularProgress, Container, Dialog, Grid, IconButton, Paper, Stack, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
@@ -36,18 +19,15 @@ interface TicketsProps {
     relationKind: RelationKind;
 }
 
-type DialogType = 'TicketImage' | 'GiveTicket' | 'UseTicket' | 'FilterTickets';
+type DialogType = 'TicketImage' | 'GiveTicket' | 'UseTicket';
 
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = ({ relationKind }: TicketsProps) => {
-    const lastAvailableTicketRef = useRef<HTMLDivElement | null>(null);
-
-    const [showOnlySpecial, setShowOnlySpecial] = useState(false);
-    const [showOnlyUsed, setShowOnlyUsed] = useState(false);
     const [openedDialog, setOpenedDialog] = useState<DialogType>();
+
     const { handleLogout } = useUserAPI();
     const { getUserRelations, userRelations } = useUserRelationContext();
-    const { givingTickets, receivingTickets, getReceivingTickets, getGivingTickets, getSortedTickets, getLastAvailableTicketId } = useTicketContext();
+    const { givingTickets, receivingTickets, getReceivingTickets, getGivingTickets } = useTicketContext();
     const { userRelationId } = usePagePath();
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
@@ -76,8 +56,6 @@ const Tickets = ({ relationKind }: TicketsProps) => {
     };
 
     const tickets = relationKind === 'Receiving' ? receivingTickets : givingTickets;
-    const ticketCount = tickets !== undefined ? tickets.length : 0;
-    const isSpecialNumber = ticketCount > 0 && (ticketCount % 100 === 0 || ticketCount % 111 === 0 || ticketCount % 1111 === 0);
 
     const getDialog = () => {
         switch (openedDialog) {
@@ -91,23 +69,6 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                 return <CreateTicketDialog onClose={() => setOpenedDialog(undefined)} />;
             case 'UseTicket':
                 return <UseTicketDialog onClose={() => setOpenedDialog(undefined)} />;
-            case 'FilterTickets':
-                return (
-                    <Dialog open={true} onClose={() => setOpenedDialog(undefined)} fullWidth>
-                        <DialogContent>
-                            <FormGroup>
-                                <FormControlLabel
-                                    label="特別チケットのみ表示"
-                                    control={<Switch checked={showOnlySpecial} onChange={event => setShowOnlySpecial(event.target.checked)} />}
-                                />
-                                <FormControlLabel
-                                    label="使用済みチケットのみ表示"
-                                    control={<Switch checked={showOnlyUsed} onChange={event => setShowOnlyUsed(event.target.checked)} />}
-                                />
-                            </FormGroup>
-                        </DialogContent>
-                    </Dialog>
-                );
         }
     };
 
@@ -133,7 +94,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
         <>
             <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} leftItem={ticketImage()} />
             <BottomNav />
-            {currentRelation === undefined ? (
+            {currentRelation === undefined || tickets === undefined ? (
                 <CircularProgress />
             ) : (
                 <main>
@@ -154,42 +115,13 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                                         <RedeemIcon />
                                     </IconButton>
                                 )}
-                                <Badge badgeContent={Number(showOnlySpecial) + Number(showOnlyUsed)} color="primary" overlap="circular">
-                                    <IconButton onClick={() => setOpenedDialog('FilterTickets')}>
-                                        <FilterAltIcon />
-                                    </IconButton>
-                                </Badge>
                             </Stack>
                         </Stack>
-                        {isSpecialNumber ? (
-                            <Typography variant="h6" align="left" color="text.primary" gutterBottom>
-                                計<GoldNumber>{ticketCount}</GoldNumber>枚
-                            </Typography>
-                        ) : (
-                            <Typography variant="h6" align="left" color="text.primary" gutterBottom>
-                                計{ticketCount}枚
-                            </Typography>
-                        )}
                         <Grid container spacing={2}>
-                            {getSortedTickets({ showOnlySpecial, showOnlyUsed, relationKind }).map(ticket => {
-                                if (ticket.id === getLastAvailableTicketId(relationKind)) {
-                                    return (
-                                        <Ticket key={ticket.id} lastAvailableTicketRef={lastAvailableTicketRef} ticket={ticket} relationKind={relationKind} />
-                                    );
-                                }
-                                return <Ticket key={ticket.id} ticket={ticket} relationKind={relationKind} />;
-                            })}
+                            {tickets.map(ticket => (
+                                <Ticket key={ticket.id} ticket={ticket} relationKind={relationKind} />
+                            ))}
                         </Grid>
-                        {!showOnlyUsed && !showOnlySpecial && (
-                            <ToLastAvailableTicketButton
-                                onClick={() => {
-                                    if (lastAvailableTicketRef.current !== null)
-                                        window.scrollTo({ top: lastAvailableTicketRef.current.offsetTop, behavior: 'smooth' });
-                                }}
-                            >
-                                <KeyboardDoubleArrowDownIcon />
-                            </ToLastAvailableTicketButton>
-                        )}
                         <ToTopButton onClick={() => window.scroll({ top: 0, behavior: 'smooth' })}>
                             <KeyboardDoubleArrowUpIcon />
                         </ToTopButton>
@@ -201,18 +133,6 @@ const Tickets = ({ relationKind }: TicketsProps) => {
     );
 };
 
-const ToLastAvailableTicketButton = styled(IconButton)`
-    font-size: 30px;
-    background: white !important;
-    border-radius: 999px;
-    position: fixed;
-    left: 16px;
-    bottom: 66px;
-    border: 2px solid #ddd;
-    width: 40px;
-    height: 40px;
-    z-index: 100;
-`;
 const ToTopButton = styled(IconButton)`
     font-size: 30px;
     background: white !important;
@@ -224,16 +144,6 @@ const ToTopButton = styled(IconButton)`
     width: 40px;
     height: 40px;
     z-index: 100;
-`;
-
-const GoldNumber = styled.span`
-    font-size: 2.5rem;
-    padding: 8px;
-    background: linear-gradient(to bottom, #cfc09f 27%, #ffecb3 40%, #3a2c0f 78%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: #fff;
-    font-weight: bold;
 `;
 
 export default Tickets;
