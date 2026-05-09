@@ -12,7 +12,7 @@ const useTicketContext = () => {
 
     const getReceivingTickets = useCallback(
         async (userRelationId: number | string) => {
-            TicketAPI.list(Number(userRelationId), false).then(({ data: { tickets } }) => {
+            TicketAPI.list({ userRelationId: Number(userRelationId), isGiving: false }).then(({ data: { tickets } }) => {
                 ticketContext.setReceivingTickets(tickets);
             });
         },
@@ -22,7 +22,7 @@ const useTicketContext = () => {
 
     const getGivingTickets = useCallback(
         async (userRelationId: number | string) => {
-            TicketAPI.list(Number(userRelationId), true).then(({ data: { tickets } }) => {
+            TicketAPI.list({ userRelationId: Number(userRelationId), isGiving: true }).then(({ data: { tickets } }) => {
                 ticketContext.setGivingTickets(tickets);
             });
         },

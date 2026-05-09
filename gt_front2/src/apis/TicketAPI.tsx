@@ -1,8 +1,16 @@
 import { AxiosResponse } from 'axios';
 import client from './axios';
 import { ITicket } from '../types/ticket';
+import { format } from 'date-fns';
 
-interface ListTicketResponse {
+export interface ListTicketsRequest {
+    userRelationId: number;
+    isGiving: boolean;
+    giftDateGte?: Date;
+    giftDateLte?: Date;
+}
+
+interface ListTicketsResponse {
     tickets: ITicket[];
 }
 
@@ -26,9 +34,13 @@ export interface CreateTicketRequest {
 export const TicketAPI = {
     BASE_URL: '/api/tickets/',
 
-    list: async (userRelationId: number, isGiving: boolean): Promise<AxiosResponse<ListTicketResponse>> => {
-        const query = isGiving ? `user_relation_id=${userRelationId}&is_giving` : `user_relation_id=${userRelationId}&is_receiving`;
-        const url = `${TicketAPI.BASE_URL}?${query}`;
+    list: async ({ userRelationId, isGiving, giftDateGte, giftDateLte }: ListTicketsRequest): Promise<AxiosResponse<ListTicketsResponse>> => {
+        let url = TicketAPI.BASE_URL;
+        const queries = [`user_relation_id=${userRelationId}`];
+        isGiving ? queries.push('is_giving') : queries.push('is_receiving');
+        if (giftDateGte) queries.push(`gift_date_gte=${format(giftDateGte, 'yyyy-MM-dd')}`);
+        if (giftDateLte) queries.push(`gift_date_lte=${format(giftDateLte, 'yyyy-MM-dd')}`);
+        url += `?${queries.join('&')}`;
         return await client.get(url);
     },
     create: async (props: CreateTicketRequest): Promise<AxiosResponse<UpsertTicketResponse>> => {
