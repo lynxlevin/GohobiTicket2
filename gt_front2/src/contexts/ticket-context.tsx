@@ -1,10 +1,6 @@
 import { createContext, ReactNode, useState } from 'react';
-import { ITicket, ITicketsForMonth } from '../types/ticket';
+import { ITicketsForMonth } from '../types/ticket';
 interface TicketContextType {
-    receivingTickets: ITicket[] | undefined;
-    givingTickets: ITicket[] | undefined;
-    setReceivingTickets: React.Dispatch<React.SetStateAction<ITicket[] | undefined>>;
-    setGivingTickets: React.Dispatch<React.SetStateAction<ITicket[] | undefined>>;
     receivingTicketsByMonth: ITicketsForMonth | undefined;
     givingTicketsByMonth: ITicketsForMonth | undefined;
     setReceivingTicketsByMonth: React.Dispatch<React.SetStateAction<ITicketsForMonth | undefined>>;
@@ -12,10 +8,6 @@ interface TicketContextType {
 }
 
 export const TicketContext = createContext<TicketContextType>({
-    receivingTickets: undefined,
-    givingTickets: undefined,
-    setReceivingTickets: () => {},
-    setGivingTickets: () => {},
     receivingTicketsByMonth: undefined,
     givingTicketsByMonth: undefined,
     setReceivingTicketsByMonth: () => {},
@@ -23,18 +15,12 @@ export const TicketContext = createContext<TicketContextType>({
 });
 
 export const TicketProvider = ({ children }: { children: ReactNode }) => {
-    const [receivingTickets, setReceivingTickets] = useState<ITicket[]>();
-    const [givingTickets, setGivingTickets] = useState<ITicket[]>();
     const [receivingTicketsByMonth, setReceivingTicketsByMonth] = useState<ITicketsForMonth>();
     const [givingTicketsByMonth, setGivingTicketsByMonth] = useState<ITicketsForMonth>();
 
     return (
         <TicketContext.Provider
             value={{
-                receivingTickets,
-                setReceivingTickets,
-                givingTickets,
-                setGivingTickets,
                 receivingTicketsByMonth,
                 givingTicketsByMonth,
                 setReceivingTicketsByMonth,

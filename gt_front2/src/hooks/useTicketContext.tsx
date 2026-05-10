@@ -2,13 +2,12 @@ import { useCallback, useContext } from 'react';
 import { CreateTicketRequest, TicketAPI } from '../apis/TicketAPI';
 import { TicketContext } from '../contexts/ticket-context';
 import { RelationKind } from '../types/user_relation';
-import { endOfMonth, parse, startOfMonth } from 'date-fns';
+import { endOfMonth, format, parse, startOfMonth } from 'date-fns';
+import { ITicket } from '../types/ticket';
 
 const useTicketContext = () => {
     const ticketContext = useContext(TicketContext);
 
-    const receivingTickets = ticketContext.receivingTickets;
-    const givingTickets = ticketContext.givingTickets;
     const receivingTicketsByMonth = ticketContext.receivingTicketsByMonth;
     const givingTicketsByMonth = ticketContext.givingTicketsByMonth;
 
@@ -46,37 +45,36 @@ const useTicketContext = () => {
     );
 
     // MYMEMO: fix
-    const getLastAvailableNormalTicket = useCallback(
-        (relationKind: RelationKind) => {
-            return ticketContext.givingTickets === undefined ? undefined : ticketContext.givingTickets[0];
-            // const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-            // if (tickets === undefined) return undefined;
-            // const availableTickets = tickets.filter(ticket => ticket.wish === null && !ticket.is_special).sort(sortConditions);
-            // if (availableTickets.length === 0) return undefined;
-            // return availableTickets.slice(-1)[0];
-        },
-        [ticketContext.givingTickets, ticketContext.receivingTickets],
-    );
+    const getLastAvailableNormalTicket = useCallback((relationKind: RelationKind) => {
+        return undefined;
+        // const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
+        // if (tickets === undefined) return undefined;
+        // const availableTickets = tickets.filter(ticket => ticket.wish === null && !ticket.is_special).sort(sortConditions);
+        // if (availableTickets.length === 0) return undefined;
+        // return availableTickets.slice(-1)[0];
+    }, []);
     // MYMEMO: fix
-    const getLastAvailableSpecialTicket = useCallback(
-        (relationKind: RelationKind) => {
-            return ticketContext.givingTickets === undefined ? undefined : ticketContext.givingTickets[0];
-            // const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-            // if (tickets === undefined) return undefined;
-            // const availableTickets = tickets.filter(ticket => ticket.wish === null && ticket.is_special).sort(sortConditions);
-            // if (availableTickets.length === 0) return undefined;
-            // return availableTickets.slice(-1)[0];
-        },
-        [ticketContext.givingTickets, ticketContext.receivingTickets],
-    );
+    const getLastAvailableSpecialTicket = useCallback((relationKind: RelationKind) => {
+        return undefined;
+        // const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
+        // if (tickets === undefined) return undefined;
+        // const availableTickets = tickets.filter(ticket => ticket.wish === null && ticket.is_special).sort(sortConditions);
+        // if (availableTickets.length === 0) return undefined;
+        // return availableTickets.slice(-1)[0];
+    }, []);
 
     const createTicket = useCallback(async (data: CreateTicketRequest) => {
         TicketAPI.create(data).then(({ data: { ticket } }) => {
-            ticketContext.setGivingTickets(prev => {
-                if (prev === undefined) return [ticket];
-                return [ticket, ...prev].sort((a, b) => {
-                    return a.gift_date > b.gift_date ? -1 : 1;
-                });
+            const yearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
+            ticketContext.setGivingTicketsByMonth(prev => {
+                const toBe = { ...prev };
+                if (toBe[yearMonth] === undefined) {
+                    toBe[yearMonth] = [ticket];
+                } else {
+                    toBe[yearMonth].push(ticket);
+                    toBe[yearMonth] = toBe[yearMonth].sort((a, b) => (a.gift_date > b.gift_date ? -1 : 1));
+                }
+                return toBe;
             });
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,18 +87,24 @@ const useTicketContext = () => {
         };
         if (willFinalize) payload.status = 'unread';
         TicketAPI.update(ticketId, payload).then(({ data: { ticket } }) => {
-            ticketContext.setGivingTickets(prev => {
-                const tickets = [...prev!];
-                tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;
-                return tickets;
+            ticketContext.setGivingTicketsByMonth(prev => {
+                const yearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
+                const toBe = { ...prev };
+                toBe[yearMonth][toBe[yearMonth].findIndex(p => p.id === ticket.id)] = ticket;
+                return toBe;
             });
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const deleteTicket = useCallback(async (ticketId: number) => {
-        TicketAPI.delete(ticketId).then(_ => {
-            ticketContext.setGivingTickets(prev => prev!.filter(ticket => ticket.id !== ticketId));
+    const deleteTicket = useCallback(async (ticket: ITicket) => {
+        const originalYearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
+        TicketAPI.delete(ticket.id).then(_ => {
+            ticketContext.setGivingTicketsByMonth(prev => {
+                const toBe = { ...prev };
+                toBe[originalYearMonth] = toBe[originalYearMonth].filter(t => t.id !== ticket.id);
+                return toBe;
+            });
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -112,20 +116,22 @@ const useTicketContext = () => {
         const {
             data: { ticket, web_push_result },
         } = await TicketAPI.use(ticketId, payload);
-        ticketContext.setReceivingTickets(prev => {
-            const tickets = [...prev!];
-            tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;
-            return tickets;
+        ticketContext.setReceivingTicketsByMonth(prev => {
+            const yearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
+            const toBe = { ...prev };
+            toBe[yearMonth][toBe[yearMonth].findIndex(p => p.id === ticket.id)] = ticket;
+            return toBe;
         });
         return web_push_result;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const readTicket = useCallback(async (ticketId: number) => {
-        TicketAPI.read(ticketId).then(() => {
-            ticketContext.setReceivingTickets(prev => {
+    const readTicket = useCallback(async (ticket: ITicket) => {
+        TicketAPI.read(ticket.id).then(() => {
+            ticketContext.setReceivingTicketsByMonth(prev => {
+                const yearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
                 // Intentionally not triggering re-render.
-                prev![prev!.findIndex(p => p.id === ticketId)].status = 'read';
+                prev![yearMonth][prev![yearMonth].findIndex(p => p.id === ticket.id)].status = 'read';
                 return prev;
             });
         });
@@ -133,14 +139,12 @@ const useTicketContext = () => {
     }, []);
 
     const clearTicketCache = useCallback(() => {
-        ticketContext.setReceivingTickets(undefined);
-        ticketContext.setGivingTickets(undefined);
+        ticketContext.setReceivingTicketsByMonth(undefined);
+        ticketContext.setGivingTicketsByMonth(undefined);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return {
-        receivingTickets,
-        givingTickets,
         receivingTicketsByMonth,
         givingTicketsByMonth,
         getReceivingTicketsByMonth,

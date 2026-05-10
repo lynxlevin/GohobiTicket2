@@ -62,7 +62,7 @@ const EditDialog = (props: EditDialogProps) => {
             </DialogContent>
             <DialogActions sx={{ justifyContent: 'center', py: 2 }}>
                 {willDelete ? (
-                    <Button variant="contained" color="error" onClick={() => deleteTicket(ticket.id)}>
+                    <Button variant="contained" color="error" onClick={() => deleteTicket(ticket)}>
                         削除する
                     </Button>
                 ) : (
