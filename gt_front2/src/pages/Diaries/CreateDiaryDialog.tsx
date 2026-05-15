@@ -11,6 +11,7 @@ import {
     MenuItem,
     Select,
     SelectChangeEvent,
+    Stack,
     TextField,
 } from '@mui/material';
 import { MobileDatePicker } from '@mui/x-date-pickers';
@@ -94,7 +95,12 @@ const CreateDiaryDialog = ({ userRelationId, onClose }: CreateDiaryDialogProps) 
     return (
         <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>
-                <FormGroup sx={{ mt: 3 }}>
+                <Stack direction="row" justifyContent="flex-end" mt={-1} mr={-2}>
+                    <Button variant="text" onClick={resetDraft} size="small" color="warning" disabled={createDiaryDraft === undefined}>
+                        クリア
+                    </Button>
+                </Stack>
+                <FormGroup sx={{ mt: 1 }}>
                     <MobileDatePicker label="日付" value={date} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{ mb: 1 }} />
                     {diaryTags !== undefined && (
                         <FormControl sx={{ width: '100%', mb: 1 }}>
@@ -127,9 +133,6 @@ const CreateDiaryDialog = ({ userRelationId, onClose }: CreateDiaryDialogProps) 
             <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
                 <Button variant="contained" onClick={handleSubmit}>
                     保存する
-                </Button>
-                <Button variant="contained" onClick={resetDraft} color="warning" disabled={createDiaryDraft === undefined}>
-                    クリア
                 </Button>
             </DialogActions>
         </Dialog>

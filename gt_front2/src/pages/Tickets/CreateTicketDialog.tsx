@@ -1,4 +1,4 @@
-import { Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, FormControlLabel, FormGroup, TextField } from '@mui/material';
+import { Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, FormControlLabel, FormGroup, Stack, TextField } from '@mui/material';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 import { format, parse } from 'date-fns';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
@@ -93,7 +93,12 @@ const CreateTicketDialog = ({ onClose }: { onClose: () => void }) => {
             ) : (
                 <Dialog open={true} onClose={onClose} fullWidth>
                     <DialogContent>
-                        <FormGroup sx={{ mt: 3 }}>
+                        <Stack direction="row" justifyContent="flex-end" mt={-1} mr={-2}>
+                            <Button variant="text" onClick={resetDraft} size="small" color="warning" disabled={createTicketDraft === undefined}>
+                                クリア
+                            </Button>
+                        </Stack>
+                        <FormGroup sx={{ mt: 1 }}>
                             <MobileDatePicker
                                 label="あげる日"
                                 value={giftDate}
@@ -111,19 +116,12 @@ const CreateTicketDialog = ({ onClose }: { onClose: () => void }) => {
                             />
                             <FormControlLabel label="下書きにする" control={<Checkbox checked={isDraft} onChange={onChangeIsDraft} />} sx={{ mr: 'auto' }} />
                         </FormGroup>
-                        <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
-                            <Button
-                                variant={isDraft ? 'outlined' : 'contained'}
-                                onClick={handleSubmit}
-                                sx={isDraft ? { color: 'primary.dark', mt: 2, mb: 2 } : { mt: 2, mb: 2 }}
-                            >
-                                {isDraft ? '下書き保存' : 'チケット付与'}
-                            </Button>
-                            <Button variant="contained" onClick={resetDraft} color="warning" disabled={createTicketDraft === undefined}>
-                                クリア
-                            </Button>
-                        </DialogActions>
                     </DialogContent>
+                    <DialogActions sx={{ justifyContent: 'center', mt: -2, pb: 2 }}>
+                        <Button variant={isDraft ? 'outlined' : 'contained'} onClick={handleSubmit} sx={isDraft ? { color: 'primary.dark' } : {}}>
+                            {isDraft ? '下書き保存' : 'チケット付与'}
+                        </Button>
+                    </DialogActions>
                 </Dialog>
             )}
         </>
