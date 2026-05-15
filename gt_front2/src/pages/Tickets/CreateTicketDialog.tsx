@@ -93,10 +93,12 @@ const CreateTicketDialog = ({ onClose }: { onClose: () => void }) => {
             ) : (
                 <Dialog open={true} onClose={onClose} fullWidth>
                     <DialogContent>
-                        <Stack direction="row" justifyContent="flex-end" mt={-1} mr={-2}>
-                            <Button variant="text" onClick={resetDraft} size="small" color="warning" disabled={createTicketDraft === undefined}>
-                                クリア
-                            </Button>
+                        <Stack direction="row" justifyContent="flex-end" mt={-1} mr={-2} height="30px">
+                            {createTicketDraft !== undefined && (
+                                <Button variant="text" onClick={resetDraft} size="small" color="warning" disabled={createTicketDraft === undefined}>
+                                    クリア
+                                </Button>
+                            )}
                         </Stack>
                         <FormGroup sx={{ mt: 1 }}>
                             <MobileDatePicker

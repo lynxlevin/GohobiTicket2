@@ -95,10 +95,12 @@ const CreateDiaryDialog = ({ userRelationId, onClose }: CreateDiaryDialogProps) 
     return (
         <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>
-                <Stack direction="row" justifyContent="flex-end" mt={-1} mr={-2}>
-                    <Button variant="text" onClick={resetDraft} size="small" color="warning" disabled={createDiaryDraft === undefined}>
-                        クリア
-                    </Button>
+                <Stack direction="row" justifyContent="flex-end" mt={-1} mr={-2} height="30px">
+                    {createDiaryDraft !== undefined && (
+                        <Button variant="text" onClick={resetDraft} size="small" color="warning" disabled={createDiaryDraft === undefined}>
+                            クリア
+                        </Button>
+                    )}
                 </Stack>
                 <FormGroup sx={{ mt: 1 }}>
                     <MobileDatePicker label="日付" value={date} onChange={onChangeDate} showDaysOutsideCurrentMonth closeOnSelect sx={{ mb: 1 }} />
