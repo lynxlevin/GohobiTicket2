@@ -14,6 +14,13 @@ interface SearchResponse {
     diaries: IDiary[];
 }
 
+interface AvailableTicketsResponse {
+    oldest: {
+        normal: ITicket | null;
+        special: ITicket | null;
+    };
+}
+
 export const UserRelationAPI = {
     BASE_URL: '/api/user_relations/',
 
@@ -27,5 +34,9 @@ export const UserRelationAPI = {
     search: async (data: { userRelationId: number; text: string }): Promise<AxiosResponse<SearchResponse>> => {
         const url = `${UserRelationAPI.BASE_URL}${data.userRelationId}/search/`;
         return await client.post(url, { text: data.text });
+    },
+    availableTickets: async (data: { userRelationId: number }): Promise<AxiosResponse<AvailableTicketsResponse>> => {
+        const url = `${UserRelationAPI.BASE_URL}${data.userRelationId}/available_tickets/`;
+        return await client.get(url);
     },
 };

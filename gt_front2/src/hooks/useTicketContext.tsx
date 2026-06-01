@@ -1,7 +1,6 @@
 import { useCallback, useContext } from 'react';
 import { CreateTicketRequest, TicketAPI } from '../apis/TicketAPI';
 import { TicketContext } from '../contexts/ticket-context';
-import { RelationKind } from '../types/user_relation';
 import { endOfMonth, format, parse, startOfMonth } from 'date-fns';
 import { ITicket } from '../types/ticket';
 
@@ -43,25 +42,6 @@ const useTicketContext = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [ticketContext.setGivingTicketsByMonth],
     );
-
-    // MYMEMO: fix
-    const getLastAvailableNormalTicket = useCallback((relationKind: RelationKind) => {
-        return undefined;
-        // const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-        // if (tickets === undefined) return undefined;
-        // const availableTickets = tickets.filter(ticket => ticket.wish === null && !ticket.is_special).sort(sortConditions);
-        // if (availableTickets.length === 0) return undefined;
-        // return availableTickets.slice(-1)[0];
-    }, []);
-    // MYMEMO: fix
-    const getLastAvailableSpecialTicket = useCallback((relationKind: RelationKind) => {
-        return undefined;
-        // const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-        // if (tickets === undefined) return undefined;
-        // const availableTickets = tickets.filter(ticket => ticket.wish === null && ticket.is_special).sort(sortConditions);
-        // if (availableTickets.length === 0) return undefined;
-        // return availableTickets.slice(-1)[0];
-    }, []);
 
     const createTicket = useCallback(async (data: CreateTicketRequest) => {
         TicketAPI.create(data).then(({ data: { ticket } }) => {
@@ -149,8 +129,6 @@ const useTicketContext = () => {
         givingTicketsByMonth,
         getReceivingTicketsByMonth,
         getGivingTicketsByMonth,
-        getLastAvailableNormalTicket,
-        getLastAvailableSpecialTicket,
         createTicket,
         updateTicket,
         deleteTicket,

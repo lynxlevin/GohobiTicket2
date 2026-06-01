@@ -81,7 +81,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
             case 'GiveTicket':
                 return <CreateTicketDialog onClose={() => setOpenedDialog(undefined)} />;
             case 'UseTicket':
-                return <UseTicketDialog onClose={() => setOpenedDialog(undefined)} />;
+                return <UseTicketDialog onClose={() => setOpenedDialog(undefined)} userRelationId={userRelationId} />;
         }
     };
 
