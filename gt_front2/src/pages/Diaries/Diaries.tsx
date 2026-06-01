@@ -5,7 +5,7 @@ import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { CircularProgress, Container, Grid, IconButton, MenuItem, Select, Stack, Typography } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useUserAPI from '../../hooks/useUserAPI';
 import Diary from './Diary';
@@ -16,31 +16,27 @@ import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
 import { addMonths, format, parse, subMonths } from 'date-fns';
 import CreateDiaryDialog from './CreateDiaryDialog';
+import useYearMonthContext from '../../hooks/useYearMonthContext';
 
 const Diaries = () => {
     const firstUnreadDiaryRef = useRef<HTMLDivElement | null>(null);
     const [openedDialog, setOpenedDialog] = useState<'WriteDiary'>();
-    const thisMonth = format(new Date(), 'yyyyMM');
-    const [yearMonth, setYearMonth] = useState(thisMonth);
 
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { unreadDiaries, diariesByMonth, getDiariesByMonth } = useDiaryContext();
     const { diaryTags, getDiaryTags } = useDiaryTagContext();
     const { handleLogout } = useUserAPI();
     const { userRelationId } = usePagePath();
+    const { yearMonth, setYearMonth, thisMonth, getTabYearMonths, getFirstDate } = useYearMonthContext();
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
 
-    const getTabYearMonths = () => {
-        const today = new Date();
-        const startDay = currentRelation !== undefined ? new Date(currentRelation.first_diary_date) : today;
-        const yearMonths = [format(today, 'yyyyMM')];
-        while (yearMonths[yearMonths.length - 1] !== format(startDay, 'yyyyMM')) {
-            const lastMonth = subMonths(parse(yearMonths[yearMonths.length - 1], 'yyyyMM', new Date()), 1);
-            yearMonths.push(format(lastMonth, 'yyyyMM'));
-        }
-        return yearMonths;
-    };
+    const tabYearMonth = useMemo(() => {
+        return getTabYearMonths('Diary', currentRelation);
+    }, [currentRelation, getTabYearMonths]);
+    const firstDate = useMemo(() => {
+        return getFirstDate('Diary', currentRelation);
+    }, [currentRelation, getFirstDate]);
 
     const getDialog = () => {
         switch (openedDialog) {
@@ -53,12 +49,13 @@ const Diaries = () => {
     useEffect(() => {
         if (userRelations === undefined) getUserRelations();
     }, [getUserRelations, userRelations]);
-
+    useEffect(() => {
+        if (!tabYearMonth.includes(yearMonth)) setYearMonth(format(firstDate, 'yyyyMM'));
+    }, [firstDate, setYearMonth, tabYearMonth, yearMonth]);
     useEffect(() => {
         if (userRelationId === null || !currentRelation) return;
         if (diariesByMonth === undefined || diariesByMonth[yearMonth] === undefined) getDiariesByMonth(userRelationId, yearMonth);
     }, [currentRelation, diariesByMonth, getDiariesByMonth, yearMonth, userRelationId]);
-
     useEffect(() => {
         if (userRelationId === null || !currentRelation) return;
         if (diaryTags === undefined) getDiaryTags(userRelationId);
@@ -86,16 +83,16 @@ const Diaries = () => {
                         <Stack direction="row" justifyContent="center" alignItems="center">
                             <IconButton
                                 onClick={() => {
-                                    yearMonth !== format(new Date(currentRelation.first_diary_date), 'yyyyMM') &&
+                                    yearMonth !== format(firstDate, 'yyyyMM') &&
                                         setYearMonth(format(subMonths(parse(yearMonth, 'yyyyMM', new Date()), 1), 'yyyyMM'));
                                 }}
-                                disabled={yearMonth === format(new Date(currentRelation.first_diary_date), 'yyyyMM')}
+                                disabled={yearMonth === format(firstDate, 'yyyyMM')}
                                 sx={{ marginRight: 5 }}
                             >
                                 <KeyboardArrowLeftIcon />
                             </IconButton>
                             <Select value={yearMonth} onChange={event => setYearMonth(event.target.value)} variant="standard">
-                                {getTabYearMonths().map(yearMonth => {
+                                {tabYearMonth.map(yearMonth => {
                                     return <MenuItem key={yearMonth} value={yearMonth}>{`${yearMonth.slice(0, 4)}/${yearMonth.slice(4, 6)}`}</MenuItem>;
                                 })}
                             </Select>

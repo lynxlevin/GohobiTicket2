@@ -5,7 +5,7 @@ import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { CardMedia, CircularProgress, Container, Dialog, Grid, IconButton, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useTicketContext from '../../hooks/useTicketContext';
 import useUserAPI from '../../hooks/useUserAPI';
@@ -17,6 +17,7 @@ import { RelationKind } from '../../types/user_relation';
 import UseTicketDialog from './UseTicketDialog';
 import CreateTicketDialog from './CreateTicketDialog';
 import { addMonths, format, parse, subMonths } from 'date-fns';
+import useYearMonthContext from '../../hooks/useYearMonthContext';
 
 interface TicketsProps {
     relationKind: RelationKind;
@@ -27,12 +28,11 @@ type DialogType = 'TicketImage' | 'GiveTicket' | 'UseTicket';
 // Copied template from https://github.com/mui/material-ui/tree/v5.15.2/docs/data/material/getting-started/templates/album
 const Tickets = ({ relationKind }: TicketsProps) => {
     const [openedDialog, setOpenedDialog] = useState<DialogType>();
-    const thisMonth = format(new Date(), 'yyyyMM');
-    const [yearMonth, setYearMonth] = useState(thisMonth);
 
     const { handleLogout } = useUserAPI();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { givingTicketsByMonth, receivingTicketsByMonth, getGivingTicketsByMonth, getReceivingTicketsByMonth } = useTicketContext();
+    const { yearMonth, setYearMonth, thisMonth, getTabYearMonths, getFirstDate } = useYearMonthContext();
 
     const { userRelationId } = usePagePath();
 
@@ -61,19 +61,14 @@ const Tickets = ({ relationKind }: TicketsProps) => {
         );
     };
 
-    const getTabYearMonths = () => {
-        const today = new Date();
-        // MYMEMO: change to first_giving/receiving_ticket_date
-        const startDay = currentRelation !== undefined ? new Date(currentRelation.first_diary_date) : today;
-        const yearMonths = [format(today, 'yyyyMM')];
-        while (yearMonths[yearMonths.length - 1] !== format(startDay, 'yyyyMM')) {
-            const lastMonth = subMonths(parse(yearMonths[yearMonths.length - 1], 'yyyyMM', new Date()), 1);
-            yearMonths.push(format(lastMonth, 'yyyyMM'));
-        }
-        return yearMonths;
-    };
-
     const tickets = relationKind === 'Receiving' ? receivingTicketsByMonth : givingTicketsByMonth;
+
+    const tabYearMonth = useMemo(() => {
+        return getTabYearMonths(relationKind === 'Giving' ? 'GivingTicket' : 'ReceivingTicket', currentRelation);
+    }, [currentRelation, getTabYearMonths, relationKind]);
+    const firstDate = useMemo(() => {
+        return getFirstDate(relationKind === 'Giving' ? 'GivingTicket' : 'ReceivingTicket', currentRelation);
+    }, [currentRelation, getFirstDate, relationKind]);
 
     const getDialog = () => {
         switch (openedDialog) {
@@ -93,7 +88,9 @@ const Tickets = ({ relationKind }: TicketsProps) => {
     useEffect(() => {
         if (userRelations === undefined) getUserRelations();
     }, [getUserRelations, userRelations]);
-
+    useEffect(() => {
+        if (!tabYearMonth.includes(yearMonth)) setYearMonth(format(firstDate, 'yyyyMM'));
+    }, [firstDate, setYearMonth, tabYearMonth, yearMonth]);
     useEffect(() => {
         if (userRelationId === null || !currentRelation) return;
         switch (relationKind) {
@@ -147,18 +144,16 @@ const Tickets = ({ relationKind }: TicketsProps) => {
                         <Stack direction="row" justifyContent="center" alignItems="center">
                             <IconButton
                                 onClick={() => {
-                                    // MYMEMO: change to first_giving/receiving_ticket_date
-                                    yearMonth !== format(new Date(currentRelation.first_diary_date), 'yyyyMM') &&
+                                    yearMonth !== format(firstDate, 'yyyyMM') &&
                                         setYearMonth(format(subMonths(parse(yearMonth, 'yyyyMM', new Date()), 1), 'yyyyMM'));
                                 }}
-                                // MYMEMO: change to first_giving/receiving_ticket_date
-                                disabled={yearMonth === format(new Date(currentRelation.first_diary_date), 'yyyyMM')}
+                                disabled={yearMonth === format(firstDate, 'yyyyMM')}
                                 sx={{ marginRight: 5 }}
                             >
                                 <KeyboardArrowLeftIcon />
                             </IconButton>
                             <Select value={yearMonth} onChange={event => setYearMonth(event.target.value)} variant="standard">
-                                {getTabYearMonths().map(yearMonth => {
+                                {tabYearMonth.map(yearMonth => {
                                     return <MenuItem key={yearMonth} value={yearMonth}>{`${yearMonth.slice(0, 4)}/${yearMonth.slice(4, 6)}`}</MenuItem>;
                                 })}
                             </Select>
