@@ -1,94 +1,60 @@
 import { useCallback, useContext } from 'react';
 import { CreateTicketRequest, TicketAPI } from '../apis/TicketAPI';
 import { TicketContext } from '../contexts/ticket-context';
+import { endOfMonth, format, parse, startOfMonth } from 'date-fns';
 import { ITicket } from '../types/ticket';
-import { RelationKind } from '../types/user_relation';
 
 const useTicketContext = () => {
     const ticketContext = useContext(TicketContext);
 
-    const receivingTickets = ticketContext.receivingTickets;
-    const givingTickets = ticketContext.givingTickets;
+    const receivingTicketsByMonth = ticketContext.receivingTicketsByMonth;
+    const givingTicketsByMonth = ticketContext.givingTicketsByMonth;
 
-    const getReceivingTickets = useCallback(
-        async (userRelationId: number | string) => {
-            TicketAPI.list(Number(userRelationId), false).then(({ data: { tickets } }) => {
-                ticketContext.setReceivingTickets(tickets);
-            });
+    const getReceivingTicketsByMonth = useCallback(
+        async (userRelationId: number, yearMonth: string) => {
+            const firstOfMonth = startOfMonth(parse(yearMonth, 'yyyyMM', new Date()));
+            TicketAPI.list({ userRelationId, isGiving: false, giftDateGte: firstOfMonth, giftDateLte: endOfMonth(firstOfMonth) }).then(
+                ({ data: { tickets } }) => {
+                    ticketContext.setReceivingTicketsByMonth(prev => {
+                        const toBe = { ...prev };
+                        toBe[yearMonth] = tickets;
+                        return toBe;
+                    });
+                },
+            );
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [ticketContext.setReceivingTickets],
+        [ticketContext.setReceivingTicketsByMonth],
     );
-
-    const getGivingTickets = useCallback(
-        async (userRelationId: number | string) => {
-            TicketAPI.list(Number(userRelationId), true).then(({ data: { tickets } }) => {
-                ticketContext.setGivingTickets(tickets);
-            });
+    const getGivingTicketsByMonth = useCallback(
+        async (userRelationId: number, yearMonth: string) => {
+            const firstOfMonth = startOfMonth(parse(yearMonth, 'yyyyMM', new Date()));
+            TicketAPI.list({ userRelationId, isGiving: true, giftDateGte: firstOfMonth, giftDateLte: endOfMonth(firstOfMonth) }).then(
+                ({ data: { tickets } }) => {
+                    ticketContext.setGivingTicketsByMonth(prev => {
+                        const toBe = { ...prev };
+                        toBe[yearMonth] = tickets;
+                        return toBe;
+                    });
+                },
+            );
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [ticketContext.setGivingTickets],
-    );
-
-    const sortConditions = (a: ITicket, b: ITicket) => {
-        const aIsNewer = a.gift_date > b.gift_date;
-        const onlyAIsUsed = a.wish !== null && b.wish === null;
-        const onlyBIsUsed = a.wish === null && b.wish !== null;
-
-        if (onlyAIsUsed) return 1;
-        if (onlyBIsUsed) return -1;
-        return aIsNewer ? -1 : 1;
-    };
-
-    const getSortedTickets = useCallback(
-        ({ showOnlySpecial, showOnlyUsed, relationKind }: { showOnlySpecial: boolean; showOnlyUsed: boolean; relationKind: RelationKind }) => {
-            const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-            if (tickets === undefined) return [];
-            return tickets
-                .filter(ticket => !showOnlySpecial || ticket.is_special)
-                .filter(ticket => !showOnlyUsed || ticket.wish !== null)
-                .sort(sortConditions);
-        },
-        [ticketContext.givingTickets, ticketContext.receivingTickets],
-    );
-
-    const getLastAvailableTicketId = useCallback(
-        (relationKind: RelationKind) => {
-            const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-            if (tickets === undefined) return undefined;
-            const availableTickets = tickets.filter(ticket => ticket.wish === null).sort(sortConditions);
-            if (availableTickets.length === 0) return undefined;
-            return availableTickets.slice(-1)[0].id;
-        },
-        [ticketContext.givingTickets, ticketContext.receivingTickets],
-    );
-
-    const getLastAvailableNormalTicket = useCallback(
-        (relationKind: RelationKind) => {
-            const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-            if (tickets === undefined) return undefined;
-            const availableTickets = tickets.filter(ticket => ticket.wish === null && !ticket.is_special).sort(sortConditions);
-            if (availableTickets.length === 0) return undefined;
-            return availableTickets.slice(-1)[0];
-        },
-        [ticketContext.givingTickets, ticketContext.receivingTickets],
-    );
-    const getLastAvailableSpecialTicket = useCallback(
-        (relationKind: RelationKind) => {
-            const tickets = relationKind === 'Receiving' ? ticketContext.receivingTickets : ticketContext.givingTickets;
-            if (tickets === undefined) return undefined;
-            const availableTickets = tickets.filter(ticket => ticket.wish === null && ticket.is_special).sort(sortConditions);
-            if (availableTickets.length === 0) return undefined;
-            return availableTickets.slice(-1)[0];
-        },
-        [ticketContext.givingTickets, ticketContext.receivingTickets],
+        [ticketContext.setGivingTicketsByMonth],
     );
 
     const createTicket = useCallback(async (data: CreateTicketRequest) => {
         TicketAPI.create(data).then(({ data: { ticket } }) => {
-            ticketContext.setGivingTickets(prev => {
-                if (prev === undefined) return [ticket];
-                return [ticket, ...prev].sort(sortConditions);
+            const yearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
+            ticketContext.setGivingTicketsByMonth(prev => {
+                const toBe = { ...prev };
+                if (toBe[yearMonth] === undefined) {
+                    toBe[yearMonth] = [ticket];
+                } else {
+                    toBe[yearMonth].push(ticket);
+                    toBe[yearMonth] = toBe[yearMonth].sort((a, b) => (a.gift_date > b.gift_date ? -1 : 1));
+                }
+                return toBe;
             });
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,18 +67,24 @@ const useTicketContext = () => {
         };
         if (willFinalize) payload.status = 'unread';
         TicketAPI.update(ticketId, payload).then(({ data: { ticket } }) => {
-            ticketContext.setGivingTickets(prev => {
-                const tickets = [...prev!];
-                tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;
-                return tickets;
+            ticketContext.setGivingTicketsByMonth(prev => {
+                const yearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
+                const toBe = { ...prev };
+                toBe[yearMonth][toBe[yearMonth].findIndex(p => p.id === ticket.id)] = ticket;
+                return toBe;
             });
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const deleteTicket = useCallback(async (ticketId: number) => {
-        TicketAPI.delete(ticketId).then(_ => {
-            ticketContext.setGivingTickets(prev => prev!.filter(ticket => ticket.id !== ticketId));
+    const deleteTicket = useCallback(async (ticket: ITicket) => {
+        const originalYearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
+        TicketAPI.delete(ticket.id).then(_ => {
+            ticketContext.setGivingTicketsByMonth(prev => {
+                const toBe = { ...prev };
+                toBe[originalYearMonth] = toBe[originalYearMonth].filter(t => t.id !== ticket.id);
+                return toBe;
+            });
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -124,20 +96,22 @@ const useTicketContext = () => {
         const {
             data: { ticket, web_push_result },
         } = await TicketAPI.use(ticketId, payload);
-        ticketContext.setReceivingTickets(prev => {
-            const tickets = [...prev!];
-            tickets[tickets.findIndex(p => p.id === ticket.id)] = ticket;
-            return tickets;
+        ticketContext.setReceivingTicketsByMonth(prev => {
+            const yearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
+            const toBe = { ...prev };
+            toBe[yearMonth][toBe[yearMonth].findIndex(p => p.id === ticket.id)] = ticket;
+            return toBe;
         });
         return web_push_result;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const readTicket = useCallback(async (ticketId: number) => {
-        TicketAPI.read(ticketId).then(() => {
-            ticketContext.setReceivingTickets(prev => {
+    const readTicket = useCallback(async (ticket: ITicket) => {
+        TicketAPI.read(ticket.id).then(() => {
+            ticketContext.setReceivingTicketsByMonth(prev => {
+                const yearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
                 // Intentionally not triggering re-render.
-                prev![prev!.findIndex(p => p.id === ticketId)].status = 'read';
+                prev![yearMonth][prev![yearMonth].findIndex(p => p.id === ticket.id)].status = 'read';
                 return prev;
             });
         });
@@ -145,20 +119,16 @@ const useTicketContext = () => {
     }, []);
 
     const clearTicketCache = useCallback(() => {
-        ticketContext.setReceivingTickets(undefined);
-        ticketContext.setGivingTickets(undefined);
+        ticketContext.setReceivingTicketsByMonth(undefined);
+        ticketContext.setGivingTicketsByMonth(undefined);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return {
-        receivingTickets,
-        givingTickets,
-        getReceivingTickets,
-        getGivingTickets,
-        getSortedTickets,
-        getLastAvailableTicketId,
-        getLastAvailableNormalTicket,
-        getLastAvailableSpecialTicket,
+        receivingTicketsByMonth,
+        givingTicketsByMonth,
+        getReceivingTicketsByMonth,
+        getGivingTicketsByMonth,
         createTicket,
         updateTicket,
         deleteTicket,

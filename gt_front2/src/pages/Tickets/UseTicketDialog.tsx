@@ -1,27 +1,35 @@
 import { Button, Dialog, DialogContent, Typography } from '@mui/material';
-import { useState } from 'react';
-import useTicketContext from '../../hooks/useTicketContext';
+import { useEffect, useState } from 'react';
 import UseDialog from './UseDialog';
+import { ITicket } from '../../types/ticket';
+import { UserRelationAPI } from '../../apis/UserRelationAPI';
 
 interface UseTicketDialogProps {
     onClose: () => void;
+    userRelationId: number | null;
 }
 
-const UseTicketDialog = ({ onClose }: UseTicketDialogProps) => {
+const UseTicketDialog = ({ onClose, userRelationId }: UseTicketDialogProps) => {
     const [openedDialog, setOpenedDialog] = useState<'UseOldestNormal' | 'UseOldestSpecial'>();
-    const { getLastAvailableNormalTicket, getLastAvailableSpecialTicket } = useTicketContext();
-
-    const lastAvailableNormalTicket = getLastAvailableNormalTicket('Receiving');
-    const lastAvailableSpecialTicket = getLastAvailableSpecialTicket('Receiving');
+    const [lastAvailableNormalTicket, setLastAvailableNormalTicket] = useState<ITicket | null>();
+    const [lastAvailableSpecialTicket, setLastAvailableSpecialTicket] = useState<ITicket | null>();
 
     const getDialog = () => {
         switch (openedDialog) {
             case 'UseOldestNormal':
-                return lastAvailableNormalTicket !== undefined ? <UseDialog onClose={onClose} ticket={lastAvailableNormalTicket} /> : <></>;
+                return !!lastAvailableNormalTicket ? <UseDialog onClose={onClose} ticket={lastAvailableNormalTicket} /> : <></>;
             case 'UseOldestSpecial':
-                return lastAvailableSpecialTicket !== undefined ? <UseDialog onClose={onClose} ticket={lastAvailableSpecialTicket} /> : <></>;
+                return !!lastAvailableSpecialTicket ? <UseDialog onClose={onClose} ticket={lastAvailableSpecialTicket} /> : <></>;
         }
     };
+
+    useEffect(() => {
+        if (userRelationId === null) return;
+        UserRelationAPI.availableTickets({ userRelationId }).then(res => {
+            setLastAvailableNormalTicket(res.data.oldest.normal);
+            setLastAvailableSpecialTicket(res.data.oldest.special);
+        });
+    }, [userRelationId]);
     return (
         <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>

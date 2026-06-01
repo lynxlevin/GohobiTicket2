@@ -28,15 +28,9 @@ export const DiaryAPI = {
     list: async ({ userRelationId, dateGte, dateLte }: ListDiariesRequest): Promise<AxiosResponse<IDiary[]>> => {
         let url = DiaryAPI.BASE_URL;
         const queries = [`user_relation_id=${userRelationId}`];
-        if (dateGte) {
-            queries.push(`date_gte=${format(dateGte, 'yyyy-MM-dd')}`);
-        }
-        if (dateLte) {
-            queries.push(`date_lte=${format(dateLte, 'yyyy-MM-dd')}`);
-        }
-        if (queries.length > 0) {
-            url += `?${queries.join('&')}`;
-        }
+        if (dateGte) queries.push(`date_gte=${format(dateGte, 'yyyy-MM-dd')}`);
+        if (dateLte) queries.push(`date_lte=${format(dateLte, 'yyyy-MM-dd')}`);
+        url += `?${queries.join('&')}`;
         return await client.get(url);
     },
     create: async (props: CreateDiaryRequest): Promise<AxiosResponse<IDiary>> => {

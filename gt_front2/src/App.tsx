@@ -17,6 +17,7 @@ import { UserProvider } from './contexts/user-context';
 import NotificationSettings from './pages/Settings/NotificationSettings';
 import Wishes from './pages/Tickets/Wishes';
 import { LocalStorageProvider } from './contexts/local-storage-context';
+import { YearMonthProvider } from './contexts/year-month-context';
 
 const theme = createTheme({
     palette: {
@@ -35,36 +36,38 @@ function App() {
         <div className="App">
             <UserProvider>
                 <UserRelationProvider>
-                    <TicketProvider>
-                        <DiaryTagProvider>
-                            <DiaryProvider>
-                                <LocalStorageProvider>
-                                    <ThemeProvider theme={theme}>
-                                        <LocalizationProvider
-                                            dateAdapter={AdapterDateFns}
-                                            adapterLocale={ja}
-                                            dateFormats={{ keyboardDate: 'yyyy/MM/dd (E)', normalDate: 'yyyy/MM/dd (E)' }}
-                                        >
-                                            <Routes>
-                                                <Route path="/" element={<Login />} />
-                                                <Route path="/login" element={<Login />} />
-                                                <Route
-                                                    path="/user_relations/:userRelationId/receiving_tickets"
-                                                    element={<Tickets relationKind="Receiving" />}
-                                                />
-                                                <Route path="/user_relations/:userRelationId/giving_tickets" element={<Tickets relationKind="Giving" />} />
-                                                <Route path="/user_relations/:userRelationId/wishes" element={<Wishes />} />
-                                                <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
-                                                <Route path="/user_relations/:userRelationId/search" element={<Search />} />
-                                                <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />
-                                                <Route path="/settings/notifications" element={<NotificationSettings />} />
-                                            </Routes>
-                                        </LocalizationProvider>
-                                    </ThemeProvider>
-                                </LocalStorageProvider>
-                            </DiaryProvider>
-                        </DiaryTagProvider>
-                    </TicketProvider>
+                    <YearMonthProvider>
+                        <TicketProvider>
+                            <DiaryTagProvider>
+                                <DiaryProvider>
+                                    <LocalStorageProvider>
+                                        <ThemeProvider theme={theme}>
+                                            <LocalizationProvider
+                                                dateAdapter={AdapterDateFns}
+                                                adapterLocale={ja}
+                                                dateFormats={{ keyboardDate: 'yyyy/MM/dd (E)', normalDate: 'yyyy/MM/dd (E)' }}
+                                            >
+                                                <Routes>
+                                                    <Route path="/" element={<Login />} />
+                                                    <Route path="/login" element={<Login />} />
+                                                    <Route
+                                                        path="/user_relations/:userRelationId/receiving_tickets"
+                                                        element={<Tickets relationKind="Receiving" />}
+                                                    />
+                                                    <Route path="/user_relations/:userRelationId/giving_tickets" element={<Tickets relationKind="Giving" />} />
+                                                    <Route path="/user_relations/:userRelationId/wishes" element={<Wishes />} />
+                                                    <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
+                                                    <Route path="/user_relations/:userRelationId/search" element={<Search />} />
+                                                    <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />
+                                                    <Route path="/settings/notifications" element={<NotificationSettings />} />
+                                                </Routes>
+                                            </LocalizationProvider>
+                                        </ThemeProvider>
+                                    </LocalStorageProvider>
+                                </DiaryProvider>
+                            </DiaryTagProvider>
+                        </TicketProvider>
+                    </YearMonthProvider>
                 </UserRelationProvider>
             </UserProvider>
         </div>

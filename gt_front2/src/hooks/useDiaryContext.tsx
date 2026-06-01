@@ -46,7 +46,8 @@ const useDiaryContext = () => {
                 if (toBe[yearMonth] === undefined) {
                     toBe[yearMonth] = [diary];
                 } else {
-                    toBe[yearMonth] = [diary, ...toBe[yearMonth]];
+                    toBe[yearMonth].push(diary);
+                    toBe[yearMonth] = toBe[yearMonth].sort((a, b) => (a.date > b.date ? -1 : 1));
                 }
                 return toBe;
             });
@@ -65,7 +66,7 @@ const useDiaryContext = () => {
                     if (originalIndex > -1) toBe[originalYearMonth].splice(originalIndex, 1);
                 }
                 if (toBe[yearMonth] !== undefined) {
-                    toBe[yearMonth] = [newDiary, ...toBe[yearMonth]].sort((a: IDiary, b: IDiary) => {
+                    toBe[yearMonth] = [newDiary, ...toBe[yearMonth]].sort((a, b) => {
                         return a.date > b.date ? -1 : 1;
                     });
                 }

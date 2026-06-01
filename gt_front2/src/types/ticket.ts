@@ -19,6 +19,10 @@ interface WishInner {
     created_at: string;
 }
 
+export interface ITicketsForMonth {
+    [yearMonth: string]: ITicket[];
+}
+
 export interface IWish {
     id: string;
     description: string;

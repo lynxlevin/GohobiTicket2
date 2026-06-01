@@ -16,10 +16,9 @@ import { RelationKind } from '../../types/user_relation';
 interface TicketProps {
     ticket: ITicket;
     relationKind: RelationKind;
-    lastAvailableTicketRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
-const Ticket = ({ ticket, relationKind, lastAvailableTicketRef }: TicketProps) => {
+const Ticket = ({ ticket, relationKind }: TicketProps) => {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isUseDialogOpen, setIsUseDialogOpen] = useState(false);
     const [isUseDetailDialogOpen, setIsUseDetailDialogOpen] = useState(false);
@@ -37,7 +36,7 @@ const Ticket = ({ ticket, relationKind, lastAvailableTicketRef }: TicketProps) =
             setTimer(
                 setTimeout(async () => {
                     setPrevStatus(ticket.status);
-                    await readTicket(ticket.id);
+                    await readTicket(ticket);
                 }, 3000),
             );
         }
@@ -63,7 +62,7 @@ const Ticket = ({ ticket, relationKind, lastAvailableTicketRef }: TicketProps) =
     }, [prevStatus, ticket.status]);
 
     return (
-        <StyledGrid item xs={12} sm={6} md={4} status={ticket.status} ref={lastAvailableTicketRef}>
+        <StyledGrid item xs={12} sm={6} md={4} status={ticket.status}>
             {relationKind === 'Giving' && ticket.status === 'draft' && getStatusBadge}
             {relationKind === 'Receiving' && ticket.status !== 'read' && getStatusBadge}
             <Card className="card">
