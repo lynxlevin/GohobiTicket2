@@ -24,9 +24,9 @@ const CreateTicketDialog = ({ onClose }: { onClose: () => void }) => {
             gift_date: format(giftDate, 'yyyy-MM-dd'),
             description,
             is_special: isSpecial,
+            is_draft: isDraft,
             user_relation_id: userRelationId!,
         };
-        if (isDraft) data.status = 'draft';
         createTicket(data);
         resetDraft();
         onClose();
