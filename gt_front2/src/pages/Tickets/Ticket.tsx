@@ -25,7 +25,7 @@ const Ticket = ({ ticket, relationKind }: TicketProps) => {
     const { readTicket } = useTicketContext();
 
     const ref = useRef(null);
-    const observeVisibility = relationKind === 'Receiving' && ticket.status !== 'read';
+    const observeVisibility = relationKind === 'Receiving' && ticket.status.toLowerCase() !== 'read';
     const { isVisible } = useOnScreen(ref, observeVisibility);
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
     const [prevStatus, setPrevStatus] = useState<TicketStatus | null>(null);
@@ -48,7 +48,7 @@ const Ticket = ({ ticket, relationKind }: TicketProps) => {
 
     const getStatusBadge = useMemo(() => {
         const status = prevStatus ? prevStatus : ticket.status;
-        if (status === 'read') return <></>;
+        if (status.toLowerCase() === 'read') return <></>;
 
         let text;
         if (status === 'unread') {
@@ -64,7 +64,7 @@ const Ticket = ({ ticket, relationKind }: TicketProps) => {
     return (
         <StyledGrid item xs={12} sm={6} md={4} status={ticket.status}>
             {relationKind === 'Giving' && ticket.status === 'draft' && getStatusBadge}
-            {relationKind === 'Receiving' && ticket.status !== 'read' && getStatusBadge}
+            {relationKind === 'Receiving' && ticket.status.toLowerCase() !== 'read' && getStatusBadge}
             <Card className="card">
                 <CardContent>
                     <div className="relative-div">

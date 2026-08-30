@@ -18,7 +18,7 @@ const useDiaryContext = () => {
         if (diariesByMonth === undefined) return {};
         const toBe: IDiariesForMonth = {};
         for (const [key, diaries] of Object.entries(diariesByMonth)) {
-            toBe[key] = diaries.filter(diary => diary.status !== 'read');
+            toBe[key] = diaries.filter(diary => diary.status.toLowerCase() !== 'read');
         }
         return toBe;
     }, [diariesByMonth]);
