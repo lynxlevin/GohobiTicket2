@@ -20,7 +20,7 @@ const Diary = ({ diary, firstUnreadDiaryRef }: DiaryProps) => {
     const { readDiary } = useDiaryContext();
 
     const ref = useRef(null);
-    const observeVisibility = diary.status !== 'read';
+    const observeVisibility = diary.status.toLowerCase() !== 'read';
     const { isVisible } = useOnScreen(ref, observeVisibility);
     const [prevStatus, setPrevStatus] = useState<DiaryStatus | null>(null);
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
@@ -44,7 +44,7 @@ const Diary = ({ diary, firstUnreadDiaryRef }: DiaryProps) => {
 
     const getStatusBadge = useMemo(() => {
         const status = prevStatus ? prevStatus : diary.status;
-        if (status === 'read') return <></>;
+        if (status.toLowerCase() === 'read') return <></>;
 
         let text;
         if (status === 'unread') {
@@ -57,7 +57,7 @@ const Diary = ({ diary, firstUnreadDiaryRef }: DiaryProps) => {
 
     return (
         <StyledGrid item xs={12} sm={6} md={4} ref={firstUnreadDiaryRef}>
-            {diary.status !== 'read' && getStatusBadge}
+            {diary.status.toLowerCase() !== 'read' && getStatusBadge}
             <Card className="card">
                 <CardContent>
                     <MoonPhase date={date} />

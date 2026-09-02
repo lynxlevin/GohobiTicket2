@@ -98,6 +98,7 @@ const useTicketContext = () => {
         } = await TicketAPI.use(ticketId, payload);
         ticketContext.setReceivingTicketsByMonth(prev => {
             const yearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
+            if (prev === undefined || prev[yearMonth] === undefined) return prev;
             const toBe = { ...prev };
             toBe[yearMonth][toBe[yearMonth].findIndex(p => p.id === ticket.id)] = ticket;
             return toBe;

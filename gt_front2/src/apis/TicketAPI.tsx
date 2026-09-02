@@ -28,7 +28,7 @@ export interface CreateTicketRequest {
     description: string;
     user_relation_id: number;
     is_special: boolean;
-    status?: string;
+    is_draft: boolean;
 }
 
 export const TicketAPI = {
@@ -46,7 +46,7 @@ export const TicketAPI = {
     create: async (props: CreateTicketRequest): Promise<AxiosResponse<UpsertTicketResponse>> => {
         return await client.post(TicketAPI.BASE_URL, { ticket: props });
     },
-    update: async (ticketId: number, props: { description: string; is_special: boolean; status?: string }): Promise<AxiosResponse<UpsertTicketResponse>> => {
+    update: async (ticketId: number, props: { description: string; is_special?: boolean; status?: string }): Promise<AxiosResponse<UpsertTicketResponse>> => {
         const url = `${TicketAPI.BASE_URL}${ticketId}/`;
         return await client.put(url, { ticket: props });
     },
