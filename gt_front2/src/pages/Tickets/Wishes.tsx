@@ -9,6 +9,7 @@ import CommonAppBar from '../../components/CommonAppBar';
 import { format } from 'date-fns';
 import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
+import ReplyIcon from '@mui/icons-material/Reply';
 import SpecialStamp from './SpecialStamp';
 import DetailDialog from './DetailDialog';
 import useUserContext from '../../hooks/useUserContext';
@@ -16,6 +17,8 @@ import { IWish } from '../../types/ticket';
 import { WishAPI } from '../../apis/WishAPI';
 import { useSearchParams } from 'react-router-dom';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
+import { IUserRelation } from '../../types/user_relation';
+import ReplyDialog from './ReplyDialog';
 
 const Wishes = () => {
     const [searchParams] = useSearchParams();
@@ -74,7 +77,7 @@ const Wishes = () => {
                                         <WishItem
                                             key={wish.id}
                                             wish={wish}
-                                            relatedUserName={currentRelation.related_username}
+                                            currentRelation={currentRelation}
                                             // MYMEMO: スレッド機能搭載後条件を外す
                                             hasThreadPosts={me?.id === 1 && showThreads}
                                             showAll={wishIdToShowAll === wish.id}
@@ -111,21 +114,23 @@ const ToTopButton = styled(IconButton)`
 
 interface WishItemProps {
     wish: IWish;
-    relatedUserName: string;
+    currentRelation: IUserRelation;
     hasThreadPosts?: boolean;
     showAll?: boolean;
     setShowAll: () => void;
     selectedRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
-const WishItem = ({ wish, relatedUserName, hasThreadPosts = true, showAll = false, setShowAll, selectedRef }: WishItemProps) => {
-    const [openedDialog, setOpenedDialog] = useState<'Detail'>();
+const WishItem = ({ wish, currentRelation, hasThreadPosts = true, showAll = false, setShowAll, selectedRef }: WishItemProps) => {
+    const [openedDialog, setOpenedDialog] = useState<'Detail' | 'Reply'>();
     const { me } = useUserContext();
 
     const getDialog = () => {
         switch (openedDialog) {
             case 'Detail':
-                return <DetailDialog ticket={wish.ticket} onClose={() => setOpenedDialog(undefined)} relatedUserName={relatedUserName} />;
+                return <DetailDialog ticket={wish.ticket} onClose={() => setOpenedDialog(undefined)} relatedUserName={currentRelation.related_username} />;
+            case 'Reply':
+                return <ReplyDialog wish={wish} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
         }
     };
 
@@ -136,7 +141,7 @@ const WishItem = ({ wish, relatedUserName, hasThreadPosts = true, showAll = fals
                     <Stack direction="row" justifyContent="space-between">
                         {me !== undefined && (
                             <Typography className={`from-name${wish.ticket.is_special ? ' special-ticket' : ''}`}>
-                                {wish.ticket.giving_user_id === me.id ? relatedUserName : me.username}より
+                                {wish.ticket.giving_user_id === me.id ? currentRelation.related_username : me.username}より
                             </Typography>
                         )}
                         <Typography className="post-time">{format(new Date(wish.created_at), 'yyyy-MM-dd HH:mm')}</Typography>
@@ -144,18 +149,18 @@ const WishItem = ({ wish, relatedUserName, hasThreadPosts = true, showAll = fals
                     <Typography className="text">{wish.description}</Typography>
                 </CardContent>
                 <CardActions className="card-actions">
+                    <IconButton size="small" onClick={() => setOpenedDialog('Reply')}>
+                        <ReplyIcon />
+                    </IconButton>
                     <IconButton size="small" onClick={() => setOpenedDialog('Detail')}>
                         <InfoIcon />
                     </IconButton>
-                    {/* <IconButton size="small">
-                        <EditIcon />
-                    </IconButton> */}
                 </CardActions>
                 {wish.ticket.is_special && <SpecialStamp randKey={wish.ticket.id} />}
                 {hasThreadPosts && (
                     <>
-                        <ThreadPost relatedUserName={relatedUserName} showAll={showAll} />
-                        {showAll && <ThreadPost relatedUserName={relatedUserName} showAll={showAll} isLast />}
+                        <ThreadPost relatedUserName={currentRelation.related_username} showAll={showAll} />
+                        {showAll && <ThreadPost relatedUserName={currentRelation.related_username} showAll={showAll} isLast />}
                     </>
                 )}
                 {hasThreadPosts && !showAll && (
