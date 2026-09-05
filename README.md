@@ -14,6 +14,13 @@ npm install
 npm start
 ```
 
+## Testing WebPush on local
+1. copy credential from .env.development to .env.production
+2. Turn off Debug from backend .env
+3. `npm run production_local`
+4. Open page on Chrome.
+**Check that notification is not turned off on Chrome browser setting or OS setting.**
+
 ## 主な機能
 - ごほうびチケット機能
   - パートナーへ一日のお礼のメッセージと共にチケットを付与。
