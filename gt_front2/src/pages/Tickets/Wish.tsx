@@ -1,7 +1,6 @@
 import { Box, Button, Card, CardActions, CardContent, CircularProgress, Container, Divider, IconButton, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
-import useUserAPI from '../../hooks/useUserAPI';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
@@ -17,7 +16,6 @@ import ReplyDialog from './ReplyDialog';
 
 const Wish = () => {
     const [openedDialog, setOpenedDialog] = useState<'Reply'>();
-    const { handleLogout } = useUserAPI();
     const { me, getMe } = useUserContext();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { userRelationId, wishId } = usePagePath();
@@ -71,7 +69,6 @@ const Wish = () => {
     return (
         <>
             <CommonAppBar
-                handleLogout={handleLogout}
                 currentRelation={currentRelation}
                 leftItem={
                     currentRelation && wish ? (

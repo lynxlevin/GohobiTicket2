@@ -1,9 +1,12 @@
-import { AppBar, Box, Button, Stack, TextField, Toolbar, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, IconButton, Stack, TextField, Typography } from '@mui/material';
 import useServiceWorker from '../../hooks/useServiceWorker';
 import { useEffect, useState } from 'react';
 import { WebPushSubscriptionAPI } from '../../apis/WebPushSubscriptionAPI';
 import BottomNav from '../../components/BottomNav';
 import { WebPushSubscriptionFromServer } from '../../types/web_push';
+import CommonAppBar from '../../components/CommonAppBar';
+import { useNavigate } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 type SubscriptionStatus = 'NoSub' | 'FrontOnly' | 'BackOnly' | 'Subscribed';
 
@@ -13,6 +16,7 @@ const NotificationSettings = () => {
     const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>();
     const [subscriptionFromServer, setSubscriptionFromServer] = useState<WebPushSubscriptionFromServer | null>();
     const { getPushManager, subscribeToWebPush, unsubscribeFromWebPush } = useServiceWorker();
+    const navigate = useNavigate();
 
     const subscribe = () => {
         if (subscriptionStatus !== 'NoSub') return;
@@ -96,7 +100,12 @@ const NotificationSettings = () => {
     const getSubscriptionStatusView = () => {
         switch (subscriptionStatus) {
             case undefined:
-                return <Typography>プッシュ通知の登録を確認中です。</Typography>;
+                return (
+                    <Box>
+                        <Typography>プッシュ通知の登録を確認中です。</Typography>
+                        <CircularProgress />
+                    </Box>
+                );
             case 'NoSub':
                 return (
                     <>
@@ -187,9 +196,13 @@ const NotificationSettings = () => {
     }, []);
     return (
         <>
-            <AppBar position="fixed" sx={{ bgcolor: 'primary.light' }}>
-                <Toolbar></Toolbar>
-            </AppBar>
+            <CommonAppBar
+                leftItem={
+                    <IconButton onClick={() => navigate('/settings')}>
+                        <ArrowBackIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
+                    </IconButton>
+                }
+            />
             <BottomNav />
             <Box pt={12}>{getSubscriptionStatusView()}</Box>
             {subscriptionStatus !== undefined && ['Subscribed', 'BackOnly'].includes(subscriptionStatus) && (

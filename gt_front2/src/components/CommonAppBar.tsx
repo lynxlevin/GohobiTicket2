@@ -1,11 +1,9 @@
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SellIcon from '@mui/icons-material/Sell';
 import SearchIcon from '@mui/icons-material/Search';
-import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import { ReactNode, useState } from 'react';
@@ -18,12 +16,11 @@ import usePagePath from '../hooks/usePagePath';
 import { IUserRelation } from '../types/user_relation';
 
 interface CommonAppBarProps {
-    handleLogout: () => Promise<void>;
     currentRelation?: IUserRelation;
     leftItem?: ReactNode;
 }
 
-const CommonAppBar = ({ handleLogout, currentRelation, leftItem }: CommonAppBarProps) => {
+const CommonAppBar = ({ currentRelation, leftItem }: CommonAppBarProps) => {
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -46,15 +43,16 @@ const CommonAppBar = ({ handleLogout, currentRelation, leftItem }: CommonAppBarP
             <Toolbar>
                 {leftItem}
                 <div style={{ flexGrow: 1 }} />
-                <IconButton
-                    onClick={() => {
-                        window.scroll({ top: 0 });
-                        navigate(`/user_relations/${currentRelation?.id}/search?tab=${pagePath}`);
-                    }}
-                    disabled={currentRelation === undefined}
-                >
-                    <SearchIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
-                </IconButton>
+                {currentRelation !== undefined && (
+                    <IconButton
+                        onClick={() => {
+                            window.scroll({ top: 0 });
+                            navigate(`/user_relations/${currentRelation?.id}/search?tab=${pagePath}`);
+                        }}
+                    >
+                        <SearchIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
+                    </IconButton>
+                )}
                 <IconButton onClick={() => setTopBarDrawerOpen(true)}>
                     <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
                 </IconButton>
@@ -95,7 +93,7 @@ const CommonAppBar = ({ handleLogout, currentRelation, leftItem }: CommonAppBarP
                                 <ListItemIcon>
                                     <PersonIcon />
                                 </ListItemIcon>
-                                <ListItemText>他の相手</ListItemText>
+                                <ListItemText>{currentRelation ? '他の友達' : '友達'}</ListItemText>
                             </ListItemButton>
                             <ExpandMore />
                         </ListItem>
@@ -120,34 +118,13 @@ const CommonAppBar = ({ handleLogout, currentRelation, leftItem }: CommonAppBarP
                             <ListItemButton
                                 disableGutters
                                 onClick={() => {
-                                    window.location.reload();
-                                }}
-                            >
-                                <ListItemIcon>
-                                    <SecurityUpdateGoodIcon />
-                                </ListItemIcon>
-                                <ListItemText>バージョンアップ</ListItemText>
-                            </ListItemButton>
-                        </ListItem>
-                        <ListItem>
-                            <ListItemButton
-                                disableGutters
-                                onClick={() => {
-                                    navigate('/settings/notifications');
+                                    navigate('/settings');
                                 }}
                             >
                                 <ListItemIcon>
                                     <SettingsIcon />
                                 </ListItemIcon>
                                 <ListItemText>設定</ListItemText>
-                            </ListItemButton>
-                        </ListItem>
-                        <ListItem>
-                            <ListItemButton disableGutters onClick={handleLogout}>
-                                <ListItemIcon>
-                                    <LogoutIcon />
-                                </ListItemIcon>
-                                <ListItemText>ログアウト</ListItemText>
                             </ListItemButton>
                         </ListItem>
                     </List>
