@@ -1,6 +1,6 @@
 import { Alert, Box, Button, Container, CssBaseline, TextField, Typography } from '@mui/material';
 import { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import useLoginPage from '../hooks/useLoginPage';
 import useUserAPI from '../hooks/useUserAPI';
 import useUserRelationContext from '../hooks/useUserRelationContext';
@@ -8,6 +8,7 @@ import { UserAPI } from '../apis/UserAPI';
 
 const Login = () => {
     useUserAPI();
+    const [searchParams] = useSearchParams();
     const { errorMessage, handleLogin, handleEmailInput, handlePasswordInput, isLoggedIn, setIsLoggedIn } = useLoginPage();
     const { userRelations, getUserRelations } = useUserRelationContext();
     const { clearAllCache } = useUserAPI();
@@ -27,7 +28,24 @@ const Login = () => {
 
     if (isLoggedIn === true && userRelations !== undefined) {
         const firstRelationId = userRelations[0].id;
-        return <Navigate to={`/user_relations/${firstRelationId}/receiving_tickets`} />;
+        const toQuery = searchParams.get('to');
+        let path = '';
+        switch (toQuery) {
+            case 'giving_tickets':
+                path = `/user_relations/${firstRelationId}/giving_tickets`
+                break;
+            case 'receiving_tickets':
+            case null:
+                path = `/user_relations/${firstRelationId}/receiving_tickets`
+                break;
+            case 'wishes':
+                path = `/user_relations/${firstRelationId}/wishes`
+                break;
+            case 'diaries':
+                path = `/user_relations/${firstRelationId}/diaries`
+                break;
+        }
+        return <Navigate to={path} />;
     }
     return (
         <Container component="main" maxWidth="xs">

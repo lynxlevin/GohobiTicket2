@@ -18,22 +18,22 @@ const BottomNav = () => {
 
     const navActions = {
         giving_tickets: () => {
-            const url = userRelationId !== undefined ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/giving_tickets` : '/login';
+            const url = userRelationId !== undefined ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/giving_tickets` : '/login?to=giving_tickets';
             navigate(url);
             window.scroll({ top: 0 });
         },
         receiving_tickets: () => {
-            const url = userRelationId !== undefined ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/receiving_tickets` : '/login';
+            const url = userRelationId !== undefined ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/receiving_tickets` : '/login?to=receiving_tickets';
             navigate(url);
             window.scroll({ top: 0 });
         },
         wishes: () => {
-            const url = userRelationId !== undefined ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/wishes` : '/login';
+            const url = userRelationId !== undefined ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/wishes` : '/login?to=wishes';
             navigate(url);
             window.scroll({ top: 0 });
         },
         diaries: () => {
-            const url = userRelationId !== undefined ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/diaries` : '/login';
+            const url = userRelationId !== undefined ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/diaries` : '/login?to=diaries';
             navigate(url);
             window.scroll({ top: 0 });
         },
