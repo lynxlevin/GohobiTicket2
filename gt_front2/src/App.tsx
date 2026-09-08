@@ -19,6 +19,7 @@ import Wishes from './pages/Tickets/Wishes';
 import { LocalStorageProvider } from './contexts/local-storage-context';
 import { YearMonthProvider } from './contexts/year-month-context';
 import Wish from './pages/Tickets/Wish';
+import Settings from './pages/Settings/Settings';
 
 const theme = createTheme({
     palette: {
@@ -61,6 +62,7 @@ function App() {
                                                     <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
                                                     <Route path="/user_relations/:userRelationId/search" element={<Search />} />
                                                     <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />
+                                                    <Route path="/settings" element={<Settings />} />
                                                     <Route path="/settings/notifications" element={<NotificationSettings />} />
                                                 </Routes>
                                             </LocalizationProvider>

@@ -131,7 +131,7 @@ const CommonAppBar = ({ currentRelation, leftItem }: CommonAppBarProps) => {
                             <ListItemButton
                                 disableGutters
                                 onClick={() => {
-                                    navigate('/settings/notifications');
+                                    navigate('/settings');
                                 }}
                             >
                                 <ListItemIcon>
