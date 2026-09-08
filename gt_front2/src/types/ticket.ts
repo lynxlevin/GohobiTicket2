@@ -35,5 +35,6 @@ export interface IWish {
         gift_date: string;
         is_special: boolean;
     }
+    has_replies: boolean;
 }
 
