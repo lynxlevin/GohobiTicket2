@@ -4,7 +4,6 @@ import PersonIcon from '@mui/icons-material/Person';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SellIcon from '@mui/icons-material/Sell';
 import SearchIcon from '@mui/icons-material/Search';
-import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import { ReactNode, useState } from 'react';
@@ -44,15 +43,16 @@ const CommonAppBar = ({ currentRelation, leftItem }: CommonAppBarProps) => {
             <Toolbar>
                 {leftItem}
                 <div style={{ flexGrow: 1 }} />
-                <IconButton
-                    onClick={() => {
-                        window.scroll({ top: 0 });
-                        navigate(`/user_relations/${currentRelation?.id}/search?tab=${pagePath}`);
-                    }}
-                    disabled={currentRelation === undefined}
-                >
-                    <SearchIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
-                </IconButton>
+                {currentRelation !== undefined && (
+                    <IconButton
+                        onClick={() => {
+                            window.scroll({ top: 0 });
+                            navigate(`/user_relations/${currentRelation?.id}/search?tab=${pagePath}`);
+                        }}
+                    >
+                        <SearchIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
+                    </IconButton>
+                )}
                 <IconButton onClick={() => setTopBarDrawerOpen(true)}>
                     <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
                 </IconButton>
@@ -93,7 +93,7 @@ const CommonAppBar = ({ currentRelation, leftItem }: CommonAppBarProps) => {
                                 <ListItemIcon>
                                     <PersonIcon />
                                 </ListItemIcon>
-                                <ListItemText>他の相手</ListItemText>
+                                <ListItemText>{currentRelation ? '他の友達' : '友達'}</ListItemText>
                             </ListItemButton>
                             <ExpandMore />
                         </ListItem>
@@ -114,19 +114,6 @@ const CommonAppBar = ({ currentRelation, leftItem }: CommonAppBarProps) => {
                                     </ListItem>
                                 ))}
                         </List>
-                        <ListItem>
-                            <ListItemButton
-                                disableGutters
-                                onClick={() => {
-                                    window.location.reload();
-                                }}
-                            >
-                                <ListItemIcon>
-                                    <SecurityUpdateGoodIcon />
-                                </ListItemIcon>
-                                <ListItemText>バージョンアップ</ListItemText>
-                            </ListItemButton>
-                        </ListItem>
                         <ListItem>
                             <ListItemButton
                                 disableGutters
