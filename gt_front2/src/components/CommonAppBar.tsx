@@ -7,7 +7,7 @@ import SellIcon from '@mui/icons-material/Sell';
 import SearchIcon from '@mui/icons-material/Search';
 import SecurityUpdateGoodIcon from '@mui/icons-material/SecurityUpdateGood';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Slide, Toolbar, useScrollTrigger } from '@mui/material';
+import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from '@mui/material';
 import { ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useTicketContext from '../hooks/useTicketContext';
