@@ -35,5 +35,17 @@ export interface IWish {
         gift_date: string;
         is_special: boolean;
     }
+    has_replies: boolean;
+}
+
+export interface IWishWithReplies extends IWish {
+    replies: IWishReply[];
+}
+
+export interface IWishReply {
+    id: string;
+    description: string;
+    posted_by_id: number;
+    created_at: string;
 }
 

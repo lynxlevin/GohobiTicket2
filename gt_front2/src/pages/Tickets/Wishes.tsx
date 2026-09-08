@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { Box, Button, Card, CardActions, CardContent, CircularProgress, Container, Divider, Grid, IconButton, Stack, Switch, Typography } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import { Button, Card, CardActions, CardContent, CircularProgress, Container, Grid, IconButton, Stack, Typography } from '@mui/material';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useUserAPI from '../../hooks/useUserAPI';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
@@ -8,14 +8,16 @@ import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
 import { format } from 'date-fns';
 import InfoIcon from '@mui/icons-material/Info';
-import EditIcon from '@mui/icons-material/Edit';
+import ReplyIcon from '@mui/icons-material/Reply';
 import SpecialStamp from './SpecialStamp';
 import DetailDialog from './DetailDialog';
 import useUserContext from '../../hooks/useUserContext';
 import { IWish } from '../../types/ticket';
 import { WishAPI } from '../../apis/WishAPI';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
+import { IUserRelation } from '../../types/user_relation';
+import ReplyDialog from './ReplyDialog';
 
 const Wishes = () => {
     const [searchParams] = useSearchParams();
@@ -23,10 +25,8 @@ const Wishes = () => {
     const { me, getMe } = useUserContext();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { userRelationId } = usePagePath();
-    const [showThreads, setShowThreads] = useState(false);
-    const [wishIdToShowAll, setWishIdToShowAll] = useState<string>('');
     const [wishes, setWishes] = useState<IWish[]>();
-    const [selectedWishId] = useState(searchParams.get('wish_id'));
+    const [wishIdQuery] = useState(searchParams.get('wishId'));
     const selectedWishRef = useRef<HTMLDivElement | null>(null);
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
@@ -47,9 +47,10 @@ const Wishes = () => {
 
     useEffect(() => {
         if (wishes === undefined) return;
-        if (selectedWishId === null) return;
-        selectedWishRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [selectedWishId, wishes]);
+        if (wishIdQuery === null) return;
+        if (selectedWishRef.current === null) return;
+        window.scroll({ top: selectedWishRef.current.getBoundingClientRect().top - 50 });
+    }, [wishIdQuery, wishes]);
 
     return (
         <>
@@ -60,13 +61,6 @@ const Wishes = () => {
             ) : (
                 <main>
                     <Container sx={{ py: 8 }} maxWidth="md">
-                        {/* MYMEMO: スレッド機能搭載後条件を外す */}
-                        {me?.id === 1 && (
-                            <>
-                                <Switch checked={showThreads} onChange={e => setShowThreads(e.target.checked)} />
-                                スレッド表示
-                            </>
-                        )}
                         {wishes && (
                             <Grid container spacing={2}>
                                 {wishes.map(wish => {
@@ -74,12 +68,9 @@ const Wishes = () => {
                                         <WishItem
                                             key={wish.id}
                                             wish={wish}
-                                            relatedUserName={currentRelation.related_username}
-                                            // MYMEMO: スレッド機能搭載後条件を外す
-                                            hasThreadPosts={me?.id === 1 && showThreads}
-                                            showAll={wishIdToShowAll === wish.id}
-                                            setShowAll={() => setWishIdToShowAll(wish.id)}
-                                            selectedRef={selectedWishId === wish.id ? selectedWishRef : undefined}
+                                            currentRelation={currentRelation}
+                                            selectedRef={wishIdQuery === wish.id ? selectedWishRef : undefined}
+                                            setWishes={setWishes}
                                         />
                                     );
                                 })}
@@ -111,21 +102,38 @@ const ToTopButton = styled(IconButton)`
 
 interface WishItemProps {
     wish: IWish;
-    relatedUserName: string;
-    hasThreadPosts?: boolean;
-    showAll?: boolean;
-    setShowAll: () => void;
+    currentRelation: IUserRelation;
     selectedRef?: React.MutableRefObject<HTMLDivElement | null>;
+    setWishes: Dispatch<SetStateAction<IWish[] | undefined>>;
 }
 
-const WishItem = ({ wish, relatedUserName, hasThreadPosts = true, showAll = false, setShowAll, selectedRef }: WishItemProps) => {
-    const [openedDialog, setOpenedDialog] = useState<'Detail'>();
+const WishItem = ({ wish, currentRelation, selectedRef, setWishes }: WishItemProps) => {
+    const [openedDialog, setOpenedDialog] = useState<'Detail' | 'Reply'>();
+    const [, setSearchParams] = useSearchParams();
     const { me } = useUserContext();
+    const navigate = useNavigate();
 
     const getDialog = () => {
         switch (openedDialog) {
             case 'Detail':
-                return <DetailDialog ticket={wish.ticket} onClose={() => setOpenedDialog(undefined)} relatedUserName={relatedUserName} />;
+                return <DetailDialog ticket={wish.ticket} onClose={() => setOpenedDialog(undefined)} relatedUserName={currentRelation.related_username} />;
+            case 'Reply':
+                return (
+                    <ReplyDialog
+                        wish={wish}
+                        currentRelation={currentRelation}
+                        onClose={() => setOpenedDialog(undefined)}
+                        afterSubmit={() => {
+                            setWishes(prev => {
+                                if (prev === undefined) return undefined;
+                                const toBe = [...prev];
+                                const thisWish = toBe.find(w => w.id === wish.id);
+                                if (thisWish !== undefined) thisWish.has_replies = true;
+                                return toBe;
+                            });
+                        }}
+                    />
+                );
         }
     };
 
@@ -136,30 +144,37 @@ const WishItem = ({ wish, relatedUserName, hasThreadPosts = true, showAll = fals
                     <Stack direction="row" justifyContent="space-between">
                         {me !== undefined && (
                             <Typography className={`from-name${wish.ticket.is_special ? ' special-ticket' : ''}`}>
-                                {wish.ticket.giving_user_id === me.id ? relatedUserName : me.username}より
+                                {wish.ticket.giving_user_id === me.id ? currentRelation.related_username : me.username}の
+                                {wish.ticket.is_special ? '特別な' : ''}お願い
                             </Typography>
                         )}
-                        <Typography className="post-time">{format(new Date(wish.created_at), 'yyyy-MM-dd HH:mm')}</Typography>
+                        <Typography className="post-time">{format(new Date(wish.created_at), 'yyyy-MM-dd HH:mm').replace(' ', '\n')}</Typography>
                     </Stack>
                     <Typography className="text">{wish.description}</Typography>
                 </CardContent>
                 <CardActions className="card-actions">
+                    {!wish.has_replies && (
+                        <IconButton
+                            size="small"
+                            onClick={() => {
+                                setSearchParams({ wishId: wish.id });
+                                setOpenedDialog('Reply');
+                            }}
+                        >
+                            <ReplyIcon />
+                        </IconButton>
+                    )}
                     <IconButton size="small" onClick={() => setOpenedDialog('Detail')}>
                         <InfoIcon />
                     </IconButton>
-                    {/* <IconButton size="small">
-                        <EditIcon />
-                    </IconButton> */}
                 </CardActions>
                 {wish.ticket.is_special && <SpecialStamp randKey={wish.ticket.id} />}
-                {hasThreadPosts && (
-                    <>
-                        <ThreadPost relatedUserName={relatedUserName} showAll={showAll} />
-                        {showAll && <ThreadPost relatedUserName={relatedUserName} showAll={showAll} isLast />}
-                    </>
-                )}
-                {hasThreadPosts && !showAll && (
-                    <Button className="open-thread-button" variant="outlined" onClick={setShowAll}>
+                {wish.has_replies && (
+                    <Button
+                        className="open-thread-button"
+                        variant="outlined"
+                        onClick={() => navigate(`/user_relations/${currentRelation.id}/wishes/${wish.id}`)}
+                    >
                         スレッドを開く
                     </Button>
                 )}
@@ -188,7 +203,9 @@ const StyledGrid = styled(Grid)`
 
     .post-time {
         font-size: 12px;
-        line-height: 21px;
+        line-height: 14px;
+        white-space: pre-line;
+        text-align: right;
     }
 
     .text {
@@ -217,61 +234,6 @@ const StyledGrid = styled(Grid)`
         margin-bottom: 16px;
         margin-left: auto;
         margin-right: auto;
-    }
-`;
-
-interface ThreadPostProps {
-    relatedUserName: string;
-    showAll?: boolean;
-    isLast?: boolean;
-}
-
-const ThreadPost = ({ relatedUserName, showAll = false, isLast = false }: ThreadPostProps) => {
-    return (
-        <StyledPost>
-            <Divider className="divider" />
-            <Box className="content">
-                <Stack direction="row" justifyContent="space-between">
-                    <Typography className="from-name">{relatedUserName}より</Typography>
-                    <Typography className="post-time">2025-08-18 13:15</Typography>
-                </Stack>
-                <Typography className={`text${showAll ? '' : ' line-clamp'}`}>
-                    あいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえおあいうえお
-                </Typography>
-                {showAll && (
-                    <IconButton size="small" className={`edit-button${isLast ? ' is-last' : ''}`}>
-                        <EditIcon />
-                    </IconButton>
-                )}
-                {isLast && <Button className="message-button">メッセージを送る</Button>}
-            </Box>
-        </StyledPost>
-    );
-};
-
-const StyledPost = styled(Box)`
-    position: relative;
-
-    .divider {
-        margin-left: 12px;
-        margin-right: 12px;
-    }
-
-    .content {
-        padding: 16px;
-    }
-
-    .edit-button {
-        position: absolute;
-        bottom: 8px;
-        right: 8px;
-    }
-    .is-last {
-        bottom: 60px;
-    }
-
-    .message-button {
-        margin-top: 16px;
     }
 `;
 
