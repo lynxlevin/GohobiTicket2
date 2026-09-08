@@ -17,23 +17,6 @@ import useDiaryTagContext from '../hooks/useDiaryTagContext';
 import usePagePath from '../hooks/usePagePath';
 import { IUserRelation } from '../types/user_relation';
 
-interface HideOnScrollProps {
-    children: React.ReactElement;
-}
-
-const HideOnScroll = (props: HideOnScrollProps) => {
-    const { children } = props;
-    const trigger = useScrollTrigger({
-        target: window,
-    });
-
-    return (
-        <Slide appear={false} direction="down" in={!trigger}>
-            {children}
-        </Slide>
-    );
-};
-
 interface CommonAppBarProps {
     handleLogout: () => Promise<void>;
     currentRelation?: IUserRelation;
@@ -59,120 +42,118 @@ const CommonAppBar = ({ handleLogout, currentRelation, leftItem }: CommonAppBarP
     };
 
     return (
-        <HideOnScroll>
-            <AppBar position="fixed" sx={{ bgcolor: 'primary.light' }}>
-                <Toolbar>
-                    {leftItem}
-                    <div style={{ flexGrow: 1 }} />
-                    <IconButton
-                        onClick={() => {
-                            window.scroll({ top: 0 });
-                            navigate(`/user_relations/${currentRelation?.id}/search?tab=${pagePath}`);
-                        }}
-                        disabled={currentRelation === undefined}
-                    >
-                        <SearchIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
-                    </IconButton>
-                    <IconButton onClick={() => setTopBarDrawerOpen(true)}>
-                        <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
-                    </IconButton>
-                    <Drawer anchor="right" open={topBarDrawerOpen} onClose={() => setTopBarDrawerOpen(false)}>
-                        <List>
-                            <ListItem disableGutters>
-                                <ListItemButton
-                                    onClick={() => {
-                                        clearCache();
-                                        setTopBarDrawerOpen(false);
-                                    }}
-                                >
-                                    <ListItemIcon>
-                                        <RefreshIcon />
-                                    </ListItemIcon>
-                                    <ListItemText>更新</ListItemText>
-                                </ListItemButton>
-                            </ListItem>
-                            {pagePath === 'diaries' && (
-                                <ListItem>
-                                    <ListItemButton
-                                        disableGutters
-                                        onClick={() => {
-                                            window.scroll({ top: 0 });
-                                            navigate(`/user_relations/${currentRelation?.id}/diary_tags`);
-                                        }}
-                                        disabled={currentRelation === undefined}
-                                    >
-                                        <ListItemIcon>
-                                            <SellIcon />
-                                        </ListItemIcon>
-                                        <ListItemText>タグ編集</ListItemText>
-                                    </ListItemButton>
-                                </ListItem>
-                            )}
-                            <ListItem>
-                                <ListItemButton disableGutters>
-                                    <ListItemIcon>
-                                        <PersonIcon />
-                                    </ListItemIcon>
-                                    <ListItemText>他の相手</ListItemText>
-                                </ListItemButton>
-                                <ExpandMore />
-                            </ListItem>
-                            <List component="div" disablePadding>
-                                {otherRelations !== undefined &&
-                                    otherRelations.map(relation => (
-                                        <ListItem key={relation.id}>
-                                            <ListItemButton
-                                                onClick={() => {
-                                                    clearCache();
-                                                    navigate(`/user_relations/${relation.id}/receiving_tickets`);
-                                                    setTopBarDrawerOpen(false);
-                                                    window.scroll({ top: 0 });
-                                                }}
-                                            >
-                                                <ListItemText inset>{relation.related_username}</ListItemText>
-                                            </ListItemButton>
-                                        </ListItem>
-                                    ))}
-                            </List>
+        <AppBar position="fixed" sx={{ bgcolor: 'primary.light' }}>
+            <Toolbar>
+                {leftItem}
+                <div style={{ flexGrow: 1 }} />
+                <IconButton
+                    onClick={() => {
+                        window.scroll({ top: 0 });
+                        navigate(`/user_relations/${currentRelation?.id}/search?tab=${pagePath}`);
+                    }}
+                    disabled={currentRelation === undefined}
+                >
+                    <SearchIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
+                </IconButton>
+                <IconButton onClick={() => setTopBarDrawerOpen(true)}>
+                    <MenuIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
+                </IconButton>
+                <Drawer anchor="right" open={topBarDrawerOpen} onClose={() => setTopBarDrawerOpen(false)}>
+                    <List>
+                        <ListItem disableGutters>
+                            <ListItemButton
+                                onClick={() => {
+                                    clearCache();
+                                    setTopBarDrawerOpen(false);
+                                }}
+                            >
+                                <ListItemIcon>
+                                    <RefreshIcon />
+                                </ListItemIcon>
+                                <ListItemText>更新</ListItemText>
+                            </ListItemButton>
+                        </ListItem>
+                        {pagePath === 'diaries' && (
                             <ListItem>
                                 <ListItemButton
                                     disableGutters
                                     onClick={() => {
-                                        window.location.reload();
+                                        window.scroll({ top: 0 });
+                                        navigate(`/user_relations/${currentRelation?.id}/diary_tags`);
                                     }}
+                                    disabled={currentRelation === undefined}
                                 >
                                     <ListItemIcon>
-                                        <SecurityUpdateGoodIcon />
+                                        <SellIcon />
                                     </ListItemIcon>
-                                    <ListItemText>バージョンアップ</ListItemText>
+                                    <ListItemText>タグ編集</ListItemText>
                                 </ListItemButton>
                             </ListItem>
-                            <ListItem>
-                                <ListItemButton
-                                    disableGutters
-                                    onClick={() => {
-                                        navigate('/settings/notifications');
-                                    }}
-                                >
-                                    <ListItemIcon>
-                                        <SettingsIcon />
-                                    </ListItemIcon>
-                                    <ListItemText>設定</ListItemText>
-                                </ListItemButton>
-                            </ListItem>
-                            <ListItem>
-                                <ListItemButton disableGutters onClick={handleLogout}>
-                                    <ListItemIcon>
-                                        <LogoutIcon />
-                                    </ListItemIcon>
-                                    <ListItemText>ログアウト</ListItemText>
-                                </ListItemButton>
-                            </ListItem>
+                        )}
+                        <ListItem>
+                            <ListItemButton disableGutters>
+                                <ListItemIcon>
+                                    <PersonIcon />
+                                </ListItemIcon>
+                                <ListItemText>他の相手</ListItemText>
+                            </ListItemButton>
+                            <ExpandMore />
+                        </ListItem>
+                        <List component="div" disablePadding>
+                            {otherRelations !== undefined &&
+                                otherRelations.map(relation => (
+                                    <ListItem key={relation.id}>
+                                        <ListItemButton
+                                            onClick={() => {
+                                                clearCache();
+                                                navigate(`/user_relations/${relation.id}/receiving_tickets`);
+                                                setTopBarDrawerOpen(false);
+                                                window.scroll({ top: 0 });
+                                            }}
+                                        >
+                                            <ListItemText inset>{relation.related_username}</ListItemText>
+                                        </ListItemButton>
+                                    </ListItem>
+                                ))}
                         </List>
-                    </Drawer>
-                </Toolbar>
-            </AppBar>
-        </HideOnScroll>
+                        <ListItem>
+                            <ListItemButton
+                                disableGutters
+                                onClick={() => {
+                                    window.location.reload();
+                                }}
+                            >
+                                <ListItemIcon>
+                                    <SecurityUpdateGoodIcon />
+                                </ListItemIcon>
+                                <ListItemText>バージョンアップ</ListItemText>
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem>
+                            <ListItemButton
+                                disableGutters
+                                onClick={() => {
+                                    navigate('/settings/notifications');
+                                }}
+                            >
+                                <ListItemIcon>
+                                    <SettingsIcon />
+                                </ListItemIcon>
+                                <ListItemText>設定</ListItemText>
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem>
+                            <ListItemButton disableGutters onClick={handleLogout}>
+                                <ListItemIcon>
+                                    <LogoutIcon />
+                                </ListItemIcon>
+                                <ListItemText>ログアウト</ListItemText>
+                            </ListItemButton>
+                        </ListItem>
+                    </List>
+                </Drawer>
+            </Toolbar>
+        </AppBar>
     );
 };
 export default CommonAppBar;
