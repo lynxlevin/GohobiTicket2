@@ -45,7 +45,7 @@ const Wish = () => {
     const getRepliesUI = () => {
         if (wish === undefined) return <></>;
         if (currentRelation === undefined) return <></>;
-        let lastReplyDate = '';
+        let lastReplyDate = format(new Date(wish.created_at), 'yyyy-MM-dd');
         return wish.replies.map(reply => {
             const replyDate = format(new Date(reply.created_at), 'yyyy-MM-dd');
             const hideDate = lastReplyDate === replyDate;
