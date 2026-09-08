@@ -85,7 +85,11 @@ self.addEventListener('push', event => {
     let url = process.env.PUBLIC_URL;
     switch (payload.message_type) {
         case 'MakeWish':
-            url += `/user_relations/${payload.user_relation_id}/wishes?wish_id=${payload.wish_id}`;
+            url += `/user_relations/${payload.user_relation_id}/wishes?wishId=${payload.wish_id}`;
+            break;
+        case 'WishReply':
+            url += `/user_relations/${payload.user_relation_id}/wishes/${payload.wish_id}`;
+            break;
     }
     const options = {
         body: payload.body ?? '失敗',
