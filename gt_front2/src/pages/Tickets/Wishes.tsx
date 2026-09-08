@@ -14,7 +14,7 @@ import DetailDialog from './DetailDialog';
 import useUserContext from '../../hooks/useUserContext';
 import { IWish } from '../../types/ticket';
 import { WishAPI } from '../../apis/WishAPI';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import { IUserRelation } from '../../types/user_relation';
 import ReplyDialog from './ReplyDialog';
@@ -111,6 +111,7 @@ const WishItem = ({ wish, currentRelation, selectedRef, setWishes }: WishItemPro
     const [openedDialog, setOpenedDialog] = useState<'Detail' | 'Reply'>();
     const [, setSearchParams] = useSearchParams();
     const { me } = useUserContext();
+    const navigate = useNavigate();
 
     const getDialog = () => {
         switch (openedDialog) {
@@ -172,6 +173,7 @@ const WishItem = ({ wish, currentRelation, selectedRef, setWishes }: WishItemPro
                     <Button
                         className="open-thread-button"
                         variant="outlined"
+                        onClick={() => navigate(`/user_relations/${currentRelation.id}/wishes/${wish.id}`)}
                     >
                         スレッドを開く
                     </Button>

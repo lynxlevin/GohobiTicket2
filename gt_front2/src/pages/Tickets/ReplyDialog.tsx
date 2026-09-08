@@ -8,25 +8,19 @@ interface ReplyDialogProps {
     onClose: () => void;
     wish: IWish;
     currentRelation: IUserRelation;
+    afterSubmit?: () => void;
 }
 
-const ReplyDialog = ({onClose, wish, currentRelation}: ReplyDialogProps) => {
+const ReplyDialog = ({ onClose, wish, currentRelation, afterSubmit }: ReplyDialogProps) => {
     const [description, setDescription] = useState('');
-    const [status, setStatus] = useState<'Unused' | 'Used' | 'UsedButNotSent'>('Unused');
 
     const handleSubmit = () => {
-        WishAPI.reply(currentRelation.id, wish.id, description).then(res => {
-            const webPushResult = res.data.web_push_result;
-            switch (webPushResult) {
-                case 'Sent':
-                    setStatus('Used');
-                    break;
-                case 'NotSent':
-                    setStatus('UsedButNotSent');
-            }
-        })
+        WishAPI.reply(currentRelation.id, wish.id, description).then(_ => {
+            afterSubmit && afterSubmit();
+            onClose();
+        });
     };
-    return status === 'Unused' ? (
+    return (
         <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>
                 <Typography fontWeight={600} mt={2} gutterBottom>
@@ -40,21 +34,6 @@ const ReplyDialog = ({onClose, wish, currentRelation}: ReplyDialogProps) => {
                 </Button>
                 <Button variant="outlined" onClick={onClose} sx={{ color: 'primary.dark' }}>
                     キャンセル
-                </Button>
-            </DialogActions>
-        </Dialog>
-    ) : (
-        <Dialog open={true} onClose={onClose} fullWidth>
-            <DialogContent>
-                <Typography fontWeight={600} mt={2} gutterBottom>
-                    {status === 'Used' && `🎉${currentRelation?.related_username}さんにメッセージを送りました。`}
-                    {status === 'UsedButNotSent' &&
-                        `${currentRelation?.related_username}さんは通知機能をオンにしていません。メッセージを送ったことを伝えましょう。`}
-                </Typography>
-            </DialogContent>
-            <DialogActions sx={{ justifyContent: 'center', py: 2 }}>
-                <Button variant="outlined" onClick={onClose} sx={{ color: 'primary.dark' }}>
-                    閉じる
                 </Button>
             </DialogActions>
         </Dialog>
