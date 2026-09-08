@@ -7,7 +7,6 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { CircularProgress, Container, Grid, IconButton, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
-import useUserAPI from '../../hooks/useUserAPI';
 import Diary from './Diary';
 import useDiaryContext from '../../hooks/useDiaryContext';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
@@ -25,7 +24,6 @@ const Diaries = () => {
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { unreadDiaries, diariesByMonth, getDiariesByMonth } = useDiaryContext();
     const { diaryTags, getDiaryTags } = useDiaryTagContext();
-    const { handleLogout } = useUserAPI();
     const { userRelationId } = usePagePath();
     const { yearMonth, setYearMonth, thisMonth, getTabYearMonths, getFirstDate } = useYearMonthContext();
 
@@ -63,7 +61,7 @@ const Diaries = () => {
 
     return (
         <>
-            <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} />
+            <CommonAppBar currentRelation={currentRelation} />
             <BottomNav />
             {currentRelation === undefined || userRelationId === null ? (
                 <CircularProgress />

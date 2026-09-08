@@ -1,5 +1,4 @@
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -18,12 +17,11 @@ import usePagePath from '../hooks/usePagePath';
 import { IUserRelation } from '../types/user_relation';
 
 interface CommonAppBarProps {
-    handleLogout: () => Promise<void>;
     currentRelation?: IUserRelation;
     leftItem?: ReactNode;
 }
 
-const CommonAppBar = ({ handleLogout, currentRelation, leftItem }: CommonAppBarProps) => {
+const CommonAppBar = ({ currentRelation, leftItem }: CommonAppBarProps) => {
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -140,14 +138,6 @@ const CommonAppBar = ({ handleLogout, currentRelation, leftItem }: CommonAppBarP
                                     <SettingsIcon />
                                 </ListItemIcon>
                                 <ListItemText>設定</ListItemText>
-                            </ListItemButton>
-                        </ListItem>
-                        <ListItem>
-                            <ListItemButton disableGutters onClick={handleLogout}>
-                                <ListItemIcon>
-                                    <LogoutIcon />
-                                </ListItemIcon>
-                                <ListItemText>ログアウト</ListItemText>
                             </ListItemButton>
                         </ListItem>
                     </List>

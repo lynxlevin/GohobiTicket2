@@ -8,7 +8,6 @@ import { CardMedia, CircularProgress, Container, Dialog, Grid, IconButton, MenuI
 import { useEffect, useMemo, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useTicketContext from '../../hooks/useTicketContext';
-import useUserAPI from '../../hooks/useUserAPI';
 import Ticket from './Ticket';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
@@ -29,7 +28,6 @@ type DialogType = 'TicketImage' | 'GiveTicket' | 'UseTicket';
 const Tickets = ({ relationKind }: TicketsProps) => {
     const [openedDialog, setOpenedDialog] = useState<DialogType>();
 
-    const { handleLogout } = useUserAPI();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { givingTicketsByMonth, receivingTicketsByMonth, getGivingTicketsByMonth, getReceivingTicketsByMonth } = useTicketContext();
     const { yearMonth, setYearMonth, thisMonth, getTabYearMonths, getFirstDate } = useYearMonthContext();
@@ -116,7 +114,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
 
     return (
         <>
-            <CommonAppBar handleLogout={handleLogout} currentRelation={currentRelation} leftItem={ticketImage()} />
+            <CommonAppBar currentRelation={currentRelation} leftItem={ticketImage()} />
             <BottomNav />
             {currentRelation === undefined ? (
                 <CircularProgress />
