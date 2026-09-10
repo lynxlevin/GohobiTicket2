@@ -65,7 +65,7 @@ const useTicketContext = () => {
             description,
             is_special: isSpecial,
         };
-        if (willFinalize) payload.status = 'unread';
+        if (willFinalize) payload.status = 'Unread';
         TicketAPI.update(ticketId, payload).then(({ data: { ticket } }) => {
             ticketContext.setGivingTicketsByMonth(prev => {
                 const yearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
@@ -112,7 +112,7 @@ const useTicketContext = () => {
             ticketContext.setReceivingTicketsByMonth(prev => {
                 const yearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
                 // Intentionally not triggering re-render.
-                prev![yearMonth][prev![yearMonth].findIndex(p => p.id === ticket.id)].status = 'read';
+                prev![yearMonth][prev![yearMonth].findIndex(p => p.id === ticket.id)].status = 'Read';
                 return prev;
             });
         });

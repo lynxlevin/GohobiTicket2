@@ -1,5 +1,5 @@
-export type TicketStatus = 'unread' | 'edited' | 'read' | 'draft';
-export type WishStatus = 'unread' | 'read';
+export type TicketStatus = 'Unread' | 'Edited' | 'Read' | 'Draft';
+export type WishStatus = 'Unread' | 'Read';
 
 export interface ITicket {
     id: number;
@@ -26,6 +26,7 @@ export interface ITicketsForMonth {
 export interface IWish {
     id: string;
     description: string;
+    reactions: string;
     status: WishStatus;
     created_at: string;
     ticket: {
@@ -45,6 +46,7 @@ export interface IWishWithReplies extends IWish {
 export interface IWishReply {
     id: string;
     description: string;
+    reactions: string;
     posted_by_id: number;
     created_at: string;
 }

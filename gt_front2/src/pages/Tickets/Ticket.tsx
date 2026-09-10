@@ -25,7 +25,7 @@ const Ticket = ({ ticket, relationKind }: TicketProps) => {
     const { readTicket } = useTicketContext();
 
     const ref = useRef(null);
-    const observeVisibility = relationKind === 'Receiving' && ticket.status.toLowerCase() !== 'read';
+    const observeVisibility = relationKind === 'Receiving' && ticket.status !== 'Read';
     const { isVisible } = useOnScreen(ref, observeVisibility);
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
     const [prevStatus, setPrevStatus] = useState<TicketStatus | null>(null);
@@ -48,23 +48,23 @@ const Ticket = ({ ticket, relationKind }: TicketProps) => {
 
     const getStatusBadge = useMemo(() => {
         const status = prevStatus ? prevStatus : ticket.status;
-        if (status.toLowerCase() === 'read') return <></>;
+        if (status === 'Read') return <></>;
 
         let text;
-        if (status === 'unread') {
+        if (status === 'Unread') {
             text = 'NEW!!';
-        } else if (status === 'edited') {
-            text = 'EDITED!!';
-        } else if (status === 'draft') {
-            text = 'DRAFT';
+        } else if (status === 'Edited') {
+            text = 'Edited!!';
+        } else if (status === 'Draft') {
+            text = 'Draft';
         }
         return <Badge className="badge" color="primary" sx={prevStatus ? { opacity: 0.45, transition: '0.5s', zIndex: 100 } : {}} badgeContent={text} />;
     }, [prevStatus, ticket.status]);
 
     return (
         <StyledGrid item xs={12} sm={6} md={4} status={ticket.status}>
-            {relationKind === 'Giving' && ticket.status === 'draft' && getStatusBadge}
-            {relationKind === 'Receiving' && ticket.status.toLowerCase() !== 'read' && getStatusBadge}
+            {relationKind === 'Giving' && ticket.status === 'Draft' && getStatusBadge}
+            {relationKind === 'Receiving' && ticket.status !== 'Draft' && getStatusBadge}
             <Card className="card">
                 <CardContent>
                     <div className="relative-div">
@@ -123,7 +123,7 @@ const Ticket = ({ ticket, relationKind }: TicketProps) => {
 
 const StyledGrid = styled(Grid)((props: { status: string }) => {
     const draftCardBGC =
-        props.status === 'draft'
+        props.status === 'Draft'
             ? css`
                   background-color: rgb(245, 245, 245);
               `

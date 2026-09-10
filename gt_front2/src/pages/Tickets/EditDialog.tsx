@@ -46,7 +46,7 @@ const EditDialog = (props: EditDialogProps) => {
                     {format(new Date(ticket.gift_date), 'yyyy-MM-dd E')}
                 </Typography>
                 <TextField value={description} onChange={event => setDescription(event.target.value)} label="内容" multiline fullWidth minRows={5} />
-                {ticket.status === 'draft' && (
+                {ticket.status === 'Draft' && (
                     <>
                         <FormControlLabel
                             disabled={!isSpecialTicketAvailable}

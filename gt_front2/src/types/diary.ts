@@ -1,4 +1,4 @@
-export type DiaryStatus = "unread" | "edited" | "read"
+export type DiaryStatus = 'Unread' | 'Edited' | 'Read'
 
 export interface IDiary {
     id: string;
