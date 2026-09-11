@@ -48,7 +48,7 @@ const Wish = () => {
             const replyDate = format(new Date(reply.created_at), 'yyyy-MM-dd');
             const hideDate = lastReplyDate === replyDate;
             lastReplyDate = replyDate;
-            return <Reply reply={reply} currentRelation={currentRelation} hideDate={hideDate} />;
+            return <Reply key={reply.id} reply={reply} currentRelation={currentRelation} hideDate={hideDate} />;
         });
     };
 
