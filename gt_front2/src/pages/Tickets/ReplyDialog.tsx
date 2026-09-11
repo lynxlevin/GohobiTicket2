@@ -1,22 +1,21 @@
 import { Button, Dialog, DialogActions, DialogContent, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { IWish, IWishWithReplies } from '../../types/ticket';
-import { WishAPI } from '../../apis/WishAPI';
 import { IUserRelation } from '../../types/user_relation';
+import useWishContext from '../../hooks/useWishContext';
 
 interface ReplyDialogProps {
     onClose: () => void;
     wish: IWish | IWishWithReplies;
     currentRelation: IUserRelation;
-    afterSubmit?: () => void;
 }
 
-const ReplyDialog = ({ onClose, wish, currentRelation, afterSubmit }: ReplyDialogProps) => {
+const ReplyDialog = ({ onClose, wish, currentRelation }: ReplyDialogProps) => {
     const [description, setDescription] = useState('');
+    const { reply } = useWishContext();
 
     const handleSubmit = () => {
-        WishAPI.reply(currentRelation.id, wish.id, description).then(_ => {
-            afterSubmit && afterSubmit();
+        reply(currentRelation.id, wish.id, description).then(_ => {
             onClose();
         });
     };

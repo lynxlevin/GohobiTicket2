@@ -6,25 +6,25 @@ import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
 import { format } from 'date-fns';
+import AddReactionOutlinedIcon from '@mui/icons-material/AddReactionOutlined';
 import InfoIcon from '@mui/icons-material/Info';
 import ReplyIcon from '@mui/icons-material/Reply';
 import SpecialStamp from './SpecialStamp';
 import DetailDialog from './DetailDialog';
 import useUserContext from '../../hooks/useUserContext';
 import { IWish } from '../../types/ticket';
-import { WishAPI } from '../../apis/WishAPI';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import { IUserRelation } from '../../types/user_relation';
 import ReplyDialog from './ReplyDialog';
+import useWishContext from '../../hooks/useWishContext';
 
 const Wishes = () => {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const { wishes, getWishes } = useWishContext();
     const { me, getMe } = useUserContext();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { userRelationId } = usePagePath();
-    const [wishes, setWishes] = useState<IWish[]>();
-    const [wishIdQuery] = useState(searchParams.get('wishId'));
     const selectedWishRef = useRef<HTMLDivElement | null>(null);
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
@@ -40,15 +40,16 @@ const Wishes = () => {
     useEffect(() => {
         if (currentRelation === undefined) return;
         if (wishes !== undefined) return;
-        WishAPI.list(currentRelation.id).then(res => setWishes(res.data));
+        getWishes(currentRelation.id);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentRelation, wishes]);
 
     useEffect(() => {
         if (wishes === undefined) return;
-        if (wishIdQuery === null) return;
+        if (searchParams.get('wishId') === null) return;
         if (selectedWishRef.current === null) return;
-        window.scroll({ top: selectedWishRef.current.getBoundingClientRect().top - 50 });
-    }, [wishIdQuery, wishes]);
+        window.scroll({ top: selectedWishRef.current.offsetTop - 50 });
+    }, [searchParams, wishes]);
 
     return (
         <>
@@ -67,8 +68,7 @@ const Wishes = () => {
                                             key={wish.id}
                                             wish={wish}
                                             currentRelation={currentRelation}
-                                            selectedRef={wishIdQuery === wish.id ? selectedWishRef : undefined}
-                                            setWishes={setWishes}
+                                            selectedRef={searchParams.get('wishId') === wish.id ? selectedWishRef : undefined}
                                         />
                                     );
                                 })}
@@ -102,11 +102,10 @@ interface WishItemProps {
     wish: IWish;
     currentRelation: IUserRelation;
     selectedRef?: React.MutableRefObject<HTMLDivElement | null>;
-    setWishes: Dispatch<SetStateAction<IWish[] | undefined>>;
 }
 
-const WishItem = ({ wish, currentRelation, selectedRef, setWishes }: WishItemProps) => {
-    const [openedDialog, setOpenedDialog] = useState<'Detail' | 'Reply'>();
+const WishItem = ({ wish, currentRelation, selectedRef }: WishItemProps) => {
+    const [openedDialog, setOpenedDialog] = useState<'Detail' | 'Reply' | 'Reaction'>();
     const [, setSearchParams] = useSearchParams();
     const { me } = useUserContext();
     const navigate = useNavigate();
@@ -116,22 +115,7 @@ const WishItem = ({ wish, currentRelation, selectedRef, setWishes }: WishItemPro
             case 'Detail':
                 return <DetailDialog ticket={wish.ticket} onClose={() => setOpenedDialog(undefined)} relatedUserName={currentRelation.related_username} />;
             case 'Reply':
-                return (
-                    <ReplyDialog
-                        wish={wish}
-                        currentRelation={currentRelation}
-                        onClose={() => setOpenedDialog(undefined)}
-                        afterSubmit={() => {
-                            setWishes(prev => {
-                                if (prev === undefined) return undefined;
-                                const toBe = [...prev];
-                                const thisWish = toBe.find(w => w.id === wish.id);
-                                if (thisWish !== undefined) thisWish.has_replies = true;
-                                return toBe;
-                            });
-                        }}
-                    />
-                );
+                return <ReplyDialog wish={wish} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
         }
     };
 

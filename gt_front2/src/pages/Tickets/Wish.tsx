@@ -7,19 +7,19 @@ import CommonAppBar from '../../components/CommonAppBar';
 import { format } from 'date-fns';
 import SpecialStamp from './SpecialStamp';
 import useUserContext from '../../hooks/useUserContext';
-import { IWishReply, IWishWithReplies } from '../../types/ticket';
-import { WishAPI } from '../../apis/WishAPI';
+import { IWishReply } from '../../types/ticket';
 import { IUserRelation } from '../../types/user_relation';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import ReplyDialog from './ReplyDialog';
+import useWishContext from '../../hooks/useWishContext';
 
 const Wish = () => {
     const [openedDialog, setOpenedDialog] = useState<'Reply'>();
+    const { currentWish: wish, getCurrentWish, clearCurrentWish } = useWishContext();
     const { me, getMe } = useUserContext();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { userRelationId, wishId } = usePagePath();
-    const [wish, setWish] = useState<IWishWithReplies>();
     const navigate = useNavigate();
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
@@ -29,14 +29,7 @@ const Wish = () => {
         if (currentRelation === undefined) return undefined;
         switch (openedDialog) {
             case 'Reply':
-                return (
-                    <ReplyDialog
-                        wish={wish}
-                        currentRelation={currentRelation}
-                        onClose={() => setOpenedDialog(undefined)}
-                        afterSubmit={() => setWish(undefined)}
-                    />
-                );
+                return <ReplyDialog wish={wish} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
         }
     };
 
@@ -63,8 +56,9 @@ const Wish = () => {
     useEffect(() => {
         if (currentRelation === undefined) return;
         if (wishId === null) return;
-        if (wish !== undefined) return;
-        WishAPI.get(currentRelation.id, wishId).then(res => setWish(res.data));
+        if (wish !== undefined && wish.id === wishId) return;
+        getCurrentWish(currentRelation.id, wishId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentRelation, wish, wishId]);
     return (
         <>
@@ -72,7 +66,12 @@ const Wish = () => {
                 currentRelation={currentRelation}
                 leftItem={
                     currentRelation && wish ? (
-                        <IconButton onClick={() => navigate(`/user_relations/${currentRelation.id}/wishes?wishId=${wish.id}`)}>
+                        <IconButton
+                            onClick={() => {
+                                clearCurrentWish();
+                                navigate(`/user_relations/${currentRelation.id}/wishes?wishId=${wish.id}`);
+                            }}
+                        >
                             <ArrowBackIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
                         </IconButton>
                     ) : (
