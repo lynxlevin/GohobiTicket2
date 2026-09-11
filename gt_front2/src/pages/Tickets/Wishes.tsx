@@ -17,6 +17,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import { IUserRelation } from '../../types/user_relation';
 import ReplyDialog from './ReplyDialog';
+import ReactionsDialog from './ReactionsDialog';
 import useWishContext from '../../hooks/useWishContext';
 
 const Wishes = () => {
@@ -108,6 +109,7 @@ const WishItem = ({ wish, currentRelation, selectedRef }: WishItemProps) => {
     const [openedDialog, setOpenedDialog] = useState<'Detail' | 'Reply' | 'Reaction'>();
     const [, setSearchParams] = useSearchParams();
     const { me } = useUserContext();
+    const { updateReactions } = useWishContext();
     const navigate = useNavigate();
 
     const getDialog = () => {
@@ -116,6 +118,8 @@ const WishItem = ({ wish, currentRelation, selectedRef }: WishItemProps) => {
                 return <DetailDialog ticket={wish.ticket} onClose={() => setOpenedDialog(undefined)} relatedUserName={currentRelation.related_username} />;
             case 'Reply':
                 return <ReplyDialog wish={wish} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
+            case 'Reaction':
+                return <ReactionsDialog wish={wish} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
         }
     };
 
@@ -135,6 +139,34 @@ const WishItem = ({ wish, currentRelation, selectedRef }: WishItemProps) => {
                     <Typography className="text">{wish.description}</Typography>
                 </CardContent>
                 <CardActions className="card-actions">
+                    <Stack direction="row" mr="auto">
+                        {Array.from(wish.reactions).map((reaction, idx) => (
+                            <IconButton
+                                key={`${wish.id}-reaction-${idx}`}
+                                size="small"
+                                onClick={() => {
+                                    if (me === undefined || wish.ticket.giving_user_id !== me.id) return;
+                                    const reactions = Array.from(wish.reactions);
+                                    reactions.splice(idx, 1);
+                                    updateReactions(currentRelation.id, wish.id, reactions.join(''));
+                                }}
+                                className="reaction"
+                            >
+                                {reaction}
+                            </IconButton>
+                        ))}
+                        {me !== undefined && wish.ticket.giving_user_id === me.id && (
+                            <IconButton
+                                size="small"
+                                onClick={() => {
+                                    setSearchParams({ wishId: wish.id });
+                                    setOpenedDialog('Reaction');
+                                }}
+                            >
+                                <AddReactionOutlinedIcon />
+                            </IconButton>
+                        )}
+                    </Stack>
                     {!wish.has_replies && (
                         <IconButton
                             size="small"
@@ -207,8 +239,14 @@ const StyledGrid = styled(Grid)`
 
     .card-actions {
         justify-content: flex-end;
-        margin-top: -16px;
         margin-bottom: 0px;
+    }
+
+    .reaction {
+        padding-top: 0px;
+        padding-bottom: 0px;
+        padding-right: 3px;
+        padding-left: 3px;
     }
 
     .open-thread-button {
