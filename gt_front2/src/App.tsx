@@ -20,6 +20,7 @@ import { LocalStorageProvider } from './contexts/local-storage-context';
 import { YearMonthProvider } from './contexts/year-month-context';
 import Wish from './pages/Tickets/Wish';
 import Settings from './pages/Settings/Settings';
+import { WishProvider } from './contexts/wish-context';
 
 const theme = createTheme({
     palette: {
@@ -40,36 +41,41 @@ function App() {
                 <UserRelationProvider>
                     <YearMonthProvider>
                         <TicketProvider>
-                            <DiaryTagProvider>
-                                <DiaryProvider>
-                                    <LocalStorageProvider>
-                                        <ThemeProvider theme={theme}>
-                                            <LocalizationProvider
-                                                dateAdapter={AdapterDateFns}
-                                                adapterLocale={ja}
-                                                dateFormats={{ keyboardDate: 'yyyy/MM/dd (E)', normalDate: 'yyyy/MM/dd (E)' }}
-                                            >
-                                                <Routes>
-                                                    <Route path="/" element={<Login />} />
-                                                    <Route path="/login" element={<Login />} />
-                                                    <Route
-                                                        path="/user_relations/:userRelationId/receiving_tickets"
-                                                        element={<Tickets relationKind="Receiving" />}
-                                                    />
-                                                    <Route path="/user_relations/:userRelationId/giving_tickets" element={<Tickets relationKind="Giving" />} />
-                                                    <Route path="/user_relations/:userRelationId/wishes" element={<Wishes />} />
-                                                    <Route path="/user_relations/:userRelationId/wishes/:wishId" element={<Wish />} />
-                                                    <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
-                                                    <Route path="/user_relations/:userRelationId/search" element={<Search />} />
-                                                    <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />
-                                                    <Route path="/settings" element={<Settings />} />
-                                                    <Route path="/settings/notifications" element={<NotificationSettings />} />
-                                                </Routes>
-                                            </LocalizationProvider>
-                                        </ThemeProvider>
-                                    </LocalStorageProvider>
-                                </DiaryProvider>
-                            </DiaryTagProvider>
+                            <WishProvider>
+                                <DiaryTagProvider>
+                                    <DiaryProvider>
+                                        <LocalStorageProvider>
+                                            <ThemeProvider theme={theme}>
+                                                <LocalizationProvider
+                                                    dateAdapter={AdapterDateFns}
+                                                    adapterLocale={ja}
+                                                    dateFormats={{ keyboardDate: 'yyyy/MM/dd (E)', normalDate: 'yyyy/MM/dd (E)' }}
+                                                >
+                                                    <Routes>
+                                                        <Route path="/" element={<Login />} />
+                                                        <Route path="/login" element={<Login />} />
+                                                        <Route
+                                                            path="/user_relations/:userRelationId/receiving_tickets"
+                                                            element={<Tickets relationKind="Receiving" />}
+                                                        />
+                                                        <Route
+                                                            path="/user_relations/:userRelationId/giving_tickets"
+                                                            element={<Tickets relationKind="Giving" />}
+                                                        />
+                                                        <Route path="/user_relations/:userRelationId/wishes" element={<Wishes />} />
+                                                        <Route path="/user_relations/:userRelationId/wishes/:wishId" element={<Wish />} />
+                                                        <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
+                                                        <Route path="/user_relations/:userRelationId/search" element={<Search />} />
+                                                        <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />
+                                                        <Route path="/settings" element={<Settings />} />
+                                                        <Route path="/settings/notifications" element={<NotificationSettings />} />
+                                                    </Routes>
+                                                </LocalizationProvider>
+                                            </ThemeProvider>
+                                        </LocalStorageProvider>
+                                    </DiaryProvider>
+                                </DiaryTagProvider>
+                            </WishProvider>
                         </TicketProvider>
                     </YearMonthProvider>
                 </UserRelationProvider>

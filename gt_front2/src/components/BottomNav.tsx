@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import usePagePath from '../hooks/usePagePath';
 import BaseBottomNav, { type NavItem } from './BaseBottomNav';
 import useUserRelationContext from '../hooks/useUserRelationContext';
+import useWishContext from '../hooks/useWishContext';
 
 const BottomNav = () => {
     const { userRelationId: pathUserRelationId, pagePath } = usePagePath();
     const { userRelations } = useUserRelationContext();
+    const { clearCurrentWish } = useWishContext();
 
     const [selected, setSelected] = useState<NavItem>();
     const handleSelect = (_: React.SyntheticEvent, newValue: NavItem) => {
@@ -18,16 +20,21 @@ const BottomNav = () => {
 
     const navActions = {
         giving_tickets: () => {
-            const url = userRelationId !== undefined ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/giving_tickets` : '/login?to=giving_tickets';
+            const url =
+                userRelationId !== undefined ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/giving_tickets` : '/login?to=giving_tickets';
             navigate(url);
             window.scroll({ top: 0 });
         },
         receiving_tickets: () => {
-            const url = userRelationId !== undefined ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/receiving_tickets` : '/login?to=receiving_tickets';
+            const url =
+                userRelationId !== undefined
+                    ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/receiving_tickets`
+                    : '/login?to=receiving_tickets';
             navigate(url);
             window.scroll({ top: 0 });
         },
         wishes: () => {
+            clearCurrentWish();
             const url = userRelationId !== undefined ? `/user_relations/${pathUserRelationId ?? userRelations![0].id}/wishes` : '/login?to=wishes';
             navigate(url);
             window.scroll({ top: 0 });
