@@ -1,12 +1,12 @@
 import { Button, Dialog, DialogActions, DialogContent, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
-import { IWish } from '../../types/ticket';
+import { IWish, IWishWithReplies } from '../../types/ticket';
 import { WishAPI } from '../../apis/WishAPI';
 import { IUserRelation } from '../../types/user_relation';
 
 interface ReplyDialogProps {
     onClose: () => void;
-    wish: IWish;
+    wish: IWish | IWishWithReplies;
     currentRelation: IUserRelation;
     afterSubmit?: () => void;
 }

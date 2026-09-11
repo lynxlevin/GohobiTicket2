@@ -39,7 +39,19 @@ export interface IWish {
     has_replies: boolean;
 }
 
-export interface IWishWithReplies extends IWish {
+export interface IWishWithReplies  {
+    id: string;
+    description: string;
+    reactions: string;
+    status: WishStatus;
+    created_at: string;
+    ticket: {
+        id: number;
+        giving_user_id: number;
+        description: string;
+        gift_date: string;
+        is_special: boolean;
+    }
     replies: IWishReply[];
 }
 

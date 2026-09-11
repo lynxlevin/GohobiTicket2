@@ -2,10 +2,12 @@ import { useCallback, useContext } from 'react';
 import { CreateTicketRequest, TicketAPI } from '../apis/TicketAPI';
 import { TicketContext } from '../contexts/ticket-context';
 import { endOfMonth, format, parse, startOfMonth } from 'date-fns';
-import { ITicket } from '../types/ticket';
+import { ITicket, IWish } from '../types/ticket';
+import { WishContext } from '../contexts/wish-context';
 
 const useTicketContext = () => {
     const ticketContext = useContext(TicketContext);
+    const wishContext = useContext(WishContext);
 
     const receivingTicketsByMonth = ticketContext.receivingTicketsByMonth;
     const givingTicketsByMonth = ticketContext.givingTicketsByMonth;
@@ -103,6 +105,11 @@ const useTicketContext = () => {
             toBe[yearMonth][toBe[yearMonth].findIndex(p => p.id === ticket.id)] = ticket;
             return toBe;
         });
+        if (wishContext.wishes !== undefined) {
+            wishContext.setWishes(prev => {
+                return [{ ...ticket.wish, reactions: '', has_replies: false, ticket: { ...ticket } } as IWish, ...prev!];
+            });
+        }
         return web_push_result;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
