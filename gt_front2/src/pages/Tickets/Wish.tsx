@@ -7,16 +7,17 @@ import CommonAppBar from '../../components/CommonAppBar';
 import { format } from 'date-fns';
 import SpecialStamp from './SpecialStamp';
 import useUserContext from '../../hooks/useUserContext';
-import { IWishReply } from '../../types/ticket';
 import { IUserRelation } from '../../types/user_relation';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import ReplyDialog from './ReplyDialog';
 import useWishContext from '../../hooks/useWishContext';
+import AddReactionOutlinedIcon from '@mui/icons-material/AddReactionOutlined';
+import ReactionsDialog, { IWishReplyWithWishId } from './ReactionsDialog';
 
 const Wish = () => {
-    const [openedDialog, setOpenedDialog] = useState<'Reply'>();
-    const { currentWish: wish, getCurrentWish, clearCurrentWish } = useWishContext();
+    const [openedDialog, setOpenedDialog] = useState<'Reply' | 'Reaction'>();
+    const { currentWish: wish, getCurrentWish, clearCurrentWish, updateReactions } = useWishContext();
     const { me, getMe } = useUserContext();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { userRelationId, wishId } = usePagePath();
@@ -30,6 +31,8 @@ const Wish = () => {
         switch (openedDialog) {
             case 'Reply':
                 return <ReplyDialog wish={wish} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
+            case 'Reaction':
+                return <ReactionsDialog wish={wish} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
         }
     };
 
@@ -41,7 +44,7 @@ const Wish = () => {
             const replyDate = format(new Date(reply.created_at), 'yyyy-MM-dd');
             const hideDate = lastReplyDate === replyDate;
             lastReplyDate = replyDate;
-            return <Reply key={reply.id} reply={reply} currentRelation={currentRelation} hideDate={hideDate} />;
+            return <Reply key={reply.id} reply={{ ...reply, wishId: wish.id }} currentRelation={currentRelation} hideDate={hideDate} />;
         });
     };
 
@@ -121,6 +124,33 @@ const Wish = () => {
                                     >
                                         {wish.description}
                                     </Typography>
+                                    <Stack direction="row" mr="auto">
+                                        {Array.from(wish.reactions).map((reaction, idx) => (
+                                            <IconButton
+                                                key={`${wish.id}-reaction-${idx}`}
+                                                size="small"
+                                                onClick={() => {
+                                                    if (me === undefined || wish.ticket.giving_user_id !== me.id) return;
+                                                    const reactions = Array.from(wish.reactions);
+                                                    reactions.splice(idx, 1);
+                                                    updateReactions(currentRelation.id, wish.id, reactions.join(''));
+                                                }}
+                                                sx={{ py: 0, px: '3px' }}
+                                            >
+                                                {reaction}
+                                            </IconButton>
+                                        ))}
+                                        {me !== undefined && wish.ticket.giving_user_id === me.id && (
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => {
+                                                    setOpenedDialog('Reaction');
+                                                }}
+                                            >
+                                                <AddReactionOutlinedIcon />
+                                            </IconButton>
+                                        )}
+                                    </Stack>
                                 </CardContent>
                                 {wish.ticket.is_special && <SpecialStamp randKey={wish.ticket.id} />}
                                 {getRepliesUI()}
@@ -130,14 +160,7 @@ const Wish = () => {
                                         marginTop: '-16px',
                                         marginBottom: '0px',
                                     }}
-                                >
-                                    {/* <IconButton size="small" onClick={() => setOpenedDialog('Reply')}>
-                        <ReplyIcon />
-                    </IconButton>
-                    <IconButton size="small" onClick={() => setOpenedDialog('Detail')}>
-                        <InfoIcon />
-                    </IconButton> */}
-                                </CardActions>
+                                ></CardActions>
                             </Card>
                             <Button sx={{ mt: '16px', px: 6 }} variant="contained" onClick={() => setOpenedDialog('Reply')}>
                                 メッセージを送る
@@ -152,14 +175,24 @@ const Wish = () => {
 };
 
 interface ReplyProps {
-    reply: IWishReply;
+    reply: IWishReplyWithWishId;
     currentRelation: IUserRelation;
     hideDate: boolean;
 }
 
 const Reply = ({ reply, currentRelation, hideDate }: ReplyProps) => {
+    const [openedDialog, setOpenedDialog] = useState<'Reaction'>();
     const { me } = useUserContext();
+    const { updateReplyReactions } = useWishContext();
     const posterName = reply.posted_by_id === me?.id ? me.username : currentRelation.related_username;
+
+    const getDialog = () => {
+        if (currentRelation === undefined) return undefined;
+        switch (openedDialog) {
+            case 'Reaction':
+                return <ReactionsDialog wishReply={reply} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
+        }
+    };
     return (
         <>
             <Box position="relative">
@@ -188,7 +221,35 @@ const Reply = ({ reply, currentRelation, hideDate }: ReplyProps) => {
                     >
                         {reply.description}
                     </Typography>
+                    <Stack direction="row" mr="auto">
+                        {Array.from(reply.reactions).map((reaction, idx) => (
+                            <IconButton
+                                key={`${reply.id}-reaction-${idx}`}
+                                size="small"
+                                onClick={() => {
+                                    if (me === undefined || reply.posted_by_id === me.id) return;
+                                    const reactions = Array.from(reply.reactions);
+                                    reactions.splice(idx, 1);
+                                    updateReplyReactions(currentRelation.id, reply.id, reactions.join(''), reply.wishId);
+                                }}
+                                sx={{ py: 0, px: '3px' }}
+                            >
+                                {reaction}
+                            </IconButton>
+                        ))}
+                        {me !== undefined && reply.posted_by_id !== me.id && (
+                            <IconButton
+                                size="small"
+                                onClick={() => {
+                                    setOpenedDialog('Reaction');
+                                }}
+                            >
+                                <AddReactionOutlinedIcon />
+                            </IconButton>
+                        )}
+                    </Stack>
                 </Box>
+                {openedDialog && getDialog()}
             </Box>
         </>
     );

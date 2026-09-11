@@ -1,16 +1,16 @@
 import { Dialog, DialogContent } from '@mui/material';
-import { IWish, IWishReply } from '../../types/ticket';
+import { IWish, IWishReply, IWishWithReplies } from '../../types/ticket';
 import { IUserRelation } from '../../types/user_relation';
 import EmojiPicker, { EmojiClickData, SuggestionMode } from 'emoji-picker-react';
 import useWishContext from '../../hooks/useWishContext';
 
-interface IWishReplyWithWishId extends IWishReply {
+export interface IWishReplyWithWishId extends IWishReply {
     wishId: string;
 }
 
 interface ReactionsDialogProps {
     onClose: () => void;
-    wish?: IWish;
+    wish?: IWish | IWishWithReplies;
     wishReply?: IWishReplyWithWishId;
     currentRelation: IUserRelation;
 }

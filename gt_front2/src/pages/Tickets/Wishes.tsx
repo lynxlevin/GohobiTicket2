@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Button, Card, CardActions, CardContent, CircularProgress, Container, Grid, IconButton, Stack, Typography } from '@mui/material';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
@@ -21,7 +21,7 @@ import ReactionsDialog from './ReactionsDialog';
 import useWishContext from '../../hooks/useWishContext';
 
 const Wishes = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const { wishes, getWishes } = useWishContext();
     const { me, getMe } = useUserContext();
     const { getUserRelations, userRelations } = useUserRelationContext();
