@@ -2,6 +2,7 @@ import { Dialog, DialogContent } from '@mui/material';
 import { IWish, IWishReply, IWishWithReplies } from '../../types/ticket';
 import { IUserRelation } from '../../types/user_relation';
 import EmojiPicker, { EmojiClickData, SuggestionMode } from 'emoji-picker-react';
+import ja from 'emoji-picker-react/dist/data/emojis-ja';
 import useWishContext from '../../hooks/useWishContext';
 
 export interface IWishReplyWithWishId extends IWishReply {
@@ -38,6 +39,8 @@ const ReactionsDialog = ({ onClose, wish, wishReply, currentRelation }: Reaction
                     previewConfig={{ showPreview: false }}
                     suggestedEmojisMode={SuggestionMode.RECENT}
                     onEmojiClick={addReaction}
+                    autoFocusSearch={false}
+                    emojiData={ja}
                 />
             </DialogContent>
         </Dialog>
