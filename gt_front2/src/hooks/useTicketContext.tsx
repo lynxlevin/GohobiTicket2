@@ -67,7 +67,11 @@ const useTicketContext = () => {
             description,
             is_special: isSpecial,
         };
-        if (willFinalize) payload.status = 'Unread';
+        if (willFinalize) {
+            payload.status = 'Unread';
+        } else {
+            payload.status = 'Draft';
+        }
         TicketAPI.update(ticketId, payload).then(({ data: { ticket } }) => {
             ticketContext.setGivingTicketsByMonth(prev => {
                 const yearMonth = format(new Date(ticket.gift_date), 'yyyyMM');
