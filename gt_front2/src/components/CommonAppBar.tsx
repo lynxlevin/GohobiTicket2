@@ -15,6 +15,7 @@ import useDiaryTagContext from '../hooks/useDiaryTagContext';
 import usePagePath from '../hooks/usePagePath';
 import { IUserRelation } from '../types/user_relation';
 import useWishContext from '../hooks/useWishContext';
+import useGlobalErrorContext from '../hooks/useGlobalErrorContext';
 
 interface CommonAppBarProps {
     currentRelation?: IUserRelation;
@@ -30,6 +31,7 @@ const CommonAppBar = ({ currentRelation, leftItem }: CommonAppBarProps) => {
     const { clearDiaryCache } = useDiaryContext();
     const { clearDiaryTagCache } = useDiaryTagContext();
     const { clearWishCache } = useWishContext();
+    const { clearGlobalErrorsCache } = useGlobalErrorContext();
     const { pagePath } = usePagePath();
 
     const otherRelations = userRelations?.filter((relation, _index, _self) => relation.related_username !== currentRelation?.related_username);
@@ -39,6 +41,7 @@ const CommonAppBar = ({ currentRelation, leftItem }: CommonAppBarProps) => {
         clearDiaryCache();
         clearDiaryTagCache();
         clearWishCache();
+        clearGlobalErrorsCache();
     };
 
     return (

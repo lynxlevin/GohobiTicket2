@@ -27,9 +27,12 @@ const CreateTicketDialog = ({ onClose }: { onClose: () => void }) => {
             is_draft: isDraft,
             user_relation_id: userRelationId!,
         };
-        createTicket(data);
-        resetDraft();
-        onClose();
+        createTicket(data)
+            .then(_ => {
+                resetDraft();
+                onClose();
+            })
+            .catch(_ => {});
     };
 
     const resetDraft = () => {

@@ -15,9 +15,11 @@ const ReplyDialog = ({ onClose, wish, currentRelation }: ReplyDialogProps) => {
     const { reply } = useWishContext();
 
     const handleSubmit = () => {
-        reply(currentRelation.id, wish.id, description).then(_ => {
-            onClose();
-        });
+        reply(currentRelation.id, wish.id, description)
+            .then(_ => {
+                onClose();
+            })
+            .catch(_ => {});
     };
     return (
         <Dialog open={true} onClose={onClose} fullWidth>

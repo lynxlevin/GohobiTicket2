@@ -33,9 +33,10 @@ const EditDialog = (props: EditDialogProps) => {
         checkSpecialTicketAvailability();
     }, [ticket.gift_date, ticket.user_relation_id]);
 
-    const handleSubmit = async () => {
-        await updateTicket(ticket.id, description, isSpecial, willFinalize);
-        onClose();
+    const handleSubmit = () => {
+        updateTicket(ticket, description, isSpecial, willFinalize)
+            .then(onClose)
+            .catch(_ => {});
     };
 
     return (
@@ -62,7 +63,7 @@ const EditDialog = (props: EditDialogProps) => {
             </DialogContent>
             <DialogActions sx={{ justifyContent: 'center', py: 2 }}>
                 {willDelete ? (
-                    <Button variant="contained" color="error" onClick={() => deleteTicket(ticket)}>
+                    <Button variant="contained" color="error" onClick={() => deleteTicket(ticket).catch(_ => {})}>
                         削除する
                     </Button>
                 ) : (

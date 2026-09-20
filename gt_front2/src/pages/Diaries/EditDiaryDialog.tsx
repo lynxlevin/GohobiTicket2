@@ -37,8 +37,9 @@ const EditDiaryDialog = ({ onClose, diary }: EditDiaryDialogProps) => {
             entry,
             date: format(date, 'yyyy-MM-dd'),
             tag_ids: tags.map(tag => tag.id),
-        });
-        onClose();
+        })
+            .then(onClose)
+            .catch(_ => {});
     };
 
     const onChangeDate = (newDate: Date | null) => {

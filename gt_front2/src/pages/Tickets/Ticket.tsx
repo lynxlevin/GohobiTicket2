@@ -36,7 +36,7 @@ const Ticket = ({ ticket, relationKind }: TicketProps) => {
             setTimer(
                 setTimeout(async () => {
                     setPrevStatus(ticket.status);
-                    await readTicket(ticket);
+                    await readTicket(ticket).catch(_ => {});
                 }, 3000),
             );
         }
