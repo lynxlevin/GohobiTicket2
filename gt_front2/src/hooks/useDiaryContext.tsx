@@ -3,9 +3,11 @@ import { DiaryContext } from '../contexts/diary-context';
 import { CreateDiaryRequest, DiaryAPI, UpdateDiaryRequest } from '../apis/DiaryAPI';
 import { IDiariesForMonth, IDiary } from '../types/diary';
 import { endOfMonth, format, parse, startOfMonth } from 'date-fns';
+import useGlobalErrorContext from './useGlobalErrorContext';
 
 const useDiaryContext = () => {
     const diaryContext = useContext(DiaryContext);
+    const { handleAPIError, handleAPIErrorThrowing } = useGlobalErrorContext();
 
     const diariesByMonth = diaryContext.diariesByMonth;
 
@@ -26,68 +28,73 @@ const useDiaryContext = () => {
     const getDiariesByMonth = useCallback(
         async (userRelationId: number, yearMonth: string) => {
             const firstOfMonth = startOfMonth(parse(yearMonth, 'yyyyMM', new Date()));
-            DiaryAPI.list({ userRelationId, dateGte: firstOfMonth, dateLte: endOfMonth(firstOfMonth) }).then(({ data: diaries }) => {
-                diaryContext.setDiariesByMonth(prev => {
-                    const toBe = { ...prev };
-                    toBe[yearMonth] = diaries;
-                    return toBe;
-                });
-            });
+            DiaryAPI.list({ userRelationId, dateGte: firstOfMonth, dateLte: endOfMonth(firstOfMonth) })
+                .then(({ data: diaries }) => {
+                    diaryContext.setDiariesByMonth(prev => {
+                        const toBe = { ...prev };
+                        toBe[yearMonth] = diaries;
+                        return toBe;
+                    });
+                })
+                .catch(handleAPIError);
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [diaryContext.setDiariesByMonth],
     );
 
-    const createDiary = useCallback(async (data: CreateDiaryRequest) => {
-        DiaryAPI.create(data).then(({ data: diary }) => {
-            const yearMonth = format(new Date(diary.date), 'yyyyMM');
-            diaryContext.setDiariesByMonth(prev => {
-                const toBe = { ...prev };
-                if (toBe[yearMonth] === undefined) {
-                    toBe[yearMonth] = [diary];
-                } else {
-                    toBe[yearMonth].push(diary);
-                    toBe[yearMonth] = toBe[yearMonth].sort((a, b) => (a.date > b.date ? -1 : 1));
-                }
-                return toBe;
-            });
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const updateDiary = useCallback(async (diary: IDiary, data: UpdateDiaryRequest) => {
-        const originalYearMonth = format(new Date(diary.date), 'yyyyMM');
-        DiaryAPI.update(diary.id, data).then(({ data: newDiary }) => {
-            const yearMonth = format(new Date(newDiary.date), 'yyyyMM');
-            diaryContext.setDiariesByMonth(prev => {
-                const toBe = { ...prev };
-                if (toBe[originalYearMonth] !== undefined) {
-                    const originalIndex = toBe[originalYearMonth].findIndex(d => d.id === diary.id);
-                    if (originalIndex > -1) toBe[originalYearMonth].splice(originalIndex, 1);
-                }
-                if (toBe[yearMonth] !== undefined) {
-                    toBe[yearMonth] = [newDiary, ...toBe[yearMonth]].sort((a, b) => {
-                        return a.date > b.date ? -1 : 1;
-                    });
-                }
-                return toBe;
-            });
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const readDiary = useCallback(async (diary: IDiary) => {
-        DiaryAPI.markRead(diary.id).then(() => {
-            diaryContext.setDiariesByMonth(prev => {
+    const createDiary = async (data: CreateDiaryRequest) => {
+        await DiaryAPI.create(data)
+            .then(({ data: diary }) => {
                 const yearMonth = format(new Date(diary.date), 'yyyyMM');
-                const toBe = { ...prev };
-                const target = toBe[yearMonth].find(d => d.id === diary.id);
-                if (target !== undefined) target.status = 'Read';
-                return toBe;
-            });
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+                diaryContext.setDiariesByMonth(prev => {
+                    const toBe = { ...prev };
+                    if (toBe[yearMonth] === undefined) {
+                        toBe[yearMonth] = [diary];
+                    } else {
+                        toBe[yearMonth].push(diary);
+                        toBe[yearMonth] = toBe[yearMonth].sort((a, b) => (a.date > b.date ? -1 : 1));
+                    }
+                    return toBe;
+                });
+            })
+            .catch(handleAPIErrorThrowing);
+    };
+
+    const updateDiary = async (diary: IDiary, data: UpdateDiaryRequest) => {
+        const originalYearMonth = format(new Date(diary.date), 'yyyyMM');
+        await DiaryAPI.update(diary.id, data)
+            .then(({ data: newDiary }) => {
+                const yearMonth = format(new Date(newDiary.date), 'yyyyMM');
+                diaryContext.setDiariesByMonth(prev => {
+                    const toBe = { ...prev };
+                    if (toBe[originalYearMonth] !== undefined) {
+                        const originalIndex = toBe[originalYearMonth].findIndex(d => d.id === diary.id);
+                        if (originalIndex > -1) toBe[originalYearMonth].splice(originalIndex, 1);
+                    }
+                    if (toBe[yearMonth] !== undefined) {
+                        toBe[yearMonth] = [newDiary, ...toBe[yearMonth]].sort((a, b) => {
+                            return a.date > b.date ? -1 : 1;
+                        });
+                    }
+                    return toBe;
+                });
+            })
+            .catch(handleAPIErrorThrowing);
+    };
+
+    const readDiary = async (diary: IDiary) => {
+        await DiaryAPI.markRead(diary.id)
+            .then(() => {
+                diaryContext.setDiariesByMonth(prev => {
+                    const yearMonth = format(new Date(diary.date), 'yyyyMM');
+                    const toBe = { ...prev };
+                    const target = toBe[yearMonth].find(d => d.id === diary.id);
+                    if (target !== undefined) target.status = 'Read';
+                    return toBe;
+                });
+            })
+            .catch(handleAPIErrorThrowing);
+    };
 
     return {
         diariesByMonth,

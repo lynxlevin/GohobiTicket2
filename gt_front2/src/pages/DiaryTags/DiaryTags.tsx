@@ -9,6 +9,7 @@ import useUserAPI from '../../hooks/useUserAPI';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
 import usePagePath from '../../hooks/usePagePath';
 import { IDiaryTag } from '../../types/diary';
+import useGlobalErrorContext from '../../hooks/useGlobalErrorContext';
 
 interface InnerTag extends IDiaryTag {
     isNew?: boolean;
@@ -16,6 +17,7 @@ interface InnerTag extends IDiaryTag {
 
 const DiaryTags = () => {
     const { diaryTags: tagsMaster, getDiaryTags, bulkUpdateDiaryTags, deleteDiaryTag } = useDiaryTagContext();
+    const { handleAPIError } = useGlobalErrorContext();
     const { userRelationId } = usePagePath();
     useUserAPI();
     const navigate = useNavigate();
@@ -28,14 +30,20 @@ const DiaryTags = () => {
     };
 
     const handleDelete = async (tag: InnerTag) => {
-        const getTagResponse = await DiaryTagAPI.get(tag.id);
-        const diaryCount = getTagResponse.data.diary_count;
-        if (diaryCount > 0) {
-            setDiaryCountForTagToDelete(diaryCount);
-            return;
-        }
-        await deleteDiaryTag(tag.id);
-        setTags(prev => prev.filter(diaryTag => diaryTag.id !== tag.id));
+        DiaryTagAPI.get(tag.id)
+            .then(res => {
+                const diaryCount = res.data.diary_count;
+                if (diaryCount > 0) {
+                    setDiaryCountForTagToDelete(diaryCount);
+                    return;
+                }
+                deleteDiaryTag(tag.id)
+                    .then(_ => {
+                        setTags(prev => prev.filter(diaryTag => diaryTag.id !== tag.id));
+                    })
+                    .catch(_ => {});
+            })
+            .catch(handleAPIError);
     };
 
     const handleSubmit = () => {
@@ -45,9 +53,11 @@ const DiaryTags = () => {
                 if (tag.isNew) return { id: null, text: tag.text, sort_no: tag.sort_no };
                 return tag;
             });
-        bulkUpdateDiaryTags({ diary_tags: payload, user_relation_id: userRelationId! }).then(diaryTags => {
-            setTags(diaryTags);
-        });
+        bulkUpdateDiaryTags({ diary_tags: payload, user_relation_id: userRelationId! })
+            .then(diaryTags => {
+                setTags(diaryTags);
+            })
+            .catch(_ => {});
     };
 
     const handleReset = () => {

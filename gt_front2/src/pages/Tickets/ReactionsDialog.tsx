@@ -20,13 +20,17 @@ const ReactionsDialog = ({ onClose, wish, wishReply, currentRelation }: Reaction
     const { updateReactions, updateReplyReactions } = useWishContext();
     const addReaction = (e: EmojiClickData) => {
         if (wish !== undefined) {
-            updateReactions(currentRelation.id, wish.id, wish.reactions + e.emoji).then(_ => {
-                onClose();
-            });
+            updateReactions(currentRelation.id, wish.id, wish.reactions + e.emoji)
+                .then(_ => {
+                    onClose();
+                })
+                .catch(_ => {});
         } else if (wishReply !== undefined) {
-            updateReplyReactions(currentRelation.id, wishReply.id, wishReply.reactions + e.emoji, wishReply.wishId).then(_ => {
-                onClose();
-            });
+            updateReplyReactions(currentRelation.id, wishReply.id, wishReply.reactions + e.emoji, wishReply.wishId)
+                .then(_ => {
+                    onClose();
+                })
+                .catch(_ => {});
         }
     };
     return (

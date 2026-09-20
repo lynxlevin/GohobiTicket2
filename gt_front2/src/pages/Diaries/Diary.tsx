@@ -32,7 +32,7 @@ const Diary = ({ diary, firstUnreadDiaryRef }: DiaryProps) => {
             setTimer(
                 setTimeout(async () => {
                     setPrevStatus(diary.status);
-                    readDiary(diary);
+                    readDiary(diary).catch(_ => {});
                 }, 3000),
             );
         }

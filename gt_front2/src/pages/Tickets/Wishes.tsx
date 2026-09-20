@@ -148,7 +148,7 @@ const WishItem = ({ wish, currentRelation, selectedRef }: WishItemProps) => {
                                     if (me === undefined || wish.ticket.giving_user_id !== me.id) return;
                                     const reactions = Array.from(wish.reactions);
                                     reactions.splice(idx, 1);
-                                    updateReactions(currentRelation.id, wish.id, reactions.join(''));
+                                    updateReactions(currentRelation.id, wish.id, reactions.join('')).catch(_ => {});
                                 }}
                                 className="reaction"
                             >

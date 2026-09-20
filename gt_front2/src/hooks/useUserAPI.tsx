@@ -1,6 +1,7 @@
 import { UserAPI } from '../apis/UserAPI';
 import useDiaryContext from './useDiaryContext';
 import useDiaryTagContext from './useDiaryTagContext';
+import useGlobalErrorContext from './useGlobalErrorContext';
 import useTicketContext from './useTicketContext';
 import useUserRelationContext from './useUserRelationContext';
 import useWishContext from './useWishContext';
@@ -11,6 +12,7 @@ const useUserAPI = () => {
     const { clearDiaryTagCache } = useDiaryTagContext();
     const { clearUserRelations } = useUserRelationContext();
     const { clearWishCache } = useWishContext();
+    const { handleAPIError } = useGlobalErrorContext();
 
     const clearAllCache = () => {
         clearTicketCache();
@@ -21,7 +23,7 @@ const useUserAPI = () => {
     };
 
     const handleLogout = async () => {
-        await UserAPI.logout();
+        await UserAPI.logout().catch(handleAPIError);
         if (window.location.pathname !== '/login') window.location.pathname = '/login';
     };
 

@@ -21,14 +21,17 @@ const UseDialog = (props: UseDialogProps) => {
     const currentRelation = userRelations?.find(relation => Number(relation.id) === ticket.user_relation_id);
     const handleSubmit = async () => {
         if (currentRelation === undefined) return;
-        const web_push_result = await consumeTicket(ticket.id, useDescription);
-        switch (web_push_result) {
-            case 'Sent':
-                setStatus('Used');
-                break;
-            case 'NotSent':
-                setStatus('UsedButNotSent');
-        }
+        consumeTicket(ticket.id, useDescription)
+            .then(webPushResult => {
+                switch (webPushResult) {
+                    case 'Sent':
+                        setStatus('Used');
+                        break;
+                    case 'NotSent':
+                        setStatus('UsedButNotSent');
+                }
+            })
+            .catch(_ => {});
     };
     return status === 'Unused' ? (
         <Dialog open={true} onClose={onClose} fullWidth>

@@ -133,7 +133,7 @@ const Wish = () => {
                                                     if (me === undefined || wish.ticket.giving_user_id !== me.id) return;
                                                     const reactions = Array.from(wish.reactions);
                                                     reactions.splice(idx, 1);
-                                                    updateReactions(currentRelation.id, wish.id, reactions.join(''));
+                                                    updateReactions(currentRelation.id, wish.id, reactions.join('')).catch(_ => {});
                                                 }}
                                                 sx={{ py: 0, px: '3px' }}
                                             >
@@ -230,7 +230,7 @@ const Reply = ({ reply, currentRelation, hideDate }: ReplyProps) => {
                                     if (me === undefined || reply.posted_by_id === me.id) return;
                                     const reactions = Array.from(reply.reactions);
                                     reactions.splice(idx, 1);
-                                    updateReplyReactions(currentRelation.id, reply.id, reactions.join(''), reply.wishId);
+                                    updateReplyReactions(currentRelation.id, reply.id, reactions.join(''), reply.wishId).catch(_ => {});
                                 }}
                                 sx={{ py: 0, px: '3px' }}
                             >

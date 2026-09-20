@@ -42,9 +42,12 @@ const CreateDiaryDialog = ({ userRelationId, onClose }: CreateDiaryDialogProps) 
             date: format(date, 'yyyy-MM-dd'),
             tag_ids: tags.map(tag => tag.id),
             user_relation_id: userRelationId,
-        });
-        resetDraft();
-        onClose();
+        })
+            .then(_ => {
+                resetDraft();
+                onClose();
+            })
+            .catch(_ => {});
     };
 
     const resetDraft = () => {

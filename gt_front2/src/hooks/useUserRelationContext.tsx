@@ -1,16 +1,20 @@
 import { useCallback, useContext } from 'react';
 import { UserRelationContext } from '../contexts/user-relation-context';
 import { UserRelationAPI } from '../apis/UserRelationAPI';
+import useGlobalErrorContext from './useGlobalErrorContext';
 
 const useUserRelationContext = () => {
     const userRelationContext = useContext(UserRelationContext);
+    const { handleAPIError } = useGlobalErrorContext();
 
     const userRelations = userRelationContext.userRelations;
 
     const getUserRelations = () => {
-        UserRelationAPI.list().then(res => {
-            userRelationContext.setUserRelations(res.data.user_relations);
-        });
+        UserRelationAPI.list()
+            .then(res => {
+                userRelationContext.setUserRelations(res.data.user_relations);
+            })
+            .catch(handleAPIError);
     };
 
     const clearUserRelations = useCallback(() => {
