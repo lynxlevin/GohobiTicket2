@@ -28,7 +28,7 @@ const useGlobalErrorContext = () => {
     };
 
     const handleAPIError = (error: AxiosError<{ error?: string }, any>) => {
-        const message = error.response?.data.error !== undefined ? error.response.data.error : error.message;
+        const message = `[${error.message}] ${error.response?.data ?? ''}`;
         pushGlobalError({ message, componentName: 'APICall', methodName: 'APICall', autoHideDurationMS: 7000 });
     };
 
