@@ -5,17 +5,22 @@ import { WishReplyAPI } from '../apis/WishReplyAPI';
 import useGlobalErrorContext from './useGlobalErrorContext';
 
 const useWishContext = () => {
+    const WISH_PAGE_SIZE = 10;
+
     const wishContext = useContext(WishContext);
     const { handleAPIError, handleAPIErrorThrowing } = useGlobalErrorContext();
 
     const wishes = wishContext.wishes;
+    const page = wishContext.page;
     const currentWish = wishContext.currentWish;
 
     const getWishes = useCallback(
-        async (userRelationId: number) => {
-            WishAPI.list(userRelationId)
-                .then(({ data: wishes }) => {
+        async (userRelationId: number, pageInput: number) => {
+            const page = pageInput - 1;
+            WishAPI.list(userRelationId, page, WISH_PAGE_SIZE)
+                .then(({ data: { wishes, page_count } }) => {
                     wishContext.setWishes(wishes);
+                    wishContext.setPage({ currentPage: pageInput, totalPageCount: page_count! });
                 })
                 .catch(handleAPIError);
         },
@@ -41,8 +46,7 @@ const useWishContext = () => {
                     wishContext.setWishes(prev => {
                         const toBe = [...prev!];
                         const wish = toBe.find(w => w.id === wishId);
-                        if (wish === undefined) return undefined;
-                        wish.reactions = reactions;
+                        if (wish !== undefined) wish.reactions = reactions;
                         return toBe;
                     });
                 }
@@ -62,8 +66,7 @@ const useWishContext = () => {
                     wishContext.setWishes(prev => {
                         const toBe = [...prev!];
                         const wish = toBe.find(w => w.id === wishId);
-                        if (wish === undefined) return undefined;
-                        wish.has_replies = true;
+                        if (wish !== undefined) wish.has_replies = true;
                         return toBe;
                     });
                 }
@@ -96,12 +99,15 @@ const useWishContext = () => {
     }, []);
     const clearWishCache = useCallback(() => {
         wishContext.setWishes(undefined);
+        wishContext.setPage(undefined);
         wishContext.setCurrentWish(undefined);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return {
         wishes,
+        currentPage: page?.currentPage,
+        totalPageCount: page?.totalPageCount,
         currentWish,
         getWishes,
         getCurrentWish,

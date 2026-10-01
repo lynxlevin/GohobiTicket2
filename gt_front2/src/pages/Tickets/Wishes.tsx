@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Button, Card, CardActions, CardContent, CircularProgress, Container, Grid, IconButton, Stack, Typography } from '@mui/material';
+import { Button, Card, CardActions, CardContent, CircularProgress, Container, Grid, IconButton, Pagination, Stack, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
 import useUserRelationContext from '../../hooks/useUserRelationContext';
@@ -14,18 +14,19 @@ import DetailDialog from './DetailDialog';
 import useUserContext from '../../hooks/useUserContext';
 import { IWish } from '../../types/ticket';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import { IUserRelation } from '../../types/user_relation';
 import ReplyDialog from './ReplyDialog';
 import ReactionsDialog from './ReactionsDialog';
 import useWishContext from '../../hooks/useWishContext';
+import useGlobalErrorContext from '../../hooks/useGlobalErrorContext';
 
 const Wishes = () => {
-    const [searchParams] = useSearchParams();
-    const { wishes, getWishes } = useWishContext();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const { wishes, getWishes, currentPage, totalPageCount } = useWishContext();
     const { me, getMe } = useUserContext();
     const { getUserRelations, userRelations } = useUserRelationContext();
     const { userRelationId } = usePagePath();
+    const { pushGlobalError, removeGlobalErrors } = useGlobalErrorContext();
     const selectedWishRef = useRef<HTMLDivElement | null>(null);
 
     const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
@@ -40,10 +41,20 @@ const Wishes = () => {
 
     useEffect(() => {
         if (currentRelation === undefined) return;
-        if (wishes !== undefined) return;
-        getWishes(currentRelation.id);
+        const targetPage = Number(searchParams.get('page') ?? 1);
+        if (isNaN(targetPage) || targetPage < 1 || !Number.isInteger(targetPage)) {
+            pushGlobalError({
+                message: 'URLクエリのpageは自然数にしてください。',
+                componentName: 'Wishes page',
+                methodName: 'useEffect',
+            });
+            return;
+        }
+        removeGlobalErrors({ componentName: 'Wishes page' });
+        if (currentPage !== undefined && currentPage === targetPage) return;
+        getWishes(currentRelation.id, targetPage);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentRelation, wishes]);
+    }, [currentPage, currentRelation, searchParams]);
 
     useEffect(() => {
         if (wishes === undefined) return;
@@ -61,51 +72,67 @@ const Wishes = () => {
             ) : (
                 <main>
                     <Container sx={{ py: 8 }} maxWidth="md">
+                        {totalPageCount === undefined ? (
+                            <CircularProgress />
+                        ) : (
+                            <Pagination
+                                count={totalPageCount}
+                                page={currentPage}
+                                onChange={(_event, value) =>
+                                    setSearchParams(searchParams => {
+                                        searchParams.set('page', String(value));
+                                        return searchParams;
+                                    })
+                                }
+                                sx={{ py: 1 }}
+                            />
+                        )}
                         {wishes && (
                             <Grid container spacing={2}>
                                 {wishes.map(wish => {
+                                    const isSelected = searchParams.get('wishId') === wish.id;
                                     return (
                                         <WishItem
                                             key={wish.id}
                                             wish={wish}
                                             currentRelation={currentRelation}
-                                            selectedRef={searchParams.get('wishId') === wish.id ? selectedWishRef : undefined}
+                                            isSelected={isSelected}
+                                            selectedRef={isSelected ? selectedWishRef : undefined}
                                         />
                                     );
                                 })}
                             </Grid>
                         )}
+                        {totalPageCount === undefined ? (
+                            <CircularProgress />
+                        ) : (
+                            <Pagination
+                                count={totalPageCount}
+                                page={currentPage}
+                                onChange={(_event, value) =>
+                                    setSearchParams(searchParams => {
+                                        searchParams.set('page', String(value));
+                                        return searchParams;
+                                    })
+                                }
+                                sx={{ py: 1 }}
+                            />
+                        )}
                     </Container>
-
-                    <ToTopButton onClick={() => window.scroll({ top: 0, behavior: 'smooth' })}>
-                        <KeyboardDoubleArrowUpIcon />
-                    </ToTopButton>
                 </main>
             )}
         </>
     );
 };
 
-const ToTopButton = styled(IconButton)`
-    font-size: 30px;
-    background: white !important;
-    border-radius: 999px;
-    position: fixed;
-    right: 16px;
-    bottom: 66px;
-    border: 2px solid #ddd;
-    width: 40px;
-    height: 40px;
-    z-index: 100;
-`;
-
 interface WishItemProps {
     wish: IWish;
     currentRelation: IUserRelation;
+    isSelected: boolean;
     selectedRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
-const WishItem = ({ wish, currentRelation, selectedRef }: WishItemProps) => {
+const WishItem = ({ wish, currentRelation, isSelected, selectedRef }: WishItemProps) => {
     const [openedDialog, setOpenedDialog] = useState<'Detail' | 'Reply' | 'Reaction'>();
     const [, setSearchParams] = useSearchParams();
     const { me } = useUserContext();
@@ -125,7 +152,7 @@ const WishItem = ({ wish, currentRelation, selectedRef }: WishItemProps) => {
 
     return (
         <StyledGrid item xs={12} sm={6} md={4} ref={selectedRef}>
-            <Card className="card">
+            <Card className={`card${isSelected ? ' card-selected' : ''}`}>
                 <CardContent>
                     <Stack direction="row" justifyContent="space-between">
                         {me !== undefined && (
@@ -159,7 +186,10 @@ const WishItem = ({ wish, currentRelation, selectedRef }: WishItemProps) => {
                             <IconButton
                                 size="small"
                                 onClick={() => {
-                                    setSearchParams({ wishId: wish.id });
+                                    setSearchParams(searchParams => {
+                                        searchParams.set('wishId', wish.id);
+                                        return searchParams;
+                                    });
                                     setOpenedDialog('Reaction');
                                 }}
                             >
@@ -171,7 +201,10 @@ const WishItem = ({ wish, currentRelation, selectedRef }: WishItemProps) => {
                         <IconButton
                             size="small"
                             onClick={() => {
-                                setSearchParams({ wishId: wish.id });
+                                setSearchParams(searchParams => {
+                                    searchParams.set('wishId', wish.id);
+                                    return searchParams;
+                                });
                                 setOpenedDialog('Reply');
                             }}
                         >
@@ -204,6 +237,9 @@ const StyledGrid = styled(Grid)`
         display: flex;
         flex-direction: column;
         position: relative;
+    }
+    .card-selected {
+        border: 1px solid yellow;
     }
 
     .from-name {
