@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react';
 import UseDialog from './UseDialog';
 import { ITicket } from '../../types/ticket';
 import { UserRelationAPI } from '../../apis/UserRelationAPI';
+import { IUserRelation } from '../../types/user_relation';
 
 interface UseTicketDialogProps {
     onClose: () => void;
-    userRelationId: number | null;
+    currentUserRelation: IUserRelation;
 }
 
-const UseTicketDialog = ({ onClose, userRelationId }: UseTicketDialogProps) => {
+const UseTicketDialog = ({ onClose, currentUserRelation }: UseTicketDialogProps) => {
     const [openedDialog, setOpenedDialog] = useState<'UseOldestNormal' | 'UseOldestSpecial'>();
     const [lastAvailableNormalTicket, setLastAvailableNormalTicket] = useState<ITicket | null>();
     const [lastAvailableSpecialTicket, setLastAvailableSpecialTicket] = useState<ITicket | null>();
@@ -17,19 +18,26 @@ const UseTicketDialog = ({ onClose, userRelationId }: UseTicketDialogProps) => {
     const getDialog = () => {
         switch (openedDialog) {
             case 'UseOldestNormal':
-                return !!lastAvailableNormalTicket ? <UseDialog onClose={onClose} ticket={lastAvailableNormalTicket} /> : <></>;
+                return !!lastAvailableNormalTicket ? (
+                    <UseDialog onClose={onClose} ticket={lastAvailableNormalTicket} currentUserRelation={currentUserRelation} />
+                ) : (
+                    <></>
+                );
             case 'UseOldestSpecial':
-                return !!lastAvailableSpecialTicket ? <UseDialog onClose={onClose} ticket={lastAvailableSpecialTicket} /> : <></>;
+                return !!lastAvailableSpecialTicket ? (
+                    <UseDialog onClose={onClose} ticket={lastAvailableSpecialTicket} currentUserRelation={currentUserRelation} />
+                ) : (
+                    <></>
+                );
         }
     };
 
     useEffect(() => {
-        if (userRelationId === null) return;
-        UserRelationAPI.availableTickets({ userRelationId }).then(res => {
+        UserRelationAPI.availableTickets({ userRelationId: currentUserRelation.id }).then(res => {
             setLastAvailableNormalTicket(res.data.oldest.normal);
             setLastAvailableSpecialTicket(res.data.oldest.special);
         });
-    }, [userRelationId]);
+    }, [currentUserRelation]);
     return (
         <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>

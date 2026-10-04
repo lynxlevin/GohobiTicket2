@@ -24,6 +24,7 @@ import { WishProvider } from './contexts/wish-context';
 import { GlobalErrorProvider } from './contexts/global-error-context';
 import useGlobalErrorContext from './hooks/useGlobalErrorContext';
 import { Snackbar } from '@mui/material';
+import UserRelationParent from './pages/Tickets/UserRelationParent';
 
 const theme = createTheme({
     palette: {
@@ -73,13 +74,15 @@ const Router = () => {
             <Routes>
                 <Route path="/" element={<Login />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/user_relations/:userRelationId/receiving_tickets" element={<Tickets relationKind="Receiving" />} />
-                <Route path="/user_relations/:userRelationId/giving_tickets" element={<Tickets relationKind="Giving" />} />
-                <Route path="/user_relations/:userRelationId/wishes" element={<Wishes />} />
-                <Route path="/user_relations/:userRelationId/wishes/:wishId" element={<Wish />} />
-                <Route path="/user_relations/:userRelationId/diaries" element={<Diaries />} />
-                <Route path="/user_relations/:userRelationId/search" element={<Search />} />
-                <Route path="/user_relations/:userRelationId/diary_tags" element={<DiaryTags />} />
+                <Route path="/user_relations/:userRelationId" element={<UserRelationParent />}>
+                    <Route path="receiving_tickets" element={<Tickets relationKind="Receiving" />} />
+                    <Route path="giving_tickets" element={<Tickets relationKind="Giving" />} />
+                    <Route path="wishes" element={<Wishes />} />
+                    <Route path="wishes/:wishId" element={<Wish />} />
+                    <Route path="diaries" element={<Diaries />} />
+                    <Route path="diary_tags" element={<DiaryTags />} />
+                    <Route path="search" element={<Search />} />
+                </Route>
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/settings/notifications" element={<NotificationSettings />} />
             </Routes>

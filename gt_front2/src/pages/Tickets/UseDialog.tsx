@@ -2,25 +2,23 @@ import { Button, Dialog, DialogActions, DialogContent, Divider, TextField, Typog
 import { format } from 'date-fns';
 import { useState } from 'react';
 import useTicketContext from '../../hooks/useTicketContext';
-import useUserRelationContext from '../../hooks/useUserRelationContext';
 import { ITicket } from '../../types/ticket';
+import { IUserRelation } from '../../types/user_relation';
 
 interface UseDialogProps {
     onClose: () => void;
     ticket: ITicket;
+    currentUserRelation: IUserRelation;
 }
 
 const UseDialog = (props: UseDialogProps) => {
-    const { onClose, ticket } = props;
+    const { onClose, ticket, currentUserRelation } = props;
     const [useDescription, setUseDescription] = useState('');
     const [status, setStatus] = useState<'Unused' | 'Used' | 'UsedButNotSent'>('Unused');
 
-    const { userRelations } = useUserRelationContext();
     const { consumeTicket } = useTicketContext();
 
-    const currentRelation = userRelations?.find(relation => Number(relation.id) === ticket.user_relation_id);
     const handleSubmit = async () => {
-        if (currentRelation === undefined) return;
         consumeTicket(ticket.id, useDescription)
             .then(webPushResult => {
                 switch (webPushResult) {
@@ -64,9 +62,9 @@ const UseDialog = (props: UseDialogProps) => {
         <Dialog open={true} onClose={onClose} fullWidth>
             <DialogContent>
                 <Typography fontWeight={600} mt={2} gutterBottom>
-                    {status === 'Used' && `🎉${currentRelation?.related_username}さんにおねがいメッセージを送りました。`}
+                    {status === 'Used' && `🎉${currentUserRelation.related_username}さんにおねがいメッセージを送りました。`}
                     {status === 'UsedButNotSent' &&
-                        `${currentRelation?.related_username}さんは通知機能をオンにしていません。チケットを使ったことを伝えましょう。`}
+                        `${currentUserRelation.related_username}さんは通知機能をオンにしていません。チケットを使ったことを伝えましょう。`}
                 </Typography>
                 <Divider />
                 <Typography fontWeight={600} mt={2} gutterBottom>

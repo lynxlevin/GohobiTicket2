@@ -2,8 +2,6 @@ import styled from '@emotion/styled';
 import { Button, Card, CardActions, CardContent, CircularProgress, Container, Grid, IconButton, Pagination, Stack, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
-import useUserRelationContext from '../../hooks/useUserRelationContext';
-import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
 import { format } from 'date-fns';
 import AddReactionOutlinedIcon from '@mui/icons-material/AddReactionOutlined';
@@ -11,36 +9,22 @@ import InfoIcon from '@mui/icons-material/Info';
 import ReplyIcon from '@mui/icons-material/Reply';
 import SpecialStamp from './SpecialStamp';
 import DetailDialog from './DetailDialog';
-import useUserContext from '../../hooks/useUserContext';
 import { IWish } from '../../types/ticket';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { IUserRelation } from '../../types/user_relation';
 import ReplyDialog from './ReplyDialog';
 import ReactionsDialog from './ReactionsDialog';
 import useWishContext from '../../hooks/useWishContext';
 import useGlobalErrorContext from '../../hooks/useGlobalErrorContext';
+import useCurrentUserRelationContext from '../../hooks/useCurrentUserRelationContext';
 
 const Wishes = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { wishes, getWishes, currentPage, totalPageCount } = useWishContext();
-    const { me, getMe } = useUserContext();
-    const { getUserRelations, userRelations } = useUserRelationContext();
-    const { userRelationId } = usePagePath();
+    const { currentUserRelation } = useCurrentUserRelationContext();
     const { pushGlobalError, removeGlobalErrors } = useGlobalErrorContext();
     const selectedWishRef = useRef<HTMLDivElement | null>(null);
 
-    const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
-
     useEffect(() => {
-        if (me === undefined) getMe();
-    }, [getMe, me]);
-
-    useEffect(() => {
-        if (userRelations === undefined) getUserRelations();
-    }, [getUserRelations, userRelations]);
-
-    useEffect(() => {
-        if (currentRelation === undefined) return;
         const targetPage = Number(searchParams.get('page') ?? 1);
         if (isNaN(targetPage) || targetPage < 1 || !Number.isInteger(targetPage)) {
             pushGlobalError({
@@ -52,9 +36,9 @@ const Wishes = () => {
         }
         removeGlobalErrors({ componentName: 'Wishes page' });
         if (currentPage !== undefined && currentPage === targetPage) return;
-        getWishes(currentRelation.id, targetPage);
+        getWishes(currentUserRelation.id, targetPage);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentPage, currentRelation, searchParams]);
+    }, [currentPage, currentUserRelation, searchParams]);
 
     useEffect(() => {
         if (wishes === undefined) return;
@@ -65,88 +49,75 @@ const Wishes = () => {
 
     return (
         <>
-            <CommonAppBar currentRelation={currentRelation} />
+            <CommonAppBar currentRelation={currentUserRelation} />
             <BottomNav />
-            {currentRelation === undefined ? (
-                <CircularProgress />
-            ) : (
-                <main>
-                    <Container sx={{ py: 8 }} maxWidth="md">
-                        {totalPageCount === undefined ? (
-                            <CircularProgress />
-                        ) : (
-                            <Pagination
-                                count={totalPageCount}
-                                page={currentPage}
-                                onChange={(_event, value) =>
-                                    setSearchParams(searchParams => {
-                                        searchParams.set('page', String(value));
-                                        return searchParams;
-                                    })
-                                }
-                                sx={{ py: 1 }}
-                            />
-                        )}
-                        {wishes && (
-                            <Grid container spacing={2}>
-                                {wishes.map(wish => {
-                                    const isSelected = searchParams.get('wishId') === wish.id;
-                                    return (
-                                        <WishItem
-                                            key={wish.id}
-                                            wish={wish}
-                                            currentRelation={currentRelation}
-                                            isSelected={isSelected}
-                                            selectedRef={isSelected ? selectedWishRef : undefined}
-                                        />
-                                    );
-                                })}
-                            </Grid>
-                        )}
-                        {totalPageCount === undefined ? (
-                            <CircularProgress />
-                        ) : (
-                            <Pagination
-                                count={totalPageCount}
-                                page={currentPage}
-                                onChange={(_event, value) =>
-                                    setSearchParams(searchParams => {
-                                        searchParams.set('page', String(value));
-                                        return searchParams;
-                                    })
-                                }
-                                sx={{ py: 1 }}
-                            />
-                        )}
-                    </Container>
-                </main>
-            )}
+            <main>
+                <Container sx={{ py: 8 }} maxWidth="md">
+                    {totalPageCount === undefined ? (
+                        <CircularProgress />
+                    ) : (
+                        <Pagination
+                            count={totalPageCount}
+                            page={currentPage}
+                            onChange={(_event, value) =>
+                                setSearchParams(searchParams => {
+                                    searchParams.set('page', String(value));
+                                    return searchParams;
+                                })
+                            }
+                            sx={{ py: 1 }}
+                        />
+                    )}
+                    {wishes && (
+                        <Grid container spacing={2}>
+                            {wishes.map(wish => {
+                                const isSelected = searchParams.get('wishId') === wish.id;
+                                return <WishItem key={wish.id} wish={wish} isSelected={isSelected} selectedRef={isSelected ? selectedWishRef : undefined} />;
+                            })}
+                        </Grid>
+                    )}
+                    {totalPageCount === undefined ? (
+                        <CircularProgress />
+                    ) : (
+                        <Pagination
+                            count={totalPageCount}
+                            page={currentPage}
+                            onChange={(_event, value) =>
+                                setSearchParams(searchParams => {
+                                    searchParams.set('page', String(value));
+                                    return searchParams;
+                                })
+                            }
+                            sx={{ py: 1 }}
+                        />
+                    )}
+                </Container>
+            </main>
         </>
     );
 };
 
 interface WishItemProps {
     wish: IWish;
-    currentRelation: IUserRelation;
     isSelected: boolean;
     selectedRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
-const WishItem = ({ wish, currentRelation, isSelected, selectedRef }: WishItemProps) => {
+const WishItem = ({ wish, isSelected, selectedRef }: WishItemProps) => {
     const [openedDialog, setOpenedDialog] = useState<'Detail' | 'Reply' | 'Reaction'>();
     const [, setSearchParams] = useSearchParams();
-    const { me } = useUserContext();
+    const { me, currentUserRelation } = useCurrentUserRelationContext();
     const { updateReactions } = useWishContext();
     const navigate = useNavigate();
 
     const getDialog = () => {
         switch (openedDialog) {
             case 'Detail':
-                return <DetailDialog ticket={wish.ticket} onClose={() => setOpenedDialog(undefined)} relatedUserName={currentRelation.related_username} />;
+                return <DetailDialog ticket={wish.ticket} onClose={() => setOpenedDialog(undefined)} relatedUserName={currentUserRelation.related_username} />;
             case 'Reply':
-                return <ReplyDialog wish={wish} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
+                return <ReplyDialog wish={wish} currentRelation={currentUserRelation} onClose={() => setOpenedDialog(undefined)} />;
             case 'Reaction':
-                return <ReactionsDialog wish={wish} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
+                return <ReactionsDialog wish={wish} currentRelation={currentUserRelation} onClose={() => setOpenedDialog(undefined)} />;
         }
     };
 
@@ -157,7 +128,7 @@ const WishItem = ({ wish, currentRelation, isSelected, selectedRef }: WishItemPr
                     <Stack direction="row" justifyContent="space-between">
                         {me !== undefined && (
                             <Typography className={`from-name${wish.ticket.is_special ? ' special-ticket' : ''}`}>
-                                {wish.ticket.giving_user_id === me.id ? currentRelation.related_username : me.username}の
+                                {wish.ticket.giving_user_id === me.id ? currentUserRelation.related_username : me.username}の
                                 {wish.ticket.is_special ? '特別な' : ''}お願い
                             </Typography>
                         )}
@@ -175,7 +146,7 @@ const WishItem = ({ wish, currentRelation, isSelected, selectedRef }: WishItemPr
                                     if (me === undefined || wish.ticket.giving_user_id !== me.id) return;
                                     const reactions = Array.from(wish.reactions);
                                     reactions.splice(idx, 1);
-                                    updateReactions(currentRelation.id, wish.id, reactions.join('')).catch(_ => {});
+                                    updateReactions(currentUserRelation.id, wish.id, reactions.join('')).catch(_ => {});
                                 }}
                                 className="reaction"
                             >
@@ -220,7 +191,7 @@ const WishItem = ({ wish, currentRelation, isSelected, selectedRef }: WishItemPr
                     <Button
                         className="open-thread-button"
                         variant="outlined"
-                        onClick={() => navigate(`/user_relations/${currentRelation.id}/wishes/${wish.id}`)}
+                        onClick={() => navigate(`/user_relations/${currentUserRelation.id}/wishes/${wish.id}`)}
                     >
                         スレッドを開く
                     </Button>
