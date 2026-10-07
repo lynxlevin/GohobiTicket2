@@ -4,9 +4,7 @@ import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
 import useUserContext from '../../hooks/useUserContext';
 import { Outlet } from 'react-router-dom';
-import { IUserRelation } from '../../types/user_relation';
 import { CurrentUserRelationContext } from '../../contexts/current-user-relation-context';
-import { IUser } from '../../types/user';
 
 const UserRelationParent = () => {
     const { me, getMe } = useUserContext();
@@ -26,14 +24,8 @@ const UserRelationParent = () => {
     return currentUserRelation === undefined || userRelations === undefined || me === undefined ? (
         <CircularProgress />
     ) : (
-        <UserRelationParentInner me={me} currentUserRelation={currentUserRelation} />
-    );
-};
-
-const UserRelationParentInner = ({ me, currentUserRelation }: { me: IUser; currentUserRelation: IUserRelation }) => {
-    return (
         <>
-            <CurrentUserRelationContext.Provider value={{ me, currentUserRelation }}>
+            <CurrentUserRelationContext.Provider value={{ me, currentUserRelation, userRelations }}>
                 <Outlet />
             </CurrentUserRelationContext.Provider>
         </>

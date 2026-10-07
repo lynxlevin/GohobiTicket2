@@ -29,7 +29,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
 
     const { givingTicketsByMonth, receivingTicketsByMonth, getGivingTicketsByMonth, getReceivingTicketsByMonth } = useTicketContext();
     const { yearMonth, setYearMonth, thisMonth, getTabYearMonths, getFirstDate } = useYearMonthContext();
-    const { currentUserRelation } = useCurrentUserRelationContext();
+    const { currentUserRelation, userRelations } = useCurrentUserRelationContext();
 
     const imageFile = relationKind === 'Receiving' ? currentUserRelation.receiving_ticket_img : currentUserRelation.giving_ticket_img;
 
@@ -98,7 +98,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
     return (
         <>
             <CommonAppBar currentRelation={currentUserRelation} leftItem={ticketImage()} />
-            <BottomNav />
+            <BottomNav userRelations={userRelations} />
             <main>
                 <Container maxWidth="sm" sx={{ py: 8 }}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center" height="40px">

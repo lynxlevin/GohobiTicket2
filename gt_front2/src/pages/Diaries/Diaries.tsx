@@ -20,7 +20,7 @@ const Diaries = () => {
     const firstUnreadDiaryRef = useRef<HTMLDivElement | null>(null);
     const [openedDialog, setOpenedDialog] = useState<'WriteDiary'>();
 
-    const { currentUserRelation } = useCurrentUserRelationContext();
+    const { currentUserRelation, userRelations } = useCurrentUserRelationContext();
     const { unreadDiaries, diariesByMonth, getDiariesByMonth } = useDiaryContext();
     const { diaryTags, getDiaryTags } = useDiaryTagContext();
     const { yearMonth, setYearMonth, thisMonth, getTabYearMonths, getFirstDate } = useYearMonthContext();
@@ -52,7 +52,7 @@ const Diaries = () => {
     return (
         <>
             <CommonAppBar currentRelation={currentUserRelation} />
-            <BottomNav />
+            <BottomNav userRelations={userRelations} />
             <main>
                 <Container maxWidth="sm" sx={{ py: 8 }}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center" height="40px">

@@ -20,7 +20,7 @@ import useCurrentUserRelationContext from '../../hooks/useCurrentUserRelationCon
 const Wishes = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { wishes, getWishes, currentPage, totalPageCount } = useWishContext();
-    const { currentUserRelation } = useCurrentUserRelationContext();
+    const { currentUserRelation, userRelations } = useCurrentUserRelationContext();
     const { pushGlobalError, removeGlobalErrors } = useGlobalErrorContext();
     const selectedWishRef = useRef<HTMLDivElement | null>(null);
 
@@ -50,7 +50,7 @@ const Wishes = () => {
     return (
         <>
             <CommonAppBar currentRelation={currentUserRelation} />
-            <BottomNav />
+            <BottomNav userRelations={userRelations} />
             <main>
                 <Container sx={{ py: 8 }} maxWidth="md">
                     {totalPageCount === undefined ? (

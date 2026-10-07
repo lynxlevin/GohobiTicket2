@@ -7,12 +7,20 @@ import CommonAppBar from '../../components/CommonAppBar';
 import BottomNav from '../../components/BottomNav';
 import { useNavigate } from 'react-router-dom';
 import useUserAPI from '../../hooks/useUserAPI';
+import { useEffect } from 'react';
+import useUserRelationContext from '../../hooks/useUserRelationContext';
 
 const LIST_ITEM_MARGIN = 1.5;
 
 const Settings = () => {
     const { handleLogout } = useUserAPI();
+    const { userRelations, getUserRelations } = useUserRelationContext();
 
+    useEffect(() => {
+        if (userRelations !== undefined) return;
+        getUserRelations();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userRelations]);
     return (
         <Container maxWidth="sm">
             <CommonAppBar />
@@ -26,7 +34,7 @@ const Settings = () => {
                     <ButtonListItem onClick={handleLogout} icon={<LogoutIcon />} name="ログアウト" />
                 </List>
             </Box>
-            <BottomNav />
+            {userRelations !== undefined && <BottomNav userRelations={userRelations} />}
         </Container>
     );
 };

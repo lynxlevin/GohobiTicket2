@@ -6,10 +6,12 @@ const useCurrentUserRelationContext = () => {
 
     const me = currentUserRelationContext.me;
     const currentUserRelation = currentUserRelationContext.currentUserRelation;
+    const userRelations = currentUserRelationContext.userRelations;
 
     return {
         me,
         currentUserRelation,
+        userRelations,
     };
 };
 

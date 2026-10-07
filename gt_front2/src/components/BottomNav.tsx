@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import usePagePath from '../hooks/usePagePath';
 import BaseBottomNav, { type NavItem } from './BaseBottomNav';
-import useUserRelationContext from '../hooks/useUserRelationContext';
 import useWishContext from '../hooks/useWishContext';
+import { IUserRelation } from '../types/user_relation';
 
-const BottomNav = () => {
+interface BottomNavProps {
+    userRelations: IUserRelation[];
+}
+
+const BottomNav = ({ userRelations }: BottomNavProps) => {
     const { userRelationId: pathUserRelationId, pagePath } = usePagePath();
-    const { userRelations } = useUserRelationContext();
     const { clearCurrentWish } = useWishContext();
 
     const [selected, setSelected] = useState<NavItem>();

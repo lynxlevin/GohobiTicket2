@@ -7,6 +7,7 @@ import { WebPushSubscriptionFromServer } from '../../types/web_push';
 import CommonAppBar from '../../components/CommonAppBar';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import useUserRelationContext from '../../hooks/useUserRelationContext';
 
 type SubscriptionStatus = 'NoSub' | 'FrontOnly' | 'BackOnly' | 'Subscribed';
 
@@ -17,6 +18,7 @@ const NotificationSettings = () => {
     const [subscriptionFromServer, setSubscriptionFromServer] = useState<WebPushSubscriptionFromServer | null>();
     const { getPushManager, subscribeToWebPush, unsubscribeFromWebPush } = useServiceWorker();
     const navigate = useNavigate();
+    const { userRelations, getUserRelations } = useUserRelationContext();
 
     const subscribe = () => {
         if (subscriptionStatus !== 'NoSub') return;
@@ -194,6 +196,11 @@ const NotificationSettings = () => {
         let match = Object.entries(uaRegex).find(([k, v]) => navigator.userAgent.match(v));
         setDeviceName(match === undefined ? '' : match[0]);
     }, []);
+    useEffect(() => {
+        if (userRelations !== undefined) return;
+        getUserRelations();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userRelations]);
     return (
         <>
             <CommonAppBar
@@ -203,7 +210,7 @@ const NotificationSettings = () => {
                     </IconButton>
                 }
             />
-            <BottomNav />
+            {userRelations !== undefined && <BottomNav userRelations={userRelations} />}
             <Box pt={12}>{getSubscriptionStatusView()}</Box>
             {subscriptionStatus !== undefined && ['Subscribed', 'BackOnly'].includes(subscriptionStatus) && (
                 <>

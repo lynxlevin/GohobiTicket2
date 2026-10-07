@@ -18,7 +18,7 @@ import useCurrentUserRelationContext from '../../hooks/useCurrentUserRelationCon
 const Wish = () => {
     const [openedDialog, setOpenedDialog] = useState<'Reply' | 'Reaction'>();
     const { currentWish: wish, getCurrentWish, clearCurrentWish, updateReactions } = useWishContext();
-    const { me, currentUserRelation } = useCurrentUserRelationContext();
+    const { me, currentUserRelation, userRelations } = useCurrentUserRelationContext();
     const { wishId } = usePagePath();
     const navigate = useNavigate();
 
@@ -68,7 +68,7 @@ const Wish = () => {
                     )
                 }
             />
-            <BottomNav />
+            <BottomNav userRelations={userRelations} />
             {wish === undefined ? (
                 <CircularProgress />
             ) : (
