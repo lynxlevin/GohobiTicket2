@@ -5,7 +5,6 @@ import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
 import { format } from 'date-fns';
 import SpecialStamp from './SpecialStamp';
-import useUserContext from '../../hooks/useUserContext';
 import { IUserRelation } from '../../types/user_relation';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
@@ -14,11 +13,13 @@ import useWishContext from '../../hooks/useWishContext';
 import AddReactionOutlinedIcon from '@mui/icons-material/AddReactionOutlined';
 import ReactionsDialog, { IWishReplyWithWishId } from './ReactionsDialog';
 import useCurrentUserRelationContext from '../../hooks/useCurrentUserRelationContext';
+import useCurrentUserContext from '../../hooks/useCurrentUserContext';
 
 const Wish = () => {
     const [openedDialog, setOpenedDialog] = useState<'Reply' | 'Reaction'>();
     const { currentWish: wish, getCurrentWish, clearCurrentWish, updateReactions } = useWishContext();
-    const { me, currentUserRelation, userRelations } = useCurrentUserRelationContext();
+    const { currentUserRelation } = useCurrentUserRelationContext();
+    const { me, userRelations } = useCurrentUserContext();
     const { wishId } = usePagePath();
     const navigate = useNavigate();
 
@@ -52,6 +53,7 @@ const Wish = () => {
     return (
         <>
             <CommonAppBar
+                userRelations={userRelations}
                 currentRelation={currentUserRelation}
                 leftItem={
                     wish ? (
@@ -168,9 +170,9 @@ interface ReplyProps {
 
 const Reply = ({ reply, currentUserRelation, hideDate }: ReplyProps) => {
     const [openedDialog, setOpenedDialog] = useState<'Reaction'>();
-    const { me } = useUserContext();
+    const { me } = useCurrentUserContext();
     const { updateReplyReactions } = useWishContext();
-    const posterName = reply.posted_by_id === me?.id ? me.username : currentUserRelation.related_username;
+    const posterName = reply.posted_by_id === me.id ? me.username : currentUserRelation.related_username;
 
     const getDialog = () => {
         switch (openedDialog) {
@@ -212,7 +214,7 @@ const Reply = ({ reply, currentUserRelation, hideDate }: ReplyProps) => {
                                 key={`${reply.id}-reaction-${idx}`}
                                 size="small"
                                 onClick={() => {
-                                    if (me === undefined || reply.posted_by_id === me.id) return;
+                                    if (reply.posted_by_id === me.id) return;
                                     const reactions = Array.from(reply.reactions);
                                     reactions.splice(idx, 1);
                                     updateReplyReactions(currentUserRelation.id, reply.id, reactions.join(''), reply.wishId).catch(_ => {});

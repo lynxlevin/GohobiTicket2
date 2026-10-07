@@ -16,6 +16,7 @@ import CreateTicketDialog from './CreateTicketDialog';
 import { addMonths, format, parse, subMonths } from 'date-fns';
 import useYearMonthContext from '../../hooks/useYearMonthContext';
 import useCurrentUserRelationContext from '../../hooks/useCurrentUserRelationContext';
+import useCurrentUserContext from '../../hooks/useCurrentUserContext';
 
 interface TicketsProps {
     relationKind: RelationKind;
@@ -29,7 +30,8 @@ const Tickets = ({ relationKind }: TicketsProps) => {
 
     const { givingTicketsByMonth, receivingTicketsByMonth, getGivingTicketsByMonth, getReceivingTicketsByMonth } = useTicketContext();
     const { yearMonth, setYearMonth, thisMonth, getTabYearMonths, getFirstDate } = useYearMonthContext();
-    const { currentUserRelation, userRelations } = useCurrentUserRelationContext();
+    const { currentUserRelation } = useCurrentUserRelationContext();
+    const { userRelations } = useCurrentUserContext();
 
     const imageFile = relationKind === 'Receiving' ? currentUserRelation.receiving_ticket_img : currentUserRelation.giving_ticket_img;
 
@@ -97,7 +99,7 @@ const Tickets = ({ relationKind }: TicketsProps) => {
 
     return (
         <>
-            <CommonAppBar currentRelation={currentUserRelation} leftItem={ticketImage()} />
+            <CommonAppBar userRelations={userRelations} currentRelation={currentUserRelation} leftItem={ticketImage()} />
             <BottomNav userRelations={userRelations} />
             <main>
                 <Container maxWidth="sm" sx={{ py: 8 }}>

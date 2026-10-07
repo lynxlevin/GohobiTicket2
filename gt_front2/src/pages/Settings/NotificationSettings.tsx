@@ -7,7 +7,7 @@ import { WebPushSubscriptionFromServer } from '../../types/web_push';
 import CommonAppBar from '../../components/CommonAppBar';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import useUserRelationContext from '../../hooks/useUserRelationContext';
+import useCurrentUserContext from '../../hooks/useCurrentUserContext';
 
 type SubscriptionStatus = 'NoSub' | 'FrontOnly' | 'BackOnly' | 'Subscribed';
 
@@ -18,7 +18,7 @@ const NotificationSettings = () => {
     const [subscriptionFromServer, setSubscriptionFromServer] = useState<WebPushSubscriptionFromServer | null>();
     const { getPushManager, subscribeToWebPush, unsubscribeFromWebPush } = useServiceWorker();
     const navigate = useNavigate();
-    const { userRelations, getUserRelations } = useUserRelationContext();
+    const { userRelations } = useCurrentUserContext();
 
     const subscribe = () => {
         if (subscriptionStatus !== 'NoSub') return;
@@ -196,14 +196,10 @@ const NotificationSettings = () => {
         let match = Object.entries(uaRegex).find(([k, v]) => navigator.userAgent.match(v));
         setDeviceName(match === undefined ? '' : match[0]);
     }, []);
-    useEffect(() => {
-        if (userRelations !== undefined) return;
-        getUserRelations();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [userRelations]);
     return (
         <>
             <CommonAppBar
+                userRelations={userRelations}
                 leftItem={
                     <IconButton onClick={() => navigate('/settings')}>
                         <ArrowBackIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />

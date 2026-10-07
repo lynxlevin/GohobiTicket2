@@ -9,7 +9,6 @@ import { AppBar, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIco
 import { ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useTicketContext from '../hooks/useTicketContext';
-import useUserRelationContext from '../hooks/useUserRelationContext';
 import useDiaryContext from '../hooks/useDiaryContext';
 import useDiaryTagContext from '../hooks/useDiaryTagContext';
 import usePagePath from '../hooks/usePagePath';
@@ -18,15 +17,15 @@ import useWishContext from '../hooks/useWishContext';
 import useGlobalErrorContext from '../hooks/useGlobalErrorContext';
 
 interface CommonAppBarProps {
+    userRelations: IUserRelation[];
     currentRelation?: IUserRelation;
     leftItem?: ReactNode;
 }
 
-const CommonAppBar = ({ currentRelation, leftItem }: CommonAppBarProps) => {
+const CommonAppBar = ({ userRelations, currentRelation, leftItem }: CommonAppBarProps) => {
     const [topBarDrawerOpen, setTopBarDrawerOpen] = useState(false);
     const navigate = useNavigate();
 
-    const { userRelations } = useUserRelationContext();
     const { clearTicketCache } = useTicketContext();
     const { clearDiaryCache } = useDiaryContext();
     const { clearDiaryTagCache } = useDiaryTagContext();
@@ -34,7 +33,7 @@ const CommonAppBar = ({ currentRelation, leftItem }: CommonAppBarProps) => {
     const { clearGlobalErrorsCache } = useGlobalErrorContext();
     const { pagePath } = usePagePath();
 
-    const otherRelations = userRelations?.filter((relation, _index, _self) => relation.related_username !== currentRelation?.related_username);
+    const otherRelations = userRelations.filter((relation, _index, _self) => relation.related_username !== currentRelation?.related_username);
 
     const clearCache = () => {
         clearTicketCache();

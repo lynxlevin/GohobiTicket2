@@ -15,12 +15,14 @@ import { addMonths, format, parse, subMonths } from 'date-fns';
 import CreateDiaryDialog from './CreateDiaryDialog';
 import useYearMonthContext from '../../hooks/useYearMonthContext';
 import useCurrentUserRelationContext from '../../hooks/useCurrentUserRelationContext';
+import useCurrentUserContext from '../../hooks/useCurrentUserContext';
 
 const Diaries = () => {
     const firstUnreadDiaryRef = useRef<HTMLDivElement | null>(null);
     const [openedDialog, setOpenedDialog] = useState<'WriteDiary'>();
 
-    const { currentUserRelation, userRelations } = useCurrentUserRelationContext();
+    const { currentUserRelation } = useCurrentUserRelationContext();
+    const { userRelations } = useCurrentUserContext();
     const { unreadDiaries, diariesByMonth, getDiariesByMonth } = useDiaryContext();
     const { diaryTags, getDiaryTags } = useDiaryTagContext();
     const { yearMonth, setYearMonth, thisMonth, getTabYearMonths, getFirstDate } = useYearMonthContext();
@@ -51,7 +53,7 @@ const Diaries = () => {
 
     return (
         <>
-            <CommonAppBar currentRelation={currentUserRelation} />
+            <CommonAppBar userRelations={userRelations} currentRelation={currentUserRelation} />
             <BottomNav userRelations={userRelations} />
             <main>
                 <Container maxWidth="sm" sx={{ py: 8 }}>

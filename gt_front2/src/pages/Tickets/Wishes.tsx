@@ -16,14 +16,17 @@ import ReactionsDialog from './ReactionsDialog';
 import useWishContext from '../../hooks/useWishContext';
 import useGlobalErrorContext from '../../hooks/useGlobalErrorContext';
 import useCurrentUserRelationContext from '../../hooks/useCurrentUserRelationContext';
+import useCurrentUserContext from '../../hooks/useCurrentUserContext';
 
 const Wishes = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { wishes, getWishes, currentPage, totalPageCount } = useWishContext();
-    const { currentUserRelation, userRelations } = useCurrentUserRelationContext();
+    const { currentUserRelation } = useCurrentUserRelationContext();
+    const { userRelations } = useCurrentUserContext();
     const { pushGlobalError, removeGlobalErrors } = useGlobalErrorContext();
     const selectedWishRef = useRef<HTMLDivElement | null>(null);
 
+    // MYMEMO: searchParamsのuseEffectをまとめる。それぞれメソッドにして、getWishesの後に処理できるようにしたい
     useEffect(() => {
         const targetPage = Number(searchParams.get('page') ?? 1);
         if (isNaN(targetPage) || targetPage < 1 || !Number.isInteger(targetPage)) {
@@ -49,7 +52,7 @@ const Wishes = () => {
 
     return (
         <>
-            <CommonAppBar currentRelation={currentUserRelation} />
+            <CommonAppBar userRelations={userRelations} currentRelation={currentUserRelation} />
             <BottomNav userRelations={userRelations} />
             <main>
                 <Container sx={{ py: 8 }} maxWidth="md">
@@ -106,14 +109,22 @@ interface WishItemProps {
 const WishItem = ({ wish, isSelected, selectedRef }: WishItemProps) => {
     const [openedDialog, setOpenedDialog] = useState<'Detail' | 'Reply' | 'Reaction'>();
     const [, setSearchParams] = useSearchParams();
-    const { me, currentUserRelation } = useCurrentUserRelationContext();
+    const { currentUserRelation } = useCurrentUserRelationContext();
+    const { me } = useCurrentUserContext();
     const { updateReactions } = useWishContext();
     const navigate = useNavigate();
 
     const getDialog = () => {
         switch (openedDialog) {
             case 'Detail':
-                return <DetailDialog ticket={wish.ticket} onClose={() => setOpenedDialog(undefined)} relatedUserName={currentUserRelation.related_username} />;
+                return (
+                    <DetailDialog
+                        me={me}
+                        ticket={wish.ticket}
+                        onClose={() => setOpenedDialog(undefined)}
+                        relatedUserName={currentUserRelation.related_username}
+                    />
+                );
             case 'Reply':
                 return <ReplyDialog wish={wish} currentRelation={currentUserRelation} onClose={() => setOpenedDialog(undefined)} />;
             case 'Reaction':
