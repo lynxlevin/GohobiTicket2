@@ -19,6 +19,8 @@ import useCurrentUserRelationContext from '../../hooks/useCurrentUserRelationCon
 import useCurrentUserContext from '../../hooks/useCurrentUserContext';
 
 const Wishes = () => {
+    const [focusedWishId, setFocusedWishId] = useState<string | null>(null);
+    const [targetPage, setTargetPage] = useState<number>();
     const [searchParams, setSearchParams] = useSearchParams();
     const { wishes, getWishes, currentPage, totalPageCount } = useWishContext();
     const { currentUserRelation } = useCurrentUserRelationContext();
@@ -26,30 +28,41 @@ const Wishes = () => {
     const { pushGlobalError, removeGlobalErrors } = useGlobalErrorContext();
     const selectedWishRef = useRef<HTMLDivElement | null>(null);
 
-    // MYMEMO: searchParamsのuseEffectをまとめる。それぞれメソッドにして、getWishesの後に処理できるようにしたい
     useEffect(() => {
-        const targetPage = Number(searchParams.get('page') ?? 1);
-        if (isNaN(targetPage) || targetPage < 1 || !Number.isInteger(targetPage)) {
-            pushGlobalError({
-                message: 'URLクエリのpageは自然数にしてください。',
-                componentName: 'Wishes page',
-                methodName: 'useEffect',
-            });
-            return;
+        const isValidPageNumber = (pageQuery: number) => {
+            if (isNaN(pageQuery) || pageQuery < 1 || !Number.isInteger(pageQuery)) {
+                pushGlobalError({
+                    message: 'URLクエリのpageは自然数にしてください。',
+                    componentName: 'Wishes page',
+                    methodName: 'useEffect',
+                });
+                return false;
+            } else {
+                removeGlobalErrors({ componentName: 'Wishes page' });
+                return true;
+            }
+        };
+        const wishId = searchParams.get('wishId');
+        if (focusedWishId !== wishId) setFocusedWishId(wishId);
+        const pageQuery = Number(searchParams.get('page') ?? 1);
+        if (isValidPageNumber(pageQuery)) {
+            if (pageQuery !== targetPage) setTargetPage(pageQuery);
         }
-        removeGlobalErrors({ componentName: 'Wishes page' });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams]);
+    useEffect(() => {
+        if (targetPage === undefined) return;
         if (currentPage !== undefined && currentPage === targetPage) return;
         getWishes(currentUserRelation.id, targetPage);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentPage, currentUserRelation, searchParams]);
-
+    }, [currentPage, currentUserRelation.id, targetPage]);
     useEffect(() => {
         if (wishes === undefined) return;
-        if (searchParams.get('wishId') === null) return;
+        if (focusedWishId === null) return;
         if (selectedWishRef.current === null) return;
         window.scroll({ top: selectedWishRef.current.offsetTop - 50 });
-    }, [searchParams, wishes]);
-
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [wishes, focusedWishId]);
     return (
         <>
             <CommonAppBar userRelations={userRelations} currentRelation={currentUserRelation} />
@@ -74,7 +87,7 @@ const Wishes = () => {
                     {wishes && (
                         <Grid container spacing={2}>
                             {wishes.map(wish => {
-                                const isSelected = searchParams.get('wishId') === wish.id;
+                                const isSelected = focusedWishId === wish.id;
                                 return <WishItem key={wish.id} wish={wish} isSelected={isSelected} selectedRef={isSelected ? selectedWishRef : undefined} />;
                             })}
                         </Grid>
