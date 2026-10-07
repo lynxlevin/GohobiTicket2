@@ -1,8 +1,6 @@
-import { AppBar, Box, CircularProgress, Container, Grid, IconButton, InputAdornment, OutlinedInput, Toolbar } from '@mui/material';
+import { AppBar, Box, Container, Grid, IconButton, InputAdornment, OutlinedInput, Toolbar } from '@mui/material';
 import { useEffect, useState } from 'react';
-import useUserRelationContext from '../../hooks/useUserRelationContext';
 import useDiaryTagContext from '../../hooks/useDiaryTagContext';
-import usePagePath from '../../hooks/usePagePath';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -13,13 +11,13 @@ import Diary from '../Diaries/Diary';
 import { UserRelationAPI } from '../../apis/UserRelationAPI';
 import { ITicket } from '../../types/ticket';
 import { IDiary } from '../../types/diary';
+import useCurrentUserRelationContext from '../../hooks/useCurrentUserRelationContext';
 
 const Search = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
-    const { userRelationId } = usePagePath();
-    const { getUserRelations, userRelations } = useUserRelationContext();
     const { diaryTags, getDiaryTags } = useDiaryTagContext();
+    const { currentUserRelation } = useCurrentUserRelationContext();
 
     const [pageQuery, setPageQuery] = useState<NavItem>();
     const [searchText, setSearchText] = useState('');
@@ -27,17 +25,15 @@ const Search = () => {
     const [receivingTickets, setReceivingTickets] = useState<ITicket[]>();
     const [diaries, setDiaries] = useState<IDiary[]>();
 
-    const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
-
     const getContent = () => {
         switch (pageQuery) {
             case 'giving_tickets':
                 return givingTickets?.map(ticket => {
-                    return <Ticket key={ticket.id} ticket={ticket} relationKind="Giving" />;
+                    return <Ticket key={ticket.id} ticket={ticket} relationKind="Giving" currentUserRelation={currentUserRelation} />;
                 });
             case 'receiving_tickets':
                 return receivingTickets?.map(ticket => {
-                    return <Ticket key={ticket.id} ticket={ticket} relationKind="Receiving" />;
+                    return <Ticket key={ticket.id} ticket={ticket} relationKind="Receiving" currentUserRelation={currentUserRelation} />;
                 });
             case 'diaries':
                 return diaries?.map(diary => {
@@ -49,7 +45,7 @@ const Search = () => {
     const submit = () => {
         const text = searchText.trim();
         if (text.length === 0) return;
-        UserRelationAPI.search({ userRelationId: userRelationId!, text }).then(res => {
+        UserRelationAPI.search({ userRelationId: currentUserRelation.id, text }).then(res => {
             const givingTicketsRes = res.data.giving_tickets;
             const receivingTicketsRes = res.data.receiving_tickets;
             const diariesRes = res.data.diaries;
@@ -89,14 +85,8 @@ const Search = () => {
     };
 
     useEffect(() => {
-        if (userRelations === undefined) getUserRelations();
-    }, [getUserRelations, userRelations]);
-
-    useEffect(() => {
-        if (userRelationId === null || !currentRelation) return;
-        if (diaryTags === undefined) getDiaryTags(userRelationId);
-    }, [currentRelation, diaryTags, getDiaryTags, userRelationId]);
-
+        if (diaryTags === undefined) getDiaryTags(currentUserRelation.id);
+    }, [currentUserRelation, diaryTags, getDiaryTags]);
     useEffect(() => {
         const tab = searchParams.get('tab');
         setPageQuery(tab === null ? undefined : (tab as NavItem));
@@ -109,7 +99,7 @@ const Search = () => {
                     <IconButton
                         onClick={() => {
                             window.scroll({ top: 0 });
-                            navigate(`/user_relations/${userRelationId}/${pageQuery ?? 'receiving_tickets'}`);
+                            navigate(`/user_relations/${currentUserRelation.id}/${pageQuery ?? 'receiving_tickets'}`);
                         }}
                         sx={{ color: 'rgba(0,0,0,0.67)' }}
                     >
@@ -143,20 +133,16 @@ const Search = () => {
                 setSelected={setPageQuery}
                 badges={{ givingTickets: givingTickets?.length, receivingTickets: receivingTickets?.length, diaries: diaries?.length }}
             />
-            {userRelationId === null ? (
-                <CircularProgress />
-            ) : (
-                <main>
-                    <Box sx={{ pt: 8 }}>
-                        <Container maxWidth="sm"></Container>
-                    </Box>
-                    <Container sx={{ pt: 2, pb: 8 }} maxWidth="md">
-                        <Grid container spacing={4}>
-                            {getContent()}
-                        </Grid>
-                    </Container>
-                </main>
-            )}
+            <main>
+                <Box sx={{ pt: 8 }}>
+                    <Container maxWidth="sm"></Container>
+                </Box>
+                <Container sx={{ pt: 2, pb: 8 }} maxWidth="md">
+                    <Grid container spacing={4}>
+                        {getContent()}
+                    </Grid>
+                </Container>
+            </main>
         </>
     );
 };

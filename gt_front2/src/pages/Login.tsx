@@ -32,17 +32,17 @@ const Login = () => {
         let path = '';
         switch (toQuery) {
             case 'giving_tickets':
-                path = `/user_relations/${firstRelationId}/giving_tickets`
+                path = `/user_relations/${firstRelationId}/giving_tickets`;
                 break;
             case 'receiving_tickets':
             case null:
-                path = `/user_relations/${firstRelationId}/receiving_tickets`
+                path = `/user_relations/${firstRelationId}/receiving_tickets`;
                 break;
             case 'wishes':
-                path = `/user_relations/${firstRelationId}/wishes`
+                path = `/user_relations/${firstRelationId}/wishes`;
                 break;
             case 'diaries':
-                path = `/user_relations/${firstRelationId}/diaries`
+                path = `/user_relations/${firstRelationId}/diaries`;
                 break;
         }
         return <Navigate to={path} />;

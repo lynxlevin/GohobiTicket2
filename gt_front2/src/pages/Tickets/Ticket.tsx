@@ -11,14 +11,15 @@ import SpecialStamp from './SpecialStamp';
 import UseDetailDialog from './UseDetailDialog';
 import UseDialog from './UseDialog';
 import { ITicket, TicketStatus } from '../../types/ticket';
-import { RelationKind } from '../../types/user_relation';
+import { IUserRelation, RelationKind } from '../../types/user_relation';
 
 interface TicketProps {
     ticket: ITicket;
     relationKind: RelationKind;
+    currentUserRelation: IUserRelation;
 }
 
-const Ticket = ({ ticket, relationKind }: TicketProps) => {
+const Ticket = ({ ticket, relationKind, currentUserRelation }: TicketProps) => {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isUseDialogOpen, setIsUseDialogOpen] = useState(false);
     const [isUseDetailDialogOpen, setIsUseDetailDialogOpen] = useState(false);
@@ -106,6 +107,7 @@ const Ticket = ({ ticket, relationKind }: TicketProps) => {
                     onClose={() => {
                         setIsUseDialogOpen(false);
                     }}
+                    currentUserRelation={currentUserRelation}
                     ticket={ticket}
                 />
             )}

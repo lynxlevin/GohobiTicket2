@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import useUserContext from '../../hooks/useUserContext';
+import { IUser } from '../../types/user';
 
 interface TicketDetail {
     giving_user_id: number;
@@ -12,11 +12,11 @@ interface DetailDialogProps {
     onClose: () => void;
     ticket: TicketDetail;
     relatedUserName: string;
+    me: IUser;
 }
 
 const DetailDialog = (props: DetailDialogProps) => {
-    const { onClose, ticket, relatedUserName } = props;
-    const { me } = useUserContext();
+    const { onClose, ticket, relatedUserName, me } = props;
 
     return (
         <Dialog open={true} onClose={onClose} fullWidth>

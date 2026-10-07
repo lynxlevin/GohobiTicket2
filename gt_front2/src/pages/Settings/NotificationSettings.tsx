@@ -7,6 +7,7 @@ import { WebPushSubscriptionFromServer } from '../../types/web_push';
 import CommonAppBar from '../../components/CommonAppBar';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import useCurrentUserContext from '../../hooks/useCurrentUserContext';
 
 type SubscriptionStatus = 'NoSub' | 'FrontOnly' | 'BackOnly' | 'Subscribed';
 
@@ -17,6 +18,7 @@ const NotificationSettings = () => {
     const [subscriptionFromServer, setSubscriptionFromServer] = useState<WebPushSubscriptionFromServer | null>();
     const { getPushManager, subscribeToWebPush, unsubscribeFromWebPush } = useServiceWorker();
     const navigate = useNavigate();
+    const { userRelations } = useCurrentUserContext();
 
     const subscribe = () => {
         if (subscriptionStatus !== 'NoSub') return;
@@ -197,13 +199,14 @@ const NotificationSettings = () => {
     return (
         <>
             <CommonAppBar
+                userRelations={userRelations}
                 leftItem={
                     <IconButton onClick={() => navigate('/settings')}>
                         <ArrowBackIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
                     </IconButton>
                 }
             />
-            <BottomNav />
+            {userRelations !== undefined && <BottomNav userRelations={userRelations} />}
             <Box pt={12}>{getSubscriptionStatusView()}</Box>
             {subscriptionStatus !== undefined && ['Subscribed', 'BackOnly'].includes(subscriptionStatus) && (
                 <>

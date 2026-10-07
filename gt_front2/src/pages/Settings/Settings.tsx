@@ -7,15 +7,17 @@ import CommonAppBar from '../../components/CommonAppBar';
 import BottomNav from '../../components/BottomNav';
 import { useNavigate } from 'react-router-dom';
 import useUserAPI from '../../hooks/useUserAPI';
+import useCurrentUserContext from '../../hooks/useCurrentUserContext';
 
 const LIST_ITEM_MARGIN = 1.5;
 
 const Settings = () => {
     const { handleLogout } = useUserAPI();
+    const { userRelations } = useCurrentUserContext();
 
     return (
         <Container maxWidth="sm">
-            <CommonAppBar />
+            <CommonAppBar userRelations={userRelations} />
             <Box color="rgba(0, 0, 0, 0.67)" pt={8}>
                 <List>
                     <ListItem>
@@ -26,7 +28,7 @@ const Settings = () => {
                     <ButtonListItem onClick={handleLogout} icon={<LogoutIcon />} name="ログアウト" />
                 </List>
             </Box>
-            <BottomNav />
+            {userRelations !== undefined && <BottomNav userRelations={userRelations} />}
         </Container>
     );
 };

@@ -1,12 +1,10 @@
 import { Box, Button, Card, CardActions, CardContent, CircularProgress, Container, Divider, IconButton, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import BottomNav from '../../components/BottomNav';
-import useUserRelationContext from '../../hooks/useUserRelationContext';
 import usePagePath from '../../hooks/usePagePath';
 import CommonAppBar from '../../components/CommonAppBar';
 import { format } from 'date-fns';
 import SpecialStamp from './SpecialStamp';
-import useUserContext from '../../hooks/useUserContext';
 import { IUserRelation } from '../../types/user_relation';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
@@ -14,65 +12,55 @@ import ReplyDialog from './ReplyDialog';
 import useWishContext from '../../hooks/useWishContext';
 import AddReactionOutlinedIcon from '@mui/icons-material/AddReactionOutlined';
 import ReactionsDialog, { IWishReplyWithWishId } from './ReactionsDialog';
+import useCurrentUserRelationContext from '../../hooks/useCurrentUserRelationContext';
+import useCurrentUserContext from '../../hooks/useCurrentUserContext';
 
 const Wish = () => {
     const [openedDialog, setOpenedDialog] = useState<'Reply' | 'Reaction'>();
     const { currentWish: wish, getCurrentWish, clearCurrentWish, updateReactions } = useWishContext();
-    const { me, getMe } = useUserContext();
-    const { getUserRelations, userRelations } = useUserRelationContext();
-    const { userRelationId, wishId } = usePagePath();
+    const { currentUserRelation } = useCurrentUserRelationContext();
+    const { me, userRelations } = useCurrentUserContext();
+    const { wishId } = usePagePath();
     const navigate = useNavigate();
-
-    const currentRelation = userRelations?.find(relation => Number(relation.id) === userRelationId);
 
     const getDialog = () => {
         if (wish === undefined) return undefined;
-        if (currentRelation === undefined) return undefined;
         switch (openedDialog) {
             case 'Reply':
-                return <ReplyDialog wish={wish} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
+                return <ReplyDialog wish={wish} currentRelation={currentUserRelation} onClose={() => setOpenedDialog(undefined)} />;
             case 'Reaction':
-                return <ReactionsDialog wish={wish} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
+                return <ReactionsDialog wish={wish} currentRelation={currentUserRelation} onClose={() => setOpenedDialog(undefined)} />;
         }
     };
 
     const getRepliesUI = () => {
         if (wish === undefined) return <></>;
-        if (currentRelation === undefined) return <></>;
         let lastReplyDate = format(new Date(wish.created_at), 'yyyy-MM-dd');
         return wish.replies.map(reply => {
             const replyDate = format(new Date(reply.created_at), 'yyyy-MM-dd');
             const hideDate = lastReplyDate === replyDate;
             lastReplyDate = replyDate;
-            return <Reply key={reply.id} reply={{ ...reply, wishId: wish.id }} currentRelation={currentRelation} hideDate={hideDate} />;
+            return <Reply key={reply.id} reply={{ ...reply, wishId: wish.id }} currentUserRelation={currentUserRelation} hideDate={hideDate} />;
         });
     };
 
     useEffect(() => {
-        if (me === undefined) getMe();
-    }, [getMe, me]);
-
-    useEffect(() => {
-        if (userRelations === undefined) getUserRelations();
-    }, [getUserRelations, userRelations]);
-
-    useEffect(() => {
-        if (currentRelation === undefined) return;
         if (wishId === null) return;
         if (wish !== undefined && wish.id === wishId) return;
-        getCurrentWish(currentRelation.id, wishId);
+        getCurrentWish(currentUserRelation.id, wishId);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentRelation, wish, wishId]);
+    }, [currentUserRelation, wish, wishId]);
     return (
         <>
             <CommonAppBar
-                currentRelation={currentRelation}
+                userRelations={userRelations}
+                currentRelation={currentUserRelation}
                 leftItem={
-                    currentRelation && wish ? (
+                    wish ? (
                         <IconButton
                             onClick={() => {
                                 clearCurrentWish();
-                                navigate(`/user_relations/${currentRelation.id}/wishes?wishId=${wish.id}`);
+                                navigate(`/user_relations/${currentUserRelation.id}/wishes?wishId=${wish.id}`);
                             }}
                         >
                             <ArrowBackIcon sx={{ color: 'rgba(0,0,0,0.67)' }} />
@@ -82,8 +70,8 @@ const Wish = () => {
                     )
                 }
             />
-            <BottomNav />
-            {currentRelation === undefined || wish === undefined || me === undefined ? (
+            <BottomNav userRelations={userRelations} />
+            {wish === undefined ? (
                 <CircularProgress />
             ) : (
                 <main>
@@ -107,7 +95,7 @@ const Wish = () => {
                                                       }
                                             }
                                         >
-                                            {wish.ticket.giving_user_id === me.id ? currentRelation.related_username : me.username}の
+                                            {wish.ticket.giving_user_id === me.id ? currentUserRelation.related_username : me.username}の
                                             {wish.ticket.is_special ? '特別な' : ''}お願い
                                         </Typography>
                                         <Typography sx={{ fontSize: '12px', lineHeight: '14px', whiteSpace: 'pre-line', textAlign: 'right' }}>
@@ -133,7 +121,7 @@ const Wish = () => {
                                                     if (me === undefined || wish.ticket.giving_user_id !== me.id) return;
                                                     const reactions = Array.from(wish.reactions);
                                                     reactions.splice(idx, 1);
-                                                    updateReactions(currentRelation.id, wish.id, reactions.join('')).catch(_ => {});
+                                                    updateReactions(currentUserRelation.id, wish.id, reactions.join('')).catch(_ => {});
                                                 }}
                                                 sx={{ py: 0, px: '3px' }}
                                             >
@@ -176,21 +164,20 @@ const Wish = () => {
 
 interface ReplyProps {
     reply: IWishReplyWithWishId;
-    currentRelation: IUserRelation;
+    currentUserRelation: IUserRelation;
     hideDate: boolean;
 }
 
-const Reply = ({ reply, currentRelation, hideDate }: ReplyProps) => {
+const Reply = ({ reply, currentUserRelation, hideDate }: ReplyProps) => {
     const [openedDialog, setOpenedDialog] = useState<'Reaction'>();
-    const { me } = useUserContext();
+    const { me } = useCurrentUserContext();
     const { updateReplyReactions } = useWishContext();
-    const posterName = reply.posted_by_id === me?.id ? me.username : currentRelation.related_username;
+    const posterName = reply.posted_by_id === me.id ? me.username : currentUserRelation.related_username;
 
     const getDialog = () => {
-        if (currentRelation === undefined) return undefined;
         switch (openedDialog) {
             case 'Reaction':
-                return <ReactionsDialog wishReply={reply} currentRelation={currentRelation} onClose={() => setOpenedDialog(undefined)} />;
+                return <ReactionsDialog wishReply={reply} currentRelation={currentUserRelation} onClose={() => setOpenedDialog(undefined)} />;
         }
     };
     return (
@@ -227,10 +214,10 @@ const Reply = ({ reply, currentRelation, hideDate }: ReplyProps) => {
                                 key={`${reply.id}-reaction-${idx}`}
                                 size="small"
                                 onClick={() => {
-                                    if (me === undefined || reply.posted_by_id === me.id) return;
+                                    if (reply.posted_by_id === me.id) return;
                                     const reactions = Array.from(reply.reactions);
                                     reactions.splice(idx, 1);
-                                    updateReplyReactions(currentRelation.id, reply.id, reactions.join(''), reply.wishId).catch(_ => {});
+                                    updateReplyReactions(currentUserRelation.id, reply.id, reactions.join(''), reply.wishId).catch(_ => {});
                                 }}
                                 sx={{ py: 0, px: '3px' }}
                             >
