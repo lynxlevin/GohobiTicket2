@@ -18,7 +18,7 @@ const useServiceWorker = () => {
         if (pushManager === undefined) {
             throw new Error('This Browser does not support Web Push.');
         }
-        const vapidPublicKey = process.env.REACT_APP_VAPID_PUBLIC_KEY;
+        const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
         if (vapidPublicKey === undefined) {
             throw new Error('VAPID_PUBLIC_KEY not set.');
         }
