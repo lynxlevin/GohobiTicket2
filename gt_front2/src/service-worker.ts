@@ -50,7 +50,7 @@ registerRoute(
         // Return true to signal that we want to use the handler.
         return true;
     },
-    createHandlerBoundToURL(process.env.PUBLIC_URL + '/index.html'),
+    createHandlerBoundToURL(`${import.meta.env.BASE_URL}index.html`),
 );
 
 // An example runtime caching route for requests that aren't handled by the
@@ -82,19 +82,19 @@ self.addEventListener('message', event => {
 self.addEventListener('push', event => {
     const payload = event.data?.json();
     const title = payload.title ?? '';
-    let url = process.env.PUBLIC_URL;
+    let url = import.meta.env.BASE_URL;
     switch (payload.message_type) {
         case 'MakeWish':
-            url += `/user_relations/${payload.user_relation_id}/wishes?wishId=${payload.wish_id}`;
+            url += `user_relations/${payload.user_relation_id}/wishes?wishId=${payload.wish_id}`;
             break;
         case 'WishReply':
-            url += `/user_relations/${payload.user_relation_id}/wishes/${payload.wish_id}`;
+            url += `user_relations/${payload.user_relation_id}/wishes/${payload.wish_id}`;
             break;
     }
     const options = {
         body: payload.body ?? '失敗',
-        icon: `${process.env.PUBLIC_URL}/apple-touch-icon.png`,
-        image: `${process.env.PUBLIC_URL}/apple-touch-icon.png`,
+        icon: `${import.meta.env.BASE_URL}apple-touch-icon.png`,
+        image: `${import.meta.env.BASE_URL}apple-touch-icon.png`,
         data: { url },
     };
 
