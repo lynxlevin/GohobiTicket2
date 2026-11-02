@@ -1,4 +1,5 @@
-// MEMO: use `npm run production_local` to test this feature.
+// MEMO: set development VITE_VAPID_PUBLIC_KEY to .env.production and
+// use `npm run production_local` to test this feature.
 const useServiceWorker = () => {
     const getPushManager = async () => {
         if (!('Notification' in window)) return undefined;
