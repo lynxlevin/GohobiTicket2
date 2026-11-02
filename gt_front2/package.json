@@ -16,12 +16,7 @@
     "emoji-picker-react": "^4.20.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.21.1",
-    "workbox-core": "^7.3.0",
-    "workbox-expiration": "^7.3.0",
-    "workbox-precaching": "^7.3.0",
-    "workbox-routing": "^7.3.0",
-    "workbox-strategies": "^7.3.0"
+    "react-router-dom": "^6.21.1"
   },
   "scripts": {
     "start": "vite",
@@ -64,7 +59,12 @@
     "eslint-plugin-prettier": "^5.1.2",
     "prettier": "^3.1.1",
     "typescript": "^5.9.3",
-    "vite": "^8.3.5"
+    "vite": "^8.3.5",
+    "workbox-core": "^7.4.1",
+    "workbox-expiration": "^7.4.1",
+    "workbox-precaching": "^7.4.1",
+    "workbox-routing": "^7.4.1",
+    "workbox-strategies": "^7.4.1"
   },
   "jest": {
     "transformIgnorePatterns": [
