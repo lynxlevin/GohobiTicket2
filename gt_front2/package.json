@@ -23,7 +23,7 @@
     "start": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "production_local": "npm run build && npm serve"
+    "production_local": "npm run build && npm run serve"
   },
   "eslintConfig": {
     "extends": [
@@ -70,7 +70,6 @@
       "node_modules/(?!@axios)/"
     ]
   },
-  "proxy": "http://localhost:8000",
   "volta": {
     "node": "26.13.0",
     "npm": "12.2.1"
